@@ -13,7 +13,7 @@ many essentital features.
  $ cd eek
  $ ./autogen.sh --prefix=/usr --enable-gtk-doc
  $ make
- $ ./examples/eek-clutter-xkb-test --geometry=winbook --symbols=in
+ $ ./examples/eek-clutter-xkb-test --geometry=kinesis --symbols=in
 
 * API
 
@@ -32,7 +32,7 @@ and an XKB-based layout engine:
  EekLayout *layout;
 
  /* Create a keyboard layout from XKB configuration. */
- layout = eek_xkb_layout_new (NULL, "winbook", "in");
+ layout = eek_xkb_layout_new (NULL, "kinesis", "in");
 
  /* Create a keyboard that is implemented as ClutterActor. */
  keyboard = eek_clutter_keyboard_new ();
