@@ -298,7 +298,7 @@ eek_key_get_outline (EekKey *key)
 
 /**
  * eek_key_set_bounds:
- * @key: a #EekKey
+ * @key: an #EekKey
  * @bounds: bounding box of @key
  *
  * Set the bounding box of @key to @bounds.
@@ -316,7 +316,7 @@ eek_key_set_bounds (EekKey    *key,
 
 /**
  * eek_key_get_bounds:
- * @key: a #EekKey
+ * @key: an #EekKey
  * @bounds: the bounding box of @key
  *
  * Get the bounding box of @key.
@@ -334,7 +334,7 @@ eek_key_get_bounds (EekKey    *key,
 
 /**
  * eek_key_set_keysym_index:
- * @key: a #EekKey
+ * @key: an #EekKey
  * @group: row index of the symbol matrix #EekKey:keysyms
  * @level: column index of the symbol matrix #EekKey:keysyms
  *
@@ -354,7 +354,7 @@ eek_key_set_keysym_index (EekKey *key,
 
 /**
  * eek_key_get_keysym_index:
- * @key: a #EekKey
+ * @key: an #EekKey
  * @group: a pointer to row index of the symbol matrix #EekKey:keysyms
  * to be stored
  * @level: a pointer to column index of the symbol matrix

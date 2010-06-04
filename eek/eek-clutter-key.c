@@ -536,6 +536,13 @@ eek_clutter_key_create_texture (EekClutterKey *key)
     return texture;
 }
 
+/**
+ * eek_clutter_key_set_texture:
+ * @key: an #EekClutterKey
+ * @texture: an #ClutterActor
+ *
+ * Set the background texture of @key to @texture.
+ */
 void
 eek_clutter_key_set_texture (EekClutterKey *key,
                              ClutterActor  *texture)

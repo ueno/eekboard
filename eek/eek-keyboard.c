@@ -82,7 +82,7 @@ eek_keyboard_get_type (void)
 
 /**
  * eek_keyboard_set_bounds:
- * @keyboard: a #EekKeyboard
+ * @keyboard: an #EekKeyboard
  * @bounds: bounding box of the keyboard
  *
  * Set the bounding box of @keyboard to @bounds.
@@ -100,7 +100,7 @@ eek_keyboard_set_bounds (EekKeyboard *keyboard,
 
 /**
  * eek_keyboard_get_bounds:
- * @keyboard: a #EekKeyboard
+ * @keyboard: an #EekKeyboard
  * @bounds: the bounding box of @keyboard
  *
  * Get the bounding box of @keyboard.
@@ -118,7 +118,7 @@ eek_keyboard_get_bounds (EekKeyboard *keyboard,
 
 /**
  * eek_keyboard_create_section:
- * @keyboard: a #EekKeyboard
+ * @keyboard: an #EekKeyboard
  * @name: name of the section
  * @angle: rotation angle of the section
  * @bounds: bounding box of the section
@@ -140,7 +140,7 @@ eek_keyboard_create_section (EekKeyboard *keyboard,
 
 /**
  * eek_keyboard_foreach_section:
- * @keyboard: a #EekKeyboard
+ * @keyboard: an #EekKeyboard
  * @func: a callback of #GFunc
  * @user_data: a pointer to an object passed to @func
  *
@@ -160,8 +160,8 @@ eek_keyboard_foreach_section (EekKeyboard *keyboard,
 
 /**
  * eek_keyboard_set_layout:
- * @keyboard: a #EekKeyboard
- * @layout: a #EekLayout
+ * @keyboard: an #EekKeyboard
+ * @layout: an #EekLayout
  *
  * Set the layout of @keyboard to @layout.  This actually turns
  * @keyboard to be ready to be drawn on the screen.

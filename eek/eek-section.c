@@ -131,7 +131,7 @@ eek_section_get_type (void)
 
 /**
  * eek_section_set_dimensions:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @columns: the number of columns in @section
  * @rows: the number of rows in @section
  *
@@ -150,7 +150,7 @@ eek_section_set_dimensions (EekSection *section,
 
 /**
  * eek_section_get_dimensions:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @columns: a pointer where the number of columns in @section is stored
  * @rows: a pointer where the number of rows in @section is stored
  *
@@ -169,7 +169,7 @@ eek_section_get_dimensions (EekSection *section,
 
 /**
  * eek_section_set_angle:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @angle: rotation angle of @section
  *
  * Set the rotation angle of @section to @angle.
@@ -186,7 +186,7 @@ eek_section_set_angle (EekSection *section,
 
 /**
  * eek_section_get_angle:
- * @section: a #EekSection
+ * @section: an #EekSection
  *
  * Get the rotation angle of @section.
  */
@@ -201,7 +201,7 @@ eek_section_get_angle (EekSection *section)
 
 /**
  * eek_section_set_bounds:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @bounds: bounding box of @section
  *
  * Set the bounding box of @section to @bounds.
@@ -218,7 +218,7 @@ eek_section_set_bounds (EekSection *section,
 
 /**
  * eek_section_get_bounds:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @bounds: the bounding box of @section
  *
  * Get the bounding box of @section.
@@ -235,7 +235,7 @@ eek_section_get_bounds (EekSection *section,
 
 /**
  * eek_section_create_key:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @name: name of the key
  * @keysyms: symbol matrix of the key
  * @num_groups: number of rows in the @keysyms
@@ -278,7 +278,7 @@ eek_section_create_key (EekSection  *section,
 
 /**
  * eek_section_foreach_key:
- * @section: a #EekSection
+ * @section: an #EekSection
  * @func: a callback of #GFunc
  * @user_data: a pointer to an object passed to @func
  *
