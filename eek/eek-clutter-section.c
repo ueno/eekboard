@@ -128,15 +128,15 @@ eek_clutter_section_real_get_bounds (EekSection *self,
 }
 
 static EekKey *
-eek_clutter_section_real_create_key (EekSection   *self,
-                                     const gchar  *name,
-                                     guint *keysyms,
-                                     gint          num_groups,
-                                     gint          num_levels,
-                                     gint          column,
-                                     gint          row,
-                                     EekOutline   *outline,
-                                     EekBounds    *bounds)
+eek_clutter_section_real_create_key (EekSection  *self,
+                                     const gchar *name,
+                                     guint       *keysyms,
+                                     gint         num_groups,
+                                     gint         num_levels,
+                                     gint         column,
+                                     gint         row,
+                                     EekOutline  *outline,
+                                     EekBounds   *bounds)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
     EekKey *key;
