@@ -254,7 +254,9 @@ draw_key_on_layout (EekKey      *key,
     g_object_unref (buffer);
 
     /* Actually draw on the layout */
-    draw_text_on_layout (layout, label, scale_x < scale_y ? scale_x : scale_y);
+    draw_text_on_layout (layout,
+                         label,
+                         (scale_x < scale_y ? scale_x : scale_y) * 0.8);
     if (label != empty_label)
         g_free ((gpointer)label);
 }
