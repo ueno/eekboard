@@ -162,7 +162,7 @@ eek_clutter_key_real_set_keysym_index (EekKey *self,
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    eek_key_set_index (EEK_KEY(priv->simple), group, level);
+    eek_key_set_keysym_index (EEK_KEY(priv->simple), group, level);
 }
 
 static void
