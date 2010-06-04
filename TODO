@@ -1,0 +1,7 @@
+- modifier handling
+- step-by-step scaling of key labels
+- GTK+ keyboard elements
+- matchbox-keyboard layout engine
+- emit key events using libfakekey or xtest
+- .spec
+- .pc
