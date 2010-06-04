@@ -355,10 +355,10 @@ eek_key_set_keysym_index (EekKey *key,
 /**
  * eek_key_get_keysym_index:
  * @key: an #EekKey
- * @group: a pointer to row index of the symbol matrix #EekKey:keysyms
- * to be stored
- * @level: a pointer to column index of the symbol matrix
- * #EekKey:keysyms to be stored
+ * @group: a pointer where row index of the symbol matrix #EekKey:keysyms
+ * will be stored
+ * @level: a pointer where column index of the symbol matrix
+ * #EekKey:keysyms will be stored
  *
  * Get the current cell position of the symbol matrix of @key.
  */

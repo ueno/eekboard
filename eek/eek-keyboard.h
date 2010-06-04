@@ -38,41 +38,53 @@ struct _EekKeyboardIface
     GTypeInterface g_iface;
 
     /*< public >*/
-    void        (* set_bounds)      (EekKeyboard *self,
-                                     EekBounds   *bounds);
-    void        (* get_bounds)      (EekKeyboard *self,
-                                     EekBounds   *bounds);
-    EekSection *(* create_section)  (EekKeyboard *self,
-                                     const gchar *name,
-                                     gint         angle,
-                                     EekBounds   *bounds);
+    void        (* set_bounds)       (EekKeyboard *self,
+                                      EekBounds   *bounds);
+    void        (* get_bounds)       (EekKeyboard *self,
+                                      EekBounds   *bounds);
+    void        (* set_keysym_index) (EekKeyboard *self,
+                                      gint         group,
+                                      gint         level);
+    void        (* get_keysym_index) (EekKeyboard *self,
+                                      gint        *group,
+                                      gint        *level);
+    EekSection *(* create_section)   (EekKeyboard *self,
+                                      const gchar *name,
+                                      gint         angle,
+                                      EekBounds   *bounds);
                                     
-    void        (* foreach_section) (EekKeyboard *self,
-                                     GFunc        func,
-                                     gpointer     user_data);
+    void        (* foreach_section)  (EekKeyboard *self,
+                                      GFunc        func,
+                                      gpointer     user_data);
 
-    void        (* set_layout)      (EekKeyboard *self,
-                                     EekLayout   *layout);
+    void        (* set_layout)       (EekKeyboard *self,
+                                      EekLayout   *layout);
 };
 
-GType       eek_keyboard_get_type        (void) G_GNUC_CONST;
+GType       eek_keyboard_get_type         (void) G_GNUC_CONST;
 
-void        eek_keyboard_set_bounds      (EekKeyboard *keyboard,
-                                          EekBounds   *bounds);
-void        eek_keyboard_get_bounds      (EekKeyboard *keyboard,
-                                          EekBounds   *bounds);
+void        eek_keyboard_set_bounds       (EekKeyboard *keyboard,
+                                           EekBounds   *bounds);
+void        eek_keyboard_get_bounds       (EekKeyboard *keyboard,
+                                           EekBounds   *bounds);
+void        eek_keyboard_set_keysym_index (EekKeyboard *self,
+                                           gint         group,
+                                           gint         level);
+void        eek_keyboard_get_keysym_index (EekKeyboard *self,
+                                           gint        *group,
+                                           gint        *level);
 
-EekSection *eek_keyboard_create_section  (EekKeyboard *keyboard,
-                                          const gchar *name,
-                                          gint         angle,
-                                          EekBounds   *bounds);
+EekSection *eek_keyboard_create_section   (EekKeyboard *keyboard,
+                                           const gchar *name,
+                                           gint         angle,
+                                           EekBounds   *bounds);
 
-void        eek_keyboard_foreach_section (EekKeyboard *keyboard,
-                                          GFunc        func,
-                                          gpointer     user_data);
+void        eek_keyboard_foreach_section  (EekKeyboard *keyboard,
+                                           GFunc        func,
+                                           gpointer     user_data);
 
-void        eek_keyboard_set_layout      (EekKeyboard *keyboard,
-                                          EekLayout   *layout);
+void        eek_keyboard_set_layout       (EekKeyboard *keyboard,
+                                           EekLayout   *layout);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

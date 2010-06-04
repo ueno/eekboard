@@ -191,7 +191,7 @@ create_key (EekXkbLayout *layout,
         keysyms = g_malloc0 ((num_keysyms) * sizeof(guint));
         for (i = 0; i < num_groups; i++)
             for (j = 0; j < num_levels; j++) {
-                keysym = XkbKeySymEntry (priv->xkb, keycode, i, j);
+                keysym = XkbKeySymEntry (priv->xkb, keycode, j, i);
                 keysyms[i * num_levels + j] = keysym;
             }
     }

@@ -24,6 +24,11 @@
 #include "eek-keysym.h"
 #include <string.h>
 
+#define DEBUG 0
+#if DEBUG
+#include <stdio.h>
+#endif
+
 enum {
     PROP_0,
     PROP_NAME,
@@ -76,6 +81,17 @@ eek_simple_key_real_set_keysyms (EekKey *self,
     memcpy (priv->keysyms, keysyms, groups * levels * sizeof(guint));
     priv->num_groups = groups;
     priv->num_levels = levels;
+
+#if DEBUG
+    {
+        gint i;
+
+        fprintf (stderr, "%s: ", priv->name);
+        for (i = 0; i < groups * levels; i++)
+            fprintf (stderr, "\"%s\" ", eek_keysym_to_string (keysyms[i]));
+        fprintf (stderr, "\n");
+    }
+#endif
 }
 
 static gint

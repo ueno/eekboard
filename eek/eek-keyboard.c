@@ -117,6 +117,48 @@ eek_keyboard_get_bounds (EekKeyboard *keyboard,
 }
 
 /**
+ * eek_keyboard_set_keysym_index:
+ * @keyboard: an #EekKeyboard
+ * @group: row index of the symbol matrix of keys on @keyboard
+ * @level: column index of the symbol matrix of keys on @keyboard
+ *
+ * Select a cell of the symbol matrix of each key on @keyboard.
+ */
+void
+eek_keyboard_set_keysym_index (EekKeyboard *self,
+                               gint         group,
+                               gint         level)
+{
+    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(self);
+
+    g_return_if_fail (iface);
+    g_return_if_fail (iface->set_keysym_index);
+    (*iface->set_keysym_index) (self, group, level);
+}
+
+/**
+ * eek_keyboard_set_keysym_index:
+ * @keyboard: an #EekKeyboard
+ * @group: a pointer where row index of the symbol matrix of keys on
+ * @keyboard will be stored
+ * @level: a pointer where column index of the symbol matrix of keys
+ * on @keyboard will be stored
+ *
+ * Get the current cell position of the symbol matrix of each key on @keyboard.
+ */
+void
+eek_keyboard_get_keysym_index (EekKeyboard *self,
+                               gint        *group,
+                               gint        *level)
+{
+    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(self);
+
+    g_return_if_fail (iface);
+    g_return_if_fail (iface->get_keysym_index);
+    return (*iface->get_keysym_index) (self, group, level);
+}
+
+/**
  * eek_keyboard_create_section:
  * @keyboard: an #EekKeyboard
  * @name: name of the section
