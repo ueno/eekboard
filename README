@@ -3,6 +3,10 @@ eek - easy embedded keyboard
 *NOTE* This is not usable by now. It has still a lot of bugs and lacks
 many essentital features.
 
+* Quick look
+
+ http://ueno.fedorapeople.org/eek/eek-in-demo.ogv
+
 * How to test
 
  $ git clone git://github.com/ueno/eek.git
