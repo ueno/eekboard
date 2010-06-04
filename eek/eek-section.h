@@ -30,6 +30,7 @@ G_BEGIN_DECLS
 #define EEK_SECTION_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_SECTION, EekSectionIface))
 
 typedef struct _EekSectionIface EekSectionIface;
+typedef struct _EekSection EekSection;
 
 struct _EekSectionIface
 {
@@ -86,7 +87,7 @@ void    eek_section_get_bounds     (EekSection  *section,
 
 EekKey *eek_section_create_key     (EekSection  *section,
                                     const gchar *name,
-                                    guint       *labels,
+                                    guint       *keysyms,
                                     gint         num_groups,
                                     gint         num_levels,
                                     gint         column,

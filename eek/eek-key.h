@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 #define EEK_KEY_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_KEY, EekKeyIface))
 
 typedef struct _EekKeyIface EekKeyIface;
+typedef struct _EekKey EekKey;
 
 struct _EekKeyIface
 {
@@ -40,8 +41,8 @@ struct _EekKeyIface
     /*< public >*/
     void        (* set_keysyms)      (EekKey     *self,
                                       guint      *keysyms,
-                                      gint        groups,
-                                      gint        levels);
+                                      gint        num_groups,
+                                      gint        num_levels);
     gint        (* get_groups)       (EekKey     *self);
     guint       (* get_keysym)       (EekKey     *self);
 
@@ -72,8 +73,8 @@ GType       eek_key_get_type         (void) G_GNUC_CONST;
 
 void        eek_key_set_keysyms      (EekKey     *key,
                                       guint      *keysyms,
-                                      gint        groups,
-                                      gint        levels);
+                                      gint        num_groups,
+                                      gint        num_levels);
 gint        eek_key_get_groups       (EekKey     *key);
 guint       eek_key_get_keysym       (EekKey     *key);
 

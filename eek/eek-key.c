@@ -97,7 +97,7 @@ eek_key_base_init (gpointer g_iface)
          */
         /* Use pointer instead of boxed to avoid copy, since we can
            assume that only a few outline shapes are used in a whole
-           keyboard (unlike labels and bounds). */
+           keyboard (unlike keysyms and bounds). */
         pspec = g_param_spec_pointer ("outline",
                                       "Outline",
                                       "Pointer to outline shape of the key",
@@ -119,7 +119,7 @@ eek_key_base_init (gpointer g_iface)
         /**
          * EekKey:group:
          *
-         * The column index of #EekKey in the label matrix #EekKey:labels.
+         * The column index of #EekKey in the symbol matrix #EekKey:keysyms.
          */
         pspec = g_param_spec_int ("group",
                                   "Group",
@@ -131,7 +131,7 @@ eek_key_base_init (gpointer g_iface)
         /**
          * EekKey:level:
          *
-         * The row index of #EekKey in the label matrix #EekKey:labels.
+         * The row index of #EekKey in the symbol matrix #EekKey:keysyms.
          */
         pspec = g_param_spec_int ("level",
                                   "Level",
@@ -208,10 +208,9 @@ eek_key_get_groups  (EekKey *key)
  * eek_key_get_keysym:
  * @key: an #EekKey
  *
- * Get the current symbol of @key.  It is depend on the current group,
- * level, and the symbol matrix of @key.  They are set with
- * eek_key_set_group(), eek_key_set_level(), and eek_key_set_labels(),
- * respectively.
+ * Get the current symbol of @key.  It is depend on the current group
+ * and level, and the symbol matrix of @key.  They are set through
+ * eek_key_set_keysym_index() and eek_key_set_keysyms(), respectively.
  */
 guint
 eek_key_get_keysym (EekKey *key)

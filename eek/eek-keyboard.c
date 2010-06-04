@@ -163,10 +163,8 @@ eek_keyboard_foreach_section (EekKeyboard *keyboard,
  * @keyboard: a #EekKeyboard
  * @layout: a #EekLayout
  *
- * Set the layout of @keyboard to @layout.  For the user of EEK, it is
- * preferable to call this function rather than
- * eek_layout_apply_to_keyboard(), while the implementation calls it
- * internally.
+ * Set the layout of @keyboard to @layout.  This actually turns
+ * @keyboard to be ready to be drawn on the screen.
  */
 void
 eek_keyboard_set_layout (EekKeyboard *keyboard,

@@ -65,7 +65,7 @@ eek_clutter_keyboard_real_set_bounds (EekKeyboard *self,
     g_return_if_fail (priv);
     eek_keyboard_set_bounds (EEK_KEYBOARD(priv->simple), bounds);
     clutter_actor_set_position (CLUTTER_ACTOR(self), bounds->x, bounds->y);
-    clutter_actor_set_size (CLUTTER_ACTOR(self), bounds->w, bounds->h);
+    clutter_actor_set_size (CLUTTER_ACTOR(self), bounds->width, bounds->height);
 }
 
 static void
@@ -250,7 +250,7 @@ eek_clutter_keyboard_new (gfloat width,
     EekBounds bounds;
 
     bounds.x = bounds.y = 0;
-    bounds.w = width;
-    bounds.h = height;
+    bounds.width = width;
+    bounds.height = height;
     return g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, "bounds", &bounds, NULL);
 }

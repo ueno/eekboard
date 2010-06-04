@@ -248,15 +248,15 @@ eek_section_get_bounds (EekSection *section,
  * Create an #EekKey instance and attach it to @section.
  */
 EekKey *
-eek_section_create_key (EekSection   *section,
-                        const gchar  *name,
-                        guint  *keysyms,
-                        gint          num_groups,
-                        gint          num_levels,
-                        gint          column,
-                        gint          row,
-                        EekOutline   *outline,
-                        EekBounds    *bounds)
+eek_section_create_key (EekSection  *section,
+                        const gchar *name,
+                        guint       *keysyms,
+                        gint         num_groups,
+                        gint         num_levels,
+                        gint         column,
+                        gint         row,
+                        EekOutline  *outline,
+                        EekBounds   *bounds)
 {
     EekSectionIface *iface;
 

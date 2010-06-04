@@ -53,6 +53,12 @@ keysym_label_compare (const void *key0, const void *key1)
     return (gint)entry0->keysym - (gint)entry1->keysym;
 }
 
+/**
+ * eek_keysym_to_string:
+ * @keysym: keysym ID
+ *
+ * Return a string representation of @keysym.
+ */
 G_CONST_RETURN gchar *
 eek_keysym_to_string (guint keysym)
 {

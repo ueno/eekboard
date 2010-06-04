@@ -175,8 +175,8 @@ create_key (EekXkbLayout *layout,
     xkbbounds = &xkbgeometry->shapes[xkbkey->shape_ndx].bounds;
     bounds.x = xkb_to_pixmap_coord(layout, xkbbounds->x1 + x);
     bounds.y = xkb_to_pixmap_coord(layout, xkbbounds->y1 + y);
-    bounds.w = xkb_to_pixmap_coord(layout, xkbbounds->x2 - xkbbounds->x1);
-    bounds.h = xkb_to_pixmap_coord(layout, xkbbounds->y2 - xkbbounds->y1);
+    bounds.width = xkb_to_pixmap_coord(layout, xkbbounds->x2 - xkbbounds->x1);
+    bounds.height = xkb_to_pixmap_coord(layout, xkbbounds->y2 - xkbbounds->y1);
 
     keycode = find_keycode (layout, name);
     if (keycode == INVALID_KEYCODE)
@@ -222,8 +222,8 @@ create_section (EekXkbLayout  *layout,
 
     bounds.x = xkb_to_pixmap_coord(layout, xkbsection->left);
     bounds.y = xkb_to_pixmap_coord(layout, xkbsection->top);
-    bounds.w = xkb_to_pixmap_coord(layout, xkbsection->width);
-    bounds.h = xkb_to_pixmap_coord(layout, xkbsection->height);
+    bounds.width = xkb_to_pixmap_coord(layout, xkbsection->width);
+    bounds.height = xkb_to_pixmap_coord(layout, xkbsection->height);
 
     priv = layout->priv;
     xkbgeometry = priv->xkb->geom;
@@ -282,11 +282,11 @@ create_keyboard (EekXkbLayout *layout, EekKeyboard *keyboard)
     xkbgeometry = priv->xkb->geom;
 
     eek_keyboard_get_bounds (keyboard, &bounds);
-    setup_scaling (EEK_XKB_LAYOUT(layout), bounds.w, bounds.h);
+    setup_scaling (EEK_XKB_LAYOUT(layout), bounds.width, bounds.height);
 
     bounds.x = bounds.y = 0;
-    bounds.w = xkb_to_pixmap_coord(layout, xkbgeometry->width_mm);
-    bounds.h = xkb_to_pixmap_coord(layout, xkbgeometry->height_mm);
+    bounds.width = xkb_to_pixmap_coord(layout, xkbgeometry->width_mm);
+    bounds.height = xkb_to_pixmap_coord(layout, xkbgeometry->height_mm);
     eek_keyboard_set_bounds (keyboard, &bounds);
 
     for (i = 0; i < xkbgeometry->num_sections; i++) {

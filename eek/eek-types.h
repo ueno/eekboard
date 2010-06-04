@@ -24,6 +24,8 @@
 
 G_BEGIN_DECLS
 
+typedef struct _EekKeyboard EekKeyboard;
+
 /**
  * EekKeysymMatrix:
  * @data: array of keysyms
@@ -73,8 +75,8 @@ struct _EekBounds
 {
     gdouble x;
     gdouble y;
-    gdouble w;
-    gdouble h;
+    gdouble width;
+    gdouble height;
 };
 typedef struct _EekBounds EekBounds;
 
@@ -99,11 +101,6 @@ typedef struct _EekOutline EekOutline;
 
 #define EEK_TYPE_OUTLINE (eek_outline_get_type ())
 GType eek_outline_get_type (void) G_GNUC_CONST;
-
-/* dummy */
-typedef struct _EekKeyboard EekKeyboard;
-typedef struct _EekSection EekSection;
-typedef struct _EekKey EekKey;
 
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

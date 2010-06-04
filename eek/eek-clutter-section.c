@@ -114,7 +114,7 @@ eek_clutter_section_real_set_bounds (EekSection *self,
     g_return_if_fail (priv);
     eek_section_set_bounds (EEK_SECTION(priv->simple), bounds);
     clutter_actor_set_position (CLUTTER_ACTOR(self), bounds->x, bounds->y);
-    clutter_actor_set_size (CLUTTER_ACTOR(self), bounds->w, bounds->h);
+    clutter_actor_set_size (CLUTTER_ACTOR(self), bounds->width, bounds->height);
 }
 
 static void

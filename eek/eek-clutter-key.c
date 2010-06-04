@@ -140,8 +140,8 @@ eek_clutter_key_real_set_bounds (EekKey *self, EekBounds *bounds)
     clutter_actor_set_anchor_point_from_gravity (CLUTTER_ACTOR(self),
                                                  CLUTTER_GRAVITY_CENTER);
     clutter_actor_set_position (CLUTTER_ACTOR(self),
-                                bounds->x + bounds->w / 2,
-                                bounds->y + bounds->h / 2);
+                                bounds->x + bounds->width / 2,
+                                bounds->y + bounds->height / 2);
 }
 
 static void
@@ -231,7 +231,7 @@ draw_key_on_layout (EekKey      *key,
     PangoRectangle logical_rect = { 0, };
     EekBounds bounds;
     guint keysym;
-    const gchar *label;
+    const gchar *label, *empty_label = "";
     gdouble scale_x, scale_y;
 
     eek_key_get_bounds (key, &bounds);
@@ -240,21 +240,23 @@ draw_key_on_layout (EekKey      *key,
         return;
     label = eek_keysym_to_string (keysym);
     if (!label)
-        label = "";
+        label = empty_label;
 
     /* Compute the layout extents. */
     buffer = pango_layout_copy (layout);
     draw_text_on_layout (buffer, label, 1.0);
     pango_layout_get_extents (buffer, NULL, &logical_rect);
     scale_x = scale_y = 1.0;
-    if (PANGO_PIXELS(logical_rect.width) > bounds.w)
-        scale_x = bounds.w / PANGO_PIXELS(logical_rect.width);
-    if (PANGO_PIXELS(logical_rect.height) > bounds.h)
-        scale_y = bounds.h / PANGO_PIXELS(logical_rect.height);
+    if (PANGO_PIXELS(logical_rect.width) > bounds.width)
+        scale_x = bounds.width / PANGO_PIXELS(logical_rect.width);
+    if (PANGO_PIXELS(logical_rect.height) > bounds.height)
+        scale_y = bounds.height / PANGO_PIXELS(logical_rect.height);
     g_object_unref (buffer);
 
     /* Actually draw on the layout */
     draw_text_on_layout (layout, label, scale_x < scale_y ? scale_x : scale_y);
+    if (label != empty_label)
+        g_free ((gpointer)label);
 }
 
 static void
@@ -301,25 +303,10 @@ eek_clutter_key_get_preferred_width (ClutterActor *self,
                                      gfloat       *natural_width_p)
 {
     PangoLayout *layout;
-    PangoFontDescription *font_desc;
-    PangoRectangle logical_rect = { 0, };
-    EekBounds bounds;
-    guint keysym;
-    const gchar *label;
-    gdouble scale = 1.0;
 
-    eek_key_get_bounds (EEK_KEY(self), &bounds);
-    keysym = eek_key_get_keysym (EEK_KEY(self));
-    g_return_if_fail (keysym != EEK_INVALID_KEYSYM);
-    label = eek_keysym_to_string (keysym);
-    if (!label)
-        label = "";
-
-    /* Draw the label on the key. */
+    /* Draw the label on the key - just to validate the glyph cache. */
     layout = clutter_actor_create_pango_layout (self, NULL);
     draw_key_on_layout (EEK_KEY(self), layout);
-    pango_layout_get_extents (layout, NULL, &logical_rect);
-
     cogl_pango_ensure_glyph_cache_for_layout (layout);
     g_object_unref (layout);
 
@@ -520,7 +507,7 @@ eek_clutter_key_create_texture (EekClutterKey *key)
     outline = eek_key_get_outline (EEK_KEY(key));
     eek_key_get_bounds (EEK_KEY(key), &bounds);
 
-    texture = clutter_cairo_texture_new (bounds.w, bounds.h);
+    texture = clutter_cairo_texture_new (bounds.width, bounds.height);
     cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
     cairo_set_line_width (cr, 1);
     cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
