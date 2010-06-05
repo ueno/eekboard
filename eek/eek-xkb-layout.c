@@ -528,6 +528,10 @@ eek_xkb_layout_new (const gchar *keycodes,
         priv->names.symbols = g_strdup (symbols);
 
     get_keyboard (layout);
+    if (priv->xkb == NULL) {
+        g_object_unref (layout);
+        return NULL;
+    }
     return EEK_LAYOUT(layout);
 }
 

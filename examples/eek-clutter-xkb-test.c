@@ -110,6 +110,7 @@ main (int argc, char *argv[])
 
     keyboard = eek_clutter_keyboard_new (CSW, CSH);
     if (keyboard == NULL) {
+        g_object_unref (layout);
         fprintf (stderr, "Failed to create keyboard\n");
         exit(1);
     }
