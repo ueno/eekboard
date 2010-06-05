@@ -15,14 +15,14 @@ lacks documentation.
  $ make
  $ ./examples/eek-clutter-xkb-test --geometry=kinesis --symbols=in
 
-* API
+* API (not fixed)
 
-There are two kinds of objects in eek.  One is "keyboard element" and
-another is "keyboard layout engine".  A keyboard element represents
-either a keyboard, a section, or a key.  Each element implements the
-Builder pattern so that it can be converted into a UI widget
-(ClutterActor, GTK+ button, ...).  A keyboard layout engine arranges
-keyboard elements using layout rules from external configuration
+There are two different kinds of objects in eek.  One is "keyboard
+element" and another is "keyboard layout engine".  A keyboard element
+represents either a keyboard, a section, or a key.  Each element
+implements the Builder pattern so that it can be converted into a UI
+widget (ClutterActor, GTK+ button, ...).  A layout engine arranges
+keyboard elements using information from external configuration
 mechanisms (XKB, matchbox-keyboard layouts in XML, ...)
 
 Here is a sample code which utilizes Clutter-based keyboard elements
@@ -31,10 +31,10 @@ and an XKB-based layout engine:
  EekKeyboard *keyboard;
  EekLayout *layout;
 
- /* Create a keyboard layout from XKB configuration. */
+ /* Create a keyboard layout using XKB configuration. */
  layout = eek_xkb_layout_new (NULL, "kinesis", "in");
 
- /* Create a keyboard that is implemented as ClutterActor. */
+ /* Create a keyboard implemented as ClutterActor. */
  keyboard = eek_clutter_keyboard_new ();
 
  /* Apply the layout to the keyboard. */
