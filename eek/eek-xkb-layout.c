@@ -218,7 +218,7 @@ create_section (EekXkbLayout  *layout,
     EekBounds bounds;
     const gchar *name;
     gfloat left, top;
-    gint i, j, columns;
+    gint i, j;
 
     bounds.x = xkb_to_pixmap_coord(layout, xkbsection->left);
     bounds.y = xkb_to_pixmap_coord(layout, xkbsection->top);
@@ -234,21 +234,14 @@ create_section (EekXkbLayout  *layout,
                                            xkbsection->angle / 10,
                                            &bounds);
 
-    for (columns = 0, i = 0; i < xkbsection->num_rows; i++) {
-        XkbRowRec *xkbrow;
-
-        xkbrow = &xkbsection->rows[i];
-        if (xkbrow->num_keys > columns)
-            columns = xkbrow->num_keys;
-    }
-    eek_section_set_dimensions (section, columns, xkbsection->num_rows);
-
+    eek_section_set_rows (section, xkbsection->num_rows);
     for (i = 0; i < xkbsection->num_rows; i++) {
         XkbRowRec *xkbrow;
 
         xkbrow = &xkbsection->rows[i];
         left = xkbrow->left;
         top = xkbrow->top;
+        eek_section_set_columns (section, i, xkbrow->num_keys);
         for (j = 0; j < xkbrow->num_keys; j++) {
             XkbKeyRec *xkbkey;
             XkbBoundsRec *xkbbounds;

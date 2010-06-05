@@ -59,25 +59,43 @@ struct _EekClutterSectionPrivate
 };
 
 static void
-eek_clutter_section_real_set_dimensions (EekSection *self,
-                                         gint        columns,
-                                         gint        rows)
+eek_clutter_section_real_set_rows (EekSection *self,
+                                   gint        rows)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    eek_section_set_dimensions (EEK_SECTION(priv->simple), columns, rows);
+    eek_section_set_rows (EEK_SECTION(priv->simple), rows);
+}
+
+static gint
+eek_clutter_section_real_get_rows (EekSection *self)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, -1);
+    return eek_section_get_rows (EEK_SECTION(priv->simple));
 }
 
 static void
-eek_clutter_section_real_get_dimensions (EekSection *self,
-                                         gint       *columns,
-                                         gint       *rows)
+eek_clutter_section_real_set_columns (EekSection *self,
+                                      gint        row,
+                                      gint        columns)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    eek_section_get_dimensions (EEK_SECTION(priv->simple), columns, rows);
+    eek_section_set_columns (EEK_SECTION(priv->simple), row, columns);
+}
+
+static gint
+eek_clutter_section_real_get_columns (EekSection *self,
+                                      gint        row)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, -1);
+    return eek_section_get_columns (EEK_SECTION(priv->simple), row);
 }
 
 static void
@@ -146,9 +164,10 @@ eek_clutter_section_real_create_key (EekSection  *self,
 
     g_return_val_if_fail (priv, NULL);
 
-    eek_section_get_dimensions (self, &columns, &rows);
+    rows = eek_section_get_rows (self);
+    g_return_val_if_fail (0 <= row && row < rows, NULL);
+    columns = eek_section_get_columns (self, row);
     g_return_val_if_fail (column < columns, NULL);
-    g_return_val_if_fail (row < rows, NULL);
 
     matrix.data = keysyms;
     matrix.num_groups = num_groups;
@@ -196,8 +215,10 @@ eek_clutter_section_real_foreach_key (EekSection *self,
 static void
 eek_section_iface_init (EekSectionIface *iface)
 {
-    iface->set_dimensions = eek_clutter_section_real_set_dimensions;
-    iface->get_dimensions = eek_clutter_section_real_get_dimensions;
+    iface->set_rows = eek_clutter_section_real_set_rows;
+    iface->get_rows = eek_clutter_section_real_get_rows;
+    iface->set_columns = eek_clutter_section_real_set_columns;
+    iface->get_columns = eek_clutter_section_real_get_columns;
     iface->set_angle = eek_clutter_section_real_set_angle;
     iface->get_angle = eek_clutter_section_real_get_angle;
     iface->set_bounds = eek_clutter_section_real_set_bounds;

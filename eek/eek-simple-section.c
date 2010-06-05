@@ -46,35 +46,58 @@ G_DEFINE_TYPE_WITH_CODE (EekSimpleSection, eek_simple_section,
 struct _EekSimpleSectionPrivate
 {
     gchar *name;
-    gint num_columns;
     gint num_rows;
+    gint *num_columns;
     gint angle;
     EekBounds bounds;
     GSList *keys;
 };
 
 static void
-eek_simple_section_real_set_dimensions (EekSection *self,
-                                        gint        columns,
-                                        gint        rows)
+eek_simple_section_real_set_rows (EekSection *self,
+                                  gint        rows)
 {
     EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    priv->num_columns = columns;
+    g_return_if_fail (rows >= 0);
     priv->num_rows = rows;
+    if (rows > 0) {
+        g_free (priv->num_columns);
+        priv->num_columns = g_slice_alloc (sizeof(gint) * priv->num_rows);
+    }
+}
+
+static gint
+eek_simple_section_real_get_rows (EekSection *self)
+{
+    EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, -1);
+    return priv->num_rows;
 }
 
 static void
-eek_simple_section_real_get_dimensions (EekSection *self,
-                                        gint       *columns,
-                                        gint       *rows)
+eek_simple_section_real_set_columns (EekSection *self,
+                                     gint        row,
+                                     gint        columns)
 {
     EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    *columns = priv->num_columns;
-    *rows = priv->num_rows;
+    g_return_if_fail (0 <= row && row < priv->num_rows);
+    priv->num_columns[row] = columns;
+}
+
+static gint
+eek_simple_section_real_get_columns (EekSection *self,
+                                     gint        row)
+{
+    EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, -1);
+    g_return_val_if_fail (0 <= row && row < priv->num_rows, -1);
+    return priv->num_columns[row];
 }
 
 static void
@@ -133,8 +156,8 @@ eek_simple_section_real_create_key (EekSection  *self,
     EekKeysymMatrix matrix;
 
     g_return_val_if_fail (priv, NULL);
-    g_return_val_if_fail (column < priv->num_columns, NULL);
-    g_return_val_if_fail (row < priv->num_rows, NULL);
+    g_return_val_if_fail (0 <= row && row < priv->num_rows, NULL);
+    g_return_val_if_fail (column < priv->num_columns[row], NULL);
 
     matrix.data = keysyms;
     matrix.num_groups = num_groups;
@@ -166,8 +189,10 @@ eek_simple_section_real_foreach_key (EekSection *self,
 static void
 eek_section_iface_init (EekSectionIface *iface)
 {
-    iface->set_dimensions = eek_simple_section_real_set_dimensions;
-    iface->get_dimensions = eek_simple_section_real_get_dimensions;
+    iface->set_rows = eek_simple_section_real_set_rows;
+    iface->get_rows = eek_simple_section_real_get_rows;
+    iface->set_columns = eek_simple_section_real_set_columns;
+    iface->get_columns = eek_simple_section_real_get_columns;
     iface->set_angle = eek_simple_section_real_set_angle;
     iface->get_angle = eek_simple_section_real_get_angle;
     iface->set_bounds = eek_simple_section_real_set_bounds;
@@ -195,6 +220,7 @@ eek_simple_section_finalize (GObject *object)
 
     g_free (priv->name);
     g_slist_free (priv->keys);
+    g_slice_free (gint, priv->num_columns);
     G_OBJECT_CLASS (eek_simple_section_parent_class)->finalize (object);
 }
 
@@ -288,4 +314,6 @@ eek_simple_section_init (EekSimpleSection *self)
     priv->angle = 0;
     memset (&priv->bounds, 0, sizeof priv->bounds);
     priv->keys = NULL;
+    priv->num_rows = 0;
+    priv->num_columns = NULL;
 }

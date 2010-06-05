@@ -130,41 +130,71 @@ eek_section_get_type (void)
 }
 
 /**
- * eek_section_set_dimensions:
+ * eek_section_set_rows:
  * @section: an #EekSection
- * @columns: the number of columns in @section
  * @rows: the number of rows in @section
  *
- * Set dimensions of @section from @columns and @rows.
+ * Set the number of rows in @section to @rows.
  */
 void
-eek_section_set_dimensions (EekSection *section,
-                            gint        columns,
-                            gint        rows)
+eek_section_set_rows (EekSection *section,
+                      gint        rows)
 {
     EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
 
-    g_return_if_fail (iface->set_dimensions);
-    (*iface->set_dimensions) (section, columns, rows);
+    g_return_if_fail (iface->set_rows);
+    (*iface->set_rows) (section, rows);
 }
 
 /**
- * eek_section_get_dimensions:
+ * eek_section_get_rows:
  * @section: an #EekSection
- * @columns: a pointer where the number of columns in @section is stored
- * @rows: a pointer where the number of rows in @section is stored
  *
- * Get the rotation angle of @section.
+ * Get the number of rows in @section.
  */
-void
-eek_section_get_dimensions (EekSection *section,
-                            gint       *columns,
-                            gint       *rows)
+gint
+eek_section_get_rows (EekSection *section)
 {
     EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
 
-    g_return_if_fail (iface->get_dimensions);
-    return (*iface->get_dimensions) (section, columns, rows);
+    g_return_if_fail (iface->get_rows);
+    return (*iface->get_rows) (section);
+}
+
+/**
+ * eek_section_set_columns:
+ * @section: an #EekSection
+ * @row: the row index in @section
+ * @columns: the number of keys on @row
+ *
+ * Set the number of keys on @row.
+ */
+void
+eek_section_set_columns (EekSection *section,
+                         gint        row,
+                         gint        columns)
+{
+    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
+
+    g_return_if_fail (iface->set_columns);
+    (*iface->set_columns) (section, row, columns);
+}
+
+/**
+ * eek_section_get_columns:
+ * @section: an #EekSection
+ * @row: the row index in @section
+ *
+ * Get the number of keys on @row.
+ */
+gint
+eek_section_get_columns (EekSection *section,
+                         gint        row)
+{
+    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
+
+    g_return_if_fail (iface->get_columns);
+    return (*iface->get_columns) (section, row);
 }
 
 /**
