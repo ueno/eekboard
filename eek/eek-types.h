@@ -24,6 +24,12 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    EEK_ORIENTATION_VERTICAL,
+    EEK_ORIENTATION_HORIZONTAL,
+    EEK_ORIENTATION_INVALID = -1
+} EekOrientation;
+
 typedef struct _EekKeyboard EekKeyboard;
 
 /**

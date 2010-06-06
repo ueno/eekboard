@@ -48,6 +48,7 @@ struct _EekSimpleSectionPrivate
     gchar *name;
     gint num_rows;
     gint *num_columns;
+    EekOrientation *orientations;
     gint angle;
     EekBounds bounds;
     GSList *keys;
@@ -65,6 +66,9 @@ eek_simple_section_real_set_rows (EekSection *self,
     if (rows > 0) {
         g_free (priv->num_columns);
         priv->num_columns = g_slice_alloc (sizeof(gint) * priv->num_rows);
+        g_free (priv->orientations);
+        priv->orientations =
+            g_slice_alloc (sizeof(EekOrientation) * priv->num_rows);
     }
 }
 
@@ -98,6 +102,29 @@ eek_simple_section_real_get_columns (EekSection *self,
     g_return_val_if_fail (priv, -1);
     g_return_val_if_fail (0 <= row && row < priv->num_rows, -1);
     return priv->num_columns[row];
+}
+
+static void
+eek_simple_section_real_set_orientation (EekSection    *self,
+                                         gint           row,
+                                         EekOrientation orientation)
+{
+    EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
+
+    g_return_if_fail (priv);
+    g_return_if_fail (0 <= row && row < priv->num_rows);
+    priv->orientations[row] = orientation;
+}
+
+static EekOrientation
+eek_simple_section_real_get_orientation (EekSection *self,
+                                         gint        row)
+{
+    EekSimpleSectionPrivate *priv = EEK_SIMPLE_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, EEK_ORIENTATION_INVALID);
+    g_return_if_fail (0 <= row && row < priv->num_rows);
+    return priv->orientations[row];
 }
 
 static void
@@ -193,6 +220,8 @@ eek_section_iface_init (EekSectionIface *iface)
     iface->get_rows = eek_simple_section_real_get_rows;
     iface->set_columns = eek_simple_section_real_set_columns;
     iface->get_columns = eek_simple_section_real_get_columns;
+    iface->set_orientation = eek_simple_section_real_set_orientation;
+    iface->get_orientation = eek_simple_section_real_get_orientation;
     iface->set_angle = eek_simple_section_real_set_angle;
     iface->get_angle = eek_simple_section_real_get_angle;
     iface->set_bounds = eek_simple_section_real_set_bounds;
@@ -221,6 +250,7 @@ eek_simple_section_finalize (GObject *object)
     g_free (priv->name);
     g_slist_free (priv->keys);
     g_slice_free (gint, priv->num_columns);
+    g_slice_free (EekOrientation, priv->orientations);
     G_OBJECT_CLASS (eek_simple_section_parent_class)->finalize (object);
 }
 
@@ -316,4 +346,5 @@ eek_simple_section_init (EekSimpleSection *self)
     priv->keys = NULL;
     priv->num_rows = 0;
     priv->num_columns = NULL;
+    priv->orientations = NULL;
 }

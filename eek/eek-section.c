@@ -157,17 +157,17 @@ eek_section_get_rows (EekSection *section)
 {
     EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
 
-    g_return_if_fail (iface->get_rows);
+    g_return_val_if_fail (iface->get_rows, -1);
     return (*iface->get_rows) (section);
 }
 
 /**
  * eek_section_set_columns:
  * @section: an #EekSection
- * @row: the row index in @section
+ * @row: row index in @section
  * @columns: the number of keys on @row
  *
- * Set the number of keys on @row.
+ * Set the number of keys on the @row-th row in @section.
  */
 void
 eek_section_set_columns (EekSection *section,
@@ -183,9 +183,9 @@ eek_section_set_columns (EekSection *section,
 /**
  * eek_section_get_columns:
  * @section: an #EekSection
- * @row: the row index in @section
+ * @row: row index in @section
  *
- * Get the number of keys on @row.
+ * Get the number of keys on the @row-th row in @section.
  */
 gint
 eek_section_get_columns (EekSection *section,
@@ -195,6 +195,43 @@ eek_section_get_columns (EekSection *section,
 
     g_return_if_fail (iface->get_columns);
     return (*iface->get_columns) (section, row);
+}
+
+/**
+ * eek_section_set_orientation:
+ * @section: an #EekSection
+ * @row: row index in @section
+ * @orientation: either %EEK_ORIENTATION_HORIZONTAL or %EEK_ORIENTATION_VERTICAL
+ *
+ * Set the orientation of the @row-th row in @section to @orientation.
+ */
+void
+eek_section_set_orientation (EekSection    *section,
+                             gint           row,
+                             EekOrientation orientation)
+{
+    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
+
+    g_return_if_fail (iface->set_orientation);
+    (*iface->set_orientation) (section, row, orientation);
+}
+
+/**
+ * eek_section_get_orientation:
+ * @section: an #EekSection
+ * @row: row index in @section
+ *
+ * Get the orientation of the @row-th row in @section.
+ * Returns: either %EEK_ORIENTATION_HORIZONTAL or %EEK_ORIENTATION_VERTICAL
+ */
+EekOrientation
+eek_section_get_orientation (EekSection *section,
+                             gint        row)
+{
+    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
+
+    g_return_val_if_fail (iface->get_orientation, EEK_ORIENTATION_INVALID);
+    return (*iface->get_orientation) (section, row);
 }
 
 /**

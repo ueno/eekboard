@@ -242,6 +242,11 @@ create_section (EekXkbLayout  *layout,
         left = xkbrow->left;
         top = xkbrow->top;
         eek_section_set_columns (section, i, xkbrow->num_keys);
+        eek_section_set_orientation (section,
+                                     i,
+                                     xkbrow->vertical ?
+                                     EEK_ORIENTATION_VERTICAL :
+                                     EEK_ORIENTATION_HORIZONTAL);
         for (j = 0; j < xkbrow->num_keys; j++) {
             XkbKeyRec *xkbkey;
             XkbBoundsRec *xkbbounds;

@@ -99,6 +99,27 @@ eek_clutter_section_real_get_columns (EekSection *self,
 }
 
 static void
+eek_clutter_section_real_set_orientation (EekSection    *self,
+                                          gint           row,
+                                          EekOrientation orientation)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+
+    g_return_if_fail (priv);
+    eek_section_set_orientation (EEK_SECTION(priv->simple), row, orientation);
+}
+
+static EekOrientation
+eek_clutter_section_real_get_orientation (EekSection *self,
+                                          gint        row)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, EEK_ORIENTATION_INVALID);
+    return eek_section_get_orientation (EEK_SECTION(priv->simple), row);
+}
+
+static void
 eek_clutter_section_real_set_angle (EekSection *self,
                                     gint        angle)
 {
@@ -219,6 +240,8 @@ eek_section_iface_init (EekSectionIface *iface)
     iface->get_rows = eek_clutter_section_real_get_rows;
     iface->set_columns = eek_clutter_section_real_set_columns;
     iface->get_columns = eek_clutter_section_real_get_columns;
+    iface->set_orientation = eek_clutter_section_real_set_orientation;
+    iface->get_orientation = eek_clutter_section_real_get_orientation;
     iface->set_angle = eek_clutter_section_real_set_angle;
     iface->get_angle = eek_clutter_section_real_get_angle;
     iface->set_bounds = eek_clutter_section_real_set_bounds;
