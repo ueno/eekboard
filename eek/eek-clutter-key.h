@@ -50,11 +50,11 @@ struct _EekClutterKeyClass
     ClutterGroupClass parent_class;
 };
 
-GType eek_clutter_key_get_type    (void) G_GNUC_CONST;
+GType         eek_clutter_key_get_type       (void) G_GNUC_CONST;
 
 ClutterActor *eek_clutter_key_create_texture (EekClutterKey *key);
-void  eek_clutter_key_set_texture (EekClutterKey *key,
-                                   ClutterActor  *texture);
+void          eek_clutter_key_set_texture    (EekClutterKey *key,
+                                              ClutterActor  *texture);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEY_H */
