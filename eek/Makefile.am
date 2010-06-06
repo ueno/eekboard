@@ -95,10 +95,14 @@ eek-unicode-keysym-labels.h: unicode-keysym-labels.txt
 eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
 	./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = eek.pc eek-clutter.pc eek-xkb.pc
+
 DISTCLEANFILES = \
 	eek-special-keysym-labels.h \
 	eek-unicode-keysym-labels.h \
-	eek-keyname-keysym-labels.h
+	eek-keyname-keysym-labels.h \
+	$(pkgconfig_DATA)
 
 EXTRA_DIST = \
 	gen-keysym-labels.py \

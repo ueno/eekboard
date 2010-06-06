@@ -49,5 +49,8 @@ examples/Makefile
 tests/Makefile
 docs/Makefile
 docs/reference/Makefile
-docs/reference/eek/Makefile])
+docs/reference/eek/Makefile
+eek/eek.pc
+eek/eek-clutter.pc
+eek/eek-xkb.pc])
 AC_OUTPUT

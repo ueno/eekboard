@@ -4,4 +4,4 @@
 - matchbox-keyboard layout engine
 - emit key events using libfakekey or xtest
 - .spec
-- .pc
+
