@@ -1,11 +1,11 @@
-eek - easy embedded keyboard
+eek - easy embedded keyboard -*- outline -*-
 
 *NOTE* This is not usable by now. The code has still a lot of bugs and
 lacks documentation.
 
 * Quick look
 
- http://ueno.fedorapeople.org/eek/eek-in-demo.ogv (2MB, Ogg Theora)
+ http://ueno.fedorapeople.org/eek/eek-in-demo.ogv (2MB, Ogg Theora video)
 
 * How to test
 
@@ -17,10 +17,10 @@ lacks documentation.
 
 * API (not fixed)
 
-There are two different kinds of objects in eek.  One is "keyboard
+eek provides two different kinds of objects.  One is "keyboard
 element" and another is "keyboard layout engine".  A keyboard element
 represents either a keyboard, a section, or a key.  Each element
-implements the Builder pattern so that it can be converted into a UI
+implements the Builder pattern[1] so that it can be converted into a UI
 widget (ClutterActor, GTK+ button, ...).  A layout engine arranges
 keyboard elements using information from external configuration
 mechanisms (XKB, matchbox-keyboard layouts in XML, ...)
@@ -28,16 +28,26 @@ mechanisms (XKB, matchbox-keyboard layouts in XML, ...)
 Here is a sample code which utilizes Clutter-based keyboard elements
 and an XKB-based layout engine:
 
- EekKeyboard *keyboard;
- EekLayout *layout;
+ 1: EekKeyboard *keyboard;
+ 2: EekLayout *layout;
+ 3:
+ 4: /* Create a keyboard layout using XKB configuration. */
+ 5: layout = eek_xkb_layout_new (NULL, "kinesis", "in");
+ 6:
+ 7: /* Create a keyboard implemented as ClutterActor. */
+ 8: keyboard = eek_clutter_keyboard_new (640, 480);
+ 9:
+10: /* Apply the layout to the keyboard. */
+11: eek_keyboard_set_layout (keyboard, layout);
+12: 
+13: clutter_group_add (CLUTTER_GROUP(stage), CLUTTER_ACTOR(keyboard));
 
- /* Create a keyboard layout using XKB configuration. */
- layout = eek_xkb_layout_new (NULL, "kinesis", "in");
+To use GTK+-based keyboard elements instead of Clutter, simply replace
+line 8 and 13 with:
 
- /* Create a keyboard implemented as ClutterActor. */
- keyboard = eek_clutter_keyboard_new ();
+ 8: keyboard = eek_gtk_keyboard_new ();
+13: gtk_container_add (GTK_CONTAINER(window), GTK_WIDGET(keyboard));
 
- /* Apply the layout to the keyboard. */
- eek_keyboard_set_layout (keyboard, layout);
- 
- clutter_group_add (CLUTTER_GROUP(stage), CLUTTER_ACTOR(keyboard));
+Footnotes: 
+[1]  http://en.wikipedia.org/wiki/Builder_pattern
+
