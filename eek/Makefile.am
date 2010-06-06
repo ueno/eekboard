@@ -89,11 +89,11 @@ eek_HEADERS = \
 eek-keysym.c: eek-special-keysym-labels.h eek-unicode-keysym-labels.h eek-keyname-keysym-labels.h
 
 eek-special-keysym-labels.h: special-keysym-labels.txt
-	./gen-keysym-labels.py special_keysym_labels < $< > $@
+	$(PYTHON) ./gen-keysym-labels.py special_keysym_labels < $< > $@
 eek-unicode-keysym-labels.h: unicode-keysym-labels.txt
-	./gen-keysym-labels.py unicode_keysym_labels < $< > $@
+	$(PYTHON) ./gen-keysym-labels.py unicode_keysym_labels < $< > $@
 eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
-	./gen-keysym-labels.py keyname_keysym_labels < $< > $@
+	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = eek.pc eek-clutter.pc eek-xkb.pc

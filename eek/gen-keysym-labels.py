@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
 # Copyright (C) 2010 Red Hat, Inc.

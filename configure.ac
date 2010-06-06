@@ -42,6 +42,8 @@ GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 EEK_API_VERSION=0.1
 AC_SUBST(EEK_API_VERSION)
 
+AC_CHECK_PROGS([PYTHON], [python])
+
 AC_CONFIG_HEADERS([eek/config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
