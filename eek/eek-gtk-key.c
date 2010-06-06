@@ -69,7 +69,8 @@ eek_gtk_key_real_set_keysyms (EekKey *self,
 
     g_return_if_fail (priv);
     eek_key_set_keysyms (EEK_KEY(priv->simple), keysyms, groups, levels);
-    eek_key_set_keysym_index (EEK_KEY(self), 0, 0);
+    if (groups > 0 && levels > 0)
+        eek_key_set_keysym_index (EEK_KEY(self), 0, 0);
 }
 
 static gint
