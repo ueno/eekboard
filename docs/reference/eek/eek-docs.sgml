@@ -30,6 +30,12 @@
     <title>XKB layout engine</title>
     <xi:include href="xml/eek-xkb-layout.xml"/>
   </chapter>
+  <chapter>
+    <title>GTK keyboard elements</title>
+    <xi:include href="xml/eek-gtk-keyboard.xml"/>
+    <xi:include href="xml/eek-gtk-section.xml"/>
+    <xi:include href="xml/eek-gtk-key.xml"/>
+  </chapter>
   <chapter id="object-tree">
     <title>Object Hierarchy</title>
      <xi:include href="xml/tree_index.sgml"/>
