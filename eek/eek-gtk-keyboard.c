@@ -201,18 +201,15 @@ eek_keyboard_iface_init (EekKeyboardIface *iface)
 static void
 eek_gtk_keyboard_dispose (GObject *object)
 {
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
-
-    if (priv->simple) {
-        g_object_unref (priv->simple);
-        priv->simple = NULL;
-    }
     G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->dispose (object);
 }
 
 static void
 eek_gtk_keyboard_finalize (GObject *object)
 {
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
+
+    g_object_unref (priv->simple);
     G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->finalize (object);
 }
 

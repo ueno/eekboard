@@ -253,14 +253,7 @@ eek_gtk_section_dispose (GObject *object)
 
     num_rows = eek_section_get_rows (EEK_SECTION(object));
     for (i = 0; i < num_rows; i++)
-        if (priv->rows[i]) {
-            g_object_unref (priv->rows[i]);
-            priv->rows[i] = NULL;
-        }
-    if (priv->simple) {
-        g_object_unref (priv->simple);
-        priv->simple = NULL;
-    }
+        gtk_container_remove (GTK_CONTAINER(object), priv->rows[i]);
     G_OBJECT_CLASS (eek_gtk_section_parent_class)->dispose (object);
 }
 
@@ -269,6 +262,7 @@ eek_gtk_section_finalize (GObject *object)
 {
     EekGtkSectionPrivate *priv = EEK_GTK_SECTION_GET_PRIVATE(object);
 
+    g_object_unref (priv->simple);
     g_slice_free (GtkWidget *, priv->rows);
     G_OBJECT_CLASS (eek_gtk_section_parent_class)->finalize (object);
 }

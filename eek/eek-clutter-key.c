@@ -193,12 +193,6 @@ eek_key_iface_init (EekKeyIface *iface)
 static void
 eek_clutter_key_dispose (GObject *object)
 {
-    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
-
-    if (priv->simple) {
-        g_object_unref (priv->simple);
-        priv->simple = NULL;
-    }
     clutter_group_remove_all (CLUTTER_GROUP(object));
     G_OBJECT_CLASS (eek_clutter_key_parent_class)->dispose (object);
 }
@@ -206,6 +200,9 @@ eek_clutter_key_dispose (GObject *object)
 static void
 eek_clutter_key_finalize (GObject *object)
 {
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
+
+    g_object_unref (priv->simple);
     G_OBJECT_CLASS (eek_clutter_key_parent_class)->finalize (object);
 }
 

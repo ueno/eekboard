@@ -185,12 +185,6 @@ eek_keyboard_iface_init (EekKeyboardIface *iface)
 static void
 eek_clutter_keyboard_dispose (GObject *object)
 {
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
-
-    if (priv->simple) {
-        g_object_unref (priv->simple);
-        priv->simple = NULL;
-    }
     clutter_group_remove_all (CLUTTER_GROUP(object));
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->dispose (object);
 }
@@ -198,6 +192,9 @@ eek_clutter_keyboard_dispose (GObject *object)
 static void
 eek_clutter_keyboard_finalize (GObject *object)
 {
+    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
+
+    g_object_unref (priv->simple);
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
 }
 

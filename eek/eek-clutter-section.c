@@ -253,19 +253,16 @@ eek_section_iface_init (EekSectionIface *iface)
 static void
 eek_clutter_section_dispose (GObject *object)
 {
-    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
-
     clutter_group_remove_all (CLUTTER_GROUP(object));
-    if (priv->simple) {
-        g_object_unref (priv->simple);
-        priv->simple = NULL;
-    }
     G_OBJECT_CLASS (eek_clutter_section_parent_class)->dispose (object);
 }
 
 static void
 eek_clutter_section_finalize (GObject *object)
 {
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
+
+    g_object_unref (priv->simple);
     G_OBJECT_CLASS (eek_clutter_section_parent_class)->finalize (object);
 }
 
