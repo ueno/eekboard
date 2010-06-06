@@ -34,7 +34,9 @@ PKG_CHECK_MODULES([PANGO], [pango], ,
   [AC_MSG_ERROR([Pango not found])])
 PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
   [AC_MSG_ERROR([Clutter not found])])
-PKG_CHECK_MODULES([XKB], [gtk+-2.0 gdk-2.0 x11], ,
+PKG_CHECK_MODULES([GTK2], [gtk+-2.0 gdk-2.0], ,
+  [AC_MSG_ERROR([GTK2 support not found])])
+PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
@@ -54,5 +56,6 @@ docs/reference/Makefile
 docs/reference/eek/Makefile
 eek/eek.pc
 eek/eek-clutter.pc
-eek/eek-xkb.pc])
+eek/eek-xkb.pc
+eek/eek-gtk.pc])
 AC_OUTPUT

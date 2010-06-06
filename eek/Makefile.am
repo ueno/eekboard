@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-lib_LTLIBRARIES = libeek.la libeek-clutter.la libeek-xkb.la
+lib_LTLIBRARIES = libeek.la libeek-clutter.la libeek-xkb.la libeek-gtk.la
 
 libeek_la_SOURCES = \
 	eek-layout.c \
@@ -67,8 +67,23 @@ libeek_xkb_la_SOURCES = \
 	eek-xkb-layout.c \
 	$(NULL)
 
-libeek_xkb_la_CFLAGS = $(XKB_CFLAGS)
-libeek_xkb_la_LIBADD = libeek.la $(XKB_LIBS)
+libeek_xkb_la_CFLAGS = $(GTK2_CFLAGS) $(XKB_CFLAGS)
+libeek_xkb_la_LIBADD = libeek.la $(GTK2_LIBS) $(XKB_LIBS)
+
+libeek_gtk_la_SOURCES = \
+	eek-gtk-keyboard.c \
+	eek-gtk-keyboard.h \
+	eek-gtk-section.c \
+	eek-gtk-section.h \
+	eek-gtk-key.c \
+	eek-gtk-key.h \
+	eek-gtk-private.c \
+	eek-gtk-private.h \
+	eek-gtk.h \
+	$(NULL)
+
+libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
 eek_HEADERS = \
@@ -96,7 +111,7 @@ eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
 	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = eek.pc eek-clutter.pc eek-xkb.pc
+pkgconfig_DATA = eek.pc eek-clutter.pc eek-xkb.pc eek-gtk.pc
 
 DISTCLEANFILES = \
 	eek-special-keysym-labels.h \
