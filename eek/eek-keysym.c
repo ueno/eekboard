@@ -59,7 +59,7 @@ find_keysym (guint              keysym,
              const gchar      **label,
              EekKeysymCategory *category)
 {
-    EekKeysymCategory bsearch_key, *bsearch_val;
+    struct eek_keysym_label bsearch_key, *bsearch_val;
 
     /* First, search special keysyms. */
     bsearch_key.keysym = keysym;
