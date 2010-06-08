@@ -221,8 +221,10 @@ eek_simple_key_real_set_keysym_index (EekKey *self,
     EekSimpleKeyPrivate *priv = EEK_SIMPLE_KEY_GET_PRIVATE(self);
 
     g_return_if_fail (priv);
-    g_return_if_fail (group < priv->num_groups);
-    g_return_if_fail (level < priv->num_levels);
+    g_return_if_fail (0 <= group);
+    if (group >= priv->num_groups)
+        group = 0;
+    g_return_if_fail (0 <= level && level < priv->num_levels);
     priv->group = group;
     priv->level = level;
 }
