@@ -34,6 +34,7 @@
 
 enum {
     PROP_0,
+    PROP_KEYCODE,
     PROP_KEYSYMS,
     PROP_COLUMN,
     PROP_ROW,
@@ -59,6 +60,15 @@ struct _EekGtkKeyPrivate
     EekSimpleKey *simple;
 };
 
+static guint
+eek_gtk_key_real_get_keycode (EekKey *self)
+{
+    EekGtkKeyPrivate *priv = EEK_GTK_KEY_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, EEK_INVALID_KEYCODE);
+    return eek_key_get_keycode (EEK_KEY(priv->simple));
+}
+
 static void
 eek_gtk_key_real_set_keysyms (EekKey *self,
                               guint  *keysyms,
@@ -71,6 +81,18 @@ eek_gtk_key_real_set_keysyms (EekKey *self,
     eek_key_set_keysyms (EEK_KEY(priv->simple), keysyms, groups, levels);
     if (groups > 0 && levels > 0)
         eek_key_set_keysym_index (EEK_KEY(self), 0, 0);
+}
+
+static void
+eek_gtk_key_real_get_keysyms (EekKey *self,
+                              guint **keysyms,
+                              gint   *groups,
+                              gint   *levels)
+{
+    EekGtkKeyPrivate *priv = EEK_GTK_KEY_GET_PRIVATE(self);
+
+    g_return_if_fail (priv);
+    eek_key_get_keysyms (EEK_KEY(priv->simple), keysyms, groups, levels);
 }
 
 static gint
@@ -181,7 +203,9 @@ eek_gtk_key_real_get_keysym_index (EekKey *self, gint *group, gint *level)
 static void
 eek_key_iface_init (EekKeyIface *iface)
 {
+    iface->get_keycode = eek_gtk_key_real_get_keycode;
     iface->set_keysyms = eek_gtk_key_real_set_keysyms;
+    iface->get_keysyms = eek_gtk_key_real_get_keysyms;
     iface->get_groups = eek_gtk_key_real_get_groups;
     iface->get_keysym = eek_gtk_key_real_get_keysym;
     iface->set_index = eek_gtk_key_real_set_index;
@@ -227,6 +251,7 @@ eek_gtk_key_set_property (GObject      *object,
                              matrix->num_groups,
                              matrix->num_levels);
         break;
+    case PROP_KEYCODE:
     case PROP_BOUNDS:
     case PROP_OUTLINE:
     case PROP_COLUMN:
@@ -255,6 +280,7 @@ eek_gtk_key_get_property (GObject    *object,
 
     g_return_if_fail (priv);
     switch (prop_id) {
+    case PROP_KEYCODE:
     case PROP_BOUNDS:
     case PROP_KEYSYMS:
     case PROP_COLUMN:
@@ -288,6 +314,9 @@ eek_gtk_key_class_init (EekGtkKeyClass *klass)
     gobject_class->finalize     = eek_gtk_key_finalize;
     gobject_class->dispose      = eek_gtk_key_dispose;
 
+    g_object_class_override_property (gobject_class,
+                                      PROP_KEYCODE,
+                                      "keycode");
     g_object_class_override_property (gobject_class,
                                       PROP_KEYSYMS,
                                       "keysyms");

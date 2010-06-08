@@ -65,6 +65,7 @@ test_create (void)
 
     key = eek_section_create_key (section,
                                   "test-key",
+                                  0,
                                   keysyms,
                                   3,
                                   2,

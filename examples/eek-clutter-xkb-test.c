@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CSW 640
-#define CSH 480
+#define CSW 1280
+#define CSH 1024
 
 static gchar *symbols = NULL;
 static gchar *keycodes = NULL;

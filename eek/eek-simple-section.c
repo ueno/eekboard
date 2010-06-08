@@ -170,6 +170,7 @@ eek_simple_section_real_get_bounds (EekSection *self, EekBounds *bounds)
 static EekKey *
 eek_simple_section_real_create_key (EekSection  *self,
                                     const gchar *name,
+                                    guint        keycode,
                                     guint       *keysyms,
                                     gint         num_groups,
                                     gint         num_levels,
@@ -191,6 +192,7 @@ eek_simple_section_real_create_key (EekSection  *self,
     matrix.num_levels = num_levels;
     key = g_object_new (EEK_TYPE_SIMPLE_KEY,
                         "name", name,
+                        "keycode", keycode,
                         "keysyms", &matrix,
                         "column", column,
                         "row", row,

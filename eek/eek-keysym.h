@@ -21,6 +21,8 @@
 #define EEK_KEYSYMS_H 1
 
 #define EEK_INVALID_KEYSYM ((guint)(-1))
+#define EEK_INVALID_KEYCODE ((guint)(-1))
+
 G_CONST_RETURN gchar *eek_keysym_to_string (guint keysym);
 
 #endif  /* EEK_KEYSYMS_H */

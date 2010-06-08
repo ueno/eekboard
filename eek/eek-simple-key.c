@@ -32,6 +32,7 @@
 enum {
     PROP_0,
     PROP_NAME,
+    PROP_KEYCODE,
     PROP_KEYSYMS,
     PROP_COLUMN,
     PROP_ROW,
@@ -55,6 +56,7 @@ G_DEFINE_TYPE_WITH_CODE (EekSimpleKey, eek_simple_key,
 struct _EekSimpleKeyPrivate
 {
     gchar *name;
+    guint keycode;
     guint *keysyms;
     gint num_levels;
     gint num_groups;
@@ -65,6 +67,15 @@ struct _EekSimpleKeyPrivate
     gint group;
     gint level;
 };
+
+static guint
+eek_simple_key_real_get_keycode (EekKey *self)
+{
+    EekSimpleKeyPrivate *priv = EEK_SIMPLE_KEY_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, EEK_INVALID_KEYCODE);
+    return priv->keycode;
+}
 
 static void
 eek_simple_key_real_set_keysyms (EekKey *self,
@@ -92,6 +103,27 @@ eek_simple_key_real_set_keysyms (EekKey *self,
         fprintf (stderr, "\n");
     }
 #endif
+}
+
+static void
+eek_simple_key_real_get_keysyms (EekKey *self,
+                                 guint **keysyms,
+                                 gint   *groups,
+                                 gint   *levels)
+{
+    EekSimpleKeyPrivate *priv = EEK_SIMPLE_KEY_GET_PRIVATE(self);
+
+    g_return_if_fail (groups);
+    g_return_if_fail (levels);
+    g_return_if_fail (keysyms);
+
+    *groups = priv->num_groups;
+    *levels = priv->num_levels;
+    if (priv->keysyms) {
+        *keysyms = g_slice_alloc (*groups * *levels * sizeof(guint));
+        memcpy (*keysyms, priv->keysyms, *groups * *levels * sizeof(guint));
+    } else
+        *keysyms = NULL;
 }
 
 static gint
@@ -212,7 +244,9 @@ eek_simple_key_real_get_keysym_index (EekKey *self,
 static void
 eek_key_iface_init (EekKeyIface *iface)
 {
+    iface->get_keycode = eek_simple_key_real_get_keycode;
     iface->set_keysyms = eek_simple_key_real_set_keysyms;
+    iface->get_keysyms = eek_simple_key_real_get_keysyms;
     iface->get_groups = eek_simple_key_real_get_groups;
     iface->get_keysym = eek_simple_key_real_get_keysym;
     iface->set_index = eek_simple_key_real_set_index;
@@ -255,6 +289,9 @@ eek_simple_key_set_property (GObject      *object,
     case PROP_NAME:
         g_free (priv->name);
         priv->name = g_strdup (g_value_get_string (value));
+        break;
+    case PROP_KEYCODE:
+        priv->keycode = g_value_get_uint (value);
         break;
     case PROP_KEYSYMS:
         matrix = g_value_get_boxed (value);
@@ -303,6 +340,9 @@ eek_simple_key_get_property (GObject    *object,
     switch (prop_id) {
     case PROP_NAME:
         g_value_set_string (value, priv->name);
+        break;
+    case PROP_KEYCODE:
+        g_value_set_uint (value, priv->keycode);
         break;
     case PROP_KEYSYMS:
         matrix.data = priv->keysyms;
@@ -355,6 +395,9 @@ eek_simple_key_class_init (EekSimpleKeyClass *klass)
                                       PROP_NAME,
                                       "name");
     g_object_class_override_property (gobject_class,
+                                      PROP_KEYCODE,
+                                      "keycode");
+    g_object_class_override_property (gobject_class,
                                       PROP_KEYSYMS,
                                       "keysyms");
     g_object_class_override_property (gobject_class,
@@ -384,6 +427,7 @@ eek_simple_key_init (EekSimpleKey *self)
 
     priv = self->priv = EEK_SIMPLE_KEY_GET_PRIVATE(self);
     priv->keysyms = NULL;
+    priv->keycode = 0;
     priv->num_groups = 0;
     priv->num_levels = 0;
     priv->column = 0;

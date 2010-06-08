@@ -55,6 +55,18 @@ eek_key_base_init (gpointer g_iface)
         g_object_interface_install_property (g_iface, pspec);
 
         /**
+         * EekKey:keycode:
+         *
+         * The keycode of #EekKey.
+         */
+        pspec = g_param_spec_uint ("keycode",
+                                   "Keycode",
+                                   "Keycode of the key",
+                                   0, G_MAXUINT, 0,
+                                   G_PARAM_READWRITE);
+        g_object_interface_install_property (g_iface, pspec);
+
+        /**
          * EekKey:keysyms:
          *
          * The symbol matrix of #EekKey.
@@ -165,6 +177,22 @@ eek_key_get_type (void)
 }
 
 /**
+ * eek_key_get_keycode:
+ * @key: an #EekKey
+ *
+ * Get the keycode of @key.
+ */
+guint
+eek_key_get_keycode (EekKey *key)
+{
+    EekKeyIface *iface = EEK_KEY_GET_IFACE(key);
+
+    g_return_val_if_fail (iface, EEK_INVALID_KEYCODE);
+    g_return_val_if_fail (iface->get_keycode, EEK_INVALID_KEYCODE);
+    return (*iface->get_keycode) (key);
+}
+
+/**
  * eek_key_set_keysyms:
  * @key: an #EekKey
  * @keysyms: symbol matrix of @key
@@ -186,6 +214,32 @@ eek_key_set_keysyms (EekKey *key,
     g_return_if_fail (iface);
     g_return_if_fail (iface->set_keysyms);
     (*iface->set_keysyms) (key, keysyms, num_groups, num_levels);
+}
+
+/**
+ * eek_key_get_keysyms:
+ * @key: an #EekKey
+ * @keysyms: pointer where symbol matrix of @key will be stored
+ * @num_groups: pointer where the number of groups (rows) of @keysyms
+ * will be stored
+ * @num_levels: pointer where the number of levels (columns) of
+ * @keysyms will be stored
+ *
+ * Get the symbol matrix of @key to @keysyms. @keysyms is an array of
+ * symbols (unsigned int) and the length must match with @num_groups *
+ * @num_levels.
+ */
+void
+eek_key_get_keysyms (EekKey *key,
+                     guint **keysyms,
+                     gint   *num_groups,
+                     gint   *num_levels)
+{
+    EekKeyIface *iface = EEK_KEY_GET_IFACE(key);
+
+    g_return_if_fail (iface);
+    g_return_if_fail (iface->get_keysyms);
+    (*iface->get_keysyms) (key, keysyms, num_groups, num_levels);
 }
 
 /**

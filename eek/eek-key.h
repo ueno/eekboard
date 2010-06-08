@@ -39,10 +39,15 @@ struct _EekKeyIface
     GTypeInterface g_iface;
 
     /*< public >*/
+    guint       (* get_keycode)      (EekKey     *self);
     void        (* set_keysyms)      (EekKey     *self,
                                       guint      *keysyms,
                                       gint        num_groups,
                                       gint        num_levels);
+    void        (* get_keysyms)      (EekKey     *self,
+                                      guint     **keysyms,
+                                      gint       *num_groups,
+                                      gint       *num_levels);
     gint        (* get_groups)       (EekKey     *self);
     guint       (* get_keysym)       (EekKey     *self);
 
@@ -71,10 +76,15 @@ struct _EekKeyIface
 
 GType       eek_key_get_type         (void) G_GNUC_CONST;
 
+guint       eek_key_get_keycode      (EekKey     *key);
 void        eek_key_set_keysyms      (EekKey     *key,
                                       guint      *keysyms,
                                       gint        num_groups,
                                       gint        num_levels);
+void        eek_key_get_keysyms      (EekKey     *key,
+                                      guint     **keysyms,
+                                      gint       *num_groups,
+                                      gint       *num_levels);
 gint        eek_key_get_groups       (EekKey     *key);
 guint       eek_key_get_keysym       (EekKey     *key);
 

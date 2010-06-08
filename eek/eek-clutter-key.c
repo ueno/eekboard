@@ -34,6 +34,7 @@
 
 enum {
     PROP_0,
+    PROP_KEYCODE,
     PROP_KEYSYMS,
     PROP_COLUMN,
     PROP_ROW,
@@ -59,6 +60,15 @@ struct _EekClutterKeyPrivate
     EekSimpleKey *simple;
 };
 
+static guint
+eek_clutter_key_real_get_keycode (EekKey *self)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
+
+    g_return_val_if_fail (priv, EEK_INVALID_KEYCODE);
+    return eek_key_get_keycode (EEK_KEY(priv->simple));
+}
+
 static void
 eek_clutter_key_real_set_keysyms (EekKey *self,
                                   guint  *keysyms,
@@ -69,6 +79,18 @@ eek_clutter_key_real_set_keysyms (EekKey *self,
 
     g_return_if_fail (priv);
     eek_key_set_keysyms (EEK_KEY(priv->simple), keysyms, groups, levels);
+}
+
+static void
+eek_clutter_key_real_get_keysyms (EekKey *self,
+                                  guint **keysyms,
+                                  gint   *groups,
+                                  gint   *levels)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
+
+    g_return_if_fail (priv);
+    eek_key_get_keysyms (EEK_KEY(priv->simple), keysyms, groups, levels);
 }
 
 static gint
@@ -177,7 +199,9 @@ eek_clutter_key_real_get_keysym_index (EekKey *self, gint *group, gint *level)
 static void
 eek_key_iface_init (EekKeyIface *iface)
 {
+    iface->get_keycode = eek_clutter_key_real_get_keycode;
     iface->set_keysyms = eek_clutter_key_real_set_keysyms;
+    iface->get_keysyms = eek_clutter_key_real_get_keysyms;
     iface->get_groups = eek_clutter_key_real_get_groups;
     iface->get_keysym = eek_clutter_key_real_get_keysym;
     iface->set_index = eek_clutter_key_real_set_index;
@@ -337,6 +361,7 @@ eek_clutter_key_set_property (GObject      *object,
                              g_value_get_pointer (value));
         break;
         /* Otherwise delegate to priv->simple or the parent. */
+    case PROP_KEYCODE:
     case PROP_KEYSYMS:
     case PROP_COLUMN:
     case PROP_GROUP:
@@ -369,6 +394,7 @@ eek_clutter_key_get_property (GObject    *object,
         eek_key_get_bounds (EEK_KEY(object), &bounds);
         g_value_set_boxed (value, &bounds);
         break;
+    case PROP_KEYCODE:
     case PROP_KEYSYMS:
     case PROP_COLUMN:
     case PROP_ROW:
@@ -409,6 +435,9 @@ eek_clutter_key_class_init (EekClutterKeyClass *klass)
     gobject_class->finalize     = eek_clutter_key_finalize;
     gobject_class->dispose      = eek_clutter_key_dispose;
 
+    g_object_class_override_property (gobject_class,
+                                      PROP_KEYCODE,
+                                      "keycode");
     g_object_class_override_property (gobject_class,
                                       PROP_KEYSYMS,
                                       "keysyms");

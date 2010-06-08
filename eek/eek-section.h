@@ -63,6 +63,7 @@ struct _EekSectionIface
 
     EekKey        *(* create_key)      (EekSection    *self,
                                         const gchar   *name,
+                                        guint          keycode,
                                         guint         *keysyms,
                                         gint           num_groups,
                                         gint           num_levels,
@@ -103,6 +104,7 @@ void           eek_section_get_bounds      (EekSection    *section,
 
 EekKey        *eek_section_create_key      (EekSection    *section,
                                             const gchar   *name,
+                                            guint          keycode,
                                             guint         *keysyms,
                                             gint           num_groups,
                                             gint           num_levels,

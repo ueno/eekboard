@@ -198,6 +198,7 @@ create_key (EekXkbLayout *layout,
 
     eek_section_create_key (section,
                             name,
+                            keycode,
                             keysyms,
                             num_groups,
                             num_levels,
