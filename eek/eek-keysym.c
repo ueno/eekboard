@@ -25,6 +25,7 @@
 struct eek_keysym_label {
     guint keysym;
     const gchar *label;
+    EekKeysymCategory category;
 };
 
 #include "eek-special-keysym-labels.h"
@@ -53,6 +54,81 @@ keysym_label_compare (const void *key0, const void *key1)
     return (gint)entry0->keysym - (gint)entry1->keysym;
 }
 
+static gboolean
+find_keysym (guint              keysym,
+             const gchar      **label,
+             EekKeysymCategory *category)
+{
+    EekKeysymCategory bsearch_key, *bsearch_val;
+
+    /* First, search special keysyms. */
+    bsearch_key.keysym = keysym;
+    bsearch_val = bsearch (&bsearch_key,
+                           special_keysym_labels,
+                           G_N_ELEMENTS(special_keysym_labels),
+                           sizeof (struct eek_keysym_label),
+                           keysym_label_compare);
+    if (bsearch_val) {
+        if (label)
+            *label = g_strdup (bsearch_val->label);
+        if (category)
+            *category = bsearch_val->category;
+        return TRUE;
+    }
+  
+    /* Check for Latin-1 characters (1:1 mapping) */
+    if ((keysym >= 0x0020 && keysym <= 0x007e) ||
+        (keysym >= 0x00a0 && keysym <= 0x00ff)) {
+        if (label)
+            *label = unichar_to_utf8 (keysym);
+        if (category)
+            *category = EEK_KEYSYM_CATEGORY_LETTER;
+        return TRUE;
+    }
+
+    /* Also check for directly encoded 24-bit UCS characters:
+     */
+    if ((keysym & 0xff000000) == 0x01000000) {
+        if (label)
+            *label = unichar_to_utf8 (keysym & 0x00ffffff);
+        if (category)
+            *category = EEK_KEYSYM_CATEGORY_LETTER;
+        return TRUE;
+    }
+
+    /* Search known unicode keysyms. */
+    bsearch_key.keysym = keysym;
+    bsearch_val = bsearch (&bsearch_key,
+                           unicode_keysym_labels,
+                           G_N_ELEMENTS(unicode_keysym_labels),
+                           sizeof (struct eek_keysym_label),
+                           keysym_label_compare);
+    if (bsearch_val) {
+        if (label)
+            *label = g_strdup (bsearch_val->label);
+        if (category)
+            *category = bsearch_val->category;
+        return TRUE;
+    }
+
+    /* Finally, search keynames. */
+    bsearch_key.keysym = keysym;
+    bsearch_val = bsearch (&bsearch_key,
+                           keyname_keysym_labels,
+                           G_N_ELEMENTS(keyname_keysym_labels),
+                           sizeof (struct eek_keysym_label),
+                           keysym_label_compare);
+    if (bsearch_val) {
+        if (label)
+            *label = g_strdup (bsearch_val->label);
+        if (category)
+            *category = bsearch_val->category;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 /**
  * eek_keysym_to_string:
  * @keysym: keysym ID
@@ -62,47 +138,25 @@ keysym_label_compare (const void *key0, const void *key1)
 G_CONST_RETURN gchar *
 eek_keysym_to_string (guint keysym)
 {
-    struct eek_keysym_label bsearch_key, *bsearch_val;
+    const gchar *label;
 
-    /* First, search special keysyms. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           special_keysym_labels,
-                           G_N_ELEMENTS(special_keysym_labels),
-                           sizeof (struct eek_keysym_label),
-                           keysym_label_compare);
-    if (bsearch_val)
-        return g_strdup (bsearch_val->label);
-  
-    /* Check for Latin-1 characters (1:1 mapping) */
-    if ((keysym >= 0x0020 && keysym <= 0x007e) ||
-        (keysym >= 0x00a0 && keysym <= 0x00ff))
-        return unichar_to_utf8 (keysym);
-
-    /* Also check for directly encoded 24-bit UCS characters:
-     */
-    if ((keysym & 0xff000000) == 0x01000000)
-        return unichar_to_utf8 (keysym & 0x00ffffff);
-
-    /* Search known unicode keysyms. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           unicode_keysym_labels,
-                           G_N_ELEMENTS(unicode_keysym_labels),
-                           sizeof (struct eek_keysym_label),
-                           keysym_label_compare);
-    if (bsearch_val)
-        return g_strdup (bsearch_val->label);
-
-    /* Finally, search keynames. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           keyname_keysym_labels,
-                           G_N_ELEMENTS(keyname_keysym_labels),
-                           sizeof (struct eek_keysym_label),
-                           keysym_label_compare);
-    if (bsearch_val)
-        return g_strdup (bsearch_val->label);
-
+    if (find_keysym (keysym, &label, NULL))
+        return label;
     return g_strdup ("");
+}
+
+/**
+ * eek_keysym_get_category:
+ * @keysym: keysym ID
+ *
+ * Return a string representation of @keysym.
+ */
+EekKeysymCategory
+eek_keysym_get_category (guint keysym)
+{
+    EekKeysymCategory category;
+
+    if (find_keysym (keysym, NULL, &category))
+        return category;
+    return EEK_KEYSYM_CATEGORY_UNKNOWN;
 }

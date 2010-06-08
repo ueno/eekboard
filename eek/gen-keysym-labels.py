@@ -28,16 +28,17 @@ if len(sys.argv) != 2:
 table = dict()
 for line in sys.stdin:
     line = line.decode('UTF-8')
-    match = re.match(r'\s*(0x[0-9A-F]+)\s+(\S*)', line, re.I)
+    match = re.match(r'\s*(0x[0-9A-F]+)\s+(\S*)\s+(\S*)', line, re.I)
     if match:
-        table[int(match.group(1), 16)] = match.group(2)
+        table[int(match.group(1), 16)] = (match.group(2), match.group(3))
 
 sys.stdout.write("static const struct eek_keysym_label %s[] = {\n" %
                  sys.argv[1])
 
-for index, (keysym, label) in enumerate([(keysym, table[keysym])
-                                         for keysym in sorted(table.keys())]):
-    sys.stdout.write("    { 0x%X, %s }" % (keysym, label.encode('UTF-8')))
+for index, (keysym, (l, c)) in enumerate([(keysym, table[keysym])
+                                          for keysym in sorted(table.keys())]):
+    sys.stdout.write("    { 0x%X, %s, %s }" %
+                     (keysym, l.encode('UTF-8'), c.encode('UTF-8')))
     if index < len(table) - 1:
         sys.stdout.write(",")
     sys.stdout.write("\n")

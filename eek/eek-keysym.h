@@ -23,6 +23,14 @@
 #define EEK_INVALID_KEYSYM ((guint)(-1))
 #define EEK_INVALID_KEYCODE ((guint)(-1))
 
+typedef enum {
+    EEK_KEYSYM_CATEGORY_LETTER,
+    EEK_KEYSYM_CATEGORY_FUNCTION,
+    EEK_KEYSYM_CATEGORY_KEYNAME,
+    EEK_KEYSYM_CATEGORY_UNKNOWN
+} EekKeysymCategory;
+
 G_CONST_RETURN gchar *eek_keysym_to_string (guint keysym);
+EekKeysymCategory eek_keysym_get_category (guint keysym);
 
 #endif  /* EEK_KEYSYMS_H */
