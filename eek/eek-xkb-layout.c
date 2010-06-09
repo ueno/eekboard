@@ -305,6 +305,9 @@ eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
 
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
+
+    if (g_object_is_floating (keyboard))
+        g_object_unref (keyboard);
 }
 
 static void
