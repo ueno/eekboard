@@ -137,10 +137,10 @@ eek_clutter_section_finalize (GObject *object)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
 
-    if (priv->actor) {
-        clutter_group_remove_all (CLUTTER_GROUP(priv->actor));
+    /* No need for clutter_group_remove_all() since
+       ClutterGroup#dispose() unrefs all the children. */
+    if (priv->actor)
         g_object_unref (priv->actor);
-    }
     G_OBJECT_CLASS (eek_clutter_section_parent_class)->finalize (object);
 }
 

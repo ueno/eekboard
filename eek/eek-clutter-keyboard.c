@@ -40,6 +40,7 @@ G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 struct _EekClutterKeyboardPrivate
 {
     ClutterActor *actor;
+    EekLayout *layout;
 };
 
 static void
@@ -97,8 +98,10 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
     g_return_val_if_fail (section, NULL);
     g_object_ref_sink (section);
 
-    g_signal_connect (section, "key-pressed", G_CALLBACK(key_pressed_event), self);
-    g_signal_connect (section, "key-released", G_CALLBACK(key_released_event), self);
+    g_signal_connect (section, "key-pressed",
+                      G_CALLBACK(key_pressed_event), self);
+    g_signal_connect (section, "key-released",
+                      G_CALLBACK(key_released_event), self);
 
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(section));
@@ -112,14 +115,30 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 }
 
 static void
+eek_clutter_keyboard_real_set_layout (EekKeyboard *self,
+                                      EekLayout   *layout)
+{
+    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
+
+    g_return_if_fail (EEK_IS_LAYOUT(layout));
+
+    /* Don't apply the layout to keyboard right now, so to delay
+       drawing until eek_clutter_keyboard_get_actor. */
+    priv->layout = layout;
+    g_object_ref_sink (priv->layout);
+}
+
+static void
 eek_clutter_keyboard_finalize (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
-    if (priv->actor) {
-        clutter_group_remove_all (CLUTTER_GROUP(priv->actor));
+    /* No need for clutter_group_remove_all() since
+       ClutterGroup#dispose() unrefs all the children. */
+    if (priv->actor)
         g_object_unref (priv->actor);
-    }
+    if (priv->layout)
+        g_object_unref (priv->layout);
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
 }
 
@@ -146,6 +165,7 @@ eek_clutter_keyboard_init (EekClutterKeyboard *self)
 
     priv = self->priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
     priv->actor = NULL;
+    priv->layout = NULL;
 }
 
 /**
@@ -182,5 +202,7 @@ eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
         EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
     if (!priv->actor)
         priv->actor = clutter_group_new ();
+    if (priv->layout)
+        eek_layout_apply (priv->layout, EEK_KEYBOARD(keyboard));
     return priv->actor;
 }

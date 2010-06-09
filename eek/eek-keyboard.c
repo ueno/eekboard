@@ -143,8 +143,10 @@ eek_keyboard_real_create_section (EekKeyboard *self)
     g_return_val_if_fail (section, NULL);
     g_object_ref_sink (section);
 
-    g_signal_connect (section, "key-pressed", G_CALLBACK(key_pressed_event), self);
-    g_signal_connect (section, "key-released", G_CALLBACK(key_released_event), self);
+    g_signal_connect (section, "key-pressed",
+                      G_CALLBACK(key_pressed_event), self);
+    g_signal_connect (section, "key-released",
+                      G_CALLBACK(key_released_event), self);
 
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(section));
@@ -152,12 +154,12 @@ eek_keyboard_real_create_section (EekKeyboard *self)
 }
 
 static void
-eek_keyboard_real_set_layout (EekKeyboard *keyboard,
+eek_keyboard_real_set_layout (EekKeyboard *self,
                               EekLayout   *layout)
 {
     g_return_if_fail (EEK_IS_LAYOUT(layout));
 
-    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
+    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, self);
 
     if (g_object_is_floating (layout))
         g_object_unref (layout);

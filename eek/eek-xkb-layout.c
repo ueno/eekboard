@@ -305,9 +305,6 @@ eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
 
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
-
-    if (g_object_is_floating (keyboard))
-        g_object_unref (keyboard);
 }
 
 static void
@@ -318,8 +315,7 @@ eek_xkb_layout_finalize (GObject *object)
     g_free (priv->names.keycodes);
     g_free (priv->names.geometry);
     g_free (priv->names.symbols);
-    /* XXX */
-    //g_hash_table_unref (priv->outline_hash);
+    g_hash_table_unref (priv->outline_hash);
     XkbFreeKeyboard (priv->xkb, 0, TRUE);	/* free_all = TRUE */
     G_OBJECT_CLASS (eek_xkb_layout_parent_class)->finalize (object);
 }

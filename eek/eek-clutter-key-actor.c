@@ -123,11 +123,7 @@ static void
 eek_clutter_key_actor_finalize (GObject *object)
 {
     EekClutterKeyActorPrivate *priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(object);
-
-    clutter_group_remove_all (CLUTTER_GROUP(object));
     g_object_unref (priv->key);
-       if (priv->texture)
-           g_object_unref (priv->texture);
     G_OBJECT_CLASS (eek_clutter_key_actor_parent_class)->finalize (object);
 }
 
@@ -139,11 +135,6 @@ eek_clutter_key_actor_class_init (EekClutterKeyActorClass *klass)
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterKeyActorPrivate));
-
-    klass->outline_textures = g_hash_table_new_full (g_direct_hash,
-                                                     g_direct_equal,
-                                                     NULL,
-                                                     g_free);
 
     actor_class->paint = eek_clutter_key_actor_real_paint;
     /* FIXME: This is a workaround for the bug
@@ -488,18 +479,21 @@ create_texture_for_key (EekKey *key)
 static ClutterActor *
 get_texture (EekClutterKeyActor *actor)
 {
+    EekClutterKeyActorClass *actor_class =
+        EEK_CLUTTER_KEY_ACTOR_GET_CLASS(actor);
     ClutterActor *texture;
-    GHashTable *outline_textures;
     EekOutline *outline;
 
-    outline_textures = EEK_CLUTTER_KEY_ACTOR_GET_CLASS(actor)->
-        outline_textures;
-
+    if (!actor_class->outline_textures)
+        actor_class->outline_textures = g_hash_table_new_full (g_direct_hash,
+                                                               g_direct_equal,
+                                                               NULL,
+                                                               g_free);
     outline = eek_key_get_outline (actor->priv->key);
-    texture = g_hash_table_lookup (outline_textures, outline);
+    texture = g_hash_table_lookup (actor_class->outline_textures, outline);
     if (texture == NULL) {
         texture = create_texture_for_key (actor->priv->key);
-        g_hash_table_insert (outline_textures, outline, texture);
+        g_hash_table_insert (actor_class->outline_textures, outline, texture);
     } else
         texture = clutter_clone_new (texture);
     return texture;
