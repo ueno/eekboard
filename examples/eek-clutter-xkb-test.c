@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CSW 1280
-#define CSH 1024
+#define CSW 640
+#define CSH 480
 
 static gchar *symbols = NULL;
 static gchar *keycodes = NULL;
@@ -83,12 +83,21 @@ on_resize (GObject *object,
 			 &value);
 }
 
+static void
+key_pressed_event (EekKeyboard *keyboard,
+                   EekKey      *key)
+{
+    guint keysym = eek_key_get_keysym (key);
+    g_return_if_fail (keysym != EEK_INVALID_KEYSYM);
+    g_debug ("%s", eek_keysym_to_string (keysym));
+}
+
 int
 main (int argc, char *argv[])
 {
     EekKeyboard *keyboard;
     EekLayout *layout;
-    ClutterActor *stage;
+    ClutterActor *stage, *actor;
     ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
     GOptionContext *context;
 
@@ -116,16 +125,17 @@ main (int argc, char *argv[])
     }
     g_object_ref_sink (keyboard);
 
+    g_signal_connect (keyboard, "key-pressed", G_CALLBACK(key_pressed_event), NULL);
     eek_keyboard_set_layout (keyboard, layout);
-
+    actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard));
     stage = clutter_stage_get_default ();
 
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
     clutter_stage_set_user_resizable (CLUTTER_STAGE (stage), TRUE);
-    clutter_actor_get_size (CLUTTER_ACTOR(keyboard), &stage_width, &stage_height);
+    clutter_actor_get_size (actor, &stage_width, &stage_height);
     clutter_actor_set_size (stage, stage_width, stage_height);
 
-    clutter_group_add (CLUTTER_GROUP(stage), CLUTTER_ACTOR(keyboard));
+    clutter_group_add (CLUTTER_GROUP(stage), actor);
 
     clutter_actor_show_all (stage);
 
@@ -137,11 +147,6 @@ main (int argc, char *argv[])
     g_signal_connect (stage,
                       "notify::height",
                       G_CALLBACK (on_resize),
-                      NULL);
-
-    g_signal_connect (stage, 
-                      "event",
-                      G_CALLBACK (on_event),
                       NULL);
 
     clutter_main ();

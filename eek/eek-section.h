@@ -20,102 +20,72 @@
 #ifndef EEK_SECTION_H
 #define EEK_SECTION_H 1
 
-#include "eek-key.h"
+#include <glib-object.h>
+#include "eek-container.h"
+#include "eek-types.h"
 
 G_BEGIN_DECLS
 
 #define EEK_TYPE_SECTION (eek_section_get_type())
 #define EEK_SECTION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_SECTION, EekSection))
+#define EEK_SECTION_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_SECTION, EekSectionClass))
 #define EEK_IS_SECTION(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_SECTION))
-#define EEK_SECTION_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_SECTION, EekSectionIface))
+#define EEK_IS_SECTION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_SECTION))
+#define EEK_SECTION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_SECTION, EekSectionClass))
 
-typedef struct _EekSectionIface EekSectionIface;
-typedef struct _EekSection EekSection;
+typedef struct _EekSectionClass EekSectionClass;
+typedef struct _EekSectionPrivate EekSectionPrivate;
 
-struct _EekSectionIface
+struct _EekSection
 {
     /*< private >*/
-    GTypeInterface g_iface;
+    EekContainer parent;
 
-    /*< public >*/
-    void           (* set_rows)        (EekSection    *self,
-                                        gint           rows);
-    gint           (* get_rows)        (EekSection    *self);
-    void           (* set_columns)     (EekSection    *self,
-                                        gint           row,
-                                        gint           columns);
-    gint           (* get_columns)     (EekSection    *self,
-                                        gint           row);
-    void           (* set_orientation) (EekSection    *self,
-                                        gint           row,
-                                        EekOrientation orientation);
-    EekOrientation (* get_orientation) (EekSection    *self,
-                                        gint           row);
-
-    void           (* set_angle)       (EekSection    *self,
-                                        gint           angle);
-    gint           (* get_angle)       (EekSection    *self);
-
-    void           (* set_bounds)      (EekSection    *self,
-                                        EekBounds     *bounds);
-    void           (* get_bounds)      (EekSection    *self,
-                                        EekBounds     *bounds);
-
-    EekKey        *(* create_key)      (EekSection    *self,
-                                        const gchar   *name,
-                                        guint          keycode,
-                                        guint         *keysyms,
-                                        gint           num_groups,
-                                        gint           num_levels,
-                                        gint           column,
-                                        gint           row,
-                                        EekOutline    *outline,
-                                        EekBounds     *bounds);
-
-    void           (* foreach_key)     (EekSection    *self,
-                                        GFunc          func,
-                                        gpointer       user_data);
+    EekSectionPrivate *priv;
 };
 
-GType          eek_section_get_type        (void) G_GNUC_CONST;
+struct _EekSectionClass
+{
+    /*< private >*/
+    EekContainerClass parent_class;
 
-void           eek_section_set_rows        (EekSection    *section,
-                                            gint           rows);
-gint           eek_section_get_rows        (EekSection    *section);
-void           eek_section_set_columns     (EekSection    *section,
-                                            gint           row,
-                                            gint           columns);
-gint           eek_section_get_columns     (EekSection    *section,
-                                            gint           row);
-void           eek_section_set_orientation (EekSection    *section,
-                                            gint           row,
-                                            EekOrientation orientation);
-EekOrientation eek_section_get_orientation (EekSection    *section,
-                                            gint           row);
+    /*< public >*/
+    void    (* set_angle)    (EekSection     *self,
+                              gint            angle);
+    gint    (* get_angle)    (EekSection     *self);
 
-void           eek_section_set_angle       (EekSection    *section,
-                                            gint           angle);
-gint           eek_section_get_angle       (EekSection    *section);
+    gint    (* get_n_rows)   (EekSection     *self);
+    void    (* add_row)      (EekSection     *self,
+                              gint            num_columns,
+                              EekOrientation  orientation);
+    void    (* get_row)      (EekSection     *self,
+                              gint            index,
+                              gint           *num_columns,
+                              EekOrientation *orientation);
 
-void           eek_section_set_bounds      (EekSection    *section,
-                                            EekBounds     *bounds);
-void           eek_section_get_bounds      (EekSection    *section,
-                                            EekBounds     *bounds);
+    EekKey *(* create_key)   (EekSection     *self,
+                              gint            row,
+                              gint            column);
+};
 
-EekKey        *eek_section_create_key      (EekSection    *section,
-                                            const gchar   *name,
-                                            guint          keycode,
-                                            guint         *keysyms,
-                                            gint           num_groups,
-                                            gint           num_levels,
-                                            gint           column,
-                                            gint           row,
-                                            EekOutline    *outline,
-                                            EekBounds     *bounds);
+GType   eek_section_get_type   (void) G_GNUC_CONST;
 
-void           eek_section_foreach_key     (EekSection    *section,
-                                            GFunc          func,
-                                            gpointer       user_data);
+void    eek_section_set_angle  (EekSection     *section,
+                                gint            angle);
+gint    eek_section_get_angle  (EekSection     *section);
+
+gint    eek_section_get_n_rows (EekSection     *section);
+void    eek_section_add_row    (EekSection     *section,
+                                gint            num_columns,
+                                EekOrientation  orientation);
+void    eek_section_get_row    (EekSection     *section,
+                                gint            index,
+                                gint           *num_columns,
+                                EekOrientation *orientation);
+
+EekKey *eek_section_create_key (EekSection     *section,
+                                gint            column,
+                                gint            row);
 
 G_END_DECLS
 #endif  /* EEK_SECTION_H */

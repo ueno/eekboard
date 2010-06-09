@@ -20,10 +20,10 @@
 
 /**
  * SECTION:eek-layout
- * @short_description: Base class of a layout engine
+ * @short_description: Base interface of a layout engine
  *
- * The #EekLayout class is a base abstract class of layout engine
- * which arranges keyboard elements.
+ * The #EekLayout class is a base interface of layout engine which
+ * arranges keyboard elements.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -33,31 +33,39 @@
 #include "eek-layout.h"
 #include "eek-keyboard.h"
 
-G_DEFINE_ABSTRACT_TYPE (EekLayout, eek_layout, G_TYPE_INITIALLY_UNOWNED);
-
 static void
-eek_layout_finalize (GObject *object)
+eek_layout_base_init (gpointer gobject_class)
 {
-    G_OBJECT_CLASS (eek_layout_parent_class)->finalize (object);
+    static gboolean is_initialized = FALSE;
+
+    if (!is_initialized) {
+        /* TODO: signals */
+        is_initialized = TRUE;
+    }
 }
 
-static void
-eek_layout_dispose (GObject *object)
+GType
+eek_layout_get_type (void)
 {
-    G_OBJECT_CLASS (eek_layout_parent_class)->dispose (object);
+    static GType iface_type = 0;
+    if (iface_type == 0) {
+        static const GTypeInfo info = {
+            sizeof (EekLayoutIface),
+            eek_layout_base_init,
+            NULL,
+        };
+        iface_type = g_type_register_static (G_TYPE_INTERFACE,
+                                             "EekLayout",
+                                             &info, 0);
+    }
+    return iface_type;
 }
 
-static void
-eek_layout_class_init (EekLayoutClass *klass)
+void
+eek_layout_apply (EekLayout   *layout,
+                  EekKeyboard *keyboard)
 {
-    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-    GParamSpec        *pspec;
-
-    gobject_class->finalize     = eek_layout_finalize;
-    gobject_class->dispose      = eek_layout_dispose;
+    g_return_if_fail (EEK_IS_LAYOUT(layout));
+    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
 }
 
-static void
-eek_layout_init (EekLayout *self)
-{
-}

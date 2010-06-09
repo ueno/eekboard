@@ -17,6 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
+
+/**
+ * SECTION:eek-types
+ * @short_description: Miscellaneous types
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */

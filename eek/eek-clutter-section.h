@@ -38,19 +38,19 @@ typedef struct _EekClutterSectionPrivate EekClutterSectionPrivate;
 struct _EekClutterSection
 {
     /*< private >*/
-    ClutterGroup parent;
+    EekSection parent;
 
-    /*< private >*/
     EekClutterSectionPrivate *priv;
 };
 
 struct _EekClutterSectionClass
 {
     /*< private >*/
-    ClutterGroupClass parent_class;
+    EekSectionClass parent_class;
 };
 
-GType       eek_clutter_section_get_type (void) G_GNUC_CONST;
+GType               eek_clutter_section_get_type  (void) G_GNUC_CONST;
+ClutterActor       *eek_clutter_section_get_actor (EekClutterSection *section);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_SECTION_H */

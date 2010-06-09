@@ -38,7 +38,7 @@ typedef struct _EekClutterKeyPrivate EekClutterKeyPrivate;
 struct _EekClutterKey
 {
     /*< private >*/
-    ClutterGroup parent;
+    EekKey parent;
 
     /*< private >*/
     EekClutterKeyPrivate *priv;
@@ -47,14 +47,11 @@ struct _EekClutterKey
 struct _EekClutterKeyClass
 {
     /*< private >*/
-    ClutterGroupClass parent_class;
+    EekKeyClass parent_class;
 };
 
-GType         eek_clutter_key_get_type       (void) G_GNUC_CONST;
-
-ClutterActor *eek_clutter_key_create_texture (EekClutterKey *key);
-void          eek_clutter_key_set_texture    (EekClutterKey *key,
-                                              ClutterActor  *texture);
+GType           eek_clutter_key_get_type  (void) G_GNUC_CONST;
+ClutterActor   *eek_clutter_key_get_actor (EekClutterKey *key);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEY_H */

@@ -40,13 +40,8 @@ and an XKB-based layout engine:
 10: /* Apply the layout to the keyboard. */
 11: eek_keyboard_set_layout (keyboard, layout);
 12: 
-13: clutter_group_add (CLUTTER_GROUP(stage), CLUTTER_ACTOR(keyboard));
-
-To use GTK+-based keyboard elements instead of Clutter, simply replace
-line 8 and 13 with:
-
- 8: keyboard = eek_gtk_keyboard_new ();
-13: gtk_container_add (GTK_CONTAINER(window), GTK_WIDGET(keyboard));
+13: clutter_group_add (CLUTTER_GROUP(stage),
+14: 		       eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard)));
 
 Footnotes: 
 [1]  http://en.wikipedia.org/wiki/Builder_pattern

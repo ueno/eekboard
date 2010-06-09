@@ -30,6 +30,8 @@ typedef enum {
     EEK_ORIENTATION_INVALID = -1
 } EekOrientation;
 
+typedef struct _EekKey EekKey;
+typedef struct _EekSection EekSection;
 typedef struct _EekKeyboard EekKeyboard;
 
 /**

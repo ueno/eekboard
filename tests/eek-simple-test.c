@@ -17,74 +17,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-#include "eek-simple-keyboard.h"
+#include "eek.h"
+#include "eek-clutter.h"
 
 static void
 test_create (void)
 {
     EekKeyboard *keyboard;
     EekSection *section;
-    EekKey *key;
+    EekKey *key0, *key1;
 
-    EekOutline outline = {45.0, NULL, 0};
-    EekBounds bounds = {0.1, 0.2, 3.0, 4.0};
-    EekKeysymMatrix *matrix;
-    GValue value = {0};
-    gint iv;
-    const gchar *sv;
-    gpointer bv;
-    guint keysyms[] = {'a', 'b', 'c', 'd', 'e', 'f'};
+    keyboard = g_object_new (EEK_TYPE_KEYBOARD, NULL);
+    section = eek_keyboard_create_section (keyboard);
+    g_assert (EEK_IS_SECTION(section));
+    eek_section_add_row (section, 2, EEK_ORIENTATION_HORIZONTAL);
+    key0 = eek_section_create_key (section, 0, 0);
+    g_assert (EEK_IS_KEY(key0));
+    key1 = eek_section_create_key (section, 1, 0);
+    g_assert (EEK_IS_KEY(key1));
+}
 
-    keyboard = eek_simple_keyboard_new ();
-    g_assert (keyboard);
-    g_assert (g_object_is_floating (keyboard));
+static void
+test_create_clutter (void)
+{
+    EekKeyboard *keyboard;
+    EekSection *section;
+    EekKey *key0, *key1;
+    ClutterActor *actor;
 
-    section = eek_keyboard_create_section (keyboard,
-                                           "test-section",
-                                           45,
-                                           &bounds);
-    g_assert (section);
-    g_value_init (&value, G_TYPE_STRING);
-    g_object_get_property (G_OBJECT(section), "name", &value);
-    sv = g_value_get_string (&value);
-    g_assert_cmpstr (sv, ==, "test-section");
-    g_value_unset (&value);
-
-    g_value_init (&value, G_TYPE_INT);
-    g_object_get_property (G_OBJECT(section), "angle", &value);
-    iv = g_value_get_int (&value);
-    g_assert_cmpint (iv, ==, 45);
-    g_value_unset (&value);
-
-    g_value_init (&value, EEK_TYPE_BOUNDS);
-    g_object_get_property (G_OBJECT(section), "bounds", &value);
-    bv = g_value_get_boxed (&value);
-    g_assert (bv);
-    g_assert_cmpfloat (((EekBounds *)bv)->x, ==, 0.1);
-    g_value_unset (&value);
-
-    key = eek_section_create_key (section,
-                                  "test-key",
-                                  0,
-                                  keysyms,
-                                  3,
-                                  2,
-                                  1,
-                                  2,
-                                  &outline,
-                                  &bounds);
-    g_assert (key);
-    g_value_init (&value, EEK_TYPE_KEYSYM_MATRIX);
-    g_object_get_property (G_OBJECT(key), "keysyms", &value);
-    matrix = g_value_get_boxed (&value);
-    g_assert_cmpint (matrix->data[0], ==, 'a');
-    g_value_unset (&value);
-
-    g_value_init (&value, G_TYPE_POINTER);
-    g_object_get_property (G_OBJECT(key), "outline", &value);
-    bv = g_value_get_pointer (&value);
-    g_assert (bv == &outline);
-    g_value_unset (&value);
+    keyboard = eek_clutter_keyboard_new (640.0, 480.0);
+    section = eek_keyboard_create_section (keyboard);
+    g_assert (EEK_IS_SECTION(section));
+    eek_section_add_row (section, 2, EEK_ORIENTATION_HORIZONTAL);
+    key0 = eek_section_create_key (section, 0, 0);
+    g_assert (EEK_IS_KEY(key0));
+    key1 = eek_section_create_key (section, 1, 0);
+    g_assert (EEK_IS_KEY(key1));
+    actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard));
+    g_assert (CLUTTER_IS_ACTOR(actor));
     g_object_unref (keyboard);
 }
 
@@ -94,5 +64,7 @@ main (int argc, char **argv)
     g_type_init ();
     g_test_init (&argc, &argv, NULL);
     g_test_add_func ("/eek-simple-test/create", test_create);
+    clutter_init (&argc, &argv);
+    g_test_add_func ("/eek-simple-test/create-clutter", test_create_clutter);
     return g_test_run ();
 }

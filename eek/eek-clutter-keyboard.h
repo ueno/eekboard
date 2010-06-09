@@ -25,20 +25,20 @@
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_KEYBOARD (eek_clutter_keyboard_get_type())
-#define EEK_CLUTTER_KEYBOARD(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_CLUTTER_KEYBOARD, EekKeyboard))
+#define EEK_CLUTTER_KEYBOARD(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_CLUTTER_KEYBOARD, EekClutterKeyboard))
 #define EEK_CLUTTER_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_CLUTTER_KEYBOARD, EekClutterKeyboardClass))
 #define EEK_IS_CLUTTER_KEYBOARD(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_CLUTTER_KEYBOARD))
 #define EEK_IS_CLUTTER_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_CLUTTER_KEYBOARD))
 #define EEK_CLUTTER_KEYBOARD_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_CLUTTER_KEYBOARD, EekClutterKeyboardClass))
 
-typedef struct _EekClutterKeyboard        EekClutterKeyboard;
-typedef struct _EekClutterKeyboardClass   EekClutterKeyboardClass;
+typedef struct _EekClutterKeyboard EekClutterKeyboard;
+typedef struct _EekClutterKeyboardClass EekClutterKeyboardClass;
 typedef struct _EekClutterKeyboardPrivate EekClutterKeyboardPrivate;
 
 struct _EekClutterKeyboard
 {
     /*< private >*/
-    ClutterGroup parent;
+    EekKeyboard parent;
 
     EekClutterKeyboardPrivate *priv;
 };
@@ -46,13 +46,13 @@ struct _EekClutterKeyboard
 struct _EekClutterKeyboardClass
 {
     /*< private >*/
-    ClutterGroupClass parent_class;
+    EekKeyboardClass parent_class;
 };
 
-GType        eek_clutter_keyboard_get_type (void) G_GNUC_CONST;
-
-EekKeyboard *eek_clutter_keyboard_new      (gfloat width,
-                                            gfloat height);
+GType         eek_clutter_keyboard_get_type  (void) G_GNUC_CONST;
+EekKeyboard  *eek_clutter_keyboard_new       (gfloat width,
+                                              gfloat height);
+ClutterActor *eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEYBOARD_H */

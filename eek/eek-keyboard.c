@@ -20,14 +20,11 @@
 
 /**
  * SECTION:eek-keyboard
- * @short_description: Base interface of a keyboard
+ * @short_description: Base class of a keyboard
  * @see_also: #EekSection
  *
- * The #EekKeyboardIface interface represents a keyboard, which
- * consists of one or more sections of the #EekSectionIface interface.
- *
- * #EekKeyboardIface follows the Builder pattern and is responsible
- * for creation of sections.
+ * The #EekKeyboardClass class represents a keyboard, which consists
+ * of one or more sections of the #EekSectionClass class.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,85 +32,270 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-keyboard.h"
+#include "eek-section.h"
+#include "eek-key.h"
+
+enum {
+    PROP_0,
+    PROP_GROUP,
+    PROP_LEVEL,
+    PROP_LAST
+};
+
+enum {
+    KEY_PRESSED,
+    KEY_RELEASED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
+G_DEFINE_TYPE (EekKeyboard, eek_keyboard, EEK_TYPE_CONTAINER);
+
+#define EEK_KEYBOARD_GET_PRIVATE(obj)                                  \
+    (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_KEYBOARD, EekKeyboardPrivate))
+
+
+struct _EekKeyboardPrivate
+{
+    gint group;
+    gint level;
+};
+
+struct keysym_index {
+    gint group;
+    gint level;
+};
 
 static void
-eek_keyboard_base_init (gpointer g_iface)
+set_keysym_index_for_key (EekElement *element,
+                          gpointer    user_data)
 {
-    static gboolean is_initialized = FALSE;
+    struct keysym_index *ki;
 
-    if (!is_initialized) {
-        GParamSpec *pspec;
+    g_return_if_fail (EEK_IS_KEY(element));
 
-        /**
-         * EekKeyboard:bounds:
-         *
-         * The bounding box of #EekKeyboard.
-         */
-        pspec = g_param_spec_boxed ("bounds",
-                                    "Bounds",
-                                    "Bounding box of the keyboard",
-                                    EEK_TYPE_BOUNDS,
-                                    G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+    ki = user_data;
+    eek_key_set_keysym_index (EEK_KEY(element), ki->group, ki->level);
+}
 
-        is_initialized = TRUE;
+static void
+set_keysym_index_for_section (EekElement *element,
+                              gpointer user_data)
+{
+    eek_container_foreach_child (EEK_CONTAINER(element),
+                                 set_keysym_index_for_key,
+                                 user_data);
+}
+
+static void
+eek_keyboard_real_set_keysym_index (EekKeyboard *self,
+                                    gint         group,
+                                    gint         level)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    struct keysym_index ki;
+
+    ki.group = priv->group = group;
+    ki.level = priv->level = level;
+
+    eek_container_foreach_child (EEK_CONTAINER(self),
+                                 set_keysym_index_for_section,
+                                 &ki);
+}
+
+void
+eek_keyboard_real_get_keysym_index (EekKeyboard *self,
+                                    gint        *group,
+                                    gint        *level)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+
+    g_return_if_fail (group || level);
+    if (group)
+        *group = priv->group;
+    if (level)
+        *level = priv->level;
+}
+
+static void
+key_pressed_event (EekSection  *section,
+                   EekKey      *key,
+                   EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "key-pressed", key);
+}
+
+static void
+key_released_event (EekSection  *section,
+                    EekKey      *key,
+                    EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "key-released", key);
+}
+
+static EekSection *
+eek_keyboard_real_create_section (EekKeyboard *self)
+{
+    EekSection *section;
+
+    section = g_object_new (EEK_TYPE_SECTION, NULL);
+    g_return_val_if_fail (section, NULL);
+    g_object_ref_sink (section);
+
+    g_signal_connect (section, "key-pressed", G_CALLBACK(key_pressed_event), self);
+    g_signal_connect (section, "key-released", G_CALLBACK(key_released_event), self);
+
+    EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
+                                              EEK_ELEMENT(section));
+    return section;
+}
+
+static void
+eek_keyboard_real_set_layout (EekKeyboard *keyboard,
+                              EekLayout   *layout)
+{
+    g_return_if_fail (EEK_IS_LAYOUT(layout));
+
+    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
+
+    if (g_object_is_floating (layout))
+        g_object_unref (layout);
+}
+
+static void
+eek_keyboard_set_property (GObject    *object,
+                           guint       prop_id,
+                           const GValue     *value,
+                           GParamSpec *pspec)
+{
+    gint group, level;
+
+    g_return_if_fail (EEK_IS_KEYBOARD(object));
+    switch (prop_id) {
+    case PROP_GROUP:
+        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
+        eek_keyboard_set_keysym_index (EEK_KEYBOARD(object),
+                                       g_value_get_int (value),
+                                       level);
+        break;
+    case PROP_LEVEL:
+        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
+        eek_keyboard_set_keysym_index (EEK_KEYBOARD(object),
+                                       group,
+                                       g_value_get_int (value));
+        break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
     }
 }
 
-GType
-eek_keyboard_get_type (void)
+static void
+eek_keyboard_get_property (GObject    *object,
+                           guint       prop_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
-    static GType iface_type = 0;
+    gint group, level;
 
-    if (iface_type == 0) {
-        static const GTypeInfo info = {
-            sizeof (EekKeyboardIface),
-            eek_keyboard_base_init,
-            NULL
-        };
-
-        iface_type = g_type_register_static (G_TYPE_INTERFACE,
-                                             "EekKeyboard",
-                                             &info,
-                                             0);
+    g_return_if_fail (EEK_IS_KEYBOARD(object));
+    switch (prop_id) {
+    case PROP_GROUP:
+        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
+        g_value_set_int (value, group);
+        break;
+    case PROP_LEVEL:
+        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &level, &level);
+        g_value_set_int (value, level);
+        break;
+    default:
+        g_object_get_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
     }
-    return iface_type;
 }
 
-/**
- * eek_keyboard_set_bounds:
- * @keyboard: an #EekKeyboard
- * @bounds: bounding box of the keyboard
- *
- * Set the bounding box of @keyboard to @bounds.
- */
-void
-eek_keyboard_set_bounds (EekKeyboard *keyboard,
-                         EekBounds   *bounds)
+static void
+eek_keyboard_class_init (EekKeyboardClass *klass)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(keyboard);
+    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec        *pspec;
 
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->set_bounds);
-    (*iface->set_bounds) (keyboard, bounds);
+    g_type_class_add_private (gobject_class,
+                              sizeof (EekKeyboardPrivate));
+
+    klass->set_keysym_index = eek_keyboard_real_set_keysym_index;
+    klass->get_keysym_index = eek_keyboard_real_get_keysym_index;
+    klass->create_section = eek_keyboard_real_create_section;
+    klass->set_layout = eek_keyboard_real_set_layout;
+
+    gobject_class->get_property = eek_keyboard_get_property;
+    gobject_class->set_property = eek_keyboard_set_property;
+
+    /**
+     * EekKeyboard:group:
+     *
+     * The group (row) index of symbol matrix of #EekKeyboard.
+     */
+    pspec = g_param_spec_int ("group",
+                              "Group",
+                              "Group index of symbol matrix of the keyboard",
+                              0, G_MAXINT, 0,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_GROUP,
+                                     pspec);
+
+    /**
+     * EekKeyboard:level:
+     *
+     * The level (row) index of symbol matrix of #EekKeyboard.
+     */
+    pspec = g_param_spec_int ("level",
+                              "Level",
+                              "Level index of symbol matrix of the keyboard",
+                              0, G_MAXINT, 0,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_LEVEL,
+                                     pspec);
+
+    signals[KEY_PRESSED] =
+        g_signal_new ("key-pressed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      0,
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+
+    signals[KEY_RELEASED] =
+        g_signal_new ("key-released",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      0,
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
 }
 
-/**
- * eek_keyboard_get_bounds:
- * @keyboard: an #EekKeyboard
- * @bounds: the bounding box of @keyboard
- *
- * Get the bounding box of @keyboard.
- */
-void
-eek_keyboard_get_bounds (EekKeyboard *keyboard,
-                         EekBounds   *bounds)
+static void
+eek_keyboard_init (EekKeyboard *self)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(keyboard);
+    EekKeyboardPrivate *priv;
 
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->get_bounds);
-    return (*iface->get_bounds) (keyboard, bounds);
+    priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    priv->group = priv->level = 0;
 }
 
 /**
@@ -125,19 +307,16 @@ eek_keyboard_get_bounds (EekKeyboard *keyboard,
  * Select a cell of the symbol matrix of each key on @keyboard.
  */
 void
-eek_keyboard_set_keysym_index (EekKeyboard *self,
+eek_keyboard_set_keysym_index (EekKeyboard *keyboard,
                                gint         group,
                                gint         level)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(self);
-
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->set_keysym_index);
-    (*iface->set_keysym_index) (self, group, level);
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    EEK_KEYBOARD_GET_CLASS(keyboard)->set_keysym_index (keyboard, group, level);
 }
 
 /**
- * eek_keyboard_set_keysym_index:
+ * eek_keyboard_get_keysym_index:
  * @keyboard: an #EekKeyboard
  * @group: a pointer where row index of the symbol matrix of keys on
  * @keyboard will be stored
@@ -147,57 +326,29 @@ eek_keyboard_set_keysym_index (EekKeyboard *self,
  * Get the current cell position of the symbol matrix of each key on @keyboard.
  */
 void
-eek_keyboard_get_keysym_index (EekKeyboard *self,
+eek_keyboard_get_keysym_index (EekKeyboard *keyboard,
                                gint        *group,
                                gint        *level)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(self);
-
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->get_keysym_index);
-    return (*iface->get_keysym_index) (self, group, level);
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    EEK_KEYBOARD_GET_CLASS(keyboard)->get_keysym_index (keyboard, group, level);
 }
 
 /**
  * eek_keyboard_create_section:
  * @keyboard: an #EekKeyboard
  * @name: name of the section
- * @angle: rotation angle of the section
  * @bounds: bounding box of the section
  *
  * Create an #EekSection instance and attach it to @keyboard.
  */
 EekSection *
-eek_keyboard_create_section (EekKeyboard *keyboard,
-                             const gchar *name,
-                             gint         angle,
-                             EekBounds   *bounds)
+eek_keyboard_create_section (EekKeyboard *keyboard)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(keyboard);
-
-    g_return_val_if_fail (iface, NULL);
-    g_return_val_if_fail (iface->create_section, NULL);
-    return (*iface->create_section) (keyboard, name, angle, bounds);
-}
-
-/**
- * eek_keyboard_foreach_section:
- * @keyboard: an #EekKeyboard
- * @func: a callback of #GFunc
- * @user_data: a pointer to an object passed to @func
- *
- * Iterate over @keyboard's children list.
- */
-void
-eek_keyboard_foreach_section (EekKeyboard *keyboard,
-                              GFunc        func,
-                              gpointer     user_data)
-{
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(keyboard);
-
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->foreach_section);
-    (*iface->foreach_section) (keyboard, func, user_data);
+    EekSection *section;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
+    section = EEK_KEYBOARD_GET_CLASS(keyboard)->create_section (keyboard);
+    return section;
 }
 
 /**
@@ -212,10 +363,6 @@ void
 eek_keyboard_set_layout (EekKeyboard *keyboard,
                          EekLayout   *layout)
 {
-    EekKeyboardIface *iface = EEK_KEYBOARD_GET_IFACE(keyboard);
-
-    g_return_if_fail (iface);
-    g_return_if_fail (iface->set_layout);
-    g_return_if_fail (EEK_IS_LAYOUT(layout));
-    (*iface->set_layout) (keyboard, layout);
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    EEK_KEYBOARD_GET_CLASS(keyboard)->set_layout (keyboard, layout);
 }

@@ -28,31 +28,24 @@ G_BEGIN_DECLS
 
 #define EEK_TYPE_LAYOUT (eek_layout_get_type())
 #define EEK_LAYOUT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_LAYOUT, EekLayout))
-#define EEK_LAYOUT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_LAYOUT, EekLayoutClass))
 #define EEK_IS_LAYOUT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_LAYOUT))
-#define EEK_IS_LAYOUT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_LAYOUT))
-#define EEK_LAYOUT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_LAYOUT, EekLayoutClass))
+#define EEK_LAYOUT_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_LAYOUT, EekLayoutIface))
 
-typedef struct _EekLayoutClass EekLayoutClass;
+typedef struct _EekLayoutIface EekLayoutIface;
 typedef struct _EekLayout EekLayout;
 
-struct _EekLayout
+struct _EekLayoutIface
 {
     /*< private >*/
-    GInitiallyUnowned parent;
+    GTypeInterface parent_iface;
+
+    void (*apply) (EekLayout   *self,
+                   EekKeyboard *keyboard);
 };
 
-struct _EekLayoutClass
-{
-    /*< private >*/
-    GInitiallyUnownedClass parent_class;
-
-    /*< public >*/
-    void (*apply_to_keyboard) (EekLayout   *self,
-                               EekKeyboard *keyboard);
-};
-
-GType eek_layout_get_type          (void) G_GNUC_CONST;
+GType eek_layout_get_type (void) G_GNUC_CONST;
+void  eek_layout_apply    (EekLayout   *layout,
+                           EekKeyboard *keyboard);
 
 G_END_DECLS
 #endif  /* EEK_LAYOUT_H */

@@ -56,6 +56,5 @@ docs/reference/Makefile
 docs/reference/eek/Makefile
 eek/eek.pc
 eek/eek-clutter.pc
-eek/eek-xkb.pc
-eek/eek-gtk.pc])
+eek/eek-xkb.pc])
 AC_OUTPUT

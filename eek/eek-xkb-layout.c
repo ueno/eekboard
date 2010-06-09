@@ -37,10 +37,17 @@
 #include <string.h>
 #include "eek-xkb-layout.h"
 #include "eek-keyboard.h"
+#include "eek-section.h"
+#include "eek-key.h"
+#include "eek-keysym.h"
 
 #define noKBDRAW_DEBUG
 
-G_DEFINE_TYPE (EekXkbLayout, eek_xkb_layout, EEK_TYPE_LAYOUT);
+static void eek_layout_iface_init (EekLayoutIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekXkbLayout, eek_xkb_layout, G_TYPE_INITIALLY_UNOWNED,
+                         G_IMPLEMENT_INTERFACE (EEK_TYPE_LAYOUT,
+                                                eek_layout_iface_init));
 
 #define EEK_XKB_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKB_LAYOUT, EekXkbLayoutPrivate))
@@ -72,8 +79,6 @@ struct _EekXkbLayoutPrivate
     gint scale_denominator;
 };
 
-#define INVALID_KEYCODE ((guint)(-1))
-
 static guint
 find_keycode (EekXkbLayout *layout, gchar *key_name);
 
@@ -104,7 +109,7 @@ xkb_to_pixmap_double (EekXkbLayout *layout,
     return d * priv->scale_numerator / priv->scale_denominator;
 }
 
-static EekKey *
+static void
 create_key (EekXkbLayout *layout,
             EekSection   *section,
             gint          column,
@@ -120,11 +125,11 @@ create_key (EekXkbLayout *layout,
     EekXkbLayoutPrivate *priv = layout->priv;
     EekKey *key;
     EekBounds bounds;
-    guint *keysyms;
+    guint *keysyms = NULL;
     gchar name[XkbKeyNameLength + 1];
     EekOutline *outline;
     KeyCode keycode;
-    gint num_groups, num_levels;
+    gint num_groups, num_levels, num_keysyms;
 
     xkbgeometry = priv->xkb->geom;
     xkbshape = &xkbgeometry->shapes[xkbkey->shape_ndx];
@@ -133,7 +138,7 @@ create_key (EekXkbLayout *layout,
         xkboutline = xkbshape->primary == NULL ? &xkbshape->outlines[0] :
             xkbshape->primary;
 
-        outline = g_new0 (EekOutline, 1);
+        outline = g_slice_new (EekOutline);
         outline->corner_radius = xkb_to_pixmap_coord(layout, xkboutline->corner_radius);
 
         if (xkboutline->num_points <= 2) { /* rectangular */
@@ -179,16 +184,16 @@ create_key (EekXkbLayout *layout,
     bounds.height = xkb_to_pixmap_coord(layout, xkbbounds->y2 - xkbbounds->y1);
 
     keycode = find_keycode (layout, name);
-    if (keycode == INVALID_KEYCODE)
+    if (keycode == EEK_INVALID_KEYCODE)
         num_groups = num_levels = 0;
     else {
         KeySym keysym;
-        gint num_keysyms, i, j;
+        gint i, j;
 
         num_groups = XkbKeyNumGroups (priv->xkb, keycode);
         num_levels = XkbKeyGroupsWidth (priv->xkb, keycode);
         num_keysyms = num_groups * num_levels;
-        keysyms = g_malloc0 ((num_keysyms) * sizeof(guint));
+        keysyms = g_slice_alloc0 (num_keysyms * sizeof(guint));
         for (i = 0; i < num_groups; i++)
             for (j = 0; j < num_levels; j++) {
                 keysym = XkbKeySymEntry (priv->xkb, keycode, j, i);
@@ -196,16 +201,15 @@ create_key (EekXkbLayout *layout,
             }
     }
 
-    eek_section_create_key (section,
-                            name,
-                            keycode,
-                            keysyms,
-                            num_groups,
-                            num_levels,
-                            column,
-                            row,
-                            outline,
-                            &bounds);
+    key = eek_section_create_key (section, column, row);
+    eek_element_set_name (EEK_ELEMENT(key), name);
+    eek_element_set_bounds (EEK_ELEMENT(key), &bounds);
+    eek_key_set_keycode (key, keycode);
+    eek_key_set_keysyms (key, keysyms, num_groups, num_levels);
+    if (keysyms)
+        g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
+    eek_key_set_keysym_index (key, 0, 0);
+    eek_key_set_outline (key, outline);
 }
 
 static void
@@ -229,25 +233,24 @@ create_section (EekXkbLayout  *layout,
     priv = layout->priv;
     xkbgeometry = priv->xkb->geom;
     name = XGetAtomName (priv->display, xkbsection->name);
-    section = eek_keyboard_create_section (keyboard,
-                                           name,
-                                           /* angle is in tenth of degree */
-                                           xkbsection->angle / 10,
-                                           &bounds);
+    section = eek_keyboard_create_section (keyboard);
+    eek_element_set_name (EEK_ELEMENT(section), name);
+    eek_element_set_bounds (EEK_ELEMENT(section), &bounds);
+    eek_section_set_angle (section,
+                           /* angle is in tenth of degree */
+                           xkbsection->angle / 10);
 
-    eek_section_set_rows (section, xkbsection->num_rows);
     for (i = 0; i < xkbsection->num_rows; i++) {
         XkbRowRec *xkbrow;
 
         xkbrow = &xkbsection->rows[i];
         left = xkbrow->left;
         top = xkbrow->top;
-        eek_section_set_columns (section, i, xkbrow->num_keys);
-        eek_section_set_orientation (section,
-                                     i,
-                                     xkbrow->vertical ?
-                                     EEK_ORIENTATION_VERTICAL :
-                                     EEK_ORIENTATION_HORIZONTAL);
+        eek_section_add_row (section,
+                             xkbrow->num_keys,
+                             xkbrow->vertical ?
+                             EEK_ORIENTATION_VERTICAL :
+                             EEK_ORIENTATION_HORIZONTAL);
         for (j = 0; j < xkbrow->num_keys; j++) {
             XkbKeyRec *xkbkey;
             XkbBoundsRec *xkbbounds;
@@ -280,37 +283,31 @@ create_keyboard (EekXkbLayout *layout, EekKeyboard *keyboard)
 
     xkbgeometry = priv->xkb->geom;
 
-    eek_keyboard_get_bounds (keyboard, &bounds);
+    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     setup_scaling (EEK_XKB_LAYOUT(layout), bounds.width, bounds.height);
 
     bounds.x = bounds.y = 0;
     bounds.width = xkb_to_pixmap_coord(layout, xkbgeometry->width_mm);
     bounds.height = xkb_to_pixmap_coord(layout, xkbgeometry->height_mm);
-    eek_keyboard_set_bounds (keyboard, &bounds);
 
     for (i = 0; i < xkbgeometry->num_sections; i++) {
         XkbSectionRec *xkbsection;
-        EekSection *section;
 
         xkbsection = &xkbgeometry->sections[i];
         create_section (layout, keyboard, xkbsection);
     }
+    eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
 }
 
 static void
-eek_xkb_layout_apply_to_keyboard (EekLayout *layout, EekKeyboard *keyboard)
+eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
 {
-    g_return_if_fail (EEK_IS_XKB_LAYOUT(layout));
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
+
     if (g_object_is_floating (keyboard))
         g_object_unref (keyboard);
-}
-
-static void
-eek_xkb_layout_dispose (GObject *object)
-{
-    G_OBJECT_CLASS (eek_xkb_layout_parent_class)->dispose (object);
 }
 
 static void
@@ -321,7 +318,8 @@ eek_xkb_layout_finalize (GObject *object)
     g_free (priv->names.keycodes);
     g_free (priv->names.geometry);
     g_free (priv->names.symbols);
-    g_hash_table_unref (priv->outline_hash);
+    /* XXX */
+    //g_hash_table_unref (priv->outline_hash);
     XkbFreeKeyboard (priv->xkb, 0, TRUE);	/* free_all = TRUE */
     G_OBJECT_CLASS (eek_xkb_layout_parent_class)->finalize (object);
 }
@@ -349,7 +347,9 @@ eek_xkb_layout_set_property (GObject      *object,
             eek_xkb_layout_set_symbols (EEK_XKB_LAYOUT(object), name);
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+            g_object_set_property (object,
+                                   g_param_spec_get_name (pspec),
+                                   value);
             break;
         }
 }
@@ -377,9 +377,17 @@ eek_xkb_layout_get_property (GObject    *object,
             g_value_set_string (value, name);
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+            g_object_get_property (object,
+                                   g_param_spec_get_name (pspec),
+                                   value);
             break;
         }
+}
+
+static void
+eek_layout_iface_init (EekLayoutIface *iface)
+{
+    iface->apply = eek_xkb_layout_real_apply;
 }
 
 static void
@@ -387,16 +395,12 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec        *pspec;
-    EekLayoutClass    *layout_class = EEK_LAYOUT_CLASS (klass);
 
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
 
     gobject_class->finalize     = eek_xkb_layout_finalize;
-    gobject_class->dispose      = eek_xkb_layout_dispose;
     gobject_class->set_property = eek_xkb_layout_set_property;
     gobject_class->get_property = eek_xkb_layout_get_property;
-
-    layout_class->apply_to_keyboard = eek_xkb_layout_apply_to_keyboard;
 
     pspec = g_param_spec_string ("keycodes",
 				 "Keycodes",
@@ -418,6 +422,12 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
                                  NULL,
                                  G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_SYMBOLS, pspec);
+}
+
+static void
+outline_free (gpointer data)
+{
+    g_slice_free (EekOutline, data);
 }
 
 static void
@@ -443,7 +453,7 @@ eek_xkb_layout_init (EekXkbLayout *self)
     priv->outline_hash = g_hash_table_new_full (g_direct_hash,
                                                 g_direct_equal,
                                                 NULL,
-                                                g_free);
+                                                outline_free);
     if (priv->xkb == NULL) {
         g_critical ("XkbGetKeyboard failed to get keyboard from the server!");
         return;
@@ -515,10 +525,12 @@ eek_xkb_layout_new (const gchar *keycodes,
                     const gchar *geometry,
                     const gchar *symbols)
 {
-    EekXkbLayout *layout = g_object_new (EEK_TYPE_XKB_LAYOUT, NULL);
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayout *layout;
+    EekXkbLayoutPrivate *priv;
 
+    layout = g_object_new (EEK_TYPE_XKB_LAYOUT, NULL);
     g_return_val_if_fail (layout, NULL);
+    priv = layout->priv;
     if (keycodes)
         priv->names.keycodes = g_strdup (keycodes);
     if (geometry)
@@ -609,8 +621,6 @@ G_CONST_RETURN gchar *
 eek_xkb_layout_get_geometry (EekXkbLayout *layout)
 {
     EekXkbLayoutPrivate *priv = layout->priv;
-    char *name;
-
     return priv->names.geometry;
 }
 
@@ -682,7 +692,7 @@ find_keycode (EekXkbLayout *layout, gchar *key_name)
     EekXkbLayoutPrivate *priv = layout->priv;
 
     if (!priv->xkb)
-        return INVALID_KEYCODE;
+        return EEK_INVALID_KEYCODE;
 
 #ifdef KBDRAW_DEBUG
     printf ("    looking for keycode for (%c%c%c%c)\n",
@@ -736,7 +746,7 @@ find_keycode (EekXkbLayout *layout, gchar *key_name)
         palias++;
     }
 
-    return INVALID_KEYCODE;
+    return EEK_INVALID_KEYCODE;
 }
 
 static void

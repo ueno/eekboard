@@ -14,6 +14,8 @@
 
   <chapter>
     <title>Base classes and interfaces</title>
+    <xi:include href="xml/eek-element.xml"/>
+    <xi:include href="xml/eek-container.xml"/>
     <xi:include href="xml/eek-keyboard.xml"/>
     <xi:include href="xml/eek-section.xml"/>
     <xi:include href="xml/eek-key.xml"/>
@@ -29,12 +31,6 @@
   <chapter>
     <title>XKB layout engine</title>
     <xi:include href="xml/eek-xkb-layout.xml"/>
-  </chapter>
-  <chapter>
-    <title>GTK keyboard elements</title>
-    <xi:include href="xml/eek-gtk-keyboard.xml"/>
-    <xi:include href="xml/eek-gtk-section.xml"/>
-    <xi:include href="xml/eek-gtk-key.xml"/>
   </chapter>
   <chapter id="object-tree">
     <title>Object Hierarchy</title>

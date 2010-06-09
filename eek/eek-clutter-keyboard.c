@@ -20,31 +20,18 @@
 
 /**
  * SECTION:eek-clutter-keyboard
- * @short_description: #EekKeyboard implemented as a #ClutterActor
- *
- * The #EekClutterKeyboard class implements the #EekKeyboardIface
- * interface as a #ClutterActor.
+ * @short_description: #EekKeyboard embedding a #ClutterActor
  */
+#include <string.h>
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-clutter-keyboard.h"
-#include "eek-clutter-private.h"
-#include "eek-simple-keyboard.h"
+#include "eek-keyboard.h"
 
-enum {
-    PROP_0,
-    PROP_BOUNDS,
-    PROP_LAST
-};
-
-static void eek_keyboard_iface_init (EekKeyboardIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (EekClutterKeyboard, eek_clutter_keyboard,
-                         CLUTTER_TYPE_GROUP,
-                         G_IMPLEMENT_INTERFACE (EEK_TYPE_KEYBOARD,
-                                                eek_keyboard_iface_init));
+G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 
 #define EEK_CLUTTER_KEYBOARD_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_CLUTTER_KEYBOARD, EekClutterKeyboardPrivate))
@@ -52,141 +39,76 @@ G_DEFINE_TYPE_WITH_CODE (EekClutterKeyboard, eek_clutter_keyboard,
 
 struct _EekClutterKeyboardPrivate
 {
-    EekSimpleKeyboard *simple;
-    gint group;
-    gint level;
+    ClutterActor *actor;
 };
 
 static void
-eek_clutter_keyboard_real_set_bounds (EekKeyboard *self,
-                                      EekBounds *bounds)
+eek_clutter_keyboard_real_set_name (EekElement *self,
+                                    const gchar *name)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
 
-    g_return_if_fail (priv);
-    eek_keyboard_set_bounds (EEK_KEYBOARD(priv->simple), bounds);
-    clutter_actor_set_position (CLUTTER_ACTOR(self), bounds->x, bounds->y);
-    clutter_actor_set_size (CLUTTER_ACTOR(self), bounds->width, bounds->height);
+    EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
+        set_name (self, name);
+
+    g_return_if_fail (priv->actor);
+
+    clutter_actor_set_name (priv->actor, name);
 }
 
 static void
-eek_clutter_keyboard_real_get_bounds (EekKeyboard *self,
-                                      EekBounds   *bounds)
+eek_clutter_keyboard_real_set_bounds (EekElement *self,
+                                     EekBounds  *bounds)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
 
-    g_return_if_fail (priv);
-    return eek_keyboard_get_bounds (EEK_KEYBOARD(priv->simple), bounds);
+    EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
+        set_bounds (self, bounds);
+
+    g_return_if_fail (priv->actor);
+
+    clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
+    clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
 }
 
 static void
-eek_clutter_keyboard_real_set_keysym_index (EekKeyboard *self,
-                                            gint         group,
-                                            gint         level)
+key_pressed_event (EekSection  *section,
+                   EekKey      *key,
+                   EekKeyboard *keyboard)
 {
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
-    gint num_sections, num_keys, i, j;
-
-    g_return_if_fail (priv);
-    priv->group = group;
-    priv->level = level;
-    num_sections = clutter_group_get_n_children (CLUTTER_GROUP(self));
-    for (i = 0; i < num_sections; i++) {
-        ClutterActor *section;
-
-        section = clutter_group_get_nth_child (CLUTTER_GROUP(self), i);
-        g_return_if_fail (EEK_IS_CLUTTER_SECTION(section));
-        num_keys = clutter_group_get_n_children (CLUTTER_GROUP(section));
-        for (j = 0; j < num_keys; j++) {
-            ClutterActor *key;
-
-            key = clutter_group_get_nth_child (CLUTTER_GROUP(section), j);
-            g_return_if_fail (EEK_IS_CLUTTER_KEY(key));
-            eek_key_set_keysym_index (EEK_KEY(key), group, level);
-        }
-    }
+    g_signal_emit_by_name (keyboard, "key-pressed", key);
 }
 
 static void
-eek_clutter_keyboard_real_get_keysym_index (EekKeyboard *self,
-                                            gint        *group,
-                                            gint        *level)
+key_released_event (EekSection  *section,
+                    EekKey      *key,
+                    EekKeyboard *keyboard)
 {
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
-
-    g_return_if_fail (priv);
-    *group = priv->group;
-    *level = priv->level;
+    g_signal_emit_by_name (keyboard, "key-released", key);
 }
 
 static EekSection *
-eek_clutter_keyboard_real_create_section (EekKeyboard *self,
-                                          const gchar *name,
-                                          gint         angle,
-                                          EekBounds   *bounds)
+eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 {
     EekSection *section;
+    ClutterActor *actor;
 
-    g_return_if_fail (EEK_IS_CLUTTER_KEYBOARD(self));
+    section = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
+    g_return_val_if_fail (section, NULL);
+    g_object_ref_sink (section);
 
-    section = g_object_new (EEK_TYPE_CLUTTER_SECTION,
-                            "name", name,
-                            "angle", angle,
-                            "bounds", bounds,
-                            NULL);
+    g_signal_connect (section, "key-pressed", G_CALLBACK(key_pressed_event), self);
+    g_signal_connect (section, "key-released", G_CALLBACK(key_released_event), self);
 
-    clutter_container_add_actor (CLUTTER_CONTAINER(self),
-                                 CLUTTER_ACTOR(section));
+    EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
+                                              EEK_ELEMENT(section));
+
+    actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(self));
+    clutter_container_add_actor
+        (CLUTTER_CONTAINER(actor),
+         eek_clutter_section_get_actor (EEK_CLUTTER_SECTION(section)));
 
     return section;
-}
-
-static void
-eek_clutter_keyboard_real_foreach_section (EekKeyboard *self,
-                                           GFunc        func,
-                                           gpointer     user_data)
-{
-    EekClutterCallbackData data;
-
-    g_return_if_fail (EEK_IS_CLUTTER_KEYBOARD(self));
-
-    data.func = func;
-    data.user_data = user_data;
-
-    clutter_container_foreach (CLUTTER_CONTAINER(self),
-                               eek_clutter_callback,
-                               &data);
-}
-
-static void
-eek_clutter_keyboard_real_set_layout (EekKeyboard *self,
-                                      EekLayout *layout)
-{
-    g_return_if_fail (EEK_IS_KEYBOARD(self));
-    g_return_if_fail (EEK_IS_LAYOUT(layout));
-
-    EEK_LAYOUT_GET_CLASS(layout)->apply_to_keyboard (layout, self);
-    if (g_object_is_floating (layout))
-        g_object_unref (layout);
-}
-
-static void
-eek_keyboard_iface_init (EekKeyboardIface *iface)
-{
-    iface->set_bounds = eek_clutter_keyboard_real_set_bounds;
-    iface->get_bounds = eek_clutter_keyboard_real_get_bounds;
-    iface->set_keysym_index = eek_clutter_keyboard_real_set_keysym_index;
-    iface->get_keysym_index = eek_clutter_keyboard_real_get_keysym_index;
-    iface->create_section = eek_clutter_keyboard_real_create_section;
-    iface->foreach_section = eek_clutter_keyboard_real_foreach_section;
-    iface->set_layout = eek_clutter_keyboard_real_set_layout;
-}
-
-static void
-eek_clutter_keyboard_dispose (GObject *object)
-{
-    clutter_group_remove_all (CLUTTER_GROUP(object));
-    G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->dispose (object);
 }
 
 static void
@@ -194,112 +116,27 @@ eek_clutter_keyboard_finalize (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
-    g_object_unref (priv->simple);
+    if (priv->actor) {
+        clutter_group_remove_all (CLUTTER_GROUP(priv->actor));
+        g_object_unref (priv->actor);
+    }
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
-}
-
-static void
-eek_clutter_keyboard_set_property (GObject *object,
-                                   guint prop_id,
-                                   const GValue *value,
-                                   GParamSpec *pspec)
-{
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
-
-    g_return_if_fail (priv);
-    switch (prop_id) {
-    case PROP_BOUNDS:
-        eek_keyboard_set_bounds (EEK_KEYBOARD(object),
-                                 g_value_get_boxed (value));
-        break;
-    default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
-        break;
-    }
-}
-
-static void
-eek_clutter_keyboard_get_property (GObject *object,
-                                   guint prop_id,
-                                   GValue *value,
-                                   GParamSpec *pspec)
-{
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
-
-    g_return_if_fail (priv);
-    switch (prop_id) {
-    case PROP_BOUNDS:
-        eek_keyboard_set_bounds (EEK_KEYBOARD(object),
-                                 g_value_get_boxed (value));
-        break;
-    default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
-        break;
-    }
-}
-
-static void
-eek_clutter_keyboard_paint (ClutterActor *self)
-{
-    CLUTTER_ACTOR_CLASS (eek_clutter_keyboard_parent_class)->paint (self);
 }
 
 static void
 eek_clutter_keyboard_class_init (EekClutterKeyboardClass *klass)
 {
-    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-    ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
-    GParamSpec        *pspec;
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    EekElementClass *element_class = EEK_ELEMENT_CLASS (klass);
+    EekKeyboardClass *keyboard_class = EEK_KEYBOARD_CLASS (klass);
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterKeyboardPrivate));
 
-    gobject_class->set_property = eek_clutter_keyboard_set_property;
-    gobject_class->get_property = eek_clutter_keyboard_get_property;
-    gobject_class->finalize     = eek_clutter_keyboard_finalize;
-    gobject_class->dispose      = eek_clutter_keyboard_dispose;
-
-    actor_class->paint = eek_clutter_keyboard_paint;
-
-    g_object_class_override_property (gobject_class,
-                                      PROP_BOUNDS,
-                                      "bounds");
-}
-
-static gboolean
-on_event (ClutterActor *actor,
-	  ClutterEvent *event,
-	  gpointer      user_data)
-{
-    EekKeyboard *keyboard;
-    EekKey *key;
-    ClutterActor *source;
-
-    g_return_val_if_fail (EEK_IS_KEYBOARD(user_data), FALSE);
-    keyboard = EEK_KEYBOARD(user_data);
-
-    source = clutter_event_get_source (event);
-    if (!EEK_IS_KEY(source))
-        return FALSE;
-    key = EEK_KEY(source);
-    if (event->type == CLUTTER_BUTTON_PRESS) {
-        guint keysym;
-        gint group, level;
-
-        keysym = eek_key_get_keysym (EEK_KEY(source));
-        if (keysym == 0xFFE1 || keysym == 0xFFE2) {
-            eek_keyboard_get_keysym_index (keyboard, &group, &level);
-            if (level == 0)
-                eek_keyboard_set_keysym_index (keyboard, group, 1);
-            else
-                eek_keyboard_set_keysym_index (keyboard, group, 0);
-        }
-    }
-    return FALSE;
+    keyboard_class->create_section = eek_clutter_keyboard_real_create_section;
+    element_class->set_name = eek_clutter_keyboard_real_set_name;
+    element_class->set_bounds = eek_clutter_keyboard_real_set_bounds;
+    gobject_class->finalize = eek_clutter_keyboard_finalize;
 }
 
 static void
@@ -308,11 +145,7 @@ eek_clutter_keyboard_init (EekClutterKeyboard *self)
     EekClutterKeyboardPrivate *priv;
 
     priv = self->priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
-    priv->simple = g_object_new (EEK_TYPE_SIMPLE_KEYBOARD, NULL);
-    priv->group = priv->level = 0;
-
-    clutter_actor_set_reactive (CLUTTER_ACTOR(self), TRUE);
-    g_signal_connect (self, "event", G_CALLBACK(on_event), self);
+    priv->actor = NULL;
 }
 
 /**
@@ -326,10 +159,28 @@ EekKeyboard*
 eek_clutter_keyboard_new (gfloat width,
                           gfloat height)
 {
+    EekKeyboard *keyboard;
     EekBounds bounds;
 
-    bounds.x = bounds.y = 0;
+    keyboard = g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, NULL);
+    g_return_val_if_fail (keyboard, NULL);
+
+    /* Can't call set_bounds of this class since it needs priv->actor
+       initialized */
+    memset (&bounds, 0, sizeof bounds);
     bounds.width = width;
     bounds.height = height;
-    return g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, "bounds", &bounds, NULL);
+    EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
+        set_bounds (EEK_ELEMENT(keyboard), &bounds);
+    return keyboard;
+}
+
+ClutterActor *
+eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
+{
+    EekClutterKeyboardPrivate *priv =
+        EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+    if (!priv->actor)
+        priv->actor = clutter_group_new ();
+    return priv->actor;
 }

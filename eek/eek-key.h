@@ -21,24 +21,37 @@
 #define EEK_KEY_H 1
 
 #include <glib-object.h>
+#include "eek-element.h"
 #include "eek-types.h"
 
 G_BEGIN_DECLS
 
 #define EEK_TYPE_KEY (eek_key_get_type())
 #define EEK_KEY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_KEY, EekKey))
+#define EEK_KEY_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_KEY, EekKeyClass))
 #define EEK_IS_KEY(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_KEY))
-#define EEK_KEY_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_KEY, EekKeyIface))
+#define EEK_IS_KEY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_KEY))
+#define EEK_KEY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_KEY, EekKeyClass))
 
-typedef struct _EekKeyIface EekKeyIface;
-typedef struct _EekKey EekKey;
+typedef struct _EekKeyClass EekKeyClass;
+typedef struct _EekKeyPrivate EekKeyPrivate;
 
-struct _EekKeyIface
+struct _EekKey
 {
     /*< private >*/
-    GTypeInterface g_iface;
+    EekElement parent;
+
+    EekKeyPrivate *priv;
+};
+
+struct _EekKeyClass
+{
+    /*< private >*/
+    EekElementClass parent_class;
 
     /*< public >*/
+    void        (* set_keycode)      (EekKey     *self,
+                                      guint       keycode);
     guint       (* get_keycode)      (EekKey     *self);
     void        (* set_keysyms)      (EekKey     *self,
                                       guint      *keysyms,
@@ -48,7 +61,6 @@ struct _EekKeyIface
                                       guint     **keysyms,
                                       gint       *num_groups,
                                       gint       *num_levels);
-    gint        (* get_groups)       (EekKey     *self);
     guint       (* get_keysym)       (EekKey     *self);
 
     void        (* set_index)        (EekKey     *self,
@@ -61,10 +73,6 @@ struct _EekKeyIface
     void        (* set_outline)      (EekKey     *self,
                                       EekOutline *outline);
     EekOutline *(* get_outline)      (EekKey     *self);
-    void        (* set_bounds)       (EekKey     *self,
-                                      EekBounds  *bounds);
-    void        (* get_bounds)       (EekKey     *self,
-                                      EekBounds  *bounds);
 
     void        (* set_keysym_index) (EekKey     *self,
                                       gint        group,
@@ -76,6 +84,8 @@ struct _EekKeyIface
 
 GType       eek_key_get_type         (void) G_GNUC_CONST;
 
+void        eek_key_set_keycode      (EekKey     *key,
+                                      guint       keycode);
 guint       eek_key_get_keycode      (EekKey     *key);
 void        eek_key_set_keysyms      (EekKey     *key,
                                       guint      *keysyms,
@@ -85,7 +95,6 @@ void        eek_key_get_keysyms      (EekKey     *key,
                                       guint     **keysyms,
                                       gint       *num_groups,
                                       gint       *num_levels);
-gint        eek_key_get_groups       (EekKey     *key);
 guint       eek_key_get_keysym       (EekKey     *key);
 
 void        eek_key_set_index        (EekKey     *key,
@@ -98,10 +107,6 @@ void        eek_key_get_index        (EekKey     *key,
 void        eek_key_set_outline      (EekKey     *key,
                                       EekOutline *outline);
 EekOutline *eek_key_get_outline      (EekKey     *key);
-void        eek_key_set_bounds       (EekKey     *key,
-                                      EekBounds  *bounds);
-void        eek_key_get_bounds       (EekKey     *key,
-                                      EekBounds  *bounds);
 
 void        eek_key_set_keysym_index (EekKey     *key,
                                       gint        group,

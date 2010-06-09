@@ -77,8 +77,7 @@ EXTRA_HFILES=
 # Header files to ignore when scanning. Use base file name, no paths
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES= eek-private.h \
-	eek-clutter-private.h \
-	eek-keysyms.h \
+	eek-keysym.h \
 	$(NULL)
 
 # Images to copy into HTML directory.
@@ -103,7 +102,6 @@ GTKDOC_CFLAGS = $(GOBJECT2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
 	$(top_srcdir)/eek/libeek-clutter.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
-	$(top_srcdir)/eek/libeek-gtk.la \
 	$(GOBJECT2_LIBS) \
 	$(CLUTTER_LIBS) \
 	$(XKB_LIBS) \

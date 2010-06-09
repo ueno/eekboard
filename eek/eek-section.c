@@ -20,350 +20,329 @@
 
 /**
  * SECTION:eek-section
- * @short_description: Base interface of a keyboard section
- * @see_also: #EekKeyboard, #EekKey
+ * @short_description: Base class of a section
+ * @see_also: #EekKey
  *
- * The #EekSectionIface interface represents a keyboard section, which
- * is parented to #EekKeyboardIface and can have one or more keys of
- * the #EekKeyIface interface.
- *
- * #EekSectionIface follows the Builder pattern and is responsible for
- * creation of keys.
+ * The #EekSectionClass class represents a section, which consists
+ * of one or more keys of the #EekKeyClass class.
  */
+
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
-
 #include "eek-section.h"
+#include "eek-key.h"
+
+enum {
+    PROP_0,
+    PROP_ANGLE,
+    PROP_LAST
+};
+
+enum {
+    KEY_PRESSED,
+    KEY_RELEASED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
+G_DEFINE_TYPE (EekSection, eek_section, EEK_TYPE_CONTAINER);
+
+#define EEK_SECTION_GET_PRIVATE(obj)                           \
+    (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_SECTION, EekSectionPrivate))
+
+struct _EekRow
+{
+    gint num_columns;
+    EekOrientation orientation;
+};
+
+typedef struct _EekRow EekRow;
+
+struct _EekSectionPrivate
+{
+    gint angle;
+    GSList *rows;
+    GSList *keys;
+};
 
 static void
-eek_section_base_init (gpointer g_iface)
+eek_section_real_set_angle (EekSection *self,
+                                   gint        angle)
 {
-    static gboolean is_initialized = FALSE;
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
 
-    if (!is_initialized) {
-        GParamSpec *pspec;
+    priv->angle = angle;
 
-        /**
-         * EekSection:name:
-         *
-         * The name of #EekSection.
-         */
-        pspec = g_param_spec_string ("name",
-                                     "Name",
-                                     "Name",
-                                     NULL,
-                                     G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+    g_object_notify (G_OBJECT(self), "angle");
+}
 
-        /**
-         * EekSection:columns:
-         *
-         * The number of columns in #EekSection.
-         */
-        pspec = g_param_spec_int ("columns",
-                                  "Columns",
-                                  "The number of columns in the section",
-                                  0, G_MAXINT, 0,
-                                  G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+static gint
+eek_section_real_get_angle (EekSection *self)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
 
-        /**
-         * EekSection:rows:
-         *
-         * The number of rows in #EekSection.
-         */
-        pspec = g_param_spec_int ("rows",
-                                  "Rows",
-                                  "The number of rows of the section",
-                                  0, G_MAXINT, 0,
-                                  G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+    return priv->angle;
+}
 
-        /**
-         * EekSection:angle:
-         *
-         * The rotation angle of #EekSection.
-         */
-        pspec = g_param_spec_int ("angle",
-                                  "Angle",
-                                  "Rotation angle of the section",
-                                  -360, 360, 0,
-                                  G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+static gint
+eek_section_real_get_n_rows (EekSection *self)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
 
-        /**
-         * EekSection:bounds:
-         *
-         * The bounding box of #EekSection.
-         */
-        pspec = g_param_spec_boxed ("bounds",
-                                    "Bounds",
-                                    "Bounding box of the section",
-                                    EEK_TYPE_BOUNDS,
-                                    G_PARAM_READWRITE);
-        g_object_interface_install_property (g_iface, pspec);
+    return g_slist_length (priv->rows);
+}
 
-        is_initialized = TRUE;
+static void
+eek_section_real_add_row (EekSection    *self,
+                          gint           num_columns,
+                          EekOrientation orientation)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    EekRow *row;
+
+    row = g_slice_new (EekRow);
+    row->num_columns = num_columns;
+    row->orientation = orientation;
+    priv->rows = g_slist_append (priv->rows, row);
+}
+
+static void
+eek_section_real_get_row (EekSection     *self,
+                          gint            index,
+                          gint           *num_columns,
+                          EekOrientation *orientation)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    EekRow *row;
+
+    row = g_slist_nth_data (priv->rows, index);
+    g_return_if_fail (row);
+    if (num_columns)
+        *num_columns = row->num_columns;
+    if (orientation)
+        *orientation = row->orientation;
+}
+
+static void
+pressed_event (EekKey *key, EekSection *section)
+{
+    g_signal_emit_by_name (section, "key-pressed", key);
+}
+
+static void
+released_event (EekKey *key, EekSection *section)
+{
+    g_signal_emit_by_name (section, "key-released", key);
+}
+
+static EekKey *
+eek_section_real_create_key (EekSection  *self,
+                             gint column,
+                             gint row)
+{
+    EekKey *key;
+    gint num_columns, num_rows;
+    EekOrientation orientation;
+
+    num_rows = eek_section_get_n_rows (self);
+    g_return_val_if_fail (0 <= row && row < num_rows, NULL);
+    eek_section_get_row (self, row, &num_columns, &orientation);
+    g_return_val_if_fail (column < num_columns, NULL);
+
+    key = g_object_new (EEK_TYPE_KEY,
+                        "column", column,
+                        "row", row,
+                        NULL);
+    g_return_val_if_fail (key, NULL);
+    g_object_ref_sink (key);
+
+    g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
+    g_signal_connect (key, "released", G_CALLBACK(released_event), self);
+
+    EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
+                                              EEK_ELEMENT(key));
+
+    return key;
+}
+
+static void
+eek_section_finalize (GObject *object)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(object);
+    GSList *head;
+
+    for (head = priv->rows; head; head = g_slist_next (head))
+        g_slice_free (EekRow, head->data);
+    g_slist_free (priv->rows);
+
+    for (head = priv->keys; head; head = g_slist_next (head))
+        g_object_unref (head->data);
+    g_slist_free (priv->keys);
+
+    G_OBJECT_CLASS (eek_section_parent_class)->finalize (object);
+}
+
+static void
+eek_section_set_property (GObject      *object,
+                          guint         prop_id,
+                          const GValue *value,
+                          GParamSpec   *pspec)
+{
+    switch (prop_id) {
+    case PROP_ANGLE:
+        eek_section_set_angle (EEK_SECTION(object),
+                               g_value_get_int (value));
+        break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
     }
 }
 
-GType
-eek_section_get_type (void)
+static void
+eek_section_get_property (GObject    *object,
+                          guint       prop_id,
+                          GValue     *value,
+                          GParamSpec *pspec)
 {
-    static GType iface_type = 0;
-
-    if (iface_type == 0) {
-        static const GTypeInfo info = {
-            sizeof (EekSectionIface),
-            eek_section_base_init,
-            NULL
-        };
-
-        iface_type = g_type_register_static (G_TYPE_INTERFACE,
-                                             "EekSection",
-                                             &info,
-                                             0);
+    switch (prop_id) {
+    case PROP_ANGLE:
+        g_value_set_int (value, eek_section_get_angle (EEK_SECTION(object)));
+        break;
+    default:
+        g_object_get_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
     }
-    return iface_type;
 }
 
-/**
- * eek_section_set_rows:
- * @section: an #EekSection
- * @rows: the number of rows in @section
- *
- * Set the number of rows in @section to @rows.
- */
+static void
+eek_section_class_init (EekSectionClass *klass)
+{
+    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec        *pspec;
+
+    g_type_class_add_private (gobject_class, sizeof (EekSectionPrivate));
+
+    klass->set_angle = eek_section_real_set_angle;
+    klass->get_angle = eek_section_real_get_angle;
+    klass->get_n_rows = eek_section_real_get_n_rows;
+    klass->add_row = eek_section_real_add_row;
+    klass->get_row = eek_section_real_get_row;
+    klass->create_key = eek_section_real_create_key;
+
+    gobject_class->set_property = eek_section_set_property;
+    gobject_class->get_property = eek_section_get_property;
+    gobject_class->finalize     = eek_section_finalize;
+
+    /**
+     * EekSection:angle:
+     *
+     * The rotation angle of #EekSection.
+     */
+    pspec = g_param_spec_int ("angle",
+                              "Angle",
+                              "Rotation angle of the section",
+                              -360, 360, 0,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_ANGLE,
+                                     pspec);
+
+    signals[KEY_PRESSED] =
+        g_signal_new ("key-pressed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      0,
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+
+    signals[KEY_RELEASED] =
+        g_signal_new ("key-released",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      0,
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+}
+
+static void
+eek_section_init (EekSection *self)
+{
+    EekSectionPrivate *priv;
+
+    priv = self->priv = EEK_SECTION_GET_PRIVATE (self);
+    priv->angle = 0;
+    priv->rows = NULL;
+    priv->keys = NULL;
+}
+
 void
-eek_section_set_rows (EekSection *section,
-                      gint        rows)
+eek_section_set_angle (EekSection  *section,
+                       gint         angle)
 {
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->set_rows);
-    (*iface->set_rows) (section, rows);
+    g_return_if_fail (EEK_IS_SECTION(section));
+    EEK_SECTION_GET_CLASS(section)->set_angle (section, angle);
 }
 
-/**
- * eek_section_get_rows:
- * @section: an #EekSection
- *
- * Get the number of rows in @section.
- */
-gint
-eek_section_get_rows (EekSection *section)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_val_if_fail (iface->get_rows, -1);
-    return (*iface->get_rows) (section);
-}
-
-/**
- * eek_section_set_columns:
- * @section: an #EekSection
- * @row: row index in @section
- * @columns: the number of keys on @row
- *
- * Set the number of keys on the @row-th row in @section.
- */
-void
-eek_section_set_columns (EekSection *section,
-                         gint        row,
-                         gint        columns)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->set_columns);
-    (*iface->set_columns) (section, row, columns);
-}
-
-/**
- * eek_section_get_columns:
- * @section: an #EekSection
- * @row: row index in @section
- *
- * Get the number of keys on the @row-th row in @section.
- */
-gint
-eek_section_get_columns (EekSection *section,
-                         gint        row)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->get_columns);
-    return (*iface->get_columns) (section, row);
-}
-
-/**
- * eek_section_set_orientation:
- * @section: an #EekSection
- * @row: row index in @section
- * @orientation: either %EEK_ORIENTATION_HORIZONTAL or %EEK_ORIENTATION_VERTICAL
- *
- * Set the orientation of the @row-th row in @section to @orientation.
- */
-void
-eek_section_set_orientation (EekSection    *section,
-                             gint           row,
-                             EekOrientation orientation)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->set_orientation);
-    (*iface->set_orientation) (section, row, orientation);
-}
-
-/**
- * eek_section_get_orientation:
- * @section: an #EekSection
- * @row: row index in @section
- *
- * Get the orientation of the @row-th row in @section.
- * Returns: either %EEK_ORIENTATION_HORIZONTAL or %EEK_ORIENTATION_VERTICAL
- */
-EekOrientation
-eek_section_get_orientation (EekSection *section,
-                             gint        row)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_val_if_fail (iface->get_orientation, EEK_ORIENTATION_INVALID);
-    return (*iface->get_orientation) (section, row);
-}
-
-/**
- * eek_section_set_angle:
- * @section: an #EekSection
- * @angle: rotation angle of @section
- *
- * Set the rotation angle of @section to @angle.
- */
-void
-eek_section_set_angle (EekSection *section,
-                       gint        angle)
-{
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->set_angle);
-    (*iface->set_angle) (section, angle);
-}
-
-/**
- * eek_section_get_angle:
- * @section: an #EekSection
- *
- * Get the rotation angle of @section.
- */
 gint
 eek_section_get_angle (EekSection *section)
 {
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_val_if_fail (iface->get_angle, 0);
-    return (*iface->get_angle) (section);
+    g_return_val_if_fail (EEK_IS_SECTION(section), -1);
+    return EEK_SECTION_GET_CLASS(section)->get_angle (section);
 }
 
-/**
- * eek_section_set_bounds:
- * @section: an #EekSection
- * @bounds: bounding box of @section
- *
- * Set the bounding box of @section to @bounds.
- */
-void
-eek_section_set_bounds (EekSection *section,
-                        EekBounds  *bounds)
+gint
+eek_section_get_n_rows (EekSection *section)
 {
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->set_bounds);
-    (*iface->set_bounds) (section, bounds);
+    g_return_val_if_fail (EEK_IS_SECTION(section), -1);
+    return EEK_SECTION_GET_CLASS(section)->get_n_rows (section);
 }
 
-/**
- * eek_section_get_bounds:
- * @section: an #EekSection
- * @bounds: the bounding box of @section
- *
- * Get the bounding box of @section.
- */
 void
-eek_section_get_bounds (EekSection *section,
-                        EekBounds  *bounds)
+eek_section_add_row (EekSection    *section,
+                     gint           num_columns,
+                     EekOrientation orientation)
 {
-    EekSectionIface *iface = EEK_SECTION_GET_IFACE(section);
-
-    g_return_if_fail (iface->get_bounds);
-    return (*iface->get_bounds) (section, bounds);
+    g_return_if_fail (EEK_IS_SECTION(section));
+    EEK_SECTION_GET_CLASS(section)->add_row (section,
+                                             num_columns,
+                                             orientation);
 }
 
-/**
- * eek_section_create_key:
- * @section: an #EekSection
- * @name: name of the key
- * @keysyms: symbol matrix of the key
- * @num_groups: number of rows in the @keysyms
- * @num_levels: number of columns in the @keysyms
- * @column: column index in the @section
- * @row: row index in the section
- * @outline: outline shape of the key
- * @bounds: bounding box of the key
- *
- * Create an #EekKey instance and attach it to @section.
- */
+void
+eek_section_get_row (EekSection     *section,
+                     gint            index,
+                     gint           *num_columns,
+                     EekOrientation *orientation)
+{
+    g_return_if_fail (EEK_IS_SECTION(section));
+    EEK_SECTION_GET_CLASS(section)->get_row (section,
+                                             index,
+                                             num_columns,
+                                             orientation);
+}
+
 EekKey *
 eek_section_create_key (EekSection  *section,
-                        const gchar *name,
-                        guint        keycode,
-                        guint       *keysyms,
-                        gint         num_groups,
-                        gint         num_levels,
                         gint         column,
-                        gint         row,
-                        EekOutline  *outline,
-                        EekBounds   *bounds)
+                        gint         row)
 {
-    EekSectionIface *iface;
-
-    g_return_if_fail (EEK_IS_SECTION(section));
-
-    iface = EEK_SECTION_GET_IFACE(section);
-    g_return_if_fail (iface->create_key);
-
-    return (*iface->create_key) (section,
-                                 name,
-                                 keycode,
-                                 keysyms,
-                                 num_groups,
-                                 num_levels,
-                                 column,
-                                 row,
-                                 outline,
-                                 bounds);
-}
-
-/**
- * eek_section_foreach_key:
- * @section: an #EekSection
- * @func: a callback of #GFunc
- * @user_data: a pointer to an object passed to @func
- *
- * Iterate over @section's children list.
- */
-void
-eek_section_foreach_key (EekSection *section,
-                         GFunc       func,
-                         gpointer    user_data)
-{
-    EekSectionIface *iface;
-
-    g_return_if_fail (EEK_IS_SECTION(section));
-
-    iface = EEK_SECTION_GET_IFACE(section);
-    g_return_if_fail (iface->foreach_key);
-
-    return (*iface->foreach_key) (section, func, user_data);
+    g_return_val_if_fail (EEK_IS_SECTION(section), NULL);
+    return EEK_SECTION_GET_CLASS(section)->create_key (section, column, row);
 }

@@ -16,9 +16,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-noinst_PROGRAMS = eek-clutter-xkb-test eek-gtk-xkb-test
+noinst_PROGRAMS = eek-clutter-xkb-test
 eek_clutter_xkb_test_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(CLUTTER_CFLAGS) $(XKB_CFLAGS)
 eek_clutter_xkb_test_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la $(top_builddir)/eek/libeek-clutter.la $(GOBJECT2_LIBS) $(CLUTTER_LIBS) $(XKB_LIBS)
-
-eek_gtk_xkb_test_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(GTK2_CFLAGS) $(XKB_CFLAGS)
-eek_gtk_xkb_test_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la $(top_builddir)/eek/libeek-gtk.la $(GOBJECT2_LIBS) $(GTK2_LIBS) $(XKB_LIBS)

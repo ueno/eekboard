@@ -40,7 +40,7 @@ typedef struct _EekXkbLayoutPrivate EekXkbLayoutPrivate;
 struct _EekXkbLayout
 {
     /*< private >*/
-    EekLayout parent;
+    GInitiallyUnowned parent;
 
     EekXkbLayoutPrivate *priv;
 };
@@ -48,7 +48,7 @@ struct _EekXkbLayout
 struct _EekXkbLayoutClass
 {
     /*< private >*/
-    EekLayoutClass parent_class;
+    GInitiallyUnownedClass parent_class;
 
     void                  (* set_keycodes) (EekXkbLayout *self,
                                             const gchar  *keycodes);
