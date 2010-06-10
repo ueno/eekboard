@@ -70,7 +70,7 @@ extern void xkl_xkb_config_native_cleanup (XklEngine * engine,
 					   XkbComponentNamesPtr
 					   component_names);
 
-static void update_xkb_layout (EekXklLayout *layout);
+static void get_xkb_component_names (EekXklLayout *layout);
 
 static void
 eek_xkl_layout_finalize (GObject *object)
@@ -120,16 +120,19 @@ eek_xkl_layout_get_property (GObject    *object,
     switch (prop_id) 
         {
         case PROP_LAYOUTS:
-            g_value_set_boxed (value,
-                               eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(object)));
+            g_value_set_boxed
+                (value,
+                 eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(object)));
             break;
         case PROP_VARIANTS:
-            g_value_set_boxed (value,
-                               eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(object)));
+            g_value_set_boxed
+                (value,
+                 eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(object)));
             break;
         case PROP_OPTIONS:
-            g_value_set_boxed (value,
-                               eek_xkl_layout_get_options (EEK_XKL_LAYOUT(object)));
+            g_value_set_boxed
+                (value,
+                 eek_xkl_layout_get_options (EEK_XKL_LAYOUT(object)));
             break;
         default:
             g_object_get_property (object,
@@ -187,7 +190,7 @@ eek_xkl_layout_init (EekXklLayout *self)
 
     priv->engine = xkl_engine_get_instance (display);
     xkl_config_rec_get_from_server (&priv->config, priv->engine);
-    update_xkb_layout (self);
+    get_xkb_component_names (self);
 }
 
 EekLayout *
@@ -206,7 +209,7 @@ eek_xkl_layout_set_layouts (EekXklLayout *layout, gchar **layouts)
     g_return_if_fail (priv);
     g_strfreev (priv->config.layouts);
     priv->config.layouts = g_strdupv (layouts);
-    update_xkb_layout (layout);
+    get_xkb_component_names (layout);
 }
 
 void
@@ -217,7 +220,7 @@ eek_xkl_layout_set_variants (EekXklLayout *layout, gchar **variants)
     g_return_if_fail (priv);
     g_strfreev (priv->config.variants);
     priv->config.variants = g_strdupv (variants);
-    update_xkb_layout (layout);
+    get_xkb_component_names (layout);
 }
 
 void
@@ -228,7 +231,7 @@ eek_xkl_layout_set_options (EekXklLayout *layout, gchar **options)
     g_return_if_fail (priv);
     g_strfreev (priv->config.options);
     priv->config.options = g_strdupv (options);
-    update_xkb_layout (layout);
+    get_xkb_component_names (layout);
 }
 
 gchar **
@@ -259,7 +262,7 @@ eek_xkl_layout_get_options (EekXklLayout *layout)
 }
 
 static void
-update_xkb_layout (EekXklLayout *layout)
+get_xkb_component_names (EekXklLayout *layout)
 {
     EekXklLayoutPrivate *priv = layout->priv;
     XkbComponentNamesRec names;

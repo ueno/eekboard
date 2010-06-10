@@ -102,6 +102,7 @@ GTKDOC_CFLAGS = $(GOBJECT2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
 	$(top_srcdir)/eek/libeek-clutter.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
+	$(top_srcdir)/eek/libeek-xkl.la \
 	$(GOBJECT2_LIBS) \
 	$(CLUTTER_LIBS) \
 	$(XKB_LIBS) \

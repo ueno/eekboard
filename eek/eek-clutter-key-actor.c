@@ -61,9 +61,6 @@ static struct {
     gint outline_textures_ref_count;
 } texture_cache;
 
-static gboolean      on_event           (ClutterActor       *actor,
-                                         ClutterEvent       *event,
-                                         gpointer            user_data);
 static ClutterActor *get_texture        (EekClutterKeyActor *actor);
 static void          draw_key_on_layout (EekKey             *key,
                                          PangoLayout        *layout);
@@ -272,6 +269,7 @@ eek_clutter_key_actor_new (EekKey *key)
     return CLUTTER_ACTOR(actor);
 }
 
+#if 0
 static void  
 on_key_animate_complete (ClutterAnimation *animation,
                          gpointer user_data)
@@ -282,6 +280,7 @@ on_key_animate_complete (ClutterAnimation *animation,
     clutter_actor_set_opacity (actor, 0xff);
     clutter_actor_set_scale (actor, 1.0, 1.0);
 }
+#endif
 
 static void
 key_enlarge (ClutterActor *actor)
@@ -301,33 +300,6 @@ key_shrink (ClutterActor *actor)
                            "scale-x", 1.0,
                            "scale-y", 1.0,
                            NULL);
-}
-
-static gboolean
-on_event (ClutterActor *actor,
-	  ClutterEvent *event,
-	  gpointer      user_data)
-{
-    if (clutter_event_get_source (event) == actor) {
-        EekClutterKeyActorPrivate *priv =
-            EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
-        ClutterActor *section;
-
-        g_return_val_if_fail (priv, FALSE);
-        /* Make sure the enlarged key show up on the keys which belong
-           to other sections. */
-        section = clutter_actor_get_parent (actor);
-        clutter_actor_raise_top (section);
-        clutter_actor_raise_top (actor);
-        if (event->type == CLUTTER_BUTTON_PRESS) {
-            key_enlarge (actor);
-            g_signal_emit_by_name (priv->key, "pressed");
-        } else if (event->type == CLUTTER_BUTTON_RELEASE) {
-            key_shrink (actor);
-            g_signal_emit_by_name (priv->key, "released");
-        }
-    }
-    return FALSE;
 }
 
 static gdouble

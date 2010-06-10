@@ -19,6 +19,9 @@
  */
 #include "eek-xkb.h"
 
+/* For gdk_x11_display_get_xdisplay().  See main(). */
+#include <gtk/gtk.h>
+
 static void
 test_create (void)
 {
@@ -44,7 +47,7 @@ main (int argc, char **argv)
 {
     g_type_init ();
     g_test_init (&argc, &argv, NULL);
-    gtk_init (&argc, &argv);
+    gtk_init (&argc, &argv);  /* for gdk_x11_display_get_xdisplay() */
     g_test_add_func ("/eek-xkb-test/create", test_create);
     return g_test_run ();
 }

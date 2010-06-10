@@ -222,7 +222,7 @@ create_section (EekXkbLayout  *layout,
     EekXkbLayoutPrivate *priv;
     EekSection *section;
     EekBounds bounds;
-    const gchar *name;
+    gchar *name;
     gfloat left, top;
     gint i, j;
 
