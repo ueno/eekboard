@@ -35,6 +35,14 @@
 
 #define noKBDRAW_DEBUG
 
+enum {
+    PRESSED,
+    RELEASED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
 G_DEFINE_TYPE (EekClutterKeyActor, eek_clutter_key_actor,
                CLUTTER_TYPE_GROUP);
 
@@ -47,12 +55,20 @@ struct _EekClutterKeyActorPrivate
     ClutterActor *texture;
 };
 
+static struct {
+    /* outline pointer -> ClutterTexture */
+    GHashTable *outline_textures;
+    gint outline_textures_ref_count;
+} texture_cache;
+
 static gboolean      on_event           (ClutterActor       *actor,
                                          ClutterEvent       *event,
                                          gpointer            user_data);
 static ClutterActor *get_texture        (EekClutterKeyActor *actor);
 static void          draw_key_on_layout (EekKey             *key,
                                          PangoLayout        *layout);
+static void          key_enlarge        (ClutterActor       *actor);
+static void          key_shrink         (ClutterActor       *actor);
 
 static void
 eek_clutter_key_actor_real_paint (ClutterActor *self)
@@ -120,10 +136,45 @@ eek_clutter_key_actor_real_get_preferred_width (ClutterActor *self,
 }
 
 static void
+eek_clutter_key_actor_real_pressed (EekClutterKeyActor *self)
+{
+    ClutterActor *actor, *section;
+
+    actor = CLUTTER_ACTOR(self);
+
+    /* Make sure the enlarged key show up on the keys which belong
+       to other sections. */
+    section = clutter_actor_get_parent (actor);
+    clutter_actor_raise_top (section);
+    clutter_actor_raise_top (actor);
+    key_enlarge (actor);
+}
+
+static void
+eek_clutter_key_actor_real_released (EekClutterKeyActor *self)
+{
+    ClutterActor *actor, *section;
+
+    actor = CLUTTER_ACTOR(self);
+
+    /* Make sure the enlarged key show up on the keys which belong
+       to other sections. */
+    section = clutter_actor_get_parent (actor);
+    clutter_actor_raise_top (section);
+    clutter_actor_raise_top (actor);
+    key_shrink (actor);
+}
+
+static void
 eek_clutter_key_actor_finalize (GObject *object)
 {
     EekClutterKeyActorPrivate *priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(object);
+
     g_object_unref (priv->key);
+    if (priv->texture && --texture_cache.outline_textures_ref_count <= 0) {
+        g_hash_table_unref (texture_cache.outline_textures);
+        texture_cache.outline_textures = NULL;
+    }
     G_OBJECT_CLASS (eek_clutter_key_actor_parent_class)->finalize (object);
 }
 
@@ -145,6 +196,54 @@ eek_clutter_key_actor_class_init (EekClutterKeyActorClass *klass)
         eek_clutter_key_actor_real_get_preferred_width;
 
     gobject_class->finalize = eek_clutter_key_actor_finalize;
+
+    /* signals */
+    klass->pressed = eek_clutter_key_actor_real_pressed;
+    klass->released = eek_clutter_key_actor_real_released;
+
+    signals[PRESSED] =
+        g_signal_new ("pressed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET(EekClutterKeyActorClass, pressed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
+
+    signals[RELEASED] =
+        g_signal_new ("released",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET(EekClutterKeyActorClass, released),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
+}
+
+static void
+on_button_press_event (ClutterActor *actor,
+                       ClutterEvent *event,
+                       gpointer user_data)
+{
+    EekClutterKeyActorPrivate *priv =
+        EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
+
+    /* priv->key will send back PRESSED event of actor. */
+    g_signal_emit_by_name (priv->key, "pressed");
+}
+
+static void
+on_button_release_event (ClutterActor *actor,
+                         ClutterEvent *event,
+                         gpointer      user_data)
+{
+    EekClutterKeyActorPrivate *priv =
+        EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
+
+    /* priv->key will send back RELEASED event of actor. */
+    g_signal_emit_by_name (priv->key, "released");
 }
 
 static void
@@ -156,7 +255,10 @@ eek_clutter_key_actor_init (EekClutterKeyActor *self)
     priv->key = NULL;
     priv->texture = NULL;
     clutter_actor_set_reactive (CLUTTER_ACTOR(self), TRUE);
-    g_signal_connect (self, "event", G_CALLBACK (on_event), NULL);
+    g_signal_connect (self, "button-press-event",
+                      G_CALLBACK (on_button_press_event), NULL);
+    g_signal_connect (self, "button-release-event",
+                      G_CALLBACK (on_button_release_event), NULL);
 }
 
 ClutterActor *
@@ -166,7 +268,7 @@ eek_clutter_key_actor_new (EekKey *key)
 
     actor = g_object_new (EEK_TYPE_CLUTTER_KEY_ACTOR, NULL);
     actor->priv->key = key;
-    g_object_ref (actor->priv->key);
+    g_object_ref_sink (actor->priv->key);
     return CLUTTER_ACTOR(actor);
 }
 
@@ -479,23 +581,22 @@ create_texture_for_key (EekKey *key)
 static ClutterActor *
 get_texture (EekClutterKeyActor *actor)
 {
-    EekClutterKeyActorClass *actor_class =
-        EEK_CLUTTER_KEY_ACTOR_GET_CLASS(actor);
     ClutterActor *texture;
     EekOutline *outline;
 
-    if (!actor_class->outline_textures)
-        actor_class->outline_textures = g_hash_table_new_full (g_direct_hash,
-                                                               g_direct_equal,
-                                                               NULL,
-                                                               g_free);
+    if (!texture_cache.outline_textures)
+        texture_cache.outline_textures = g_hash_table_new_full (g_direct_hash,
+                                                                g_direct_equal,
+                                                                NULL,
+                                                                g_free);
     outline = eek_key_get_outline (actor->priv->key);
-    texture = g_hash_table_lookup (actor_class->outline_textures, outline);
+    texture = g_hash_table_lookup (texture_cache.outline_textures, outline);
     if (texture == NULL) {
         texture = create_texture_for_key (actor->priv->key);
-        g_hash_table_insert (actor_class->outline_textures, outline, texture);
+        g_hash_table_insert (texture_cache.outline_textures, outline, texture);
     } else
         texture = clutter_clone_new (texture);
+    texture_cache.outline_textures_ref_count++;
     return texture;
 }
 

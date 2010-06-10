@@ -40,7 +40,6 @@ G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 struct _EekClutterKeyboardPrivate
 {
     ClutterActor *actor;
-    EekLayout *layout;
 };
 
 static void
@@ -96,7 +95,6 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 
     section = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
     g_return_val_if_fail (section, NULL);
-    g_object_ref_sink (section);
 
     g_signal_connect (section, "key-pressed",
                       G_CALLBACK(key_pressed_event), self);
@@ -115,30 +113,12 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 }
 
 static void
-eek_clutter_keyboard_real_set_layout (EekKeyboard *self,
-                                      EekLayout   *layout)
-{
-    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
-
-    g_return_if_fail (EEK_IS_LAYOUT(layout));
-
-    /* Don't apply the layout to keyboard right now, so to delay
-       drawing until eek_clutter_keyboard_get_actor. */
-    priv->layout = layout;
-    g_object_ref_sink (priv->layout);
-}
-
-static void
 eek_clutter_keyboard_finalize (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
-    /* No need for clutter_group_remove_all() since
-       ClutterGroup#dispose() unrefs all the children. */
     if (priv->actor)
         g_object_unref (priv->actor);
-    if (priv->layout)
-        g_object_unref (priv->layout);
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
 }
 
@@ -165,7 +145,6 @@ eek_clutter_keyboard_init (EekClutterKeyboard *self)
 
     priv = self->priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
     priv->actor = NULL;
-    priv->layout = NULL;
 }
 
 /**
@@ -195,14 +174,67 @@ eek_clutter_keyboard_new (gfloat width,
     return keyboard;
 }
 
+static gboolean
+on_clutter_key_press_event (ClutterActor *actor,
+                            ClutterEvent *event,
+                            gpointer      user_data)
+{
+    guint keycode;
+    EekKey *key;
+
+    keycode = clutter_event_get_key_code (event);
+    key = eek_keyboard_find_key_by_keycode (user_data, keycode);
+    if (key) {
+        g_signal_emit_by_name (key, "pressed", NULL);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static gboolean
+on_clutter_key_release_event (ClutterActor *actor,
+                              ClutterEvent *event,
+                              gpointer      user_data)
+{
+    guint keycode;
+    EekKey *key;
+
+    keycode = clutter_event_get_key_code (event);
+    key = eek_keyboard_find_key_by_keycode (user_data, keycode);
+    if (key) {
+        g_signal_emit_by_name (key, "released", NULL);
+        return TRUE;
+    }
+    return FALSE;    
+}
+
+static void
+on_clutter_realize (ClutterActor *actor, gpointer user_data)
+{
+    EekClutterKeyboard *keyboard = user_data;
+    EekClutterKeyboardPrivate *priv =
+        EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+    ClutterActor *stage;
+
+    stage = clutter_actor_get_stage (priv->actor);
+    g_signal_connect (stage, "key-press-event",
+                      G_CALLBACK (on_clutter_key_press_event), keyboard);
+    g_signal_connect (stage, "key-release-event",
+                      G_CALLBACK (on_clutter_key_release_event), keyboard);
+}
+
 ClutterActor *
 eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
 {
     EekClutterKeyboardPrivate *priv =
         EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
-    if (!priv->actor)
+    if (!priv->actor) {
         priv->actor = clutter_group_new ();
-    if (priv->layout)
-        eek_layout_apply (priv->layout, EEK_KEYBOARD(keyboard));
+        g_object_ref_sink (priv->actor);
+        g_signal_connect (priv->actor, "realize",
+                          G_CALLBACK (on_clutter_realize), keyboard);
+        g_return_val_if_fail (priv->actor, NULL);
+        eek_keyboard_realize (EEK_KEYBOARD(keyboard));
+    }
     return priv->actor;
 }

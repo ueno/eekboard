@@ -116,7 +116,6 @@ eek_clutter_section_real_create_key (EekSection  *self,
                         "row", row,
                         NULL);
     g_return_val_if_fail (key, NULL);
-    g_object_ref_sink (key);
     
     g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
     g_signal_connect (key, "released", G_CALLBACK(released_event), self);
@@ -137,8 +136,6 @@ eek_clutter_section_finalize (GObject *object)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
 
-    /* No need for clutter_group_remove_all() since
-       ClutterGroup#dispose() unrefs all the children. */
     if (priv->actor)
         g_object_unref (priv->actor);
     G_OBJECT_CLASS (eek_clutter_section_parent_class)->finalize (object);
@@ -172,7 +169,9 @@ ClutterActor *
 eek_clutter_section_get_actor (EekClutterSection *section)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(section);
-    if (!priv->actor)
+    if (!priv->actor) {
         priv->actor = clutter_group_new ();
+        g_object_ref_sink (priv->actor);
+    }
     return priv->actor;
 }

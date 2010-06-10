@@ -16,6 +16,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-noinst_PROGRAMS = eek-clutter-xkb-test
-eek_clutter_xkb_test_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(CLUTTER_CFLAGS) $(GTK2_CFLAGS) $(XKB_CFLAGS)
-eek_clutter_xkb_test_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la $(top_builddir)/eek/libeek-clutter.la $(GOBJECT2_LIBS) $(CLUTTER_LIBS) $(GTK2_CFLAGS) $(XKB_LIBS)
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: EEK-XKB
+Description: A Library to Create Keyboard-like UI (XKB Support)
+URL: http://github.com/ueno/eek
+Version: @VERSION@
+Libs: -L${libdir} -leek -leek-xkb
+Libs.private: @GTK2_LIBS@ @XKB_LIBS@
+Cflags: -I${includedir}/eek-@EEK_API_VERSION@

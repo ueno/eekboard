@@ -80,6 +80,10 @@ struct _EekKeyClass
     void        (* get_keysym_index) (EekKey     *self,
                                       gint       *group,
                                       gint       *level);
+
+    /* signals */
+    void        (* pressed)          (EekKey     *key);
+    void        (* released)         (EekKey     *key);
 };
 
 GType       eek_key_get_type         (void) G_GNUC_CONST;

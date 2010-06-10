@@ -145,7 +145,8 @@ create_key (EekXkbLayout *layout,
             gdouble x1, y1, x2, y2;
 
             outline->num_points = 4;
-            outline->points = g_new0 (EekPoint, outline->num_points);
+            outline->points = g_slice_alloc0 (sizeof (EekPoint) *
+                                              outline->num_points);
             if (xkboutline->num_points == 1) {
                 x1 = xkb_to_pixmap_coord(layout, xkbshape->bounds.x1);
                 y1 = xkb_to_pixmap_coord(layout, xkbshape->bounds.y1);
@@ -232,9 +233,10 @@ create_section (EekXkbLayout  *layout,
 
     priv = layout->priv;
     xkbgeometry = priv->xkb->geom;
-    name = XGetAtomName (priv->display, xkbsection->name);
     section = eek_keyboard_create_section (keyboard);
+    name = XGetAtomName (priv->display, xkbsection->name);
     eek_element_set_name (EEK_ELEMENT(section), name);
+    XFree (name);
     eek_element_set_bounds (EEK_ELEMENT(section), &bounds);
     eek_section_set_angle (section,
                            /* angle is in tenth of degree */
@@ -303,11 +305,22 @@ static void
 eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
 {
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
+}
 
-    if (g_object_is_floating (keyboard))
-        g_object_unref (keyboard);
+static void
+eek_xkb_layout_real_set_names (EekXkbLayout *self, XkbComponentNamesRec *names)
+{
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
+
+    g_return_if_fail (priv);
+    g_free (priv->names.keycodes);
+    priv->names.keycodes = g_strdup (names->keycodes);
+    g_free (priv->names.geometry);
+    priv->names.geometry = g_strdup (names->geometry);
+    g_free (priv->names.symbols);
+    priv->names.symbols = g_strdup (names->symbols);
+    get_keyboard (self);
 }
 
 static void
@@ -318,7 +331,8 @@ eek_xkb_layout_finalize (GObject *object)
     g_free (priv->names.keycodes);
     g_free (priv->names.geometry);
     g_free (priv->names.symbols);
-    g_hash_table_unref (priv->outline_hash);
+    if (priv->outline_hash)
+        g_hash_table_unref (priv->outline_hash);
     XkbFreeKeyboard (priv->xkb, 0, TRUE);	/* free_all = TRUE */
     G_OBJECT_CLASS (eek_xkb_layout_parent_class)->finalize (object);
 }
@@ -392,12 +406,13 @@ eek_layout_iface_init (EekLayoutIface *iface)
 static void
 eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 {
-    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-    GParamSpec        *pspec;
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
 
-    gobject_class->finalize     = eek_xkb_layout_finalize;
+    klass->set_names = eek_xkb_layout_real_set_names;
+    gobject_class->finalize = eek_xkb_layout_finalize;
     gobject_class->set_property = eek_xkb_layout_set_property;
     gobject_class->get_property = eek_xkb_layout_get_property;
 
@@ -426,7 +441,9 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 static void
 outline_free (gpointer data)
 {
-    g_slice_free (EekOutline, data);
+    EekOutline *outline = data;
+    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
+    g_boxed_free (EEK_TYPE_OUTLINE, outline);
 }
 
 static void
@@ -435,9 +452,10 @@ eek_xkb_layout_init (EekXkbLayout *self)
     EekXkbLayoutPrivate *priv;
 
     priv = self->priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
-
     memset (&priv->names, 0, sizeof priv->names);
+
     priv->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    g_return_if_fail (priv->display);
 
     /* XXX: XkbClientMapMask | XkbIndicatorMapMask | XkbNamesMask |
        XkbGeometryMask */
@@ -555,8 +573,9 @@ eek_xkb_layout_new (const gchar *keycodes,
 void
 eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
 
+    g_return_if_fail (priv);
     g_free (priv->names.keycodes);
     priv->names.keycodes = g_strdup (keycodes);
     get_keyboard (layout);
@@ -572,8 +591,9 @@ eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
 void
 eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
 
+    g_return_if_fail (priv);
     g_free (priv->names.geometry);
     priv->names.geometry = g_strdup (geometry);
     get_keyboard (layout);
@@ -589,8 +609,9 @@ eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
 void
 eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
 
+    g_return_if_fail (priv);
     g_free (priv->names.symbols);
     priv->names.symbols = g_strdup (symbols);
     get_keyboard (layout);
@@ -605,8 +626,9 @@ eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
 G_CONST_RETURN gchar *
 eek_xkb_layout_get_keycodes (EekXkbLayout *layout)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
 
+    g_return_val_if_fail (priv, NULL);
     return priv->names.keycodes;
 }
 
@@ -619,7 +641,9 @@ eek_xkb_layout_get_keycodes (EekXkbLayout *layout)
 G_CONST_RETURN gchar *
 eek_xkb_layout_get_geometry (EekXkbLayout *layout)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+
+    g_return_val_if_fail (priv, NULL);
     return priv->names.geometry;
 }
 
@@ -632,8 +656,9 @@ eek_xkb_layout_get_geometry (EekXkbLayout *layout)
 G_CONST_RETURN gchar *
 eek_xkb_layout_get_symbols (EekXkbLayout *layout)
 {
-    EekXkbLayoutPrivate *priv = layout->priv;
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
 
+    g_return_val_if_fail (priv, NULL);
     return priv->names.symbols;
 }
 

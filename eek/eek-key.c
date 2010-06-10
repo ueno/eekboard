@@ -222,6 +222,18 @@ eek_key_real_get_keysym_index (EekKey *self,
 }
 
 static void
+eek_key_real_pressed (EekKey *key)
+{
+    g_debug ("pressed %X", eek_key_get_keycode (key));
+}
+
+static void
+eek_key_real_released (EekKey *key)
+{
+    g_debug ("released %X", eek_key_get_keycode (key));
+}
+
+static void
 eek_key_finalize (GObject *object)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(object);
@@ -354,6 +366,10 @@ eek_key_class_init (EekKeyClass *klass)
     gobject_class->get_property = eek_key_get_property;
     gobject_class->finalize     = eek_key_finalize;
 
+    /* signals */
+    klass->pressed = eek_key_real_pressed;
+    klass->released = eek_key_real_released;
+
     /**
      * EekKey:keycode:
      *
@@ -444,7 +460,7 @@ eek_key_class_init (EekKeyClass *klass)
         g_signal_new ("pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_STRUCT_OFFSET(EekKeyClass, pressed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__VOID,
@@ -454,7 +470,7 @@ eek_key_class_init (EekKeyClass *klass)
         g_signal_new ("released",
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_STRUCT_OFFSET(EekKeyClass, released),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__VOID,

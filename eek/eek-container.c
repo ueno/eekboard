@@ -58,7 +58,7 @@ eek_container_real_add_child (EekContainer *self,
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
 
     g_return_if_fail (EEK_IS_ELEMENT(child));
-    g_object_ref (child);
+    g_object_ref_sink (child);
     priv->children = g_slist_prepend (priv->children, child);
 }
 
@@ -88,6 +88,20 @@ eek_container_real_foreach_child (EekContainer *self,
         (*callback) (EEK_ELEMENT(head->data), user_data);
 }
 
+static EekElement *
+eek_container_real_find (EekContainer *self,
+                         EekCompareFunc func,
+                         gpointer user_data)
+{
+    EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
+    GSList *head;
+
+    head = g_slist_find_custom (priv->children, user_data, (GCompareFunc)func);
+    if (head)
+        return head->data;
+    return NULL;
+}
+
 static void
 eek_container_finalize (GObject *object)
 {
@@ -111,6 +125,7 @@ eek_container_class_init (EekContainerClass *klass)
     klass->add_child = eek_container_real_add_child;
     klass->remove_child = eek_container_real_remove_child;
     klass->foreach_child = eek_container_real_foreach_child;
+    klass->find = eek_container_real_find;
 
     gobject_class->finalize = eek_container_finalize;
 
@@ -154,4 +169,15 @@ eek_container_foreach_child (EekContainer *container,
     EEK_CONTAINER_GET_CLASS(container)->foreach_child (container,
                                                        callback,
                                                        user_data);
+}
+
+EekElement *
+eek_container_find (EekContainer  *container,
+                    EekCompareFunc func,
+                    gpointer       user_data)
+{
+    g_return_val_if_fail (EEK_IS_CONTAINER(container), NULL);
+    return EEK_CONTAINER_GET_CLASS(container)->find (container,
+                                                     func,
+                                                     user_data);
 }

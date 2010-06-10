@@ -1,5 +1,6 @@
 #include "eek/eek-clutter.h"
 #include "eek/eek-xkb.h"
+#include <gtk/gtk.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,31 +31,6 @@ static const GOptionEntry options[] = {
 };
 
 gfloat stage_width, stage_height;
-
-static gboolean
-on_event (ClutterStage *stage,
-	  ClutterEvent *event,
-	  gpointer      user_data)
-{
-    if (event->type == CLUTTER_BUTTON_PRESS) {
-        ClutterActor *actor = clutter_event_get_source (event);
-
-        if (EEK_IS_KEY(actor)) {
-            guint keysym;
-            const gchar *label = NULL;
-
-            keysym = eek_key_get_keysym (EEK_KEY(actor));
-            if (keysym != EEK_INVALID_KEYSYM)
-                label = eek_keysym_to_string (keysym);
-            if (label) {
-                printf ("%s", label);
-                fflush (stdout);
-            }
-        }
-        return TRUE;
-    }
-    return FALSE;
-}
 
 static void
 on_resize (GObject *object,
@@ -107,7 +83,6 @@ main (int argc, char *argv[])
     g_option_context_free (context);
 
     clutter_init (&argc, &argv);
-
     gtk_init (&argc, &argv);
 
     layout = eek_xkb_layout_new (keycodes, geometry, symbols);
@@ -115,7 +90,6 @@ main (int argc, char *argv[])
         fprintf (stderr, "Failed to create layout\n");
         exit(1);
     }
-    g_object_ref_sink (layout);
 
     keyboard = eek_clutter_keyboard_new (CSW, CSH);
     if (keyboard == NULL) {
@@ -123,11 +97,13 @@ main (int argc, char *argv[])
         fprintf (stderr, "Failed to create keyboard\n");
         exit(1);
     }
-    g_object_ref_sink (keyboard);
 
-    g_signal_connect (keyboard, "key-pressed", G_CALLBACK(key_pressed_event), NULL);
+    g_signal_connect (keyboard, "key-pressed",
+                      G_CALLBACK(key_pressed_event), NULL);
+
     eek_keyboard_set_layout (keyboard, layout);
     actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard));
+
     stage = clutter_stage_get_default ();
 
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);

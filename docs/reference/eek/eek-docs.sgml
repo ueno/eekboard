@@ -32,6 +32,10 @@
     <title>XKB layout engine</title>
     <xi:include href="xml/eek-xkb-layout.xml"/>
   </chapter>
+  <chapter>
+    <title>Libxklavier layout engine</title>
+    <xi:include href="xml/eek-xkl-layout.xml"/>
+  </chapter>
   <chapter id="object-tree">
     <title>Object Hierarchy</title>
      <xi:include href="xml/tree_index.sgml"/>

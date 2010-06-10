@@ -158,7 +158,6 @@ eek_section_real_create_key (EekSection  *self,
                         "row", row,
                         NULL);
     g_return_val_if_fail (key, NULL);
-    g_object_ref_sink (key);
 
     g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
     g_signal_connect (key, "released", G_CALLBACK(released_event), self);
@@ -167,6 +166,23 @@ eek_section_real_create_key (EekSection  *self,
                                               EEK_ELEMENT(key));
 
     return key;
+}
+
+static gint
+compare_key_by_keycode (EekElement *element, gpointer user_data)
+{
+    if (eek_key_get_keycode (EEK_KEY(element)) == (guint)(long)user_data)
+        return 0;
+    return -1;
+}
+
+static EekKey *
+eek_section_real_find_key_by_keycode (EekSection *self,
+                                      guint       keycode)
+{
+    return (EekKey *)eek_container_find (EEK_CONTAINER(self),
+                                         compare_key_by_keycode,
+                                         (gpointer)(long)keycode);
 }
 
 static void
@@ -178,10 +194,6 @@ eek_section_finalize (GObject *object)
     for (head = priv->rows; head; head = g_slist_next (head))
         g_slice_free (EekRow, head->data);
     g_slist_free (priv->rows);
-
-    for (head = priv->keys; head; head = g_slist_next (head))
-        g_object_unref (head->data);
-    g_slist_free (priv->keys);
 
     G_OBJECT_CLASS (eek_section_parent_class)->finalize (object);
 }
@@ -237,6 +249,7 @@ eek_section_class_init (EekSectionClass *klass)
     klass->add_row = eek_section_real_add_row;
     klass->get_row = eek_section_real_get_row;
     klass->create_key = eek_section_real_create_key;
+    klass->find_key_by_keycode = eek_section_real_find_key_by_keycode;
 
     gobject_class->set_property = eek_section_set_property;
     gobject_class->get_property = eek_section_get_property;
@@ -289,7 +302,6 @@ eek_section_init (EekSection *self)
     priv = self->priv = EEK_SECTION_GET_PRIVATE (self);
     priv->angle = 0;
     priv->rows = NULL;
-    priv->keys = NULL;
 }
 
 void
@@ -345,4 +357,13 @@ eek_section_create_key (EekSection  *section,
 {
     g_return_val_if_fail (EEK_IS_SECTION(section), NULL);
     return EEK_SECTION_GET_CLASS(section)->create_key (section, column, row);
+}
+
+EekKey *
+eek_section_find_key_by_keycode (EekSection *section,
+                                 guint       keycode)
+{
+    g_return_val_if_fail (EEK_IS_SECTION(section), NULL);
+    return EEK_SECTION_GET_CLASS(section)->find_key_by_keycode (section,
+                                                                keycode);
 }

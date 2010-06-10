@@ -49,8 +49,9 @@ struct _EekClutterKeyActorClass
     /*< private >*/
     ClutterGroupClass parent_class;
 
-    /* outline pointer -> ClutterTexture */
-    GHashTable *outline_textures;
+    /* signals */
+    void (* pressed) (EekClutterKeyActor *self);
+    void (* released) (EekClutterKeyActor *self);
 };
 
 GType eek_clutter_key_actor_get_type (void) G_GNUC_CONST;

@@ -60,6 +60,8 @@ struct _EekKeyboardPrivate
 {
     gint group;
     gint level;
+    EekLayout *layout;
+    gboolean is_realized;
 };
 
 struct keysym_index {
@@ -141,7 +143,6 @@ eek_keyboard_real_create_section (EekKeyboard *self)
 
     section = g_object_new (EEK_TYPE_SECTION, NULL);
     g_return_val_if_fail (section, NULL);
-    g_object_ref_sink (section);
 
     g_signal_connect (section, "key-pressed",
                       G_CALLBACK(key_pressed_event), self);
@@ -157,12 +158,64 @@ static void
 eek_keyboard_real_set_layout (EekKeyboard *self,
                               EekLayout   *layout)
 {
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+
     g_return_if_fail (EEK_IS_LAYOUT(layout));
+    priv->layout = layout;
+    g_object_ref_sink (priv->layout);
+}
 
-    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, self);
+static void
+eek_keyboard_real_realize (EekKeyboard *self)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
 
-    if (g_object_is_floating (layout))
-        g_object_unref (layout);
+    g_return_if_fail (priv->layout);
+    g_return_if_fail (!priv->is_realized);
+    EEK_LAYOUT_GET_IFACE(priv->layout)->apply (priv->layout, self);
+    priv->is_realized = TRUE;
+}
+
+struct find_key_by_keycode_data {
+    EekKey *key;
+    guint keycode;
+};
+
+static gint
+compare_section_by_keycode (EekElement *element, gpointer user_data)
+{
+    struct find_key_by_keycode_data *data = user_data;
+
+    data->key = eek_section_find_key_by_keycode (EEK_SECTION(element),
+                                                 data->keycode);
+    if (data->key)
+        return 0;
+    return -1;
+}
+
+static EekKey *
+eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
+                                       guint        keycode)
+{
+    struct find_key_by_keycode_data data;
+
+    data.keycode = keycode;
+    if (eek_container_find (EEK_CONTAINER(self),
+                            compare_section_by_keycode,
+                            &data))
+        return data.key;
+    return NULL;
+}
+
+static void
+eek_keyboard_finalize (GObject *object)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
+
+    if (priv->layout)
+        g_object_unref (priv->layout);
+
+    G_OBJECT_CLASS(eek_keyboard_parent_class)->finalize (object);
 }
 
 static void
@@ -234,9 +287,12 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     klass->get_keysym_index = eek_keyboard_real_get_keysym_index;
     klass->create_section = eek_keyboard_real_create_section;
     klass->set_layout = eek_keyboard_real_set_layout;
+    klass->realize = eek_keyboard_real_realize;
+    klass->find_key_by_keycode = eek_keyboard_real_find_key_by_keycode;
 
     gobject_class->get_property = eek_keyboard_get_property;
     gobject_class->set_property = eek_keyboard_set_property;
+    gobject_class->finalize = eek_keyboard_finalize;
 
     /**
      * EekKeyboard:group:
@@ -298,6 +354,8 @@ eek_keyboard_init (EekKeyboard *self)
 
     priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
     priv->group = priv->level = 0;
+    priv->layout = NULL;
+    priv->is_realized = FALSE;
 }
 
 /**
@@ -367,4 +425,20 @@ eek_keyboard_set_layout (EekKeyboard *keyboard,
 {
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
     EEK_KEYBOARD_GET_CLASS(keyboard)->set_layout (keyboard, layout);
+}
+
+void
+eek_keyboard_realize (EekKeyboard *keyboard)
+{
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    EEK_KEYBOARD_GET_CLASS(keyboard)->realize (keyboard);
+}
+
+EekKey *
+eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
+                                  guint        keycode)
+{
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
+    return EEK_KEYBOARD_GET_CLASS(keyboard)->find_key_by_keycode (keyboard,
+                                                                  keycode);
 }

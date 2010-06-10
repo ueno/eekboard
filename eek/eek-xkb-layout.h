@@ -50,34 +50,26 @@ struct _EekXkbLayoutClass
     /*< private >*/
     GInitiallyUnownedClass parent_class;
 
-    void                  (* set_keycodes) (EekXkbLayout *self,
-                                            const gchar  *keycodes);
-    void                  (* set_geometry) (EekXkbLayout *self,
-                                            const gchar  *geometry);
-    void                  (* set_symbols)  (EekXkbLayout *self,
-                                            const gchar  *symbols);
-
-    G_CONST_RETURN gchar *(* get_keycodes) (EekXkbLayout *self);
-    G_CONST_RETURN gchar *(* get_geometry) (EekXkbLayout *self);
-    G_CONST_RETURN gchar *(* get_symbols)  (EekXkbLayout *self);
+    void (* set_names) (EekXkbLayout         *self,
+                        XkbComponentNamesRec *names);
 };
 
 GType                 eek_xkb_layout_get_type     (void) G_GNUC_CONST;
 
-EekLayout            *eek_xkb_layout_new          (const gchar   *keycodes,
-                                                   const gchar   *geometry,
-                                                   const gchar   *symbols);
+EekLayout            *eek_xkb_layout_new          (const gchar  *keycodes,
+                                                   const gchar  *geometry,
+                                                   const gchar  *symbols);
 
-void                  eek_xkb_layout_set_keycodes (EekXkbLayout  *layout,
-                                                   const gchar   *keycodes);
-void                  eek_xkb_layout_set_geometry (EekXkbLayout  *layout,
-                                                   const gchar   *geometry);
-void                  eek_xkb_layout_set_symbols  (EekXkbLayout  *layout,
-                                                   const gchar   *symbols);
+void                  eek_xkb_layout_set_keycodes (EekXkbLayout *layout,
+                                                   const gchar  *keycodes);
+void                  eek_xkb_layout_set_geometry (EekXkbLayout *layout,
+                                                   const gchar  *geometry);
+void                  eek_xkb_layout_set_symbols  (EekXkbLayout *layout,
+                                                   const gchar  *symbols);
 
-G_CONST_RETURN gchar *eek_xkb_layout_get_keycodes (EekXkbLayout * layout);
-G_CONST_RETURN gchar *eek_xkb_layout_get_geometry (EekXkbLayout * layout);
-G_CONST_RETURN gchar *eek_xkb_layout_get_symbols  (EekXkbLayout * layout);
+G_CONST_RETURN gchar *eek_xkb_layout_get_keycodes (EekXkbLayout *layout);
+G_CONST_RETURN gchar *eek_xkb_layout_get_geometry (EekXkbLayout *layout);
+G_CONST_RETURN gchar *eek_xkb_layout_get_symbols  (EekXkbLayout *layout);
 
 G_END_DECLS
 #endif				/* #ifndef EEK_XKB_LAYOUT_H */

@@ -69,12 +69,28 @@ eek_clutter_key_real_set_bounds (EekElement *self,
 }
 
 static void
+eek_clutter_key_real_pressed (EekKey *key)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
+
+    if (priv->actor)
+        g_signal_emit_by_name (priv->actor, "pressed");
+}
+
+static void
+eek_clutter_key_real_released (EekKey *key)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
+
+    if (priv->actor)
+        g_signal_emit_by_name (priv->actor, "released");
+}
+
+static void
 eek_clutter_key_finalize (GObject *object)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
 
-    /* No need for clutter_group_remove_all() since
-       ClutterGroup#dispose() unrefs all the children. */
     if (priv->actor)
         g_object_unref (priv->actor);
     G_OBJECT_CLASS (eek_clutter_key_parent_class)->finalize (object);
@@ -85,6 +101,7 @@ eek_clutter_key_class_init (EekClutterKeyClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     EekElementClass *element_class = EEK_ELEMENT_CLASS (klass);
+    EekKeyClass *key_class = EEK_KEY_CLASS (klass);
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterKeyPrivate));
@@ -92,6 +109,10 @@ eek_clutter_key_class_init (EekClutterKeyClass *klass)
     element_class->set_name = eek_clutter_key_real_set_name;
     element_class->set_bounds = eek_clutter_key_real_set_bounds;
     gobject_class->finalize = eek_clutter_key_finalize;
+
+    /* signals */
+    key_class->pressed = eek_clutter_key_real_pressed;
+    key_class->released = eek_clutter_key_real_released;
 }
 
 static void
@@ -106,7 +127,9 @@ ClutterActor *
 eek_clutter_key_get_actor (EekClutterKey *key)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
-    if (!priv->actor)
+    if (!priv->actor) {
         priv->actor = eek_clutter_key_actor_new (EEK_KEY(key));
+        g_object_ref_sink (priv->actor);
+    }
     return priv->actor;
 }

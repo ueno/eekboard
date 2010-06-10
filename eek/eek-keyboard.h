@@ -51,32 +51,38 @@ struct _EekKeyboardClass
     EekContainerClass parent_class;
 
     /*< public >*/
-    void        (* set_keysym_index) (EekKeyboard *self,
-                                      gint         group,
-                                      gint         level);
-    void        (* get_keysym_index) (EekKeyboard *self,
-                                      gint        *group,
-                                      gint        *level);
+    void        (* set_keysym_index)    (EekKeyboard *self,
+                                         gint         group,
+                                         gint         level);
+    void        (* get_keysym_index)    (EekKeyboard *self,
+                                         gint        *group,
+                                         gint        *level);
 
-    EekSection *(* create_section)   (EekKeyboard *self);
+    EekSection *(* create_section)      (EekKeyboard *self);
 
-    void        (* set_layout)       (EekKeyboard *self,
-                                      EekLayout   *layout);
+    void        (* set_layout)          (EekKeyboard *self,
+                                         EekLayout   *layout);
+    EekKey     *(* find_key_by_keycode) (EekKeyboard *self,
+                                         guint        keycode);
+    void        (* realize)             (EekKeyboard *self);
 };
 
-GType       eek_keyboard_get_type         (void) G_GNUC_CONST;
+GType       eek_keyboard_get_type            (void) G_GNUC_CONST;
 
-void        eek_keyboard_set_keysym_index (EekKeyboard *self,
-                                           gint         group,
-                                           gint         level);
-void        eek_keyboard_get_keysym_index (EekKeyboard *self,
-                                           gint        *group,
-                                           gint        *level);
+void        eek_keyboard_set_keysym_index    (EekKeyboard *self,
+                                              gint         group,
+                                              gint         level);
+void        eek_keyboard_get_keysym_index    (EekKeyboard *self,
+                                              gint        *group,
+                                              gint        *level);
 
-EekSection *eek_keyboard_create_section   (EekKeyboard *keyboard);
+EekSection *eek_keyboard_create_section      (EekKeyboard *keyboard);
 
-void        eek_keyboard_set_layout       (EekKeyboard *keyboard,
-                                           EekLayout   *layout);
+void        eek_keyboard_set_layout          (EekKeyboard *keyboard,
+                                              EekLayout   *layout);
+void        eek_keyboard_realize          (EekKeyboard *keyboard);
+EekKey     *eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
+                                              guint        keycode);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

@@ -37,6 +37,7 @@ test_create (void)
     g_assert (EEK_IS_KEY(key1));
 }
 
+#if 0
 static void
 test_create_clutter (void)
 {
@@ -57,6 +58,7 @@ test_create_clutter (void)
     g_assert (CLUTTER_IS_ACTOR(actor));
     g_object_unref (keyboard);
 }
+#endif
 
 int
 main (int argc, char **argv)
@@ -64,7 +66,9 @@ main (int argc, char **argv)
     g_type_init ();
     g_test_init (&argc, &argv, NULL);
     g_test_add_func ("/eek-simple-test/create", test_create);
+#if 0
     clutter_init (&argc, &argv);
     g_test_add_func ("/eek-simple-test/create-clutter", test_create_clutter);
+#endif
     return g_test_run ();
 }
