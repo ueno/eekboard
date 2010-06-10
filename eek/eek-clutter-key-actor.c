@@ -1,4 +1,5 @@
 /* 
+ * Copyright (C) 2006 Sergey V. Udaltsov <svu@gnome.org>
  * Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
  * Copyright (C) 2010 Red Hat, Inc.
  * 
@@ -23,6 +24,8 @@
  * @short_description: Custom #ClutterActor drawing a key shape
  */
 
+#include <cogl/cogl.h>
+#include <cogl/cogl-pango.h>
 #include <math.h>
 
 #ifdef HAVE_CONFIG_H
@@ -30,8 +33,6 @@
 #endif  /* HAVE_CONFIG_H */
 #include "eek-clutter-key-actor.h"
 #include "eek-keysym.h"
-#include <cogl/cogl.h>
-#include <cogl/cogl-pango.h>
 
 #define noKBDRAW_DEBUG
 
@@ -61,11 +62,16 @@ static struct {
     gint outline_textures_ref_count;
 } texture_cache;
 
-static ClutterActor *get_texture        (EekClutterKeyActor *actor);
-static void          draw_key_on_layout (EekKey             *key,
-                                         PangoLayout        *layout);
-static void          key_enlarge        (ClutterActor       *actor);
-static void          key_shrink         (ClutterActor       *actor);
+static ClutterActor *get_texture          (EekClutterKeyActor *actor);
+static void          draw_key_on_layout   (EekKey             *key,
+                                           PangoLayout        *layout);
+static void          key_enlarge          (ClutterActor       *actor);
+static void          key_shrink           (ClutterActor       *actor);
+static void          draw_rounded_polygon (cairo_t            *cr,
+                                           gboolean            filled,
+                                           gdouble             radius,
+                                           EekPoint           *points,
+                                           gint                num_points);
 
 static void
 eek_clutter_key_actor_real_paint (ClutterActor *self)
@@ -101,11 +107,12 @@ eek_clutter_key_actor_real_paint (ClutterActor *self)
     /* FIXME: Color should be configurable through a property. */
     cogl_color_set_from_4ub (&color, 0x80, 0x00, 0x00, 0xff);
     clutter_actor_get_allocation_geometry (self, &geom);
-    cogl_pango_render_layout (layout,
-                              (geom.width - logical_rect.width / PANGO_SCALE) / 2,
-                              (geom.height - logical_rect.height / PANGO_SCALE) / 2,
-                              &color,
-                              0);
+    cogl_pango_render_layout
+        (layout,
+         (geom.width - logical_rect.width / PANGO_SCALE) / 2,
+         (geom.height - logical_rect.height / PANGO_SCALE) / 2,
+         &color,
+         0);
     g_object_unref (layout);
 }
 
@@ -302,6 +309,134 @@ key_shrink (ClutterActor *actor)
                            NULL);
 }
 
+
+static ClutterActor *
+create_texture_for_key (EekKey *key)
+{
+    ClutterActor *texture;
+    cairo_t *cr;
+    cairo_pattern_t *pat;
+    EekOutline *outline;
+    EekBounds bounds;
+
+    outline = eek_key_get_outline (EEK_KEY(key));
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+ 
+    texture = clutter_cairo_texture_new (bounds.width, bounds.height);
+    cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
+    cairo_set_line_width (cr, 1);
+    cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+
+    pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
+    cairo_pattern_add_color_stop_rgba (pat, 1, 0.5, 0.5, 0.5, 1);
+    cairo_pattern_add_color_stop_rgba (pat, 0, 1, 1, 1, 1);
+
+    cairo_set_source (cr, pat);
+
+    draw_rounded_polygon (cr,
+                          TRUE,
+                          outline->corner_radius,
+                          outline->points,
+                          outline->num_points);
+
+    cairo_pattern_destroy (pat);
+
+    cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5);
+    draw_rounded_polygon (cr,
+                          FALSE,
+                          outline->corner_radius,
+                          outline->points,
+                          outline->num_points);
+    cairo_destroy (cr);
+    return texture;
+}
+
+static ClutterActor *
+get_texture (EekClutterKeyActor *actor)
+{
+    ClutterActor *texture;
+    EekOutline *outline;
+
+    if (!texture_cache.outline_textures)
+        texture_cache.outline_textures = g_hash_table_new_full (g_direct_hash,
+                                                                g_direct_equal,
+                                                                NULL,
+                                                                g_free);
+    outline = eek_key_get_outline (actor->priv->key);
+    texture = g_hash_table_lookup (texture_cache.outline_textures, outline);
+    if (texture == NULL) {
+        texture = create_texture_for_key (actor->priv->key);
+        g_hash_table_insert (texture_cache.outline_textures, outline, texture);
+    } else
+        texture = clutter_clone_new (texture);
+    texture_cache.outline_textures_ref_count++;
+    return texture;
+}
+
+static void
+draw_text_on_layout (PangoLayout *layout,
+                     const gchar *text,
+                     gdouble      scale)
+{
+    PangoFontDescription *font_desc;
+
+#define FONT_SIZE (720 * 50)
+    /* FIXME: Font should be configurable through a property. */
+    font_desc = pango_font_description_from_string ("Sans");
+    pango_font_description_set_size (font_desc, FONT_SIZE * scale);
+    pango_layout_set_font_description (layout, font_desc);
+    pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
+    pango_layout_set_text (layout, text, -1);
+    pango_font_description_free (font_desc);
+}
+
+static void
+draw_key_on_layout (EekKey      *key,
+                    PangoLayout *layout)
+{
+    PangoLayout *buffer;
+    PangoRectangle logical_rect = { 0, };
+    EekBounds bounds;
+    guint keysym;
+    const gchar *label, *empty_label = "";
+    gdouble scale_x, scale_y;
+
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    keysym = eek_key_get_keysym (key);
+    if (keysym == EEK_INVALID_KEYSYM)
+        return;
+    label = eek_keysym_to_string (keysym);
+    if (!label)
+        label = empty_label;
+
+    /* Compute the layout extents. */
+    buffer = pango_layout_copy (layout);
+    draw_text_on_layout (buffer, label, 1.0);
+    pango_layout_get_extents (buffer, NULL, &logical_rect);
+    scale_x = scale_y = 1.0;
+    if (PANGO_PIXELS(logical_rect.width) > bounds.width)
+        scale_x = bounds.width / PANGO_PIXELS(logical_rect.width);
+    if (PANGO_PIXELS(logical_rect.height) > bounds.height)
+        scale_y = bounds.height / PANGO_PIXELS(logical_rect.height);
+    g_object_unref (buffer);
+
+    /* Actually draw on the layout */
+    draw_text_on_layout (layout,
+                         label,
+                         (scale_x < scale_y ? scale_x : scale_y) * 0.8);
+    if (label != empty_label)
+        g_free ((gpointer)label);
+}
+
+/*
+ * The functions below are borrowed from
+ * libgnomekbd/gkbd-keyboard-drawing.c.
+ * Copyright (C) 2006 Sergey V. Udaltsov <svu@gnome.org>
+ *
+ * length(), point_line_distance(), normal_form(), inverse(), multiply(),
+ * intersect(), rounded_corner(), draw_rounded_polygon()
+ */
+
 static gdouble
 length (gdouble x, gdouble y)
 {
@@ -469,7 +604,7 @@ rounded_corner (cairo_t * cr,
     cairo_line_to (cr, cx, cy);
 }
 
-void
+static void
 draw_rounded_polygon (cairo_t  *cr,
                       gboolean  filled,
                       gdouble   radius,
@@ -507,122 +642,4 @@ draw_rounded_polygon (cairo_t  *cr,
         cairo_fill (cr);
     else
         cairo_stroke (cr);
-}
-
-static ClutterActor *
-create_texture_for_key (EekKey *key)
-{
-    ClutterActor *texture;
-    cairo_t *cr;
-    cairo_pattern_t *pat;
-    EekOutline *outline;
-    EekBounds bounds;
-
-    outline = eek_key_get_outline (EEK_KEY(key));
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
- 
-    texture = clutter_cairo_texture_new (bounds.width, bounds.height);
-    cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
-    cairo_set_line_width (cr, 1);
-    cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-
-    pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
-    cairo_pattern_add_color_stop_rgba (pat, 1, 0.5, 0.5, 0.5, 1);
-    cairo_pattern_add_color_stop_rgba (pat, 0, 1, 1, 1, 1);
-
-    cairo_set_source (cr, pat);
-
-    draw_rounded_polygon (cr,
-                          TRUE,
-                          outline->corner_radius,
-                          outline->points,
-                          outline->num_points);
-
-    cairo_pattern_destroy (pat);
-
-    cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5);
-    draw_rounded_polygon (cr,
-                          FALSE,
-                          outline->corner_radius,
-                          outline->points,
-                          outline->num_points);
-    cairo_destroy (cr);
-    return texture;
-}
-
-static ClutterActor *
-get_texture (EekClutterKeyActor *actor)
-{
-    ClutterActor *texture;
-    EekOutline *outline;
-
-    if (!texture_cache.outline_textures)
-        texture_cache.outline_textures = g_hash_table_new_full (g_direct_hash,
-                                                                g_direct_equal,
-                                                                NULL,
-                                                                g_free);
-    outline = eek_key_get_outline (actor->priv->key);
-    texture = g_hash_table_lookup (texture_cache.outline_textures, outline);
-    if (texture == NULL) {
-        texture = create_texture_for_key (actor->priv->key);
-        g_hash_table_insert (texture_cache.outline_textures, outline, texture);
-    } else
-        texture = clutter_clone_new (texture);
-    texture_cache.outline_textures_ref_count++;
-    return texture;
-}
-
-static void
-draw_text_on_layout (PangoLayout *layout,
-                     const gchar *text,
-                     gdouble      scale)
-{
-    PangoFontDescription *font_desc;
-
-#define FONT_SIZE (720 * 50)
-    /* FIXME: Font should be configurable through a property. */
-    font_desc = pango_font_description_from_string ("Sans");
-    pango_font_description_set_size (font_desc, FONT_SIZE * scale);
-    pango_layout_set_font_description (layout, font_desc);
-    pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text (layout, text, -1);
-    pango_font_description_free (font_desc);
-}
-
-static void
-draw_key_on_layout (EekKey      *key,
-                    PangoLayout *layout)
-{
-    PangoLayout *buffer;
-    PangoRectangle logical_rect = { 0, };
-    EekBounds bounds;
-    guint keysym;
-    const gchar *label, *empty_label = "";
-    gdouble scale_x, scale_y;
-
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    keysym = eek_key_get_keysym (key);
-    if (keysym == EEK_INVALID_KEYSYM)
-        return;
-    label = eek_keysym_to_string (keysym);
-    if (!label)
-        label = empty_label;
-
-    /* Compute the layout extents. */
-    buffer = pango_layout_copy (layout);
-    draw_text_on_layout (buffer, label, 1.0);
-    pango_layout_get_extents (buffer, NULL, &logical_rect);
-    scale_x = scale_y = 1.0;
-    if (PANGO_PIXELS(logical_rect.width) > bounds.width)
-        scale_x = bounds.width / PANGO_PIXELS(logical_rect.width);
-    if (PANGO_PIXELS(logical_rect.height) > bounds.height)
-        scale_y = bounds.height / PANGO_PIXELS(logical_rect.height);
-    g_object_unref (buffer);
-
-    /* Actually draw on the layout */
-    draw_text_on_layout (layout,
-                         label,
-                         (scale_x < scale_y ? scale_x : scale_y) * 0.8);
-    if (label != empty_label)
-        g_free ((gpointer)label);
 }
