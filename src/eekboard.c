@@ -1,3 +1,23 @@
+/* 
+ * Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
+ * Copyright (C) 2010 Red Hat, Inc.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ */
+
 #include <clutter-gtk/clutter-gtk.h>
 #include <fakekey/fakekey.h>
 #include <glib/gi18n.h>
@@ -28,7 +48,7 @@ Window target;
 EekLayout *layout;
 EekKeyboard *eek_keyboard;
 
-static void on_capture_key_event_toggled (GtkToggleAction *action,
+static void on_monitor_key_event_toggled (GtkToggleAction *action,
                                           GtkWidget *window);
 
 static const GOptionEntry options[] = {
@@ -47,12 +67,12 @@ static const GtkActionEntry action_entry[] = {
 };
 
 static const GtkToggleActionEntry toggle_action_entry[] = {
-    {"CaptureKeyEvent", NULL, N_("Capture Key Event"), NULL, NULL,
-     G_CALLBACK(on_capture_key_event_toggled), FALSE}
+    {"MonitorKeyEvent", NULL, N_("Monitor Key Typing"), NULL, NULL,
+     G_CALLBACK(on_monitor_key_event_toggled), FALSE}
 };
 
 static void
-on_capture_key_event_toggled (GtkToggleAction *action,
+on_monitor_key_event_toggled (GtkToggleAction *action,
                               GtkWidget *window)
 {
     gboolean active;
@@ -145,7 +165,7 @@ static const char ui_description[] =
     "      <menuitem action='Quit'/>"
     "    </menu>"
     "    <menu action='KeyboardMenu'>"
-    "      <menuitem action='CaptureKeyEvent'/>"
+    "      <menuitem action='MonitorKeyEvent'/>"
     "      <menu action='SetLayout'>"
     "        <placeholder name='LayoutsPH'/>"
     "      </menu>"
@@ -386,6 +406,7 @@ main (int argc, char *argv[])
         exit (1);
     }
 
+    clutter_actor_show (stage); /* workaround for clutter-gtk (<= 0.10.2) */
     eek_keyboard = create_keyboard (stage, layout, CSW, CSH);
     if (!eek_keyboard) {
         g_object_unref (layout);
