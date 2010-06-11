@@ -420,10 +420,21 @@ eek_xkb_layout_get_property (GObject    *object,
         }
 }
 
+static gint
+eek_xkb_layout_real_get_group (EekLayout *self)
+{
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
+    XkbStateRec state;
+
+    g_return_val_if_fail (XkbGetState (priv->display, XkbUseCoreKbd, &state), -1);
+    return state.group;
+}
+
 static void
 eek_layout_iface_init (EekLayoutIface *iface)
 {
     iface->apply = eek_xkb_layout_real_apply;
+    iface->get_group = eek_xkb_layout_real_get_group;
 }
 
 static void
