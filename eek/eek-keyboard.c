@@ -155,6 +155,18 @@ eek_keyboard_real_create_section (EekKeyboard *self)
 }
 
 static void
+on_group_changed (EekLayout *layout,
+                  gint       new_group,
+                  gpointer   user_data)
+{
+    EekKeyboard *keyboard = user_data;
+    gint group, level;
+
+    eek_keyboard_get_keysym_index (keyboard, &group, &level);
+    eek_keyboard_set_keysym_index (keyboard, new_group, level);
+}
+
+static void
 eek_keyboard_real_set_layout (EekKeyboard *self,
                               EekLayout   *layout)
 {
@@ -163,6 +175,8 @@ eek_keyboard_real_set_layout (EekKeyboard *self,
     g_return_if_fail (EEK_IS_LAYOUT(layout));
     priv->layout = layout;
     g_object_ref_sink (priv->layout);
+    g_signal_connect (priv->layout, "group_changed",
+                      G_CALLBACK(on_group_changed), self);
 }
 
 static void
@@ -173,6 +187,8 @@ eek_keyboard_real_realize (EekKeyboard *self)
     g_return_if_fail (priv->layout);
     g_return_if_fail (!priv->is_realized);
     EEK_LAYOUT_GET_IFACE(priv->layout)->apply (priv->layout, self);
+    /* apply the initial group setting */
+    on_group_changed (priv->layout, eek_layout_get_group (priv->layout), self);
     priv->is_realized = TRUE;
 }
 

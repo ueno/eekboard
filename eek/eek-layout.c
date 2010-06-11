@@ -33,13 +33,39 @@
 #include "eek-layout.h"
 #include "eek-keyboard.h"
 
+enum {
+    GROUP_CHANGED,
+    CHANGED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
 static void
 eek_layout_base_init (gpointer gobject_class)
 {
     static gboolean is_initialized = FALSE;
 
     if (!is_initialized) {
-        /* TODO: signals */
+        signals[GROUP_CHANGED] =
+            g_signal_new ("group-changed",
+                          G_TYPE_FROM_INTERFACE(gobject_class),
+                          G_SIGNAL_RUN_FIRST,
+                          G_STRUCT_OFFSET(EekLayoutIface, group_changed),
+                          NULL,
+                          NULL,
+                          g_cclosure_marshal_VOID__INT,
+                          G_TYPE_NONE, 1,
+                          G_TYPE_INT);
+        signals[CHANGED] =
+            g_signal_new ("changed",
+                          G_TYPE_FROM_INTERFACE(gobject_class),
+                          G_SIGNAL_RUN_FIRST,
+                          G_STRUCT_OFFSET(EekLayoutIface, changed),
+                          NULL,
+                          NULL,
+                          g_cclosure_marshal_VOID__VOID,
+                          G_TYPE_NONE, 0);
         is_initialized = TRUE;
     }
 }
@@ -69,3 +95,9 @@ eek_layout_apply (EekLayout   *layout,
     EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
 }
 
+gint
+eek_layout_get_group (EekLayout *layout)
+{
+    g_return_val_if_fail (EEK_IS_LAYOUT(layout), -1);
+    return EEK_LAYOUT_GET_IFACE(layout)->get_group (layout);
+}

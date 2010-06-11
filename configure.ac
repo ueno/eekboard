@@ -34,12 +34,16 @@ PKG_CHECK_MODULES([PANGO], [pango], ,
   [AC_MSG_ERROR([Pango not found])])
 PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
   [AC_MSG_ERROR([Clutter not found])])
+PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10], ,
+  [AC_MSG_ERROR([clutter-gtk not found])])
 PKG_CHECK_MODULES([GTK2], [gtk+-2.0 gdk-2.0], ,
   [AC_MSG_ERROR([GTK2 not found])])
 PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
+PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
+  [AC_MSG_ERROR([libfakekey not found])])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
@@ -51,6 +55,7 @@ AC_CHECK_PROGS([PYTHON], [python])
 AC_CONFIG_HEADERS([eek/config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
+src/Makefile
 examples/Makefile
 tests/Makefile
 docs/Makefile

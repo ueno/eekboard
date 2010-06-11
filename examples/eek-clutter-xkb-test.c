@@ -1,9 +1,14 @@
-#include "eek/eek-clutter.h"
-#include "eek/eek-xkb.h"
 #include <gtk/gtk.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
+#include "eek/eek-clutter.h"
+#include "eek/eek-xkb.h"
 
 #define CSW 640
 #define CSH 480

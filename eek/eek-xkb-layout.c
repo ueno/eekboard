@@ -27,14 +27,15 @@
  * elements using XKB.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif  /* HAVE_CONFIG_H */
-
 #include <gdk/gdkx.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBgeom.h>
 #include <string.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include "eek-xkb-layout.h"
 #include "eek-keyboard.h"
 #include "eek-section.h"
@@ -308,19 +309,41 @@ eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
 }
 
+static gint
+compare_component_names (gchar *name0, gchar *name1)
+{
+    if (name0 && name1)
+        return g_strcmp0 (name0, name1);
+    else if (!name0 && name1)
+        return -1;
+    else if (name0 && !name1)
+        return 1;
+    else
+        return 0;
+}
+
 static void
 eek_xkb_layout_real_set_names (EekXkbLayout *self, XkbComponentNamesRec *names)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
+    gboolean is_changed;
 
     g_return_if_fail (priv);
+    is_changed =
+        compare_component_names (names->keycodes, priv->names.keycodes) != 0;
     g_free (priv->names.keycodes);
     priv->names.keycodes = g_strdup (names->keycodes);
+    is_changed =
+        compare_component_names (names->geometry, priv->names.geometry) != 0;
     g_free (priv->names.geometry);
     priv->names.geometry = g_strdup (names->geometry);
+    is_changed =
+        compare_component_names (names->symbols, priv->names.symbols) != 0;
     g_free (priv->names.symbols);
     priv->names.symbols = g_strdup (names->symbols);
     get_keyboard (self);
+    if (is_changed)
+        g_signal_emit_by_name (self, "changed");
 }
 
 static void
@@ -574,11 +597,18 @@ void
 eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+    gboolean is_changed = TRUE;
 
     g_return_if_fail (priv);
+    if (keycodes && priv->names.keycodes)
+        is_changed = g_strcmp0 (keycodes, priv->names.keycodes) != 0;
+    else if (keycodes == NULL && priv->names.keycodes == NULL)
+        is_changed = FALSE;
     g_free (priv->names.keycodes);
     priv->names.keycodes = g_strdup (keycodes);
     get_keyboard (layout);
+    if (is_changed)
+        g_signal_emit_by_name (layout, "changed");
 }
 
 /**
@@ -592,11 +622,18 @@ void
 eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+    gboolean is_changed = TRUE;
 
     g_return_if_fail (priv);
+    if (geometry && priv->names.geometry)
+        is_changed = g_strcmp0 (geometry, priv->names.geometry) != 0;
+    else if (geometry == NULL && priv->names.geometry == NULL)
+        is_changed = FALSE;
     g_free (priv->names.geometry);
     priv->names.geometry = g_strdup (geometry);
     get_keyboard (layout);
+    if (is_changed)
+        g_signal_emit_by_name (layout, "changed");
 }
 
 /**
@@ -610,11 +647,18 @@ void
 eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+    gboolean is_changed = TRUE;
 
     g_return_if_fail (priv);
+    if (symbols && priv->names.symbols)
+        is_changed = g_strcmp0 (symbols, priv->names.symbols) != 0;
+    else if (symbols == NULL && priv->names.symbols == NULL)
+        is_changed = FALSE;
     g_free (priv->names.symbols);
     priv->names.symbols = g_strdup (symbols);
     get_keyboard (layout);
+    if (is_changed)
+        g_signal_emit_by_name (layout, "changed");
 }
 
 /**

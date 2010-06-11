@@ -39,13 +39,21 @@ struct _EekLayoutIface
     /*< private >*/
     GTypeInterface parent_iface;
 
-    void (*apply) (EekLayout   *self,
-                   EekKeyboard *keyboard);
+    /*< public >*/
+    void (* apply)         (EekLayout   *self,
+                            EekKeyboard *keyboard);
+    gint (* get_group)     (EekLayout   *self);
+
+    /* signals */
+    void (* group_changed) (EekLayout   *self,
+                            gint         group);
+    void (* changed)       (EekLayout   *self);
 };
 
-GType eek_layout_get_type (void) G_GNUC_CONST;
-void  eek_layout_apply    (EekLayout   *layout,
-                           EekKeyboard *keyboard);
+GType eek_layout_get_type  (void) G_GNUC_CONST;
+void  eek_layout_apply     (EekLayout   *layout,
+                            EekKeyboard *keyboard);
+gint  eek_layout_get_group (EekLayout   *layout);
 
 G_END_DECLS
 #endif  /* EEK_LAYOUT_H */

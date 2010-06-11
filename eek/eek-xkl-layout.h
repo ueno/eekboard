@@ -51,7 +51,10 @@ struct _EekXklLayoutClass
 
 GType      eek_xkl_layout_get_type     (void) G_GNUC_CONST;
 
-EekLayout *eek_xkl_layout_new          (gchar       **layouts,
+EekLayout *eek_xkl_layout_new          (void);
+
+void       eek_xkl_layout_set_config   (EekXklLayout *layout,
+                                        gchar       **layouts,
                                         gchar       **variants,
                                         gchar       **options);
 
@@ -63,7 +66,8 @@ void       eek_xkl_layout_set_options  (EekXklLayout *layout,
                                         gchar       **options);
 
 gchar    **eek_xkl_layout_get_layouts  (EekXklLayout *layout);
-gchar    **eek_xkl_layout_get_variants (EekXklLayout *layout);
+gchar    **eek_xkl_layout_get_variants
+                                       (EekXklLayout *layout);
 gchar    **eek_xkl_layout_get_options  (EekXklLayout *layout);
 
 G_END_DECLS

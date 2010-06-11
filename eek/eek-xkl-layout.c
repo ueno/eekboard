@@ -38,7 +38,12 @@
 
 #define noKBDRAW_DEBUG
 
-G_DEFINE_TYPE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT);
+static void eek_layout_iface_init (EekLayoutIface *iface);
+static EekLayoutIface *parent_layout_iface;
+
+G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT,
+                         G_IMPLEMENT_INTERFACE(EEK_TYPE_LAYOUT,
+                                               eek_layout_iface_init));
 
 #define EEK_XKL_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKL_LAYOUT, EekXklLayoutPrivate))
@@ -71,6 +76,26 @@ extern void xkl_xkb_config_native_cleanup (XklEngine * engine,
 					   component_names);
 
 static void get_xkb_component_names (EekXklLayout *layout);
+
+static gint
+eek_xkl_layout_real_get_group (EekLayout *self)
+{
+    EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (self);
+    XklState *state;
+
+    state = xkl_engine_get_current_state (priv->engine);
+    g_return_val_if_fail (state, -1);
+    return state->group;
+}
+
+static void
+eek_layout_iface_init (EekLayoutIface *iface)
+{
+    parent_layout_iface = g_type_interface_peek_parent (iface);
+    if (!parent_layout_iface)
+        parent_layout_iface = g_type_default_interface_peek (EEK_TYPE_LAYOUT);
+    iface->get_group = eek_xkl_layout_real_get_group;
+}
 
 static void
 eek_xkl_layout_finalize (GObject *object)
@@ -145,12 +170,12 @@ eek_xkl_layout_get_property (GObject    *object,
 static void
 eek_xkl_layout_class_init (EekXklLayoutClass *klass)
 {
-    GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-    GParamSpec        *pspec;
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class, sizeof (EekXklLayoutPrivate));
 
-    gobject_class->finalize     = eek_xkl_layout_finalize;
+    gobject_class->finalize = eek_xkl_layout_finalize;
     gobject_class->set_property = eek_xkl_layout_set_property;
     gobject_class->get_property = eek_xkl_layout_get_property;
 
@@ -177,6 +202,19 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
 }
 
 static void
+on_state_changed (XklEngine           *xklengine,
+                  XklEngineStateChange type,
+                  gint                 value,
+                  gboolean             restore,
+                  gpointer             user_data)
+{
+    EekLayout *layout = user_data;
+
+    if (type == GROUP_CHANGED)
+        g_signal_emit_by_name (layout, "group_changed", value);
+}
+
+static void
 eek_xkl_layout_init (EekXklLayout *self)
 {
     EekXklLayoutPrivate *priv;
@@ -189,16 +227,35 @@ eek_xkl_layout_init (EekXklLayout *self)
     g_return_if_fail (display);
 
     priv->engine = xkl_engine_get_instance (display);
+    g_signal_connect (priv->engine, "X-state-changed",
+                      G_CALLBACK(on_state_changed), self);
     xkl_config_rec_get_from_server (&priv->config, priv->engine);
     get_xkb_component_names (self);
+    xkl_engine_start_listen (priv->engine, XKLL_TRACK_KEYBOARD_STATE);
 }
 
 EekLayout *
-eek_xkl_layout_new (gchar **layouts,
-                    gchar **variants,
-                    gchar **options)
+eek_xkl_layout_new (void)
 {
     return g_object_new (EEK_TYPE_XKL_LAYOUT, NULL);
+}
+
+void
+eek_xkl_layout_set_config (EekXklLayout *layout,
+                           gchar       **layouts,
+                           gchar       **variants,
+                           gchar       **options)
+{
+    EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
+
+    g_return_if_fail (priv);
+    g_strfreev (priv->config.layouts);
+    priv->config.layouts = g_strdupv (layouts);
+    g_strfreev (priv->config.variants);
+    priv->config.variants = g_strdupv (variants);
+    g_strfreev (priv->config.options);
+    priv->config.options = g_strdupv (options);
+    get_xkb_component_names (layout);
 }
 
 void
@@ -268,6 +325,7 @@ get_xkb_component_names (EekXklLayout *layout)
     XkbComponentNamesRec names;
 
     if (xkl_xkb_config_native_prepare (priv->engine, &priv->config, &names)) {
+        g_debug ("symbols = \"%s\"", names.symbols);
         EEK_XKB_LAYOUT_GET_CLASS (layout)->
             set_names (EEK_XKB_LAYOUT(layout), &names);
         xkl_xkb_config_native_cleanup (priv->engine, &names);
