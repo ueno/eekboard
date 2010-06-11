@@ -40,6 +40,8 @@ G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 struct _EekClutterKeyboardPrivate
 {
     ClutterActor *actor;
+    guint key_press_event_handler;
+    guint key_release_event_handler;
 };
 
 static void
@@ -117,8 +119,14 @@ eek_clutter_keyboard_finalize (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
-    if (priv->actor)
+    if (priv->actor) {
+        ClutterActor *stage;
+
+        stage = clutter_actor_get_stage (priv->actor);
+        g_signal_handler_disconnect (stage, priv->key_press_event_handler);
+        g_signal_handler_disconnect (stage, priv->key_release_event_handler);
         g_object_unref (priv->actor);
+    }
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
 }
 
@@ -217,8 +225,10 @@ on_clutter_realize (ClutterActor *actor, gpointer user_data)
     ClutterActor *stage;
 
     stage = clutter_actor_get_stage (priv->actor);
-    g_signal_connect (stage, "key-press-event",
-                      G_CALLBACK (on_clutter_key_press_event), keyboard);
+    priv->key_press_event_handler =
+        g_signal_connect (stage, "key-press-event",
+                          G_CALLBACK (on_clutter_key_press_event), keyboard);
+    priv->key_release_event_handler =
     g_signal_connect (stage, "key-release-event",
                       G_CALLBACK (on_clutter_key_release_event), keyboard);
 }

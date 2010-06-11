@@ -26,7 +26,7 @@ FakeKey *fakekey;
 Window target;
 
 EekLayout *layout;
-EekKeyboard *keyboard;
+EekKeyboard *eek_keyboard;
 
 static void on_capture_key_event_toggled (GtkToggleAction *action,
                                           GtkWidget *window);
@@ -130,10 +130,12 @@ on_changed (EekLayout *layout, gpointer user_data)
 
     clutter_actor_get_size (stage, &width, &height);
     actor = clutter_container_find_child_by_name (stage, "keyboard");
+
+    /* FIXME: currently keyboard must be finalized before actor. */
+    g_object_unref (eek_keyboard);
     if (actor)
         clutter_container_remove_actor (CLUTTER_CONTAINER(stage), actor);
-    g_object_unref (keyboard);
-    create_keyboard (stage, layout, width, height);
+    eek_keyboard = create_keyboard (stage, layout, width, height);
 }
 
 static const char ui_description[] =
@@ -384,8 +386,8 @@ main (int argc, char *argv[])
         exit (1);
     }
 
-    keyboard = create_keyboard (stage, layout, CSW, CSH);
-    if (!keyboard) {
+    eek_keyboard = create_keyboard (stage, layout, CSW, CSH);
+    if (!eek_keyboard) {
         g_object_unref (layout);
         fprintf (stderr, "Failed to create keyboard\n");
         exit (1);
