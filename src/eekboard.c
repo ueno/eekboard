@@ -180,10 +180,9 @@ on_changed (EekLayout *layout, gpointer user_data)
     actor = clutter_container_find_child_by_name (CLUTTER_CONTAINER(stage),
                                                   "keyboard");
 
-    /* FIXME: currently keyboard must be finalized before actor. */
-    g_object_unref (eek_keyboard);
     if (actor)
         clutter_container_remove_actor (CLUTTER_CONTAINER(stage), actor);
+    g_object_unref (eek_keyboard);
     eek_keyboard = create_keyboard (stage, layout, width, height);
 }
 

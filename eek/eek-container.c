@@ -103,13 +103,26 @@ eek_container_real_find (EekContainer *self,
 }
 
 static void
+eek_container_dispose (GObject *object)
+{
+    EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(object);
+    GSList *head;
+
+    for (head = priv->children; head; head = g_slist_next (head)) {
+        if (head->data) {
+            g_object_unref (head->data);
+            head->data = NULL;
+        }
+    }
+    G_OBJECT_CLASS(eek_container_parent_class)->dispose (object);
+}
+
+static void
 eek_container_finalize (GObject *object)
 {
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(object);
     GSList *head;
 
-    for (head = priv->children; head; head = g_slist_next (head))
-        g_object_unref (head->data);
     g_slist_free (priv->children);
     G_OBJECT_CLASS(eek_container_parent_class)->finalize (object);
 }
@@ -128,6 +141,7 @@ eek_container_class_init (EekContainerClass *klass)
     klass->find = eek_container_real_find;
 
     gobject_class->finalize = eek_container_finalize;
+    gobject_class->dispose = eek_container_dispose;
 
     signals[CHILD_ADDED] =
         g_signal_new ("child-added",

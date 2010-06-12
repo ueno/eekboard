@@ -224,14 +224,15 @@ eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
 }
 
 static void
-eek_keyboard_finalize (GObject *object)
+eek_keyboard_dispose (GObject *object)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
 
-    if (priv->layout)
+    if (priv->layout) {
         g_object_unref (priv->layout);
-
-    G_OBJECT_CLASS(eek_keyboard_parent_class)->finalize (object);
+        priv->layout = NULL;
+    }
+    G_OBJECT_CLASS(eek_keyboard_parent_class)->dispose (object);
 }
 
 static void
@@ -308,7 +309,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
 
     gobject_class->get_property = eek_keyboard_get_property;
     gobject_class->set_property = eek_keyboard_set_property;
-    gobject_class->finalize = eek_keyboard_finalize;
+    gobject_class->dispose = eek_keyboard_dispose;
 
     /**
      * EekKeyboard:group:

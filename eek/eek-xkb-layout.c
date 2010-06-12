@@ -303,9 +303,25 @@ create_keyboard (EekXkbLayout *layout, EekKeyboard *keyboard)
 }
 
 static void
+outline_free (gpointer data)
+{
+    EekOutline *outline = data;
+    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
+    g_boxed_free (EEK_TYPE_OUTLINE, outline);
+}
+
+static void
 eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
 {
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+
+    g_return_if_fail (priv);
+    if (priv->outline_hash)
+        g_hash_table_unref (priv->outline_hash);
+    priv->outline_hash = g_hash_table_new_full (g_direct_hash,
+                                                g_direct_equal,
+                                                NULL,
+                                                outline_free);
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
 }
 
@@ -473,14 +489,6 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 }
 
 static void
-outline_free (gpointer data)
-{
-    EekOutline *outline = data;
-    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
-    g_boxed_free (EEK_TYPE_OUTLINE, outline);
-}
-
-static void
 eek_xkb_layout_init (EekXkbLayout *self)
 {
     EekXkbLayoutPrivate *priv;
@@ -501,10 +509,6 @@ eek_xkb_layout_init (EekXkbLayout *self)
                                 XkbGBN_IndicatorMapMask,
                                 XkbUseCoreKbd);
 
-    priv->outline_hash = g_hash_table_new_full (g_direct_hash,
-                                                g_direct_equal,
-                                                NULL,
-                                                outline_free);
     if (priv->xkb == NULL) {
         g_critical ("XkbGetKeyboard failed to get keyboard from the server!");
         return;

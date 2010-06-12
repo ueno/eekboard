@@ -59,6 +59,9 @@ struct _EekClutterKeyActorPrivate
 static struct {
     /* outline pointer -> ClutterTexture */
     GHashTable *outline_textures;
+
+    /* manually maintain the ref-count of outline_textures to set it
+       to NULL on destroy */
     gint outline_textures_ref_count;
 } texture_cache;
 
@@ -170,16 +173,23 @@ eek_clutter_key_actor_real_released (EekClutterKeyActor *self)
 }
 
 static void
-eek_clutter_key_actor_finalize (GObject *object)
+eek_clutter_key_actor_dispose (GObject *object)
 {
     EekClutterKeyActorPrivate *priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(object);
 
-    g_object_unref (priv->key);
-    if (priv->texture && --texture_cache.outline_textures_ref_count <= 0) {
-        g_hash_table_unref (texture_cache.outline_textures);
-        texture_cache.outline_textures = NULL;
+    if (priv->key) {
+        g_object_unref (priv->key);
+        priv->key = NULL;
     }
-    G_OBJECT_CLASS (eek_clutter_key_actor_parent_class)->finalize (object);
+    if (priv->texture) {
+        /* no need to g_object_unref (priv->texture) */
+        priv->texture = NULL;
+        if (--texture_cache.outline_textures_ref_count == 0) {
+            g_hash_table_unref (texture_cache.outline_textures);
+            texture_cache.outline_textures = NULL;
+        }
+    }
+    G_OBJECT_CLASS (eek_clutter_key_actor_parent_class)->dispose (object);
 }
 
 static void
@@ -199,7 +209,7 @@ eek_clutter_key_actor_class_init (EekClutterKeyActorClass *klass)
     actor_class->get_preferred_width =
         eek_clutter_key_actor_real_get_preferred_width;
 
-    gobject_class->finalize = eek_clutter_key_actor_finalize;
+    gobject_class->dispose = eek_clutter_key_actor_dispose;
 
     /* signals */
     klass->pressed = eek_clutter_key_actor_real_pressed;
@@ -358,10 +368,8 @@ get_texture (EekClutterKeyActor *actor)
     EekOutline *outline;
 
     if (!texture_cache.outline_textures)
-        texture_cache.outline_textures = g_hash_table_new_full (g_direct_hash,
-                                                                g_direct_equal,
-                                                                NULL,
-                                                                g_free);
+        texture_cache.outline_textures = g_hash_table_new (g_direct_hash,
+                                                           g_direct_equal);
     outline = eek_key_get_outline (actor->priv->key);
     texture = g_hash_table_lookup (texture_cache.outline_textures, outline);
     if (texture == NULL) {

@@ -115,7 +115,7 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 }
 
 static void
-eek_clutter_keyboard_finalize (GObject *object)
+eek_clutter_keyboard_dispose (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
@@ -123,11 +123,16 @@ eek_clutter_keyboard_finalize (GObject *object)
         ClutterActor *stage;
 
         stage = clutter_actor_get_stage (priv->actor);
-        g_signal_handler_disconnect (stage, priv->key_press_event_handler);
-        g_signal_handler_disconnect (stage, priv->key_release_event_handler);
+        if (stage) {
+            g_signal_handler_disconnect (stage,
+                                         priv->key_press_event_handler);
+            g_signal_handler_disconnect (stage,
+                                         priv->key_release_event_handler);
+        }
         g_object_unref (priv->actor);
+        priv->actor = NULL;
     }
-    G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->finalize (object);
+    G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->dispose (object);
 }
 
 static void
@@ -143,7 +148,7 @@ eek_clutter_keyboard_class_init (EekClutterKeyboardClass *klass)
     keyboard_class->create_section = eek_clutter_keyboard_real_create_section;
     element_class->set_name = eek_clutter_keyboard_real_set_name;
     element_class->set_bounds = eek_clutter_keyboard_real_set_bounds;
-    gobject_class->finalize = eek_clutter_keyboard_finalize;
+    gobject_class->dispose = eek_clutter_keyboard_dispose;
 }
 
 static void

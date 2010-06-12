@@ -87,13 +87,15 @@ eek_clutter_key_real_released (EekKey *key)
 }
 
 static void
-eek_clutter_key_finalize (GObject *object)
+eek_clutter_key_dispose (GObject *object)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
 
-    if (priv->actor)
+    if (priv->actor) {
         g_object_unref (priv->actor);
-    G_OBJECT_CLASS (eek_clutter_key_parent_class)->finalize (object);
+        priv->actor = NULL;
+    }
+    G_OBJECT_CLASS (eek_clutter_key_parent_class)->dispose (object);
 }
 
 static void
@@ -108,7 +110,7 @@ eek_clutter_key_class_init (EekClutterKeyClass *klass)
 
     element_class->set_name = eek_clutter_key_real_set_name;
     element_class->set_bounds = eek_clutter_key_real_set_bounds;
-    gobject_class->finalize = eek_clutter_key_finalize;
+    gobject_class->dispose = eek_clutter_key_dispose;
 
     /* signals */
     key_class->pressed = eek_clutter_key_real_pressed;

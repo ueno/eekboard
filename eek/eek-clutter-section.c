@@ -132,13 +132,15 @@ eek_clutter_section_real_create_key (EekSection  *self,
 }
 
 static void
-eek_clutter_section_finalize (GObject *object)
+eek_clutter_section_dispose (GObject *object)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
 
-    if (priv->actor)
+    if (priv->actor) {
         g_object_unref (priv->actor);
-    G_OBJECT_CLASS (eek_clutter_section_parent_class)->finalize (object);
+        priv->actor = NULL;
+    }
+    G_OBJECT_CLASS (eek_clutter_section_parent_class)->dispose (object);
 }
 
 static void
@@ -154,7 +156,7 @@ eek_clutter_section_class_init (EekClutterSectionClass *klass)
     section_class->create_key = eek_clutter_section_real_create_key;
     element_class->set_name = eek_clutter_section_real_set_name;
     element_class->set_bounds = eek_clutter_section_real_set_bounds;
-    gobject_class->finalize = eek_clutter_section_finalize;
+    gobject_class->dispose = eek_clutter_section_dispose;
 }
 
 static void
