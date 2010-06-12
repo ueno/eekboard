@@ -48,14 +48,47 @@ Window target;
 EekLayout *layout;
 EekKeyboard *eek_keyboard;
 
-static void on_monitor_key_event_toggled (GtkToggleAction *action,
-                                          GtkWidget *window);
-
 static const GOptionEntry options[] = {
     {"window-id", '\0', 0, G_OPTION_ARG_STRING, &window_id,
      "the target window ID; use xwininfo to obtain the value", NULL},
     {NULL},
 };
+
+static void on_monitor_key_event_toggled (GtkToggleAction *action,
+                                          GtkWidget *window);
+
+static const char ui_description[] =
+    "<ui>"
+    "  <menubar name='MainMenu'>"
+    "    <menu action='FileMenu'>"
+    "      <menuitem action='Quit'/>"
+    "    </menu>"
+    "    <menu action='KeyboardMenu'>"
+    "      <menuitem action='MonitorKeyEvent'/>"
+    "      <menu action='SetLayout'>"
+    "        <placeholder name='LayoutsPH'/>"
+    "      </menu>"
+    "    </menu>"
+    "    <menu action='HelpMenu'>"
+    "      <menuitem action='About'/>"
+    "    </menu>"
+    "  </menubar>"
+    "</ui>";
+
+#define SET_LAYOUT_UI_PATH "/MainMenu/KeyboardMenu/SetLayout/LayoutsPH"
+
+struct _LayoutVariant {
+    gchar *layout;
+    gchar *variant;
+};
+typedef struct _LayoutVariant LayoutVariant;
+
+struct _LayoutCallbackData {
+    GtkUIManager *ui_manager;
+    GtkActionGroup *action_group;
+    guint merge_id;
+};
+typedef struct _LayoutCallbackData LayoutCallbackData;
 
 static const GtkActionEntry action_entry[] = {
     {"FileMenu", NULL, N_("_File")},
@@ -82,12 +115,6 @@ on_monitor_key_event_toggled (GtkToggleAction *action,
     g_object_set (G_OBJECT(window), "can_focus", active, NULL);
 }
 
-struct _EekBoardLayoutVariant {
-    gchar *layout;
-    gchar *variant;
-};
-typedef struct _EekBoardLayoutVariant EekBoardLayoutVariant;
-
 static void
 on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key)
@@ -105,7 +132,7 @@ on_key_released (EekKeyboard *keyboard,
 static void
 on_activate (GtkAction *action, gpointer user_data)
 {
-    EekBoardLayoutVariant *config = user_data;
+    LayoutVariant *config = user_data;
     gchar *layouts[2], *variants[2], **vp = NULL;
 
     layouts[0] = config->layout;
@@ -149,7 +176,8 @@ on_changed (EekLayout *layout, gpointer user_data)
     gfloat width, height;
 
     clutter_actor_get_size (stage, &width, &height);
-    actor = clutter_container_find_child_by_name (stage, "keyboard");
+    actor = clutter_container_find_child_by_name (CLUTTER_CONTAINER(stage),
+                                                  "keyboard");
 
     /* FIXME: currently keyboard must be finalized before actor. */
     g_object_unref (eek_keyboard);
@@ -158,68 +186,33 @@ on_changed (EekLayout *layout, gpointer user_data)
     eek_keyboard = create_keyboard (stage, layout, width, height);
 }
 
-static const char ui_description[] =
-    "<ui>"
-    "  <menubar name='MainMenu'>"
-    "    <menu action='FileMenu'>"
-    "      <menuitem action='Quit'/>"
-    "    </menu>"
-    "    <menu action='KeyboardMenu'>"
-    "      <menuitem action='MonitorKeyEvent'/>"
-    "      <menu action='SetLayout'>"
-    "        <placeholder name='LayoutsPH'/>"
-    "      </menu>"
-    "    </menu>"
-    "    <menu action='HelpMenu'>"
-    "      <menuitem action='About'/>"
-    "    </menu>"
-    "  </menubar>"
-    "</ui>";
-
-#define SET_LAYOUT_UI_PATH "/MainMenu/KeyboardMenu/SetLayout/LayoutsPH"
-
-struct _EekBoardAddLayoutData {
-    GtkUIManager *ui_manager;
-    GtkActionGroup *action_group;
-    guint merge_id;
-};
-typedef struct _EekBoardAddLayoutData EekBoardAddLayoutData;
-
-struct _EekBoardAddVariantData {
-    gchar *name;
-    gchar *description;
-};
-typedef struct _EekBoardAddVariantData EekBoardAddVariantData;
-
 static void
 variant_callback (XklConfigRegistry *registry,
-                  XklConfigItem *item,
+                  const XklConfigItem *item,
                   gpointer user_data)
 {
-    EekBoardAddVariantData *variant_data;
-    GSList **head = user_data;
+    GSList **r_variants = user_data;
+    XklConfigItem *_item;
 
-    variant_data = g_slice_new (EekBoardAddVariantData);
-    variant_data->name = g_strdup (item->name);
-    variant_data->description = g_strdup (item->description);
-    *head = g_slist_prepend (*head, variant_data);
+    _item = g_slice_dup (XklConfigItem, item);
+    *r_variants = g_slist_prepend (*r_variants, _item);
 }
 
 static void
 layout_callback (XklConfigRegistry *registry,
-                 XklConfigItem *item,
+                 const XklConfigItem *item,
                  gpointer user_data)
 {
+    LayoutCallbackData *data = user_data;
     GtkAction *action;
-    EekBoardAddLayoutData *layout_data = user_data;
     GSList *variants = NULL;
     char layout_action_name[128], variant_action_name[128];
-    EekBoardLayoutVariant *data;
+    LayoutVariant *config;
 
     g_snprintf (layout_action_name, sizeof (layout_action_name),
                 "SetLayout%s", item->name);
     action = gtk_action_new (layout_action_name, item->description, NULL, NULL);
-    gtk_action_group_add_action (layout_data->action_group, action);
+    gtk_action_group_add_action (data->action_group, action);
 
     xkl_config_registry_foreach_layout_variant (registry,
                                                 item->name,
@@ -227,14 +220,13 @@ layout_callback (XklConfigRegistry *registry,
                                                 &variants);
 
     if (!variants) {
-        data = g_slice_new (EekBoardLayoutVariant);
-        data->layout = g_strdup (item->name);
-        data->variant = NULL;
-        g_signal_connect (action, "activate", G_CALLBACK (on_activate),
-                          data);
+        config = g_slice_new (LayoutVariant);
+        config->layout = g_strdup (item->name);
+        config->variant = NULL;
+        g_signal_connect (action, "activate", G_CALLBACK (on_activate), config);
 
         g_object_unref (action);
-        gtk_ui_manager_add_ui (layout_data->ui_manager, layout_data->merge_id,
+        gtk_ui_manager_add_ui (data->ui_manager, data->merge_id,
                                SET_LAYOUT_UI_PATH,
                                layout_action_name, layout_action_name,
                                GTK_UI_MANAGER_MENUITEM, FALSE);
@@ -243,8 +235,7 @@ layout_callback (XklConfigRegistry *registry,
         GSList *head;
 
         g_object_unref (action);
-        gtk_ui_manager_add_ui (layout_data->ui_manager,
-                               layout_data->merge_id,
+        gtk_ui_manager_add_ui (data->ui_manager, data->merge_id,
                                SET_LAYOUT_UI_PATH,
                                layout_action_name, layout_action_name,
                                GTK_UI_MANAGER_MENU, FALSE);
@@ -252,35 +243,55 @@ layout_callback (XklConfigRegistry *registry,
                     SET_LAYOUT_UI_PATH "/%s", layout_action_name);
 
         for (head = variants; head; head = head->next) {
-            EekBoardAddVariantData *variant_data = head->data;
+            XklConfigItem *_item = head->data;
 
             g_snprintf (variant_action_name, sizeof (variant_action_name),
-                        "SetVariant%s%s", item->name, variant_data->name);
+                        "SetVariant%s%s", item->name, _item->name);
             action = gtk_action_new (variant_action_name,
-                                     variant_data->description,
+                                     _item->description,
                                      NULL,
                                      NULL);
 
-            data = g_slice_new (EekBoardLayoutVariant);
-            data->layout = g_strdup (item->name);
-            data->variant = g_strdup (variant_data->name);
+            config = g_slice_new (LayoutVariant);
+            config->layout = g_strdup (item->name);
+            config->variant = g_strdup (_item->name);
             g_signal_connect (action, "activate", G_CALLBACK (on_activate),
-                              data);
+                              config);
 
-            gtk_action_group_add_action (layout_data->action_group, action);
+            gtk_action_group_add_action (data->action_group, action);
             g_object_unref (action);
 
-            gtk_ui_manager_add_ui (layout_data->ui_manager,
-                                   layout_data->merge_id,
+            gtk_ui_manager_add_ui (data->ui_manager, data->merge_id,
                                    layout_path,
                                    variant_action_name, variant_action_name,
                                    GTK_UI_MANAGER_MENUITEM, FALSE);
-            g_free (variant_data->name);
-            g_free (variant_data->description);
-            g_slice_free (EekBoardAddVariantData, variant_data);
+            g_slice_free (XklConfigItem, _item);
         }
         g_slist_free (variants);
     }
+}
+
+static void
+create_layouts_menu (GtkUIManager *ui_manager)
+{
+    XklEngine *engine;
+    XklConfigRegistry *registry;
+    Display *display;
+    LayoutCallbackData data;
+
+    data.ui_manager = ui_manager;
+    data.action_group = gtk_action_group_new ("Layouts");
+    gtk_ui_manager_insert_action_group (data.ui_manager, data.action_group, -1);
+    data.merge_id = gtk_ui_manager_new_merge_id (ui_manager);
+
+    display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    g_return_if_fail (display);
+
+    engine = xkl_engine_get_instance (display);
+    registry = xkl_config_registry_get_instance (engine);
+    xkl_config_registry_load (registry, FALSE);
+
+    xkl_config_registry_foreach_layout (registry, layout_callback, &data);
 }
 
 static void
@@ -293,26 +304,12 @@ create_menus (GtkWidget *window, GtkUIManager * ui_manager)
     gtk_action_group_add_actions (action_group, action_entry,
                                   G_N_ELEMENTS (action_entry), window);
     gtk_action_group_add_toggle_actions (action_group, toggle_action_entry,
-                                         G_N_ELEMENTS (toggle_action_entry), window);
+                                         G_N_ELEMENTS (toggle_action_entry),
+                                         window);
 
     gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
     gtk_ui_manager_add_ui_from_string (ui_manager, ui_description, -1, NULL);
-
-    EekBoardAddLayoutData data;
-
-    data.action_group = gtk_action_group_new ("Layouts");
-    gtk_ui_manager_insert_action_group (ui_manager, data.action_group, -1);
-    data.merge_id = gtk_ui_manager_new_merge_id (ui_manager);
-
-    XklEngine *engine;
-    XklConfigRegistry *registry;
-    
-    engine = xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()));
-    registry = xkl_config_registry_get_instance (engine);
-    xkl_config_registry_load (registry, FALSE);
-    data.ui_manager = ui_manager;
-    data.action_group = action_group;
-    xkl_config_registry_foreach_layout (registry, layout_callback, &data);
+    create_layouts_menu (ui_manager);
 }
 
 static void
@@ -365,7 +362,7 @@ main (int argc, char *argv[])
     }
     if (window_id) {
         if (strncmp (window_id, "0x", 2) == 0)
-            target = strtol (window_id[2], NULL, 16);
+            target = strtol (&window_id[2], NULL, 16);
         else
             target = strtol (window_id, NULL, 10);
     } else {
