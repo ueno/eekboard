@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-AC_INIT([eek], [0.0.0], [ueno@unixuser.org])
+AC_INIT([eekboard], [0.0.0], [ueno@unixuser.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_PREREQ(2.63)
 AM_INIT_AUTOMAKE
@@ -56,7 +56,6 @@ AC_CONFIG_HEADERS([eek/config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
 src/Makefile
-examples/Makefile
 tests/Makefile
 docs/Makefile
 docs/reference/Makefile

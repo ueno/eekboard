@@ -4,7 +4,7 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
-PKG_NAME="eek"
+PKG_NAME="eekboard"
 
 (test -f $srcdir/configure.ac \
   && test -f $srcdir/README ) || {
