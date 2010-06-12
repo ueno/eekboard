@@ -60,8 +60,8 @@ tests/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
-eek/eek.pc
-eek/eek-clutter.pc
-eek/eek-xkb.pc
-eek/eek-xkl.pc])
+eek/libeek.pc
+eek/libeek-clutter.pc
+eek/libeek-xkb.pc
+eek/libeek-xkl.pc])
 AC_OUTPUT

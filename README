@@ -9,7 +9,8 @@ lot of bugs and lacks documentation.
 
 * How to test
 
-  $ sudo apt-get install libclutter-gtk-0.10-dev libfakekey-dev
+  $ sudo apt-get install libclutter-gtk-0.10-dev libxklavier-dev \
+	libfakekey-dev python
   $ git clone git://github.com/ueno/eekboard.git
   $ cd eekboard
   $ ./autogen.sh --prefix=/usr --enable-gtk-doc
