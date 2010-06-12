@@ -153,6 +153,7 @@ create_keyboard (ClutterActor *stage,
 {
     EekKeyboard *keyboard;
     ClutterActor *actor;
+    GValue value = {0};
 
     keyboard = eek_clutter_keyboard_new (width, height);
     g_signal_connect (keyboard, "key-pressed",
@@ -162,9 +163,9 @@ create_keyboard (ClutterActor *stage,
     eek_keyboard_set_layout (keyboard, layout);
     actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard));
     clutter_actor_set_name (actor, "keyboard");
-    clutter_actor_get_size (actor, &width, &height);
+    clutter_actor_get_size (actor, &stage_width, &stage_height);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
-    clutter_actor_set_size (stage, width, height);
+    clutter_actor_set_size (stage, stage_width, stage_height);
     return keyboard;
 }
 

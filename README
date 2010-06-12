@@ -1,7 +1,13 @@
-eek - easy embedded keyboard -*- outline -*-
+EekBoard - Easy Embedded Keyboard -*- outline -*-
 
 *NOTE* This is not usable by now. The code has still a lot of bugs and
 lacks documentation.
+
+* What's this?
+
+EekBoard is a virtual keyboard software package which ships with a
+standalone virtual keyboard application ("eekboard"), and a library to
+create keyboard-like UI ("libeek").
 
 * Quick look
 
@@ -9,19 +15,20 @@ lacks documentation.
 
 * How to test
 
- $ git clone git://github.com/ueno/eek.git
- $ cd eek
+ $ git clone git://github.com/ueno/eek.git eekboard
+ $ cd eekboard
  $ ./autogen.sh --prefix=/usr --enable-gtk-doc
  $ make
- $ ./examples/eek-clutter-xkb-test --geometry=kinesis --symbols=in
+ $ sudo make install
+ $ eekboard
 
-* API (not fixed)
+* libeek API (not fixed)
 
-eek provides two different kinds of objects.  One is "keyboard
-element" and another is "keyboard layout engine".  A keyboard element
+libeek provides only two kinds of objects.  One is "keyboard element"
+and another is "keyboard layout engine".  A keyboard element
 represents either a keyboard, a section, or a key.  Each element
-implements the Builder pattern[1] so that it can be converted into a UI
-widget (ClutterActor, GTK+ button, ...).  A layout engine arranges
+implements the Builder pattern[1] so that it can be converted into a
+UI widget (ClutterActor, GTK+ button, ...).  A layout engine arranges
 keyboard elements using information from external configuration
 mechanisms (XKB, matchbox-keyboard layouts in XML, ...)
 
@@ -45,4 +52,3 @@ and an XKB-based layout engine:
 
 Footnotes: 
 [1]  http://en.wikipedia.org/wiki/Builder_pattern
-
