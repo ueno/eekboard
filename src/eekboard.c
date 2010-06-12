@@ -2,20 +2,18 @@
  * Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
  * Copyright (C) 2010 Red Hat, Inc.
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <clutter-gtk/clutter-gtk.h>
@@ -39,6 +37,20 @@
 #define CSW 640
 #define CSH 480
 
+#define LICENSE \
+    "This program is free software: you can redistribute it and/or modify " \
+    "it under the terms of the GNU General Public License as published by " \
+    "the Free Software Foundation, either version 3 of the License, or " \
+    "(at your option) any later version." \
+    "\n\n" \
+    "This program is distributed in the hope that it will be useful, " \
+    "but WITHOUT ANY WARRANTY; without even the implied warranty of " \
+    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " \
+    "GNU General Public License for more details." \
+    "\n\n" \
+    "You should have received a copy of the GNU General Public License " \
+    "along with this program.  If not, see <http://www.gnu.org/licenses/>. " \
+
 static gchar *window_id = NULL;
 gfloat stage_width, stage_height;
 Display *display;
@@ -54,6 +66,7 @@ static const GOptionEntry options[] = {
     {NULL},
 };
 
+static void on_about (GtkAction * action, GtkWidget *window);
 static void on_monitor_key_event_toggled (GtkToggleAction *action,
                                           GtkWidget *window);
 
@@ -96,7 +109,7 @@ static const GtkActionEntry action_entry[] = {
     {"HelpMenu", NULL, N_("_Help")},
     {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (gtk_main_quit)},
     {"SetLayout", NULL, N_("Set Layout"), NULL, NULL, NULL},
-    {"About", GTK_STOCK_ABOUT, NULL, NULL, NULL, NULL}
+    {"About", GTK_STOCK_ABOUT, NULL, NULL, NULL, G_CALLBACK (on_about)}
 };
 
 static const GtkToggleActionEntry toggle_action_entry[] = {
@@ -105,14 +118,30 @@ static const GtkToggleActionEntry toggle_action_entry[] = {
 };
 
 static void
+on_about (GtkAction * action, GtkWidget *window)
+{
+  const gchar *authors[] = { "Daiki Ueno", NULL };
+
+  gtk_show_about_dialog (GTK_WINDOW (window),
+                         "version", VERSION,
+                         "copyright",
+                         "Copyright \xc2\xa9 2010 Daiki Ueno\n"
+                         "Copyright \xc2\xa9 2010 Red Hat, Inc.",
+                         "license", LICENSE,
+                         "comments",
+                         _("A virtual keyboard for GNOME"),
+                         "authors", authors,
+                         "website",
+                         "http://github.com/ueno/eek/",
+                         "website-label", _("EekBoard web site"),
+                         "wrap-license", TRUE, NULL);
+}
+
+static void
 on_monitor_key_event_toggled (GtkToggleAction *action,
                               GtkWidget *window)
 {
-    gboolean active;
-
-    active = gtk_toggle_action_get_active (action);
-    g_object_set (G_OBJECT(window), "accept_focus", active, NULL);
-    g_object_set (G_OBJECT(window), "can_focus", active, NULL);
+    g_warning ("not implemented");
 }
 
 static void
