@@ -36,3 +36,16 @@ gtk-doc.make
 eek/eek-special-keysym-labels.h
 eek/eek-unicode-keysym-labels.h
 eek/eek-keyname-keysym-labels.h
+eek/*.pc
+tests/eek-simple-test
+tests/eek-xkb-test
+src/eekboard
+docs/reference/eek/*.stamp
+docs/reference/eek/*.txt
+docs/reference/eek/xml
+docs/reference/eek/html
+docs/reference/eek/eek.signals
+docs/reference/eek/eek.args
+docs/reference/eek/eek.hierarchy
+docs/reference/eek/eek.interfaces
+docs/reference/eek/eek.prerequisites
