@@ -1,6 +1,7 @@
-- modifier handling
-- step-by-step scaling of key labels
+- GtkDrawingArea backend
+- compute font sizes from keysym types (LETTER or FUNCTION)
+- eekboard: model and options selection
+- eekboard: typing monitor
 - matchbox-keyboard layout engine
-- emit key events using libfakekey or xtest
 - .spec
 
