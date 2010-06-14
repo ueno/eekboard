@@ -85,12 +85,11 @@ static const char ui_description[] =
 
 #define SET_LAYOUT_UI_PATH "/MainMenu/KeyboardMenu/SetLayout/LayoutsPH"
 
-struct _LayoutVariant {
+struct _ConfigCallbackData {
     EekBoard *eekboard;
-    gchar *layout;
-    gchar *variant;
+    XklConfigRec *config;
 };
-typedef struct _LayoutVariant LayoutVariant;
+typedef struct _ConfigCallbackData ConfigCallbackData;
 
 struct _LayoutCallbackData {
     EekBoard *eekboard;
@@ -180,18 +179,11 @@ on_key_released (EekKeyboard *keyboard,
 static void
 on_activate (GtkAction *action, gpointer user_data)
 {
-    LayoutVariant *config = user_data;
-    gchar *layouts[2], *variants[2], **vp = NULL;
+    ConfigCallbackData *data = user_data;
 
-    layouts[0] = config->layout;
-    layouts[1] = NULL;
-    if (config->variant) {
-        variants[0] = config->variant;
-        variants[1] = NULL;
-        vp = variants;
-    }
-    eek_xkl_layout_set_config (EEK_XKL_LAYOUT(config->eekboard->layout),
-                               layouts, vp, NULL);
+    eek_xkl_layout_set_config (EEK_XKL_LAYOUT(data->eekboard->layout),
+                               data->config);
+    g_object_unref (data->config);
 }
 
 static void
@@ -202,7 +194,6 @@ create_keyboard (EekBoard  *eekboard,
                  gfloat     initial_height)
 {
     ClutterActor *actor;
-    GValue value = {0};
 
     eekboard->keyboard = eek_clutter_keyboard_new (initial_width,
                                                    initial_height);
@@ -261,7 +252,7 @@ layout_callback (XklConfigRegistry *registry,
     GtkAction *action;
     GSList *variants = NULL;
     char layout_action_name[128], variant_action_name[128];
-    LayoutVariant *config;
+    ConfigCallbackData *config;
 
     g_snprintf (layout_action_name, sizeof (layout_action_name),
                 "SetLayout%s", item->name);
@@ -274,13 +265,15 @@ layout_callback (XklConfigRegistry *registry,
                                                 &variants);
 
     if (!variants) {
-        config = g_slice_new (LayoutVariant);
+        config = g_slice_new (ConfigCallbackData);
         config->eekboard = data->eekboard;
-        config->layout = g_strdup (item->name);
-        config->variant = NULL;
+        config->config = xkl_config_rec_new ();
+        config->config->layouts = g_new0 (char *, 2);
+        config->config->layouts[0] = g_strdup (item->name);
+        config->config->layouts[1] = NULL;
+        config->config->variants = NULL;
         g_signal_connect (action, "activate", G_CALLBACK (on_activate),
                           config);
-
         g_object_unref (action);
         gtk_ui_manager_add_ui (data->ui_manager, data->merge_id,
                                SET_LAYOUT_UI_PATH,
@@ -308,10 +301,15 @@ layout_callback (XklConfigRegistry *registry,
                                      NULL,
                                      NULL);
 
-            config = g_slice_new (LayoutVariant);
+            config = g_slice_new (ConfigCallbackData);
             config->eekboard = data->eekboard;
-            config->layout = g_strdup (item->name);
-            config->variant = g_strdup (_item->name);
+            config->config = xkl_config_rec_new ();
+            config->config->layouts = g_new0 (char *, 2);
+            config->config->layouts[0] = g_strdup (item->name);
+            config->config->layouts[1] = NULL;
+            config->config->variants = g_new0 (char *, 2);
+            config->config->variants[0] = g_strdup (_item->name);
+            config->config->variants[1] = NULL;
             g_signal_connect (action, "activate", G_CALLBACK (on_activate),
                               config);
 
@@ -410,8 +408,10 @@ main (int argc, char *argv[])
     GtkWidget *menubar, *embed, *vbox, *window;
     GtkUIManager *ui_manager;
 
-    clutter_init (&argc, &argv);
-    gtk_init (&argc, &argv);
+    if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        fprintf (stderr, "Can't init Clutter-Gtk\n");
+        exit (1);
+    }
 
     memset (&eekboard, 0, sizeof eekboard);
     eekboard.display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
