@@ -304,6 +304,13 @@ eek_section_init (EekSection *self)
     priv->rows = NULL;
 }
 
+/**
+ * eek_section_set_angle:
+ * @section: an #EekSection
+ * @angle: rotation angle
+ *
+ * Set rotation angle of @section to @angle.
+ */
 void
 eek_section_set_angle (EekSection  *section,
                        gint         angle)
@@ -312,6 +319,12 @@ eek_section_set_angle (EekSection  *section,
     EEK_SECTION_GET_CLASS(section)->set_angle (section, angle);
 }
 
+/**
+ * eek_section_get_angle:
+ * @section: an #EekSection
+ *
+ * Get rotation angle of @section.
+ */
 gint
 eek_section_get_angle (EekSection *section)
 {
@@ -319,6 +332,12 @@ eek_section_get_angle (EekSection *section)
     return EEK_SECTION_GET_CLASS(section)->get_angle (section);
 }
 
+/**
+ * eek_section_get_n_rows:
+ * @section: an #EekSection
+ *
+ * Get the number of rows in @section.
+ */
 gint
 eek_section_get_n_rows (EekSection *section)
 {
@@ -326,6 +345,15 @@ eek_section_get_n_rows (EekSection *section)
     return EEK_SECTION_GET_CLASS(section)->get_n_rows (section);
 }
 
+/**
+ * eek_section_add_row:
+ * @section: an #EekSection
+ * @num_columns: the number of column in the row
+ * @orientation: #EekOrientation of the row
+ *
+ * Add a row which has @num_columns columns and whose orientation is
+ * @orientation to @section.
+ */
 void
 eek_section_add_row (EekSection    *section,
                      gint           num_columns,
@@ -337,6 +365,15 @@ eek_section_add_row (EekSection    *section,
                                              orientation);
 }
 
+/**
+ * eek_section_get_row:
+ * @section: an #EekSection
+ * @index: the index of row
+ * @num_columns: pointer where the number of column in the row will be stored
+ * @orientation: pointer where #EekOrientation of the row will be stored
+ *
+ * Get the information about the @index-th row in @section.
+ */
 void
 eek_section_get_row (EekSection     *section,
                      gint            index,
@@ -350,6 +387,16 @@ eek_section_get_row (EekSection     *section,
                                              orientation);
 }
 
+/**
+ * eek_section_create_key:
+ * @section: an #EekSection
+ * @column: the column index of the key
+ * @row: the row index of the key
+ *
+ * Create an #EekKey instance and append it to @section.  This
+ * function is rarely called by application but called by #EekLayout
+ * implementation.
+ */
 EekKey *
 eek_section_create_key (EekSection  *section,
                         gint         column,
@@ -359,6 +406,14 @@ eek_section_create_key (EekSection  *section,
     return EEK_SECTION_GET_CLASS(section)->create_key (section, column, row);
 }
 
+/**
+ * eek_section_find_key_by_keycode:
+ * @section: an #EekSection
+ * @keycode: a keycode
+ *
+ * Find an #EekKey whose keycode is @keycode.
+ * Returns: an #EekKey or NULL (if not found)
+ */
 EekKey *
 eek_section_find_key_by_keycode (EekSection *section,
                                  guint       keycode)

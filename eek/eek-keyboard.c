@@ -417,7 +417,9 @@ eek_keyboard_get_keysym_index (EekKeyboard *keyboard,
  * @name: name of the section
  * @bounds: bounding box of the section
  *
- * Create an #EekSection instance and attach it to @keyboard.
+ * Create an #EekSection instance and append it to @keyboard.  This
+ * function is rarely called by application but called by #EekLayout
+ * implementation.
  */
 EekSection *
 eek_keyboard_create_section (EekKeyboard *keyboard)
@@ -451,6 +453,14 @@ eek_keyboard_realize (EekKeyboard *keyboard)
     EEK_KEYBOARD_GET_CLASS(keyboard)->realize (keyboard);
 }
 
+/**
+ * eek_keyboard_find_key_by_keycode:
+ * @keyboard: an #EekKeyboard
+ * @keycode: a keycode
+ *
+ * Find an #EekKey whose keycode is @keycode.
+ * Returns: an #EekKey or NULL (if not found)
+ */
 EekKey *
 eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                   guint        keycode)
