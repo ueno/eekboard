@@ -47,6 +47,14 @@ eek_layout_base_init (gpointer gobject_class)
     static gboolean is_initialized = FALSE;
 
     if (!is_initialized) {
+        /**
+         * EekLayout::group-changed:
+         * @layout: an #EekLayout that received the signal
+         * @group: group index
+         *
+         * The ::group-changed signal is emitted each time group
+         * configuration of @layout changed.
+         */
         signals[GROUP_CHANGED] =
             g_signal_new ("group-changed",
                           G_TYPE_FROM_INTERFACE(gobject_class),
@@ -57,6 +65,14 @@ eek_layout_base_init (gpointer gobject_class)
                           g_cclosure_marshal_VOID__INT,
                           G_TYPE_NONE, 1,
                           G_TYPE_INT);
+
+        /**
+         * EekLayout::changed:
+         * @layout: an #EekLayout that received the signal
+         *
+         * The ::changed signal is emitted each time @layout changed
+         * and re-layout of #EekKeyboard is needed.
+         */
         signals[CHANGED] =
             g_signal_new ("changed",
                           G_TYPE_FROM_INTERFACE(gobject_class),
@@ -87,6 +103,14 @@ eek_layout_get_type (void)
     return iface_type;
 }
 
+/**
+ * eek_layout_apply:
+ * @layout: an #EekLayout
+ * @keyboard: an #EekKeyboard
+ *
+ * Apply @layout to @keyboard.  This function is rarely called by user
+ * programs but called by the subclasses of #EekKeyboard.
+ */
 void
 eek_layout_apply (EekLayout   *layout,
                   EekKeyboard *keyboard)
@@ -95,6 +119,14 @@ eek_layout_apply (EekLayout   *layout,
     EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
 }
 
+/**
+ * eek_layout_get_group:
+ * @layout: an #EekLayout
+ *
+ * Get the group index from the @layout.  This function normally
+ * called after #EekLayout::group-changed signal to change group index
+ * of all the keys in #EekKeyboard at a time.
+ */
 gint
 eek_layout_get_group (EekLayout *layout)
 {

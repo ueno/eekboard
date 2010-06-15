@@ -456,6 +456,13 @@ eek_key_class_init (EekKeyClass *klass)
                               G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_LEVEL, pspec);
 
+    /**
+     * EekKey::pressed:
+     * @key: an #EekKey
+     *
+     * The ::pressed signal is emitted each time @key is shifted to
+     * the pressed state.
+     */
     signals[PRESSED] =
         g_signal_new ("pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -466,7 +473,14 @@ eek_key_class_init (EekKeyClass *klass)
                       g_cclosure_marshal_VOID__VOID,
                       G_TYPE_NONE, 0);
 
-    signals[RELEASED] =
+    /**
+     * EekKey::released:
+     * @key: an #EekKey
+     *
+     * The ::released signal is emitted each time @key is shifted to
+     * the released state.
+     */
+   signals[RELEASED] =
         g_signal_new ("released",
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
@@ -490,6 +504,13 @@ eek_key_init (EekKey *self)
     priv->group = priv->level = 0;
 }
 
+/**
+ * eek_key_set_keycode:
+ * @key: an #EekKey
+ * @keycode: keycode
+ *
+ * Set keycode of @key to @keycode.
+ */
 void
 eek_key_set_keycode (EekKey *key,
                      guint   keycode)
@@ -498,6 +519,13 @@ eek_key_set_keycode (EekKey *key,
     EEK_KEY_GET_CLASS(key)->set_keycode (key, keycode);
 }
 
+/**
+ * eek_key_get_keycode:
+ * @key: an #EekKey
+ *
+ * Get keycode of @key.
+ * Returns: keycode or %EEK_INVALID_KEYCODE on failure
+ */
 guint
 eek_key_get_keycode (EekKey *key)
 {
@@ -505,6 +533,16 @@ eek_key_get_keycode (EekKey *key)
     return EEK_KEY_GET_CLASS(key)->get_keycode (key);
 }
 
+/**
+ * eek_key_set_keysyms:
+ * @key: an #EekKey
+ * @keysyms: symbol matrix of @key
+ * @num_groups: number of groups (rows) of @keysyms
+ * @num_levels: number of levels (columns) of @keysyms
+ *
+ * Set the symbol matrix of @key to @keysyms.  The length of @keysyms
+ * is @num_groups * @num_levels.
+ */
 void
 eek_key_set_keysyms (EekKey *key,
                      guint  *keysyms,
@@ -515,6 +553,18 @@ eek_key_set_keysyms (EekKey *key,
     EEK_KEY_GET_CLASS(key)->set_keysyms (key, keysyms, num_groups, num_levels);
 }
 
+/**
+ * eek_key_get_keysyms:
+ * @key: an #EekKey
+ * @keysyms: pointer where symbol matrix of @key will be stored
+ * @num_groups: pointer where the number of groups (rows) of @keysyms
+ * will be stored
+ * @num_levels: pointer where the number of levels (columns) of
+ * @keysyms will be stored
+ *
+ * Get the symbol matrix of @key.  If either @keysyms, @num_groups, or
+ * @num_levels are NULL, this function does not try to get the value.
+ */
 void
 eek_key_get_keysyms (EekKey *key,
                      guint **keysyms,
@@ -525,6 +575,13 @@ eek_key_get_keysyms (EekKey *key,
     EEK_KEY_GET_CLASS(key)->get_keysyms (key, keysyms, num_groups, num_levels);
 }
 
+/**
+ * eek_key_get_keysym:
+ * @key: an #EekKey
+ *
+ * Get the current symbol of @key.
+ * Returns: a symbol or %EEK_INVALID_KEYSYM on failure
+ */
 guint
 eek_key_get_keysym (EekKey *key)
 {
@@ -532,6 +589,15 @@ eek_key_get_keysym (EekKey *key)
     return EEK_KEY_GET_CLASS(key)->get_keysym (key);
 }
 
+/**
+ * eek_key_set_index:
+ * @key: an #EekKey
+ * @column: column index of @key in #EekSection
+ * @row: row index of @key in #EekSection
+ *
+ * Set the index of @key (i.e. logical location of @key in
+ * #EekSection) to @column and @row.
+ */
 void
 eek_key_set_index (EekKey *key,
                    gint    column,
@@ -541,6 +607,15 @@ eek_key_set_index (EekKey *key,
     EEK_KEY_GET_CLASS(key)->set_index (key, column, row);
 }
 
+/**
+ * eek_key_get_index:
+ * @key: an #EekKey
+ * @column: pointer where the column index of @key in #EekSection will be stored
+ * @row: pointer where the row index of @key in #EekSection will be stored
+ *
+ * Get the index of @key (i.e. logical location of @key in
+ * #EekSection).
+ */
 void
 eek_key_get_index (EekKey *key,
                    gint   *column,
@@ -550,6 +625,13 @@ eek_key_get_index (EekKey *key,
     EEK_KEY_GET_CLASS(key)->get_index (key, column, row);
 }
 
+/**
+ * eek_key_set_outline:
+ * @key: an #EekKey
+ * @outline: outline of @key
+ *
+ * Set the outline shape of @key to @outline.
+ */
 void
 eek_key_set_outline (EekKey     *key,
                      EekOutline *outline)
@@ -558,6 +640,13 @@ eek_key_set_outline (EekKey     *key,
     EEK_KEY_GET_CLASS(key)->set_outline (key, outline);
 }
 
+/**
+ * eek_key_get_outline:
+ * @key: an #EekKey
+ *
+ * Get the outline shape of @key.
+ * Returns: an #EekOutline pointer or NULL on failure
+ */
 EekOutline *
 eek_key_get_outline (EekKey *key)
 {
@@ -565,6 +654,15 @@ eek_key_get_outline (EekKey *key)
     return EEK_KEY_GET_CLASS(key)->get_outline (key);
 }
 
+/**
+ * eek_key_set_keysym_index:
+ * @key: an #EekKey
+ * @group: group (row) index of @key
+ * @level: level (column) index of @key
+ *
+ * Set the current group and/or level index of @key in its symbol
+ * matrix to @group and @level.
+ */
 void
 eek_key_set_keysym_index (EekKey *key,
                           gint    group,
@@ -574,6 +672,15 @@ eek_key_set_keysym_index (EekKey *key,
     EEK_KEY_GET_CLASS(key)->set_keysym_index (key, group, level);
 }
 
+/**
+ * eek_key_get_keysym_index:
+ * @key: an #EekKey
+ * @group: pointer where group (row) index of @key will be stored
+ * @level: pointer where level (column) index of @key will be stored
+ *
+ * Get the current group and/or level index of @key in its symbol
+ * matrix.
+ */
 void
 eek_key_get_keysym_index (EekKey *key,
                           gint   *group,

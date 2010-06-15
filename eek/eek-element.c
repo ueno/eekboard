@@ -203,6 +203,13 @@ eek_element_init (EekElement *self)
     memset (&priv->bounds, 0, sizeof priv->bounds);
 }
 
+/**
+ * eek_element_set_name:
+ * @element: an #EekElement
+ * @name: name of @element
+ *
+ * Set the name of @element to @name.
+ */
 void
 eek_element_set_name (EekElement  *element,
                       const gchar *name)
@@ -211,6 +218,13 @@ eek_element_set_name (EekElement  *element,
     EEK_ELEMENT_GET_CLASS(element)->set_name (element, name);
 }
 
+/**
+ * eek_element_get_name:
+ * @element: an #EekElement
+ *
+ * Get the name of @element.
+ * Returns: the name of @element or NULL when the name is not set
+ */
 G_CONST_RETURN gchar *
 eek_element_get_name (EekElement  *element)
 {
@@ -218,6 +232,13 @@ eek_element_get_name (EekElement  *element)
     return EEK_ELEMENT_GET_CLASS(element)->get_name (element);
 }
 
+/**
+ * eek_element_set_bounds:
+ * @element: an #EekElement
+ * @bounds: bounding box of @element
+ *
+ * Set the bounding box of @element to @bounds.
+ */
 void
 eek_element_set_bounds (EekElement  *element,
                         EekBounds   *bounds)
@@ -226,6 +247,13 @@ eek_element_set_bounds (EekElement  *element,
     EEK_ELEMENT_GET_CLASS(element)->set_bounds (element, bounds);
 }
 
+/**
+ * eek_element_get_bounds:
+ * @element: an #EekElement
+ * @bounds: pointer where bounding box of @element will be stored
+ *
+ * Get the bounding box of @element.
+ */
 void
 eek_element_get_bounds (EekElement  *element,
                         EekBounds   *bounds)

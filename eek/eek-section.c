@@ -269,6 +269,14 @@ eek_section_class_init (EekSectionClass *klass)
                                      PROP_ANGLE,
                                      pspec);
 
+    /**
+     * EekSection::key-pressed:
+     * @section: an #EekSection
+     * @key: an #EekKey
+     *
+     * The ::key-pressed signal is emitted each time a key in @section
+     * is shifted to the pressed state.
+     */
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -281,6 +289,14 @@ eek_section_class_init (EekSectionClass *klass)
                       1,
                       EEK_TYPE_KEY);
 
+    /**
+     * EekSection::key-released:
+     * @section: an #EekSection
+     * @key: an #EekKey
+     *
+     * The ::key-released signal is emitted each time a key in @section
+     * is shifted to the released state.
+     */
     signals[KEY_RELEASED] =
         g_signal_new ("key-released",
                       G_TYPE_FROM_CLASS(gobject_class),

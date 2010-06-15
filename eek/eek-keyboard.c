@@ -339,6 +339,14 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                                      PROP_LEVEL,
                                      pspec);
 
+    /**
+     * EekKeyboard::key-pressed:
+     * @keyboard: an #EekKeyboard
+     * @key: an #EekKey
+     *
+     * The ::key-pressed signal is emitted each time a key in @keyboard
+     * is shifted to the pressed state.
+     */
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -351,6 +359,14 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                       1,
                       EEK_TYPE_KEY);
 
+    /**
+     * EekKeyboard::key-released:
+     * @keyboard: an #EekKeyboard
+     * @key: an #EekKey
+     *
+     * The ::key-released signal is emitted each time a key in @keyboard
+     * is shifted to the released state.
+     */
     signals[KEY_RELEASED] =
         g_signal_new ("key-released",
                       G_TYPE_FROM_CLASS(gobject_class),

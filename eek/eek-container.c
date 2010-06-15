@@ -143,6 +143,14 @@ eek_container_class_init (EekContainerClass *klass)
     gobject_class->finalize = eek_container_finalize;
     gobject_class->dispose = eek_container_dispose;
 
+    /**
+     * EekContainer::child-added:
+     * @container: an #EekContainer
+     * @element: an #EekElement
+     *
+     * The ::child-added signal is emitted each time an element is
+     * added to @container.
+     */
     signals[CHILD_ADDED] =
         g_signal_new ("child-added",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -153,6 +161,14 @@ eek_container_class_init (EekContainerClass *klass)
                       G_TYPE_NONE, 1,
                       EEK_TYPE_ELEMENT);
 
+    /**
+     * EekContainer::child-removed:
+     * @container: an #EekContainer
+     * @element: an #EekElement
+     *
+     * The ::child-removed signal is emitted each time an element is
+     * removed from @container.
+     */
     signals[CHILD_REMOVED] =
         g_signal_new ("child-removed",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -174,6 +190,14 @@ eek_container_init (EekContainer *self)
     priv->children = NULL;
 }
 
+/**
+ * eek_container_foreach_child:
+ * @container: an #EekContainer
+ * @callback: an #EekCallback
+ * @user_data: additional data passed to @callback
+ *
+ * Enumerate children of @container and run @callback with each child.
+ */
 void
 eek_container_foreach_child (EekContainer *container,
                              EekCallback   callback,
@@ -185,6 +209,15 @@ eek_container_foreach_child (EekContainer *container,
                                                        user_data);
 }
 
+/**
+ * eek_container_find:
+ * @container: an #EekContainer
+ * @func: function to be used to compare two children
+ * @user_data: additional data passed to @func
+ *
+ * Find a child which matches the criteria supplied as @func, in @container.
+ * Returns: an #EekElement or NULL on failure
+ */
 EekElement *
 eek_container_find (EekContainer  *container,
                     EekCompareFunc func,
