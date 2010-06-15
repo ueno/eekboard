@@ -16,7 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-lib_LTLIBRARIES = libeek.la libeek-clutter.la libeek-xkb.la libeek-xkl.la
+lib_LTLIBRARIES = \
+	libeek.la \
+	libeek-clutter.la \
+	libeek-gtk.la \
+	libeek-xkb.la \
+	libeek-xkl.la
 
 libeek_la_SOURCES = \
 	eek-layout.c \
@@ -37,8 +42,7 @@ libeek_la_SOURCES = \
 	eek-keysym.c \
 	eek-special-keysym-labels.h \
 	eek-unicode-keysym-labels.h \
-	eek-keyname-keysym-labels.h \
-	$(NULL)
+	eek-keyname-keysym-labels.h
 
 libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS)
 libeek_la_LIBADD = $(GOBJECT2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
@@ -52,24 +56,33 @@ libeek_clutter_la_SOURCES = \
 	eek-clutter-key.h \
 	eek-clutter-key-actor.c \
 	eek-clutter-key-actor.h \
-	eek-clutter.h \
-	$(NULL)
+	eek-drawing.h \
+	eek-drawing.c \
+	eek-clutter.h
 
 libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)
 libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS)
 
+libeek_gtk_la_SOURCES = \
+	eek-gtk-keyboard.c \
+	eek-gtk-keyboard.h \
+	eek-drawing.h \
+	eek-drawing.c \
+	eek-gtk.h
+
+libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS)
+
 libeek_xkb_la_SOURCES = \
 	eek-xkb-layout.h \
-	eek-xkb-layout.c \
-	$(NULL)
+	eek-xkb-layout.c
 
 libeek_xkb_la_CFLAGS = $(GTK2_CFLAGS) $(XKB_CFLAGS)
 libeek_xkb_la_LIBADD = libeek.la $(GTK2_LIBS) $(XKB_LIBS)
 
 libeek_xkl_la_SOURCES = \
 	eek-xkl-layout.h \
-	eek-xkl-layout.c \
-	$(NULL)
+	eek-xkl-layout.c
 
 libeek_xkl_la_CFLAGS = $(GTK2_CFLAGS) $(LIBXKLAVIER_CFLAGS)
 libeek_xkl_la_LIBADD = libeek-xkb.la $(GTK2_LIBS) $(LIBXKLAVIER_LIBS)

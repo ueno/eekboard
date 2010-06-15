@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 #define EEK_IS_CONTAINER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_CONTAINER))
 #define EEK_CONTAINER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_CONTAINER, EekContainerClass))
 
-typedef struct _EekContainer EekContainer;
 typedef struct _EekContainerClass EekContainerClass;
 typedef struct _EekContainerPrivate EekContainerPrivate;
 

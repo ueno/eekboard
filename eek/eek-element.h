@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 #define EEK_IS_ELEMENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_ELEMENT))
 #define EEK_ELEMENT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_ELEMENT, EekElementClass))
 
-typedef struct _EekElement EekElement;
 typedef struct _EekElementClass   EekElementClass;
 typedef struct _EekElementPrivate EekElementPrivate;
 
@@ -48,16 +47,19 @@ struct _EekElementClass
     /*< private >*/
     GInitiallyUnownedClass parent_class;
 
-    void                  (* set_name)   (EekElement  *element,
-                                          const gchar *name);
+    void                  (* set_parent) (EekElement   *self,
+                                          EekContainer *parent);
+    EekContainer         *(* get_parent) (EekElement   *self);
+    void                  (* set_name)   (EekElement   *self,
+                                          const gchar  *name);
 
-    G_CONST_RETURN gchar *(* get_name)   (EekElement  *element);
+    G_CONST_RETURN gchar *(* get_name)   (EekElement   *self);
 
-    void                  (* set_bounds) (EekElement  *element,
-                                          EekBounds   *bounds);
+    void                  (* set_bounds) (EekElement   *self,
+                                          EekBounds    *bounds);
 
-    void                  (* get_bounds) (EekElement  *element,
-                                          EekBounds   *bounds);
+    void                  (* get_bounds) (EekElement   *self,
+                                          EekBounds    *bounds);
 };
 
 GType                 eek_element_get_type   (void) G_GNUC_CONST;

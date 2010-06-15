@@ -78,6 +78,7 @@ EXTRA_HFILES=
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES= eek-private.h \
 	eek-keysym.h \
+	config.h \
 	$(NULL)
 
 # Images to copy into HTML directory.
@@ -101,6 +102,7 @@ expand_content_files=
 GTKDOC_CFLAGS = $(GOBJECT2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
 	$(top_srcdir)/eek/libeek-clutter.la \
+	$(top_srcdir)/eek/libeek-gtk.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
 	$(top_srcdir)/eek/libeek-xkl.la \
 	$(GOBJECT2_LIBS) \

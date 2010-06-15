@@ -17,13 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-#ifndef EEK_H
-#define EEK_H 1
+#ifndef EEK_GTK_H
+#define EEK_GTK_H 1
 
-#include "eek-keyboard.h"
-#include "eek-section.h"
-#include "eek-key.h"
-#include "eek-layout.h"
-#include "eek-keysym.h"
+#include "eek.h"
+#include "eek-gtk-keyboard.h"
 
-#endif  /* EEK_H */
+#endif  /* EEK_GTK_H */

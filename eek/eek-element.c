@@ -33,6 +33,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-element.h"
+#include "eek-container.h"
 
 enum {
     PROP_0,
@@ -51,14 +52,37 @@ struct _EekElementPrivate
 {
     gchar *name;
     EekBounds bounds;
+    EekContainer *parent;
 };
 
 static void
-eek_element_real_set_name (EekElement *self,
-                                  const gchar *name)
+eek_element_real_set_parent (EekElement *self,
+                             EekContainer *parent)
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
 
+    if (parent) {
+        g_return_if_fail (EEK_IS_CONTAINER(parent));
+        g_object_ref_sink (G_OBJECT(parent));
+    } else if (priv->parent)
+        g_object_unref (G_OBJECT (priv->parent));
+    priv->parent = parent;
+}
+
+static EekContainer *
+eek_element_real_get_parent (EekElement *self)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+    return priv->parent;
+}
+
+static void
+eek_element_real_set_name (EekElement  *self,
+                           const gchar *name)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    g_free (priv->name);
     priv->name = g_strdup (name);
 
     g_object_notify (G_OBJECT(self), "name");
@@ -91,6 +115,17 @@ eek_element_real_get_bounds (EekElement *self,
     *bounds = priv->bounds;
 
     g_object_notify (G_OBJECT(self), "bounds");
+}
+
+static void
+eek_element_dispose (GObject *object)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(object);
+
+    if (priv->parent) {
+        g_object_unref (G_OBJECT(priv->parent));
+        priv->parent = NULL;
+    }
 }
 
 static void
@@ -155,6 +190,8 @@ eek_element_class_init (EekElementClass *klass)
     g_type_class_add_private (gobject_class,
                               sizeof (EekElementPrivate));
 
+    klass->set_parent = eek_element_real_set_parent;
+    klass->get_parent = eek_element_real_get_parent;
     klass->set_name = eek_element_real_set_name;
     klass->get_name = eek_element_real_get_name;
     klass->set_bounds = eek_element_real_set_bounds;
@@ -163,6 +200,7 @@ eek_element_class_init (EekElementClass *klass)
     gobject_class->set_property = eek_element_set_property;
     gobject_class->get_property = eek_element_get_property;
     gobject_class->finalize     = eek_element_finalize;
+    gobject_class->dispose     = eek_element_dispose;
 
     /**
      * EekElement:name:

@@ -30,6 +30,8 @@ typedef enum {
     EEK_ORIENTATION_INVALID = -1
 } EekOrientation;
 
+typedef struct _EekElement EekElement;
+typedef struct _EekContainer EekContainer;
 typedef struct _EekKey EekKey;
 typedef struct _EekSection EekSection;
 typedef struct _EekKeyboard EekKeyboard;
@@ -90,6 +92,12 @@ typedef struct _EekBounds EekBounds;
 
 #define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
 GType eek_bounds_get_type (void) G_GNUC_CONST;
+
+G_INLINE_FUNC gdouble
+eek_bounds_long_side (EekBounds *bounds)
+{
+    return bounds->width > bounds->height ? bounds->width : bounds->height;
+}
 
 /**
  * EekOutline:
