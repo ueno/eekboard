@@ -544,32 +544,19 @@ get_names (EekXkbLayout *layout)
 
 /**
  * eek_xkb_layout_new:
- * @keycodes: component name for keycodes
- * @geometry: component name for geometry
- * @symbols: component name for symbols
  *
  * Create a new #EekXkbLayout.
  */
 EekLayout *
-eek_xkb_layout_new (const gchar *keycodes,
-                    const gchar *geometry,
-                    const gchar *symbols)
+eek_xkb_layout_new (void)
 {
     EekXkbLayout *layout;
-    EekXkbLayoutPrivate *priv;
 
     layout = g_object_new (EEK_TYPE_XKB_LAYOUT, NULL);
     g_return_val_if_fail (layout, NULL);
-    priv = layout->priv;
-    if (keycodes)
-        priv->names.keycodes = g_strdup (keycodes);
-    if (geometry)
-        priv->names.geometry = g_strdup (geometry);
-    if (symbols)
-        priv->names.symbols = g_strdup (symbols);
 
     get_keyboard (layout);
-    if (priv->xkb == NULL) {
+    if (layout->priv->xkb == NULL) {
         g_object_unref (layout);
         return NULL;
     }

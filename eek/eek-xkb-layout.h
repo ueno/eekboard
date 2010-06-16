@@ -52,11 +52,7 @@ struct _EekXkbLayoutClass
 };
 
 GType                 eek_xkb_layout_get_type  (void) G_GNUC_CONST;
-
-EekLayout            *eek_xkb_layout_new       (const gchar          *keycodes,
-                                                const gchar          *geometry,
-                                                const gchar          *symbols);
-
+EekLayout            *eek_xkb_layout_new       (void);
 
 gboolean              eek_xkb_layout_set_names (EekXkbLayout         *layout,
                                                 XkbComponentNamesRec *names);

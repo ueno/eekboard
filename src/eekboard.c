@@ -383,15 +383,20 @@ on_resize (GObject *object,
 
 static GtkWidget *
 create_widget_clutter (Eekboard *eekboard,
-                       gfloat    initial_width,
-                       gfloat    initial_height)
+                       gint      initial_width,
+                       gint      initial_height)
 {
     ClutterActor *stage, *actor;
     ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
+    EekBounds bounds;
 
-    eekboard->keyboard = eek_clutter_keyboard_new (initial_width,
-                                                   initial_height);
+    bounds.x = bounds.y = 0;
+    bounds.width = initial_width;
+    bounds.height = initial_height;
+
+    eekboard->keyboard = eek_clutter_keyboard_new ();
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
+    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
     g_signal_connect (eekboard->keyboard, "key-pressed",
                       G_CALLBACK(on_key_pressed), eekboard);
     g_signal_connect (eekboard->keyboard, "key-released",
@@ -416,8 +421,8 @@ create_widget_clutter (Eekboard *eekboard,
 
 static GtkWidget *
 create_widget_gtk (Eekboard *eekboard,
-                   gfloat    initial_width,
-                   gfloat    initial_height)
+                   gint      initial_width,
+                   gint      initial_height)
 {
     EekBounds bounds;
 

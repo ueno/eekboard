@@ -50,8 +50,7 @@ struct _EekClutterKeyboardClass
 };
 
 GType         eek_clutter_keyboard_get_type  (void) G_GNUC_CONST;
-EekKeyboard  *eek_clutter_keyboard_new       (gfloat width,
-                                              gfloat height);
+EekKeyboard  *eek_clutter_keyboard_new       (void);
 ClutterActor *eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard);
 
 G_END_DECLS

@@ -28,7 +28,7 @@ test_create (void)
     EekLayout *layout;
     const gchar *keycodes, *geometry, *symbols;
 
-    layout = eek_xkb_layout_new (NULL, "winbook", NULL);
+    layout = eek_xkb_layout_new ();
     g_assert (layout);
     keycodes = eek_xkb_layout_get_keycodes (EEK_XKB_LAYOUT(layout));
     g_assert (keycodes);

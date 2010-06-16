@@ -48,9 +48,8 @@ eek_clutter_section_real_set_name (EekElement  *self,
     EEK_ELEMENT_CLASS (eek_clutter_section_parent_class)->
         set_name (self, name);
 
-    g_return_if_fail (priv->actor);
-
-    clutter_actor_set_name (priv->actor, name);
+    if (priv->actor)
+        clutter_actor_set_name (priv->actor, name);
 }
 
 static void
@@ -62,10 +61,10 @@ eek_clutter_section_real_set_bounds (EekElement *self,
     EEK_ELEMENT_CLASS (eek_clutter_section_parent_class)->
         set_bounds (self, bounds);
 
-    g_return_if_fail (priv->actor);
-
-    clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
-    clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
+    if (priv->actor) {
+        clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
+        clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
+    }
 }
 
 static void

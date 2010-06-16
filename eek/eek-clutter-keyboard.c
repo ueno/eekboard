@@ -57,9 +57,8 @@ eek_clutter_keyboard_real_set_name (EekElement *self,
     EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
         set_name (self, name);
 
-    g_return_if_fail (priv->actor);
-
-    clutter_actor_set_name (priv->actor, name);
+    if (priv->actor)
+        clutter_actor_set_name (priv->actor, name);
 }
 
 static void
@@ -71,10 +70,10 @@ eek_clutter_keyboard_real_set_bounds (EekElement *self,
     EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
         set_bounds (self, bounds);
 
-    g_return_if_fail (priv->actor);
-
-    clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
-    clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
+    if (priv->actor) {
+        clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
+        clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
+    }
 }
 
 static void
@@ -176,29 +175,13 @@ eek_clutter_keyboard_init (EekClutterKeyboard *self)
 
 /**
  * eek_clutter_keyboard_new:
- * @width: max width of the area where the keyboard to be drawn
- * @height: max height of the area where the keyboard to be drawn
  *
  * Create a new #EekClutterKeyboard.
  */
 EekKeyboard*
-eek_clutter_keyboard_new (gfloat width,
-                          gfloat height)
+eek_clutter_keyboard_new (void)
 {
-    EekKeyboard *keyboard;
-    EekBounds bounds;
-
-    keyboard = g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, NULL);
-    g_return_val_if_fail (keyboard, NULL);
-
-    /* Can't call set_bounds of this class since it needs priv->actor
-       initialized */
-    memset (&bounds, 0, sizeof bounds);
-    bounds.width = width;
-    bounds.height = height;
-    EEK_ELEMENT_CLASS (eek_clutter_keyboard_parent_class)->
-        set_bounds (EEK_ELEMENT(keyboard), &bounds);
-    return keyboard;
+    return g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, NULL);
 }
 
 static gboolean
