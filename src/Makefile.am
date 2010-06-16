@@ -16,9 +16,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-bin_PROGRAMS = eekboard eekboard-gtk
+bin_PROGRAMS = eekboard
 eekboard_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS) $(GTK2_CFLAGS) $(XKB_CFLAGS) $(LIBXKLAVIER_CFLAGS) $(LIBFAKEKEY_CFLAGS)
-eekboard_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(top_builddir)/eek/libeek-clutter.la $(GOBJECT2_LIBS) $(CLUTTER_LIBS) $(CLUTTER_GTK_LIBS) $(GTK2_CFLAGS) $(XKB_LIBS) $(LIBXKLAVIER_LIBS) $(LIBFAKEKEY_LIBS)
-
-eekboard_gtk_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(GTK2_CFLAGS) $(XKB_CFLAGS) $(LIBXKLAVIER_CFLAGS) $(LIBFAKEKEY_CFLAGS)
-eekboard_gtk_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(top_builddir)/eek/libeek-gtk.la $(GOBJECT2_LIBS) $(GTK2_CFLAGS) $(XKB_LIBS) $(LIBXKLAVIER_LIBS) $(LIBFAKEKEY_LIBS)
+eekboard_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(top_builddir)/eek/libeek-clutter.la $(top_builddir)/eek/libeek-gtk.la $(GOBJECT2_LIBS) $(CLUTTER_LIBS) $(CLUTTER_GTK_LIBS) $(GTK2_CFLAGS) $(XKB_LIBS) $(LIBXKLAVIER_LIBS) $(LIBFAKEKEY_LIBS)

@@ -511,6 +511,37 @@ set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
     XkbComponentNamesRec names;
     gboolean success = FALSE;
 
+#define DEBUG 1
+#if DEBUG
+    if (config->layouts) {
+        gint i;
+
+        fprintf (stderr, "layout = ");
+        for (i = 0; config->layouts[i] != NULL; i++)
+            fprintf (stderr, "\"%s\" ", config->layouts[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "layouts = NULL\n");
+    if (config->variants) {
+        gint i;
+
+        fprintf (stderr, "variant = ");
+        for (i = 0; config->variants[i]; i++)
+            fprintf (stderr, "\"%s\" ", config->variants[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "variants = NULL\n");
+    if (config->options) {
+        gint i;
+
+        fprintf (stderr, "option = ");
+        for (i = 0; config->options[i]; i++)
+            fprintf (stderr, "\"%s\" ", config->options[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "options = NULL\n");
+#endif
+
     /* Disabled since the current EekXklLayout implementation does not
        change the server setting. */
 #if 0

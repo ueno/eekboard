@@ -117,21 +117,13 @@ draw_key (EekElement *element, gpointer user_data)
     EekBounds bounds;
     guint keysym;
 
-    gdk_cairo_set_source_color (priv->cr, priv->dark_color);
-    cairo_set_line_width (priv->cr, 1);
-    cairo_set_line_join (priv->cr, CAIRO_LINE_JOIN_ROUND);
-
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-
     cairo_save (priv->cr);
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     cairo_translate (priv->cr, bounds.x, bounds.y);
     outline = eek_key_get_outline (key);
-    eek_draw_rounded_polygon (priv->cr,
-                              FALSE,
-                              outline->corner_radius,
-                              outline->points,
-                              outline->num_points);
-    cairo_stroke (priv->cr);
+    eek_draw_outline (priv->cr, outline);
+
+    gdk_cairo_set_source_color (priv->cr, priv->dark_color);
 
     keysym = eek_key_get_keysym (key);
     if (keysym != EEK_INVALID_KEYSYM) {

@@ -32,6 +32,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek/eek-clutter.h"
+#include "eek/eek-gtk.h"
 #include "eek/eek-xkl.h"
 
 #define CSW 640
@@ -51,19 +52,41 @@
     "You should have received a copy of the GNU General Public License " \
     "along with this program.  If not, see <http://www.gnu.org/licenses/>. " \
 
-struct _EekBoard {
-    EekKeyboard *keyboard;
-    EekLayout *layout;          /* FIXME: eek_keyboard_get_layout() */
+struct _Eekboard {
+    gboolean use_clutter;
     Display *display;
     FakeKey *fakekey;
-    guint modifiers;
+    GtkWidget *widget;
     gfloat width, height;
-};
-typedef struct _EekBoard EekBoard;
 
-static void on_about (GtkAction * action, GtkWidget *window);
-static void on_monitor_key_event_toggled (GtkToggleAction *action,
-                                          GtkWidget *window);
+    EekKeyboard *keyboard;
+    EekLayout *layout;          /* FIXME: eek_keyboard_get_layout() */
+    guint modifiers;
+};
+typedef struct _Eekboard Eekboard;
+
+struct _ConfigCallbackData {
+    Eekboard *eekboard;
+    XklConfigRec *config;
+};
+typedef struct _ConfigCallbackData ConfigCallbackData;
+
+struct _LayoutCallbackData {
+    Eekboard *eekboard;
+    GtkUIManager *ui_manager;
+    GtkActionGroup *action_group;
+    guint merge_id;
+};
+typedef struct _LayoutCallbackData LayoutCallbackData;
+
+static void       on_about      (GtkAction       *action,
+                                 GtkWidget       *window);
+static void       on_monitor_key_event_toggled
+                                (GtkToggleAction *action,
+                                 GtkWidget       *window);
+static GtkWidget *create_widget (Eekboard        *eekboard,
+                                 gfloat           initial_width,
+                                 gfloat           initial_height);
 
 static const char ui_description[] =
     "<ui>"
@@ -84,20 +107,6 @@ static const char ui_description[] =
     "</ui>";
 
 #define SET_LAYOUT_UI_PATH "/MainMenu/KeyboardMenu/SetLayout/LayoutsPH"
-
-struct _ConfigCallbackData {
-    EekBoard *eekboard;
-    XklConfigRec *config;
-};
-typedef struct _ConfigCallbackData ConfigCallbackData;
-
-struct _LayoutCallbackData {
-    EekBoard *eekboard;
-    GtkUIManager *ui_manager;
-    GtkActionGroup *action_group;
-    guint merge_id;
-};
-typedef struct _LayoutCallbackData LayoutCallbackData;
 
 static const GtkActionEntry action_entry[] = {
     {"FileMenu", NULL, N_("_File")},
@@ -130,7 +139,7 @@ on_about (GtkAction * action, GtkWidget *window)
                          "authors", authors,
                          "website",
                          "http://github.com/ueno/eek/",
-                         "website-label", _("EekBoard web site"),
+                         "website-label", _("Eekboard web site"),
                          "wrap-license", TRUE, NULL);
 }
 
@@ -146,7 +155,7 @@ on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key,
                 gpointer user_data)
 {
-    EekBoard *eekboard = user_data;
+    Eekboard *eekboard = user_data;
     guint keysym;
 
     keysym = eek_key_get_keysym (key);
@@ -173,7 +182,7 @@ on_key_released (EekKeyboard *keyboard,
                  EekKey      *key,
                  gpointer user_data)
 {
-    EekBoard *eekboard = user_data;
+    Eekboard *eekboard = user_data;
     fakekey_release (eekboard->fakekey);
 }
 
@@ -187,48 +196,19 @@ on_activate (GtkAction *action,
 }
 
 static void
-create_keyboard (EekBoard     *eekboard,
-                 ClutterActor *stage,
-                 EekLayout    *layout,
-                 gfloat        initial_width,
-                 gfloat        initial_height)
-{
-    ClutterActor *actor;
-
-    eekboard->keyboard = eek_clutter_keyboard_new (initial_width,
-                                                   initial_height);
-    g_signal_connect (eekboard->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), eekboard);
-    g_signal_connect (eekboard->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), eekboard);
-    eek_keyboard_set_layout (eekboard->keyboard, layout);
-    actor = eek_clutter_keyboard_get_actor
-        (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
-    clutter_actor_get_size (actor,
-                            &eekboard->width,
-                            &eekboard->height);
-    clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
-    clutter_actor_set_size (stage,
-                            eekboard->width,
-                            eekboard->height);
-}
-
-/* FIXME: EekKeyboard should handle relayout by itself. */
-static void
 on_changed (EekLayout *layout, gpointer user_data)
 {
-    EekBoard *eekboard = user_data;
-    ClutterActor *stage, *actor;
-    gfloat width, height;
+    Eekboard *eekboard = user_data;
+    GtkWidget *vbox, *widget;
 
-    actor = eek_clutter_keyboard_get_actor
-        (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
-    stage = clutter_actor_get_stage (actor);
-    clutter_actor_get_size (stage, &width, &height);
-    clutter_container_remove_actor (CLUTTER_CONTAINER(stage), actor);
+    vbox = gtk_widget_get_parent (eekboard->widget);
+    gtk_widget_hide (eekboard->widget);
+    gtk_widget_destroy (eekboard->widget);
+
     g_object_unref (eekboard->keyboard);
-    create_keyboard (eekboard, stage, layout, width, height);
-    clutter_actor_get_size (stage, &eekboard->width, &eekboard->height);
+    widget = create_widget (eekboard, eekboard->width, eekboard->height);
+    gtk_container_add (GTK_CONTAINER(vbox), widget);
+    gtk_widget_show_all (vbox);
 }
 
 static void
@@ -271,7 +251,9 @@ layout_callback (XklConfigRegistry *registry,
         config->config->layouts = g_new0 (char *, 2);
         config->config->layouts[0] = g_strdup (item->name);
         config->config->layouts[1] = NULL;
-        config->config->variants = NULL;
+        /* reset the existing variant setting */
+        config->config->variants = g_new0 (char *, 1);
+        config->config->variants[0] = NULL;
         g_signal_connect (action, "activate", G_CALLBACK (on_activate),
                           config);
         g_object_unref (action);
@@ -327,7 +309,7 @@ layout_callback (XklConfigRegistry *registry,
 }
 
 static void
-create_layouts_menu (EekBoard *eekboard, GtkUIManager *ui_manager)
+create_layouts_menu (Eekboard *eekboard, GtkUIManager *ui_manager)
 {
     XklEngine *engine;
     XklConfigRegistry *registry;
@@ -347,7 +329,7 @@ create_layouts_menu (EekBoard *eekboard, GtkUIManager *ui_manager)
 }
 
 static void
-create_menus (EekBoard      *eekboard,
+create_menus (Eekboard      *eekboard,
               GtkWidget     *window,
               GtkUIManager * ui_manager)
 {
@@ -371,7 +353,7 @@ on_resize (GObject *object,
 	   GParamSpec *param_spec,
 	   gpointer user_data)
 {
-    EekBoard *eekboard = user_data;
+    Eekboard *eekboard = user_data;
     GValue value = {0};
     gfloat width, height, scale;
     ClutterActor *stage, *actor;
@@ -399,68 +381,135 @@ on_resize (GObject *object,
                            &value);
 }
 
-int
-main (int argc, char *argv[])
+static GtkWidget *
+create_widget_clutter (Eekboard *eekboard,
+                       gfloat    initial_width,
+                       gfloat    initial_height)
 {
-    EekBoard eekboard;
-    ClutterActor *stage;
+    ClutterActor *stage, *actor;
     ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
-    GtkWidget *menubar, *embed, *vbox, *window;
-    GtkUIManager *ui_manager;
 
-    if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
-        fprintf (stderr, "Can't init Clutter-Gtk\n");
-        exit (1);
-    }
+    eekboard->keyboard = eek_clutter_keyboard_new (initial_width,
+                                                   initial_height);
+    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
+    g_signal_connect (eekboard->keyboard, "key-pressed",
+                      G_CALLBACK(on_key_pressed), eekboard);
+    g_signal_connect (eekboard->keyboard, "key-released",
+                      G_CALLBACK(on_key_released), eekboard);
 
-    memset (&eekboard, 0, sizeof eekboard);
-    eekboard.display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    if (!eekboard.display) {
-        fprintf (stderr, "Can't open display\n");
-        exit (1);
-    }
-
-    eekboard.fakekey = fakekey_init (eekboard.display);
-    if (!eekboard.fakekey) {
-        fprintf (stderr, "Can't init fakekey\n");
-        exit (1);
-    }
-
-    embed = gtk_clutter_embed_new ();
-    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(embed));
+    eekboard->widget = gtk_clutter_embed_new ();
+    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(eekboard->widget));
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
     clutter_stage_set_user_resizable (CLUTTER_STAGE (stage), TRUE);
 
-    eekboard.layout = eek_xkl_layout_new ();
-    if (!eekboard.layout) {
-        fprintf (stderr, "Failed to create layout\n");
-        exit (1);
+    actor = eek_clutter_keyboard_get_actor
+        (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
+    clutter_actor_get_size (actor, &eekboard->width, &eekboard->height);
+    clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
+    clutter_actor_set_size (stage, eekboard->width, eekboard->height);
+    g_signal_connect (stage, "notify::width",
+                      G_CALLBACK (on_resize), eekboard);
+    g_signal_connect (stage, "notify::height",
+                      G_CALLBACK (on_resize), eekboard);
+    return eekboard->widget;
+}
+
+static GtkWidget *
+create_widget_gtk (Eekboard *eekboard,
+                   gfloat    initial_width,
+                   gfloat    initial_height)
+{
+    EekBounds bounds;
+
+    bounds.x = bounds.y = 0;
+    bounds.width = initial_width;
+    bounds.height = initial_height;
+
+    eekboard->keyboard = eek_gtk_keyboard_new ();
+    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
+    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    g_signal_connect (eekboard->keyboard, "key-pressed",
+                      G_CALLBACK(on_key_pressed), eekboard);
+    g_signal_connect (eekboard->keyboard, "key-released",
+                      G_CALLBACK(on_key_released), eekboard);
+
+    eekboard->widget =
+        eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard->keyboard));
+    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    eekboard->width = bounds.width;
+    eekboard->height = bounds.height;
+    return eekboard->widget;
+}
+
+static GtkWidget *
+create_widget (Eekboard *eekboard,
+               gfloat    initial_width,
+               gfloat    initial_height)
+{
+    if (eekboard->use_clutter)
+        return create_widget_clutter (eekboard, initial_width, initial_height);
+    else
+        return create_widget_gtk (eekboard, initial_width, initial_height);
+}
+
+Eekboard *
+eekboard_new (gboolean use_clutter)
+{
+    Eekboard *eekboard;
+
+    eekboard = g_slice_new0 (Eekboard);
+    eekboard->use_clutter = use_clutter;
+    eekboard->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    if (!eekboard->display) {
+        g_slice_free (Eekboard, eekboard);
+        g_warning ("Can't open display");
+        return NULL;
     }
 
-    clutter_actor_show (stage); /* workaround for clutter-gtk (<= 0.10.2) */
-    create_keyboard (&eekboard, stage, eekboard.layout, CSW, CSH);
-    if (!eekboard.keyboard) {
-        g_object_unref (eekboard.layout);
-        fprintf (stderr, "Failed to create keyboard\n");
+    eekboard->fakekey = fakekey_init (eekboard->display);
+    if (!eekboard->fakekey) {
+        g_slice_free (Eekboard, eekboard);
+        g_warning ("Can't init fakekey");
+        return NULL;
+    }
+
+    eekboard->layout = eek_xkl_layout_new ();
+    if (!eekboard->layout) {
+        g_slice_free (Eekboard, eekboard);
+        g_warning ("Can't create layout");
+        return NULL;
+    }
+    g_signal_connect (eekboard->layout, "changed",
+                      G_CALLBACK(on_changed), eekboard);
+
+    create_widget (eekboard, CSW, CSH);
+
+    return eekboard;
+}
+
+int
+main (int argc, char *argv[])
+{
+    const gchar *env;
+    gboolean use_clutter = TRUE;
+    Eekboard *eekboard;
+    GtkWidget *widget, *vbox, *menubar, *window;
+    GtkUIManager *ui_manager;
+
+    env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
+    if (env && g_strcmp0 (env, "1") == 0)
+        use_clutter = FALSE;
+
+    if (use_clutter) {
+        if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+            g_warning ("Can't init Clutter-Gtk");
+            use_clutter = FALSE;
+        }
+    }
+    if (!use_clutter && !gtk_init_check (&argc, &argv)) {
+        g_warning ("Can't init GTK");
         exit (1);
     }
-    clutter_actor_get_size (stage, &eekboard.width, &eekboard.height);
-    clutter_actor_show_all (stage);
-
-    g_signal_connect (eekboard.layout,
-                      "changed",
-                      G_CALLBACK(on_changed),
-                      &eekboard);
-
-    g_signal_connect (stage, 
-                      "notify::width",
-                      G_CALLBACK (on_resize),
-                      &eekboard);
-
-    g_signal_connect (stage,
-                      "notify::height",
-                      G_CALLBACK (on_resize),
-                      &eekboard);
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_can_focus (window, FALSE);
@@ -470,16 +519,21 @@ main (int argc, char *argv[])
                       G_CALLBACK (gtk_main_quit), NULL);
 
     vbox = gtk_vbox_new (FALSE, 0);
+
+    eekboard = eekboard_new (use_clutter);
+    widget = create_widget (eekboard, CSW, CSH);
+    
     ui_manager = gtk_ui_manager_new ();
-    create_menus (&eekboard, window, ui_manager);
+    create_menus (eekboard, window, ui_manager);
     menubar = gtk_ui_manager_get_widget (ui_manager, "/MainMenu");
     gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
-    gtk_container_add (GTK_CONTAINER(vbox), embed);
-    gtk_container_add (GTK_CONTAINER(window), vbox);
 
-    gtk_widget_set_size_request (embed, eekboard.width, eekboard.height);
+    gtk_container_add (GTK_CONTAINER(vbox), widget);
+    gtk_container_add (GTK_CONTAINER(window), vbox);
+  
+    gtk_widget_set_size_request (widget, eekboard->width, eekboard->height);
     gtk_widget_show_all (window);
-    gtk_widget_set_size_request (embed, -1, -1);
+    gtk_widget_set_size_request (widget, -1, -1);
 
     gtk_main ();
 

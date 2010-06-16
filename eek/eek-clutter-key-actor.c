@@ -312,7 +312,6 @@ create_texture_for_key (EekKey *key)
 {
     ClutterActor *texture;
     cairo_t *cr;
-    cairo_pattern_t *pat;
     EekOutline *outline;
     EekBounds bounds;
 
@@ -321,29 +320,7 @@ create_texture_for_key (EekKey *key)
  
     texture = clutter_cairo_texture_new (bounds.width, bounds.height);
     cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
-    cairo_set_line_width (cr, 1);
-    cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-
-    pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
-    cairo_pattern_add_color_stop_rgba (pat, 1, 0.5, 0.5, 0.5, 1);
-    cairo_pattern_add_color_stop_rgba (pat, 0, 1, 1, 1, 1);
-
-    cairo_set_source (cr, pat);
-
-    eek_draw_rounded_polygon (cr,
-                              TRUE,
-                              outline->corner_radius,
-                              outline->points,
-                              outline->num_points);
-
-    cairo_pattern_destroy (pat);
-
-    cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5);
-    eek_draw_rounded_polygon (cr,
-                              FALSE,
-                              outline->corner_radius,
-                              outline->points,
-                              outline->num_points);
+    eek_draw_outline (cr, outline);
     cairo_destroy (cr);
     return texture;
 }

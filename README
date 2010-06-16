@@ -1,10 +1,10 @@
-EekBoard - a virtual keyboard for GNOME -*- outline -*-
+eekboard - a virtual keyboard for GNOME -*- outline -*-
 
-EekBoard is a virtual keyboard software package which ships with a
+eekboard is a virtual keyboard software package which ships with a
 standalone virtual keyboard application ("eekboard"), and a library to
 create keyboard-like UI ("libeek").
 
-*NOTE* EekBoard is still under heavy development. The code has still a
+*NOTE* eekboard is still under heavy development. The code has still a
 lot of bugs and lacks documentation.
 
 * How to test

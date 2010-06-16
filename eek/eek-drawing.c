@@ -177,6 +177,36 @@ eek_get_fonts (EekKeyboard           *keyboard,
     fonts[EEK_KEYSYM_CATEGORY_KEYNAME] = font_desc;
 }
 
+void
+eek_draw_outline (cairo_t *cr, EekOutline *outline)
+{
+    cairo_pattern_t *pat;
+
+    cairo_set_line_width (cr, 1);
+    cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+
+    pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
+    cairo_pattern_add_color_stop_rgba (pat, 1, 0.5, 0.5, 0.5, 1);
+    cairo_pattern_add_color_stop_rgba (pat, 0, 1, 1, 1, 1);
+
+    cairo_set_source (cr, pat);
+
+    eek_draw_rounded_polygon (cr,
+                              TRUE,
+                              outline->corner_radius,
+                              outline->points,
+                              outline->num_points);
+
+    cairo_pattern_destroy (pat);
+
+    cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5);
+    eek_draw_rounded_polygon (cr,
+                              FALSE,
+                              outline->corner_radius,
+                              outline->points,
+                              outline->num_points);
+}
+
 /*
  * The functions below are borrowed from
  * libgnomekbd/gkbd-keyboard-drawing.c.

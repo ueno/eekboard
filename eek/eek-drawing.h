@@ -16,6 +16,9 @@ void eek_get_fonts            (EekKeyboard           *keyboard,
                                PangoLayout           *layout,
                                PangoFontDescription **fonts);
 
+void eek_draw_outline         (cairo_t               *cr,
+                               EekOutline            *outline);
+
 void eek_draw_rounded_polygon (cairo_t               *cr,
                                gboolean               filled,
                                gdouble                radius,
