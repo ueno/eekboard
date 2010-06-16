@@ -202,8 +202,8 @@ on_changed (EekLayout *layout, gpointer user_data)
     GtkWidget *vbox, *widget;
 
     vbox = gtk_widget_get_parent (eekboard->widget);
-    gtk_widget_hide (eekboard->widget);
-    gtk_widget_destroy (eekboard->widget);
+    /* gtk_widget_destroy() seems not usable for GtkClutterEmbed */
+    gtk_container_remove (GTK_CONTAINER(vbox), eekboard->widget);
 
     g_object_unref (eekboard->keyboard);
     widget = create_widget (eekboard, eekboard->width, eekboard->height);

@@ -511,7 +511,6 @@ set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
     XkbComponentNamesRec names;
     gboolean success = FALSE;
 
-#define DEBUG 1
 #if DEBUG
     if (config->layouts) {
         gint i;
