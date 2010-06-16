@@ -54,28 +54,10 @@ G_DEFINE_TYPE (EekClutterKeyActor, eek_clutter_key_actor,
 
 struct _EekClutterKeyActorPrivate
 {
+    EekClutterDrawingContext *context;
     EekKey *key;
     ClutterActor *texture;
-    PangoFontDescription *font;
 };
-
-static struct {
-    /* outline pointer -> ClutterTexture */
-    GHashTable *outline_textures;
-
-    /* manually maintain the ref-count of outline_textures to set it
-       to NULL when all the EekClutterKeyActor are destroyed */
-    gint outline_textures_ref_count;
-} texture_cache;
-
-static struct {
-    /* keysym category -> PangoFontDescription * */
-    PangoFontDescription *category_fonts[EEK_KEYSYM_CATEGORY_LAST];
-
-    /* manually maintain the ref-count of category_fonts to set it to
-       NULL when all the EekClutterKeyActor are destroyed */
-    gint category_fonts_ref_count;
-} font_cache;
 
 static ClutterActor *get_texture          (EekClutterKeyActor *actor);
 static void          draw_key_on_layout   (EekClutterKeyActor *actor,
@@ -183,29 +165,13 @@ eek_clutter_key_actor_dispose (GObject *object)
 {
     EekClutterKeyActorPrivate *priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(object);
 
+    if (priv->context) {
+        g_object_unref (priv->context);
+        priv->context = NULL;
+    }
     if (priv->key) {
         g_object_unref (priv->key);
         priv->key = NULL;
-    }
-    if (priv->texture) {
-        /* no need to g_object_unref (priv->texture) */
-        priv->texture = NULL;
-        if (--texture_cache.outline_textures_ref_count == 0) {
-            g_hash_table_unref (texture_cache.outline_textures);
-            texture_cache.outline_textures = NULL;
-        }
-    }
-    if (priv->font) {
-        /* no need to pango_font_description_free (priv->font) */
-        priv->font = NULL;
-        if (--font_cache.category_fonts_ref_count == 0) {
-            gint i;
-
-            for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++) {
-                pango_font_description_free (font_cache.category_fonts[i]);
-                font_cache.category_fonts[i] = NULL;
-            }
-        }
     }
     G_OBJECT_CLASS (eek_clutter_key_actor_parent_class)->dispose (object);
 }
@@ -286,7 +252,6 @@ eek_clutter_key_actor_init (EekClutterKeyActor *self)
     priv = self->priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(self);
     priv->key = NULL;
     priv->texture = NULL;
-    priv->font = NULL;
     
     clutter_actor_set_reactive (CLUTTER_ACTOR(self), TRUE);
     g_signal_connect (self, "button-press-event",
@@ -296,11 +261,13 @@ eek_clutter_key_actor_init (EekClutterKeyActor *self)
 }
 
 ClutterActor *
-eek_clutter_key_actor_new (EekKey *key)
+eek_clutter_key_actor_new (EekClutterDrawingContext *context, EekKey *key)
 {
     EekClutterKeyActor *actor;
 
     actor = g_object_new (EEK_TYPE_CLUTTER_KEY_ACTOR, NULL);
+    actor->priv->context = context;
+    g_object_ref_sink (actor->priv->context);
     actor->priv->key = key;
     g_object_ref_sink (actor->priv->key);
     return CLUTTER_ACTOR(actor);
@@ -387,17 +354,17 @@ get_texture (EekClutterKeyActor *actor)
     ClutterActor *texture;
     EekOutline *outline;
 
-    if (!texture_cache.outline_textures)
-        texture_cache.outline_textures = g_hash_table_new (g_direct_hash,
-                                                           g_direct_equal);
     outline = eek_key_get_outline (actor->priv->key);
-    texture = g_hash_table_lookup (texture_cache.outline_textures, outline);
+    texture =
+        eek_clutter_drawing_context_get_outline_texture (actor->priv->context,
+                                                         outline);
     if (texture == NULL) {
         texture = create_texture_for_key (actor->priv->key);
-        g_hash_table_insert (texture_cache.outline_textures, outline, texture);
+        eek_clutter_drawing_context_set_outline_texture (actor->priv->context,
+                                                         outline,
+                                                         texture);
     } else
         texture = clutter_clone_new (texture);
-    texture_cache.outline_textures_ref_count++;
     return texture;
 }
 
@@ -410,28 +377,7 @@ draw_key_on_layout (EekClutterKeyActor *self,
     const gchar *label, *empty_label = "";
     EekKeysymCategory category;
     EekBounds bounds;
-
-    if (font_cache.category_fonts_ref_count == 0) {
-        EekContainer *keyboard, *section;
-        PangoFontDescription *font;
-        PangoLayout *copy;
-
-        section = EEK_ELEMENT_GET_CLASS(priv->key)->
-            get_parent (EEK_ELEMENT(priv->key));
-        g_return_if_fail (EEK_IS_SECTION(section));
-
-        keyboard = EEK_ELEMENT_GET_CLASS(section)->
-            get_parent (EEK_ELEMENT(section));
-        g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-        
-        copy = pango_layout_copy (layout);
-        font = pango_font_description_from_string ("Sans");
-        pango_layout_set_font_description (copy, font);
-
-        eek_get_fonts (EEK_KEYBOARD(keyboard), copy,
-                       font_cache.category_fonts);
-        g_object_unref (G_OBJECT(copy));
-    }
+    PangoFontDescription *font;
 
     keysym = eek_key_get_keysym (priv->key);
     if (keysym == EEK_INVALID_KEYSYM)
@@ -439,11 +385,10 @@ draw_key_on_layout (EekClutterKeyActor *self,
     category = eek_keysym_get_category (keysym);
     if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
         return;
-    if (!priv->font) {
-        priv->font = font_cache.category_fonts[category];
-        font_cache.category_fonts_ref_count++;
-    }
-    pango_layout_set_font_description (layout, priv->font);
+
+    font = eek_clutter_drawing_context_get_category_font (priv->context,
+                                                          category);
+    pango_layout_set_font_description (layout, font);
 
     eek_element_get_bounds (EEK_ELEMENT(priv->key), &bounds);
     pango_layout_set_width (layout, PANGO_SCALE * bounds.width);

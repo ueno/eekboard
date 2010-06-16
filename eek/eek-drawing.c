@@ -87,26 +87,21 @@ egf_key_callback (EekElement *element,
 {
     EekKey *key = EEK_KEY(element);
     GetFontSizeCallbackData *data = user_data;
-    guint *keysyms;
-    gint num_groups, num_levels, i;
     gdouble font_size;
+    guint keysym;
+    EekBounds bounds;
+    const gchar *label;
 
-    eek_key_get_keysyms (key, &keysyms, &num_groups, &num_levels);
-    for (i = 0; i < num_groups * num_levels; i++) {
-        guint keysym = keysyms[i];
-        EekBounds bounds;
-        const gchar *label;
+    keysym = eek_key_get_keysym (key);
+    if (keysym == EEK_INVALID_KEYSYM ||
+        eek_keysym_get_category (keysym) != data->category)
+        return;
 
-        if (keysym == EEK_INVALID_KEYSYM ||
-            eek_keysym_get_category (keysym) != data->category)
-            continue;
-
-        eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-        label = eek_keysym_to_string (keysym);
-        font_size = get_font_size (label, &bounds, data->layout);
-        if (font_size < data->font_size && font_size >= data->minimum_font_size)
-            data->font_size = font_size;
-    }
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    label = eek_keysym_to_string (keysym);
+    font_size = get_font_size (label, &bounds, data->layout);
+    if (font_size < data->font_size && font_size >= data->minimum_font_size)
+        data->font_size = font_size;
 }
 
 static void

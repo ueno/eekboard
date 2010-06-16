@@ -29,6 +29,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-clutter-keyboard.h"
+#include "eek-clutter-drawing-context.h"
 #include "eek-keyboard.h"
 
 G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
@@ -39,7 +40,9 @@ G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 
 struct _EekClutterKeyboardPrivate
 {
+    EekClutterDrawingContext *context;
     ClutterActor *actor;
+
     guint key_press_event_handler;
     guint key_release_event_handler;
 };
@@ -92,10 +95,16 @@ key_released_event (EekSection  *section,
 static EekSection *
 eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 {
+    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
     EekSection *section;
     ClutterActor *actor;
 
-    section = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
+    if (!priv->context) {
+        priv->context = eek_clutter_drawing_context_new ();
+        g_object_ref_sink (G_OBJECT(priv->context));
+    }
+
+    section = eek_clutter_section_new (priv->context);
     g_return_val_if_fail (section, NULL);
 
     g_signal_connect (section, "key-pressed",
@@ -119,6 +128,10 @@ eek_clutter_keyboard_dispose (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
 
+    if (priv->context) {
+        g_object_unref (G_OBJECT(priv->context));
+        priv->context = NULL;
+    }
     if (priv->actor) {
         ClutterActor *stage;
 
@@ -238,6 +251,31 @@ on_clutter_realize (ClutterActor *actor, gpointer user_data)
                       G_CALLBACK (on_clutter_key_release_event), keyboard);
 }
 
+static void
+update_category_fonts (EekClutterKeyboard *keyboard)
+{
+    EekClutterKeyboardPrivate *priv =
+        EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+    PangoContext *context;
+    PangoLayout *layout;
+    PangoFontDescription *fonts[EEK_KEYSYM_CATEGORY_LAST], *base_font;
+    gint i;
+
+    context = clutter_actor_get_pango_context (priv->actor);
+    layout = pango_layout_new (context);
+    base_font = pango_font_description_from_string ("Sans");
+    pango_layout_set_font_description (layout, base_font);
+    pango_font_description_free (base_font);
+    eek_get_fonts (EEK_KEYBOARD(keyboard), layout, &fonts);
+    for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++) {
+        eek_clutter_drawing_context_set_category_font (priv->context,
+                                                       i,
+                                                       fonts[i]);
+        pango_font_description_free (fonts[i]);
+    }
+    g_object_unref (G_OBJECT(layout));
+}
+
 ClutterActor *
 eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
 {
@@ -249,7 +287,9 @@ eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
         g_signal_connect (priv->actor, "realize",
                           G_CALLBACK (on_clutter_realize), keyboard);
         g_return_val_if_fail (priv->actor, NULL);
+
         eek_keyboard_realize (EEK_KEYBOARD(keyboard));
+        update_category_fonts (keyboard);
     }
     return priv->actor;
 }

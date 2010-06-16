@@ -35,6 +35,7 @@ G_DEFINE_TYPE (EekClutterSection, eek_clutter_section, EEK_TYPE_SECTION);
 
 struct _EekClutterSectionPrivate
 {
+    EekClutterDrawingContext *context;
     ClutterActor *actor;
 };
 
@@ -101,6 +102,7 @@ eek_clutter_section_real_create_key (EekSection  *self,
                                      gint         column,
                                      gint         row)
 {
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
     EekKey *key;
     gint num_columns, num_rows;
     EekOrientation orientation;
@@ -111,10 +113,7 @@ eek_clutter_section_real_create_key (EekSection  *self,
     eek_section_get_row (self, row, &num_columns, &orientation);
     g_return_val_if_fail (column < num_columns, NULL);
 
-    key = g_object_new (EEK_TYPE_CLUTTER_KEY,
-                        "column", column,
-                        "row", row,
-                        NULL);
+    key = eek_clutter_key_new (priv->context, column, row);
     g_return_val_if_fail (key, NULL);
     
     g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
@@ -136,6 +135,10 @@ eek_clutter_section_dispose (GObject *object)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
 
+    if (priv->context) {
+        g_object_unref (priv->context);
+        priv->context = NULL;
+    }
     if (priv->actor) {
         g_object_unref (priv->actor);
         priv->actor = NULL;
@@ -176,4 +179,17 @@ eek_clutter_section_get_actor (EekClutterSection *section)
         g_object_ref_sink (priv->actor);
     }
     return priv->actor;
+}
+
+EekSection *
+eek_clutter_section_new (EekClutterDrawingContext *context)
+{
+    EekClutterSection *section;
+
+    g_return_val_if_fail (context, NULL);
+    section = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
+    section->priv->context = context;
+    g_object_ref_sink (G_OBJECT(section->priv->context));
+
+    return EEK_SECTION(section);
 }

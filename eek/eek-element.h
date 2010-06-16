@@ -47,9 +47,6 @@ struct _EekElementClass
     /*< private >*/
     GInitiallyUnownedClass parent_class;
 
-    void                  (* set_parent) (EekElement   *self,
-                                          EekContainer *parent);
-    EekContainer         *(* get_parent) (EekElement   *self);
     void                  (* set_name)   (EekElement   *self,
                                           const gchar  *name);
 

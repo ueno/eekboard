@@ -36,6 +36,7 @@ G_DEFINE_TYPE (EekClutterKey, eek_clutter_key, EEK_TYPE_KEY);
 
 struct _EekClutterKeyPrivate
 {
+    EekClutterDrawingContext *context;
     ClutterActor *actor;
 };
 
@@ -91,6 +92,10 @@ eek_clutter_key_dispose (GObject *object)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
 
+    if (priv->context) {
+        g_object_unref (priv->context);
+        priv->context = NULL;
+    }
     if (priv->actor) {
         g_object_unref (priv->actor);
         priv->actor = NULL;
@@ -129,9 +134,26 @@ ClutterActor *
 eek_clutter_key_get_actor (EekClutterKey *key)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
+
     if (!priv->actor) {
-        priv->actor = eek_clutter_key_actor_new (EEK_KEY(key));
+        g_return_val_if_fail (priv->context, NULL);
+        priv->actor = eek_clutter_key_actor_new (priv->context, EEK_KEY(key));
         g_object_ref_sink (priv->actor);
     }
     return priv->actor;
+}
+
+EekKey *
+eek_clutter_key_new (EekClutterDrawingContext *context, gint column, gint row)
+{
+    EekClutterKey *key;
+
+    g_return_val_if_fail (context, NULL);
+    key = g_object_new (EEK_TYPE_CLUTTER_KEY,
+                        "column", column,
+                        "row", row,
+                        NULL);
+    key->priv->context = context;
+    g_object_ref_sink (key->priv->context);
+    return EEK_KEY(key);
 }

@@ -20,6 +20,8 @@
 #ifndef EEK_KEYSYM_H
 #define EEK_KEYSYM_H 1
 
+#include <glib-object.h>
+
 #define EEK_INVALID_KEYSYM ((guint)(-1))
 #define EEK_INVALID_KEYCODE ((guint)(-1))
 

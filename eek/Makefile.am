@@ -56,6 +56,8 @@ libeek_clutter_la_SOURCES = \
 	eek-clutter-key.h \
 	eek-clutter-key-actor.c \
 	eek-clutter-key-actor.h \
+	eek-clutter-drawing-context.c \
+	eek-clutter-drawing-context.h \
 	eek-drawing.h \
 	eek-drawing.c \
 	eek-clutter.h
