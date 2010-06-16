@@ -24,6 +24,15 @@
 
 G_BEGIN_DECLS
 
+/**
+ * EekOrientation:
+ * @EEK_ORIENTATION_VERTICAL: the elements will be arranged vertically
+ * @EEK_ORIENTATION_HORIZONTAL: the elements will be arranged horizontally
+ * @EEK_ORIENTATION_INVALID: used for error reporting
+ *
+ * Orientation of rows in sections.  Elements in a row will be
+ * arranged with the specified orientation.
+ */
 typedef enum {
     EEK_ORIENTATION_VERTICAL,
     EEK_ORIENTATION_HORIZONTAL,

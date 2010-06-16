@@ -74,7 +74,7 @@ struct _EekContainerClass
 
 GType       eek_container_get_type      (void) G_GNUC_CONST;
 
-void        eek_container_foreach_child (EekContainer  *self,
+void        eek_container_foreach_child (EekContainer  *container,
                                          EekCallback    callback,
                                          gpointer       user_data);
 EekElement *eek_container_find          (EekContainer  *container,

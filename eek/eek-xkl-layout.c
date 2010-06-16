@@ -50,6 +50,7 @@ G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT,
 
 enum {
     PROP_0,
+    PROP_MODEL,
     PROP_LAYOUTS,
     PROP_VARIANTS,
     PROP_OPTIONS,
@@ -75,7 +76,8 @@ extern void xkl_xkb_config_native_cleanup (XklEngine * engine,
 					   XkbComponentNamesPtr
 					   component_names);
 
-static void get_xkb_component_names (EekXklLayout *layout);
+static gboolean set_xkb_component_names (EekXklLayout *layout,
+                                         XklConfigRec *config);
 
 static gint
 eek_xkl_layout_real_get_group (EekLayout *self)
@@ -121,6 +123,10 @@ eek_xkl_layout_set_property (GObject      *object,
 {
     switch (prop_id) 
         {
+        case PROP_MODEL:
+            eek_xkl_layout_set_model (EEK_XKL_LAYOUT(object),
+                                      g_value_get_string (value));
+            break;
         case PROP_LAYOUTS:
             eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(object),
                                         g_value_get_boxed (value));
@@ -149,6 +155,11 @@ eek_xkl_layout_get_property (GObject    *object,
 {
     switch (prop_id) 
         {
+        case PROP_MODEL:
+            g_value_set_string
+                (value,
+                 eek_xkl_layout_get_model (EEK_XKL_LAYOUT(object)));
+            break;
         case PROP_LAYOUTS:
             g_value_set_boxed
                 (value,
@@ -184,6 +195,23 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
     gobject_class->set_property = eek_xkl_layout_set_property;
     gobject_class->get_property = eek_xkl_layout_get_property;
 
+    /**
+     * EekXklLayout:model:
+     *
+     * The libxklavier model name of #EekXklLayout.
+     */
+    pspec = g_param_spec_string ("model",
+                                 "Model",
+                                 "Libxklavier model",
+                                 NULL,
+                                 G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_MODEL, pspec);
+
+    /**
+     * EekXklLayout:layouts:
+     *
+     * The libxklavier layout names of #EekXklLayout.
+     */
     pspec = g_param_spec_boxed ("layouts",
                                 "Layouts",
                                 "Libxklavier layouts",
@@ -191,6 +219,11 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
                                 G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_LAYOUTS, pspec);
 
+    /**
+     * EekXklLayout:variants:
+     *
+     * The libxklavier variant names of #EekXklLayout.
+     */
     pspec = g_param_spec_boxed ("variants",
                                 "Variants",
                                 "Libxklavier variants",
@@ -198,6 +231,11 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
                                 G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_VARIANTS, pspec);
 
+    /**
+     * EekXklLayout:options:
+     *
+     * The libxklavier option names of #EekXklLayout.
+     */
     pspec = g_param_spec_boxed ("options",
                                 "Options",
                                 "Libxklavier options",
@@ -206,6 +244,8 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
     g_object_class_install_property (gobject_class, PROP_OPTIONS, pspec);
 }
 
+/* Disabled since the current EekXklLayout implementation does not
+   change the server setting. */
 #if 0
 static void
 on_state_changed (XklEngine           *xklengine,
@@ -234,103 +274,179 @@ eek_xkl_layout_init (EekXklLayout *self)
     g_return_if_fail (display);
 
     priv->engine = xkl_engine_get_instance (display);
+    /* Disabled since the current EekXklLayout implementation does not
+       change the server setting. */
 #if 0
     g_signal_connect (priv->engine, "X-state-changed",
                       G_CALLBACK(on_state_changed), self);
     xkl_engine_start_listen (priv->engine, XKLL_TRACK_KEYBOARD_STATE);
 #endif
     xkl_config_rec_get_from_server (priv->config, priv->engine);
-    get_xkb_component_names (self);
+    set_xkb_component_names (self, priv->config);
 }
 
+/**
+ * eek_xkl_layout_new:
+ *
+ * Create a new #EekXklLayout.
+ */
 EekLayout *
 eek_xkl_layout_new (void)
 {
     return g_object_new (EEK_TYPE_XKL_LAYOUT, NULL);
 }
 
-void
+G_INLINE_FUNC void
+merge_xkl_config_rec (XklConfigRec *dst, XklConfigRec *src)
+{
+    if (src->model) {
+        g_free (dst->model);
+        dst->model = g_strdup (src->model);
+    }
+    if (src->layouts) {
+        g_strfreev (dst->layouts);
+        dst->layouts = g_strdupv (src->layouts);
+    }
+    if (src->variants) {
+        g_strfreev (dst->variants);
+        dst->variants = g_strdupv (src->variants);
+    }
+    if (src->options) {
+        g_strfreev (dst->options);
+        dst->options = g_strdupv (src->options);
+    }
+}
+
+/**
+ * eek_xkl_layout_set_config:
+ * @layout: an #EekXklLayout
+ * @config: Libxklavier configuration
+ *
+ * Reconfigure @layout with @config.
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
 eek_xkl_layout_set_config (EekXklLayout *layout,
                            XklConfigRec *config)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
+    XklConfigRec *c;
 
-    g_return_if_fail (priv);
-    if (config->model) {
-        g_free (priv->config->model);
-        priv->config->model = g_strdup (config->model);
+    g_return_val_if_fail (priv, FALSE);
+    c = xkl_config_rec_new ();
+    merge_xkl_config_rec (c, priv->config);
+    merge_xkl_config_rec (c, config);
+    if (set_xkb_component_names (layout, c)) {
+        g_object_unref (c);
+        merge_xkl_config_rec (priv->config, config);
+        return TRUE;
     }
-    if (config->layouts) {
-        g_strfreev (priv->config->layouts);
-        priv->config->layouts = g_strdupv (config->layouts);
-    }
-    if (config->variants) {
-        g_strfreev (priv->config->variants);
-        priv->config->variants = g_strdupv (config->variants);
-    }
-    if (config->options) {
-        g_strfreev (priv->config->options);
-        priv->config->options = g_strdupv (config->options);
-    }
-    get_xkb_component_names (layout);
+    g_object_unref (c);
+    return FALSE;
 }
 
-void
+/**
+ * eek_xkl_layout_set_model:
+ * @layout: an #EekXklLayout
+ * @model: model name
+ *
+ * Set the model name of @layout configuration (in the Libxklavier terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
 eek_xkl_layout_set_model (EekXklLayout *layout,
-                          gchar        *model)
+                          const gchar  *model)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
     XklConfigRec *config;
+    gboolean success;
     
-    g_return_if_fail (priv);
+    g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
-    config->model = model;
-    eek_xkl_layout_set_config (layout, config);
+    config->model = (gchar *)model;
+    success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
+    return success;
 }
 
-void
+/**
+ * eek_xkl_layout_set_layouts:
+ * @layout: an #EekXklLayout
+ * @layouts: layout names
+ *
+ * Set the layout names of @layout (in the Libxklavier terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
 eek_xkl_layout_set_layouts (EekXklLayout *layout,
                             gchar       **layouts)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
     XklConfigRec *config;
+    gboolean success;
 
-    g_return_if_fail (priv);
+    g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
     config->layouts = layouts;
-    eek_xkl_layout_set_config (layout, config);
+    success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
+    return success;
 }
 
-void
+/**
+ * eek_xkl_layout_set_variants:
+ * @layout: an #EekXklLayout
+ * @variants: variant names
+ *
+ * Set the variant names of @layout (in the Libxklavier terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
 eek_xkl_layout_set_variants (EekXklLayout *layout,
                              gchar       **variants)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
     XklConfigRec *config;
+    gboolean success;
 
-    g_return_if_fail (priv);
+    g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
     config->variants = variants;
-    eek_xkl_layout_set_config (layout, config);
+    success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
+    return success;
 }
 
-void
+/**
+ * eek_xkl_layout_set_options:
+ * @layout: an #EekXklLayout
+ * @options: option names
+ *
+ * Set the option names of @layout (in the Libxklavier terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
 eek_xkl_layout_set_options (EekXklLayout *layout,
                             gchar       **options)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
     XklConfigRec *config;
+    gboolean success;
 
-    g_return_if_fail (priv);
+    g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
     config->options = options;
-    eek_xkl_layout_set_config (layout, config);
+    success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
+    return success;
 }
 
+/**
+ * eek_xkl_layout_get_model:
+ * @layout: an #EekXklLayout
+ *
+ * Get the model name of @layout configuration (in the Libxklavier terminology).
+ */
 gchar *
 eek_xkl_layout_get_model (EekXklLayout *layout)
 {
@@ -340,6 +456,13 @@ eek_xkl_layout_get_model (EekXklLayout *layout)
     return priv->config->model;
 }
 
+/**
+ * eek_xkl_layout_get_layouts:
+ * @layout: an #EekXklLayout
+ *
+ * Get the layout names of @layout configuration (in the Libxklavier
+ * terminology).
+ */
 gchar **
 eek_xkl_layout_get_layouts (EekXklLayout *layout)
 {
@@ -349,6 +472,13 @@ eek_xkl_layout_get_layouts (EekXklLayout *layout)
     return priv->config->layouts;
 }
 
+/**
+ * eek_xkl_layout_get_variants:
+ * @layout: an #EekXklLayout
+ *
+ * Get the variant names of @layout configuration (in the Libxklavier
+ * terminology).
+ */
 gchar **
 eek_xkl_layout_get_variants (EekXklLayout *layout)
 {
@@ -358,6 +488,13 @@ eek_xkl_layout_get_variants (EekXklLayout *layout)
     return priv->config->variants;
 }
 
+/**
+ * eek_xkl_layout_get_options:
+ * @layout: an #EekXklLayout
+ *
+ * Get the option names of @layout configuration (in the Libxklavier
+ * terminology).
+ */
 gchar **
 eek_xkl_layout_get_options (EekXklLayout *layout)
 {
@@ -367,15 +504,21 @@ eek_xkl_layout_get_options (EekXklLayout *layout)
     return priv->config->options;
 }
 
-static void
-get_xkb_component_names (EekXklLayout *layout)
+static gboolean
+set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
 {
     EekXklLayoutPrivate *priv = layout->priv;
     XkbComponentNamesRec names;
+    gboolean success = FALSE;
 
-    if (xkl_xkb_config_native_prepare (priv->engine, priv->config, &names)) {
-        EEK_XKB_LAYOUT_GET_CLASS (layout)->
-            set_names (EEK_XKB_LAYOUT(layout), &names);
+    /* Disabled since the current EekXklLayout implementation does not
+       change the server setting. */
+#if 0
+    xkl_config_rec_activate (priv->engine, config);
+#endif
+    if (xkl_xkb_config_native_prepare (priv->engine, config, &names)) {
+        success = eek_xkb_layout_set_names (EEK_XKB_LAYOUT(layout), &names);
         xkl_xkb_config_native_cleanup (priv->engine, &names);
     }
+    return success;
 }

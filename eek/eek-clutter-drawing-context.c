@@ -72,6 +72,7 @@ eek_clutter_drawing_context_class_init (EekClutterDrawingContextClass *klass)
                               sizeof (EekClutterDrawingContextPrivate));
 
     gobject_class->finalize = eek_clutter_drawing_context_finalize;
+    gobject_class->dispose = eek_clutter_drawing_context_dispose;
 }
 
 static void

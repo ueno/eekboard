@@ -90,7 +90,7 @@ EekKey *eek_section_create_key          (EekSection     *section,
                                          gint            column,
                                          gint            row);
 
-EekKey *eek_section_find_key_by_keycode (EekSection     *self,
+EekKey *eek_section_find_key_by_keycode (EekSection     *section,
                                          guint           keycode);
 
 G_END_DECLS

@@ -462,7 +462,7 @@ main (int argc, char *argv[])
     bounds.width = CSW;
     bounds.height = CSH;
     eekboard.keyboard = eek_gtk_keyboard_new ();
-    eek_element_set_bounds (eekboard.keyboard, &bounds);
+    eek_element_set_bounds (EEK_ELEMENT(eekboard.keyboard), &bounds);
     eek_keyboard_set_layout (eekboard.keyboard, eekboard.layout);
     embed = eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard.keyboard));
 

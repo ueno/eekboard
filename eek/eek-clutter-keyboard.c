@@ -31,6 +31,7 @@
 #include "eek-clutter-keyboard.h"
 #include "eek-clutter-drawing-context.h"
 #include "eek-keyboard.h"
+#include "eek-drawing.h"
 
 G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 
@@ -266,7 +267,9 @@ update_category_fonts (EekClutterKeyboard *keyboard)
     base_font = pango_font_description_from_string ("Sans");
     pango_layout_set_font_description (layout, base_font);
     pango_font_description_free (base_font);
-    eek_get_fonts (EEK_KEYBOARD(keyboard), layout, &fonts);
+    eek_get_fonts (EEK_KEYBOARD(keyboard),
+                   layout,
+                   (PangoFontDescription **)&fonts);
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++) {
         eek_clutter_drawing_context_set_category_font (priv->context,
                                                        i,

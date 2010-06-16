@@ -339,38 +339,6 @@ compare_component_name (gchar *name0, gchar *name1)
 }
 
 static void
-eek_xkb_layout_real_set_names (EekXkbLayout *self, XkbComponentNamesRec *names)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
-    gboolean is_changed;
-
-    g_return_if_fail (priv);
-
-    /* keycodes */
-    if (compare_component_name (names->keycodes, priv->names.keycodes) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.keycodes);
-    priv->names.keycodes = g_strdup (names->keycodes);
-
-    /* geometry */
-    if (compare_component_name (names->geometry, priv->names.geometry) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.geometry);
-    priv->names.geometry = g_strdup (names->geometry);
-
-    /* symbols */
-    if (compare_component_name (names->symbols, priv->names.symbols) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.symbols);
-    priv->names.symbols = g_strdup (names->symbols);
-
-    get_keyboard (self);
-
-    if (is_changed)
-        g_signal_emit_by_name (self, "changed");
-}
-
-static void
 eek_xkb_layout_finalize (GObject *object)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (object);
@@ -469,7 +437,6 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
 
-    klass->set_names = eek_xkb_layout_real_set_names;
     gobject_class->finalize = eek_xkb_layout_finalize;
     gobject_class->set_property = eek_xkb_layout_set_property;
     gobject_class->get_property = eek_xkb_layout_get_property;
@@ -610,28 +577,67 @@ eek_xkb_layout_new (const gchar *keycodes,
 }
 
 /**
+ * eek_xkb_layout_set_names:
+ * @layout: an #EekXkbLayout
+ * @names: XKB component names
+ *
+ * Set the XKB component names to @layout.
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
+eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
+{
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+    gboolean is_changed;
+
+    g_return_val_if_fail (priv, FALSE);
+
+    /* keycodes */
+    if (compare_component_name (names->keycodes, priv->names.keycodes) != 0)
+        is_changed = TRUE;
+    g_free (priv->names.keycodes);
+    priv->names.keycodes = g_strdup (names->keycodes);
+
+    /* geometry */
+    if (compare_component_name (names->geometry, priv->names.geometry) != 0)
+        is_changed = TRUE;
+    g_free (priv->names.geometry);
+    priv->names.geometry = g_strdup (names->geometry);
+
+    /* symbols */
+    if (compare_component_name (names->symbols, priv->names.symbols) != 0)
+        is_changed = TRUE;
+    g_free (priv->names.symbols);
+    priv->names.symbols = g_strdup (names->symbols);
+
+    get_keyboard (layout);
+    if (!priv->xkb)
+        return FALSE;
+
+    if (is_changed)
+        g_signal_emit_by_name (layout, "changed");
+
+    return TRUE;
+}
+
+/**
  * eek_xkb_layout_set_keycodes:
  * @layout: an #EekXkbLayout
  * @keycodes: component name for keycodes
  *
  * Set the keycodes component (in the XKB terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  */
-void
+gboolean
 eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    gboolean is_changed = TRUE;
+    XkbComponentNamesRec names;
 
-    g_return_if_fail (priv);
-    if (keycodes && priv->names.keycodes)
-        is_changed = g_strcmp0 (keycodes, priv->names.keycodes) != 0;
-    else if (keycodes == NULL && priv->names.keycodes == NULL)
-        is_changed = FALSE;
-    g_free (priv->names.keycodes);
-    priv->names.keycodes = g_strdup (keycodes);
-    get_keyboard (layout);
-    if (is_changed)
-        g_signal_emit_by_name (layout, "changed");
+    g_return_val_if_fail (priv, FALSE);
+    memcpy (&names, &priv->names, sizeof names);
+    names.keycodes = (gchar *)keycodes;
+    return eek_xkb_layout_set_names (layout, &names);
 }
 
 /**
@@ -639,24 +645,18 @@ eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
  * @layout: an #EekXkbLayout
  * @geometry: component name for geometry
  *
- * Set the keycodes component (in the XKB terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  */
-void
+gboolean
 eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    gboolean is_changed = TRUE;
+    XkbComponentNamesRec names;
 
-    g_return_if_fail (priv);
-    if (geometry && priv->names.geometry)
-        is_changed = g_strcmp0 (geometry, priv->names.geometry) != 0;
-    else if (geometry == NULL && priv->names.geometry == NULL)
-        is_changed = FALSE;
-    g_free (priv->names.geometry);
-    priv->names.geometry = g_strdup (geometry);
-    get_keyboard (layout);
-    if (is_changed)
-        g_signal_emit_by_name (layout, "changed");
+    g_return_val_if_fail (priv, FALSE);
+    memcpy (&names, &priv->names, sizeof names);
+    names.geometry = (gchar *)geometry;
+    return eek_xkb_layout_set_names (layout, &names);
 }
 
 /**
@@ -665,23 +665,18 @@ eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
  * @symbols: component name for symbols
  *
  * Set the symbols component (in the XKB terminology).
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  */
-void
+gboolean
 eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    gboolean is_changed = TRUE;
+    XkbComponentNamesRec names;
 
-    g_return_if_fail (priv);
-    if (symbols && priv->names.symbols)
-        is_changed = g_strcmp0 (symbols, priv->names.symbols) != 0;
-    else if (symbols == NULL && priv->names.symbols == NULL)
-        is_changed = FALSE;
-    g_free (priv->names.symbols);
-    priv->names.symbols = g_strdup (symbols);
-    get_keyboard (layout);
-    if (is_changed)
-        g_signal_emit_by_name (layout, "changed");
+    g_return_val_if_fail (priv, FALSE);
+    memcpy (&names, &priv->names, sizeof names);
+    names.symbols = (gchar *)symbols;
+    return eek_xkb_layout_set_names (layout, &names);
 }
 
 /**

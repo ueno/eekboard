@@ -430,8 +430,6 @@ eek_keyboard_get_keysym_index (EekKeyboard *keyboard,
 /**
  * eek_keyboard_create_section:
  * @keyboard: an #EekKeyboard
- * @name: name of the section
- * @bounds: bounding box of the section
  *
  * Create an #EekSection instance and append it to @keyboard.  This
  * function is rarely called by application but called by #EekLayout
