@@ -201,7 +201,9 @@ eek_key_real_set_keysym_index (EekKey *self,
     g_return_if_fail (0 <= group);
     if (group >= priv->keysyms.num_groups)
         group = 0;
-    g_return_if_fail (0 <= level && level < priv->keysyms.num_levels);
+    g_return_if_fail (0 <= level);
+    if (level >= priv->keysyms.num_levels)
+        level = 0;
     priv->group = group;
     priv->level = level;
 }
