@@ -119,6 +119,7 @@ on_about (GtkAction * action, GtkWidget *window)
   const gchar *authors[] = { "Daiki Ueno", NULL };
 
   gtk_show_about_dialog (GTK_WINDOW (window),
+                         "program-name", PACKAGE,
                          "version", VERSION,
                          "copyright",
                          "Copyright \xc2\xa9 2010 Daiki Ueno\n"
@@ -177,21 +178,20 @@ on_key_released (EekKeyboard *keyboard,
 }
 
 static void
-on_activate (GtkAction *action, gpointer user_data)
+on_activate (GtkAction *action,
+             gpointer   user_data)
 {
     ConfigCallbackData *data = user_data;
-
     eek_xkl_layout_set_config (EEK_XKL_LAYOUT(data->eekboard->layout),
                                data->config);
-    g_object_unref (data->config);
 }
 
 static void
-create_keyboard (EekBoard  *eekboard,
+create_keyboard (EekBoard     *eekboard,
                  ClutterActor *stage,
-                 EekLayout *layout,
-                 gfloat     initial_width,
-                 gfloat     initial_height)
+                 EekLayout    *layout,
+                 gfloat        initial_width,
+                 gfloat        initial_height)
 {
     ClutterActor *actor;
 
