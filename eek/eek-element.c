@@ -298,7 +298,9 @@ eek_element_get_name (EekElement  *element)
  * @element: an #EekElement
  * @bounds: bounding box of @element
  *
- * Set the bounding box of @element to @bounds.
+ * Set the bounding box of @element to @bounds.  Note that if @element
+ * has parent, X and Y positions of @bounds are relative to the parent
+ * position.
  */
 void
 eek_element_set_bounds (EekElement  *element,
@@ -313,7 +315,10 @@ eek_element_set_bounds (EekElement  *element,
  * @element: an #EekElement
  * @bounds: pointer where bounding box of @element will be stored
  *
- * Get the bounding box of @element.
+ * Get the bounding box of @element.  Note that if @element has
+ * parent, X and Y positions of @bounds are relative to the parent
+ * position.  To obtain the absolute position, use
+ * #eek_element_get_absolute_position().
  */
 void
 eek_element_get_bounds (EekElement  *element,
@@ -321,4 +326,34 @@ eek_element_get_bounds (EekElement  *element,
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
     EEK_ELEMENT_GET_CLASS(element)->get_bounds (element, bounds);
+}
+
+/**
+ * eek_element_get_absolute_position:
+ * @element: an #EekElement
+ * @x: pointer where the X coordinate of @element will be stored
+ * @y: pointer where the Y coordinate of @element will be stored
+ *
+ * Compute the absolute position of @element.
+ */
+void
+eek_element_get_absolute_position (EekElement *element,
+                                   gdouble    *x,
+                                   gdouble    *y)
+{
+    EekContainer *parent;
+    EekBounds bounds;
+    gdouble ax, ay;
+
+    eek_element_get_bounds (element, &bounds);
+    ax = bounds.x;
+    ay = bounds.y;
+    while ((parent = eek_element_get_parent (element)) != NULL) {
+        eek_element_get_bounds (EEK_ELEMENT(parent), &bounds);
+        ax += bounds.x;
+        ay += bounds.y;
+        element = EEK_ELEMENT(parent);
+    }
+    *x = ax;
+    *y = ay;
 }
