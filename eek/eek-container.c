@@ -61,7 +61,7 @@ eek_container_real_add_child (EekContainer *self,
     g_object_ref_sink (child);
 
     priv->children = g_slist_prepend (priv->children, child);
-    eek_element_set_parent (child, self);
+    eek_element_set_parent (child, EEK_ELEMENT(self));
 }
 
 static void
@@ -105,6 +105,44 @@ eek_container_real_find (EekContainer *self,
     return NULL;
 }
 
+struct _FbpData
+{
+    EekKey *key;
+    gint x, y;
+};
+typedef struct _FbpData FbpData;
+
+static gint
+compare_element_by_position (EekElement *element, gpointer user_data)
+{
+    EekBounds bounds;
+    FbpData *data = user_data;
+
+    eek_element_get_bounds (element, &bounds);
+    if (bounds.x <= data->x && bounds.y <= data->y &&
+        data->x <= (bounds.x + bounds.width) &&
+        data->y <= (bounds.y + bounds.height))
+        return 0;
+    return -1;
+}
+
+static EekElement *
+eek_container_real_find_by_position (EekContainer *self,
+                                     gdouble       x,
+                                     gdouble       y)
+{
+    EekBounds bounds;
+    FbpData data;
+    EekElement *element;
+
+    eek_element_get_bounds (EEK_ELEMENT(self), &bounds);
+    data.x = x - bounds.x;
+    data.y = y - bounds.y;
+    return eek_container_find (self,
+                               compare_element_by_position,
+                               &data);
+}
+
 static void
 eek_container_dispose (GObject *object)
 {
@@ -141,6 +179,7 @@ eek_container_class_init (EekContainerClass *klass)
     klass->remove_child = eek_container_real_remove_child;
     klass->foreach_child = eek_container_real_foreach_child;
     klass->find = eek_container_real_find;
+    klass->find_by_position = eek_container_real_find_by_position;
 
     gobject_class->finalize = eek_container_finalize;
     gobject_class->dispose = eek_container_dispose;
@@ -229,4 +268,15 @@ eek_container_find (EekContainer  *container,
     return EEK_CONTAINER_GET_CLASS(container)->find (container,
                                                      func,
                                                      user_data);
+}
+
+EekElement *
+eek_container_find_by_position (EekContainer *container,
+                                gdouble       x,
+                                gdouble       y)
+{
+    g_return_val_if_fail (EEK_IS_CONTAINER(container), NULL);
+    return EEK_CONTAINER_GET_CLASS(container)->find_by_position (container,
+                                                                 x,
+                                                                 y);
 }

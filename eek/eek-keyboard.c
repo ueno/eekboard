@@ -192,15 +192,16 @@ eek_keyboard_real_realize (EekKeyboard *self)
     priv->is_realized = TRUE;
 }
 
-struct find_key_by_keycode_data {
+struct _FkbkData {
     EekKey *key;
     guint keycode;
 };
+typedef struct _FkbkData FkbkData;
 
 static gint
 compare_section_by_keycode (EekElement *element, gpointer user_data)
 {
-    struct find_key_by_keycode_data *data = user_data;
+    FkbkData *data = user_data;
 
     data->key = eek_section_find_key_by_keycode (EEK_SECTION(element),
                                                  data->keycode);
@@ -213,7 +214,7 @@ static EekKey *
 eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
                                        guint        keycode)
 {
-    struct find_key_by_keycode_data data;
+    FkbkData data;
 
     data.keycode = keycode;
     if (eek_container_find (EEK_CONTAINER(self),

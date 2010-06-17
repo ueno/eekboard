@@ -46,40 +46,40 @@ struct _EekElementClass
 {
     /*< private >*/
     GInitiallyUnownedClass parent_class;
-    void                  (* set_parent) (EekElement   *self,
-                                          EekContainer *parent);
-    EekContainer         *(* get_parent) (EekElement   *self);
-    void                  (* set_name)   (EekElement   *self,
-                                          const gchar  *name);
+    void                  (* set_parent) (EekElement  *self,
+                                          EekElement  *parent);
+    EekElement           *(* get_parent) (EekElement  *self);
+    void                  (* set_name)   (EekElement  *self,
+                                          const gchar *name);
 
-    G_CONST_RETURN gchar *(* get_name)   (EekElement   *self);
+    G_CONST_RETURN gchar *(* get_name)   (EekElement  *self);
 
-    void                  (* set_bounds) (EekElement   *self,
-                                          EekBounds    *bounds);
+    void                  (* set_bounds) (EekElement  *self,
+                                          EekBounds   *bounds);
 
-    void                  (* get_bounds) (EekElement   *self,
-                                          EekBounds    *bounds);
+    void                  (* get_bounds) (EekElement  *self,
+                                          EekBounds   *bounds);
 };
 
 GType                 eek_element_get_type              (void) G_GNUC_CONST;
 
-void                  eek_element_set_parent            (EekElement   *element,
-                                                         EekContainer *parent);
-EekContainer         *eek_element_get_parent            (EekElement   *element);
-void                  eek_element_set_name              (EekElement   *element,
-                                                         const gchar  *name);
+void                  eek_element_set_parent            (EekElement  *element,
+                                                         EekElement  *parent);
+EekElement           *eek_element_get_parent            (EekElement  *element);
+void                  eek_element_set_name              (EekElement  *element,
+                                                         const gchar *name);
 
-G_CONST_RETURN gchar *eek_element_get_name              (EekElement   *element);
+G_CONST_RETURN gchar *eek_element_get_name              (EekElement  *element);
 
-void                  eek_element_set_bounds            (EekElement   *element,
-                                                         EekBounds    *bounds);
+void                  eek_element_set_bounds            (EekElement  *element,
+                                                         EekBounds   *bounds);
 
-void                  eek_element_get_bounds            (EekElement   *element,
-                                                         EekBounds    *bounds);
+void                  eek_element_get_bounds            (EekElement  *element,
+                                                         EekBounds   *bounds);
 
-void                  eek_element_get_absolute_position (EekElement   *element,
-                                                         gdouble      *x,
-                                                         gdouble      *y);
+void                  eek_element_get_absolute_position (EekElement  *element,
+                                                         gdouble     *x,
+                                                         gdouble     *y);
 
 G_END_DECLS
 #endif  /* EEK_ELEMENT_H */

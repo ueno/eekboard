@@ -52,12 +52,12 @@ struct _EekElementPrivate
 {
     gchar *name;
     EekBounds bounds;
-    EekContainer *parent;
+    EekElement *parent;
 };
 
 static void
-eek_element_real_set_parent (EekElement   *self,
-                             EekContainer *parent)
+eek_element_real_set_parent (EekElement *self,
+                             EekElement *parent)
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
 
@@ -73,7 +73,7 @@ eek_element_real_set_parent (EekElement   *self,
     }
 }
 
-static EekContainer *
+static EekElement *
 eek_element_real_get_parent (EekElement *self)
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
@@ -237,16 +237,16 @@ eek_element_init (EekElement *self)
 /**
  * eek_element_set_parent:
  * @element: an #EekElement
- * @parent: an #EekContainer
+ * @parent: an #EekElement
  *
  * Set the parent of @element to @parent.
  */
 void
-eek_element_set_parent (EekElement   *element,
-                        EekContainer *parent)
+eek_element_set_parent (EekElement *element,
+                        EekElement *parent)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    g_return_if_fail (EEK_IS_CONTAINER(parent));
+    g_return_if_fail (EEK_IS_ELEMENT(parent));
     EEK_ELEMENT_GET_CLASS(element)->set_parent (element, parent);
 }
 
@@ -255,9 +255,9 @@ eek_element_set_parent (EekElement   *element,
  * @element: an #EekElement
  *
  * Get the parent of @element.
- * Returns: an #EekContainer if the parent is set
+ * Returns: an #EekElement if the parent is set
  */
-EekContainer *
+EekElement *
 eek_element_get_parent (EekElement *element)
 {
     g_return_val_if_fail (EEK_IS_ELEMENT(element), NULL);
@@ -316,9 +316,8 @@ eek_element_set_bounds (EekElement  *element,
  * @bounds: pointer where bounding box of @element will be stored
  *
  * Get the bounding box of @element.  Note that if @element has
- * parent, X and Y positions of @bounds are relative to the parent
- * position.  To obtain the absolute position, use
- * #eek_element_get_absolute_position().
+ * parent, position of @bounds are relative to the parent.  To obtain
+ * the absolute position, use #eek_element_get_absolute_position().
  */
 void
 eek_element_get_bounds (EekElement  *element,
@@ -341,19 +340,14 @@ eek_element_get_absolute_position (EekElement *element,
                                    gdouble    *x,
                                    gdouble    *y)
 {
-    EekContainer *parent;
     EekBounds bounds;
-    gdouble ax, ay;
+    gdouble ax = 0.0, ay = 0.0;
 
-    eek_element_get_bounds (element, &bounds);
-    ax = bounds.x;
-    ay = bounds.y;
-    while ((parent = eek_element_get_parent (element)) != NULL) {
-        eek_element_get_bounds (EEK_ELEMENT(parent), &bounds);
+    do {
+        eek_element_get_bounds (element, &bounds);
         ax += bounds.x;
         ay += bounds.y;
-        element = EEK_ELEMENT(parent);
-    }
+    } while ((element = eek_element_get_parent (element)) != NULL);
     *x = ax;
     *y = ay;
 }
