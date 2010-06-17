@@ -33,6 +33,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-element.h"
+#include "eek-container.h"
 
 enum {
     PROP_0,
@@ -51,7 +52,34 @@ struct _EekElementPrivate
 {
     gchar *name;
     EekBounds bounds;
+    EekContainer *parent;
 };
+
+static void
+eek_element_real_set_parent (EekElement   *self,
+                             EekContainer *parent)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    if (!parent) {
+        g_return_if_fail (priv->parent);
+        /* release self-reference acquired when setting parent */
+        g_object_unref (self);
+        priv->parent = NULL;
+    } else {
+        g_return_if_fail (!priv->parent);
+        g_object_ref_sink (self);
+        priv->parent = parent;
+    }
+}
+
+static EekContainer *
+eek_element_real_get_parent (EekElement *self)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    return priv->parent;
+}
 
 static void
 eek_element_real_set_name (EekElement  *self,
@@ -156,6 +184,8 @@ eek_element_class_init (EekElementClass *klass)
     g_type_class_add_private (gobject_class,
                               sizeof (EekElementPrivate));
 
+    klass->set_parent = eek_element_real_set_parent;
+    klass->get_parent = eek_element_real_get_parent;
     klass->set_name = eek_element_real_set_name;
     klass->get_name = eek_element_real_get_name;
     klass->set_bounds = eek_element_real_set_bounds;
@@ -202,6 +232,36 @@ eek_element_init (EekElement *self)
     priv = self->priv = EEK_ELEMENT_GET_PRIVATE(self);
     priv->name = NULL;
     memset (&priv->bounds, 0, sizeof priv->bounds);
+}
+
+/**
+ * eek_element_set_parent:
+ * @element: an #EekElement
+ * @parent: an #EekContainer
+ *
+ * Set the parent of @element to @parent.
+ */
+void
+eek_element_set_parent (EekElement   *element,
+                        EekContainer *parent)
+{
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    g_return_if_fail (EEK_IS_CONTAINER(parent));
+    EEK_ELEMENT_GET_CLASS(element)->set_parent (element, parent);
+}
+
+/**
+ * eek_element_get_parent:
+ * @element: an #EekElement
+ *
+ * Get the parent of @element.
+ * Returns: an #EekContainer if the parent is set
+ */
+EekContainer *
+eek_element_get_parent (EekElement *element)
+{
+    g_return_val_if_fail (EEK_IS_ELEMENT(element), NULL);
+    return EEK_ELEMENT_GET_CLASS(element)->get_parent (element);
 }
 
 /**

@@ -61,6 +61,7 @@ eek_container_real_add_child (EekContainer *self,
     g_object_ref_sink (child);
 
     priv->children = g_slist_prepend (priv->children, child);
+    eek_element_set_parent (child, self);
 }
 
 static void
@@ -75,6 +76,7 @@ eek_container_real_remove_child (EekContainer *self,
     g_return_if_fail (head);
     g_object_unref (child);
     priv->children = g_slist_remove_link (priv->children, head);
+    eek_element_set_parent (child, NULL);
 }
 
 static void
