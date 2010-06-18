@@ -50,10 +50,10 @@ struct _EekGtkKeyboardPrivate
     GdkPixmap *pixmap;
 
     /* mapping from outline pointer to pixmap */
-    GHashTable *outline_pixmaps;
+    GHashTable *outline_textures;
 
     /* mapping from outline pointer to large pixmap */
-    GHashTable *outline_large_pixmaps;
+    GHashTable *large_outline_textures;
 
     PangoFontDescription *fonts[EEK_KEYSYM_CATEGORY_LAST];
 
@@ -109,8 +109,8 @@ eek_gtk_keyboard_finalize (GObject *object)
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
     gint i;
 
-    g_hash_table_unref (priv->outline_pixmaps);
-    g_hash_table_unref (priv->outline_large_pixmaps);
+    g_hash_table_unref (priv->outline_textures);
+    g_hash_table_unref (priv->large_outline_textures);
 
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++)
         pango_font_description_free (priv->fonts[i]);
@@ -138,12 +138,12 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
     priv = self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     priv->widget = NULL;
     priv->pixmap = NULL;
-    priv->outline_pixmaps =
+    priv->outline_textures =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
                                g_object_unref);
-    priv->outline_large_pixmaps =
+    priv->large_outline_textures =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
@@ -181,31 +181,31 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     EekKey *key = EEK_KEY(element);
     EekBounds bounds;
     EekOutline *outline;
-    GdkPixmap *pixmap;
+    GdkPixmap *texture;
 
     eek_element_get_bounds (element, &bounds);
 
     outline = eek_key_get_outline (key);
-    pixmap = g_hash_table_lookup (priv->outline_pixmaps, outline);
-    if (!pixmap) {
+    texture = g_hash_table_lookup (priv->outline_textures, outline);
+    if (!texture) {
         cairo_t *cr;
 
-        pixmap =
+        texture =
             gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
                             bounds.width, bounds.height, -1);
-        cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+        cr = gdk_cairo_create (GDK_DRAWABLE (texture));
         gdk_cairo_set_source_color (cr, context->bg);
         cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
         gdk_cairo_set_source_color (cr, context->fg);
         eek_draw_outline (cr, outline);
         cairo_destroy (cr);
-        g_hash_table_insert (priv->outline_pixmaps, outline, pixmap);
+        g_hash_table_insert (priv->outline_textures, outline, texture);
     }
 
     cairo_save (context->cr);
     cairo_translate (context->cr, bounds.x, bounds.y);
 
-    gdk_cairo_set_source_pixmap (context->cr, pixmap, 0, 0);
+    gdk_cairo_set_source_pixmap (context->cr, texture, 0, 0);
     cairo_rectangle (context->cr, 0, 0, bounds.width, bounds.height);
     cairo_fill (context->cr);
 
@@ -331,7 +331,7 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
     eek_element_get_absolute_position (EEK_ELEMENT(key), &ax, &ay);
 
     outline = eek_key_get_outline (key);
-    texture = g_hash_table_lookup (priv->outline_large_pixmaps, outline);
+    texture = g_hash_table_lookup (priv->large_outline_textures, outline);
     if (!texture) {
         texture =
             gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
@@ -343,7 +343,7 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
         gdk_cairo_set_source_color (cr, context.fg);
         eek_draw_outline (cr, outline);
         cairo_destroy (cr);
-        g_hash_table_insert (priv->outline_large_pixmaps, outline, texture);
+        g_hash_table_insert (priv->large_outline_textures, outline, texture);
     }
 
     pixmap =
@@ -367,8 +367,10 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
                        gtk_widget_get_style (priv->widget)->fg_gc[state],
                        pixmap,
                        0, 0,
-                       (ax - (bounds.width * SCALE - bounds.width) / 2) * priv->scale,
-                       (ay - (bounds.height * SCALE - bounds.height) / 2) * priv->scale,
+                       (ax - (bounds.width * SCALE - bounds.width) / 2) *
+                       priv->scale,
+                       (ay - (bounds.height * SCALE - bounds.height) / 2) *
+                       priv->scale,
                        bounds.width * SCALE * priv->scale,
                        bounds.height * SCALE * priv->scale);
     g_object_unref (pixmap);
@@ -445,23 +447,13 @@ on_size_allocate (GtkWidget     *widget,
     EekGtkKeyboardPrivate *priv =
         EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
     EekBounds bounds;
+    GdkPixmap *pixmap;
 
     if (priv->pixmap) {
-        g_object_unref (priv->pixmap);
+        pixmap = priv->pixmap;
         priv->pixmap = NULL;
+        g_object_unref (pixmap);
     }
-    g_hash_table_unref (priv->outline_pixmaps);
-    g_hash_table_unref (priv->outline_large_pixmaps);
-    priv->outline_pixmaps =
-        g_hash_table_new_full (g_direct_hash,
-                               g_direct_equal,
-                               NULL,
-                               g_object_unref);
-    priv->outline_large_pixmaps =
-        g_hash_table_new_full (g_direct_hash,
-                               g_direct_equal,
-                               NULL,
-                               g_object_unref);
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     priv->scale = allocation->width > allocation->height ?
