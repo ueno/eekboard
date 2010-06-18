@@ -6,46 +6,69 @@
 ]>
 <book id="index">
   <bookinfo>
-    <title>eek Reference Manual</title>
+    <title>libeek Reference Manual</title>
     <releaseinfo>
-      for eek 0.0.0.
-   </releaseinfo>
+      for libeek 0.0.0.
+    </releaseinfo>
+    <copyright>
+      <year>2010</year>
+      <holder>Daiki Ueno</holder>
+    </copyright>
+
+    <copyright>
+      <year>2010</year>
+      <holder>Red Hat, Inc.</holder>
+    </copyright>
+
+    <legalnotice>
+      <para>
+	Permission is granted to copy, distribute and/or modify this
+	document under the terms of the GNU Free Documentation License,
+	Version 1.3 or any later version published by the Free Software
+	Foundation; with no Invariant Sections, no Front-Cover Texts and
+	no Back-Cover Texts.  A copy of the license is included in the
+	section entitled "GNU Free Documentation License".
+      </para>
+    </legalnotice>
   </bookinfo>
 
-  <chapter>
-    <title>Base classes and interfaces</title>
-    <xi:include href="xml/eek-element.xml"/>
-    <xi:include href="xml/eek-container.xml"/>
-    <xi:include href="xml/eek-keyboard.xml"/>
-    <xi:include href="xml/eek-section.xml"/>
-    <xi:include href="xml/eek-key.xml"/>
-    <xi:include href="xml/eek-layout.xml"/>
-    <xi:include href="xml/eek-types.xml"/>
-  </chapter>
-  <chapter>
-    <title>Clutter keyboard</title>
-    <xi:include href="xml/eek-clutter-keyboard.xml"/>
-  </chapter>
-  <chapter>
-    <title>GTK keyboard</title>
-    <xi:include href="xml/eek-gtk-keyboard.xml"/>
-  </chapter>
-  <chapter>
-    <title>XKB layout engine</title>
-    <xi:include href="xml/eek-xkb-layout.xml"/>
-  </chapter>
-  <chapter>
-    <title>Libxklavier layout engine</title>
-    <xi:include href="xml/eek-xkl-layout.xml"/>
-  </chapter>
-  <chapter id="object-tree">
-    <title>Object Hierarchy</title>
-     <xi:include href="xml/tree_index.sgml"/>
-  </chapter>
-  <index id="api-index-full">
-    <title>API Index</title>
-    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
-  </index>
-
-  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+  <xi:include href="xml/eek-overview.xml"/>
+  <part id="apireference">
+    <title>API Manual</title>
+    <chapter>
+      <title>Base Classes, Interfaces, and Utilities</title>
+      <xi:include href="xml/eek-element.xml"/>
+      <xi:include href="xml/eek-container.xml"/>
+      <xi:include href="xml/eek-keyboard.xml"/>
+      <xi:include href="xml/eek-section.xml"/>
+      <xi:include href="xml/eek-key.xml"/>
+      <xi:include href="xml/eek-layout.xml"/>
+      <xi:include href="xml/eek-types.xml"/>
+      <xi:include href="xml/eek-keysym.xml"/>
+    </chapter>
+    <chapter>
+      <title>Clutter Keyboard</title>
+      <xi:include href="xml/eek-clutter-keyboard.xml"/>
+    </chapter>
+    <chapter>
+      <title>GTK Keyboard</title>
+      <xi:include href="xml/eek-gtk-keyboard.xml"/>
+    </chapter>
+    <chapter>
+      <title>Libxklavier Layout Engine</title>
+      <xi:include href="xml/eek-xkl-layout.xml"/>
+    </chapter>
+    <chapter>
+      <title>XKB Layout Engine</title>
+      <xi:include href="xml/eek-xkb-layout.xml"/>
+    </chapter>
+    <chapter id="object-tree">
+      <title>Object Hierarchy</title>
+      <xi:include href="xml/tree_index.sgml"/>
+    </chapter>
+    <index id="api-index-full">
+      <title>API Index</title>
+      <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+    </index>
+  </part>
 </book>

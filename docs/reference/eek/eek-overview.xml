@@ -1,0 +1,59 @@
+<part id="eek-overview">
+  <title>Overview</title>
+  <partintro>
+
+    <para>libeek is a library to create keyboard-like user interface.
+    Since it is designed as simple as possible, it provides only two
+    kinds of objects.  One is <emphasis>keyboard element</emphasis>
+    (derived from #EekElement) and another is <emphasis>keyboard
+    layout engine</emphasis> (which implements the #EekLayout
+    interface).</para>
+
+    <para>A keyboard element represents either a keyboard
+    (#EekKeyboard), a section (#EekSection), or a key (#EekKey).  Each
+    element implements the Builder design pattern so that it can be
+    converted into a UI widget (#ClutterActor, #GtkDrawingArea,
+    aso).</para>
+
+    <para>A layout engine arranges keyboard elements using information
+    from external configuration mechanisms (libxklavier, XKB,
+    matchbox-keyboard layouts in XML, aso)</para>
+
+    <para>Here is a sample code which creates a keyboard-like #ClutterActor using the system layout information from libxklavier:</para>
+
+    <informalexample>
+      <programlisting>
+EekKeyboard *keyboard;
+EekLayout *layout;
+
+/* Create a keyboard layout using libxklavier configuration. */
+layout = eek_xkl_layout_new ();
+
+/* Create a keyboard implemented as ClutterActor. */
+keyboard = eek_clutter_keyboard_new ();
+
+/* Apply the layout to the keyboard. */
+eek_keyboard_set_layout (keyboard, layout);
+
+clutter_group_add (CLUTTER_GROUP(stage),
+                   eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard)));
+      </programlisting>
+    </informalexample>
+
+    <para>One of the most interesting features of libeek is that UI
+    backends can be switched easily.  For example, to create a
+    keyboard-like #GtkWidget instead of #ClutterActor, all you need is
+    to replace eek_clutter_keyboard_new() with eek_gtk_keyboard_new()
+    and eek_clutter_keyboard_get_actor() with
+    eek_gtk_keyboard_get_widget().</para>
+
+    <para>Another interesting feature is that there is logical represention (model) of keyboard distinct from the UI widget (view).  More precisely, #EekKeyboard contains one or more #EekSection's and #EekSection contains one or more #EekKey's, and each element may send events when a user clicked on the UI widget.  For example, with the following code, when a user pushed a key widget with keycode 0x38 assigned, on_a_pressed will be called.</para>
+    <informalexample>
+      <programlisting>
+/* Find a key element in the logical keyboard. */
+EekKey *key = eek_keyboard_find_key_by_keycode (keyboard, 0x38);
+g_signal_connect (key, "pressed", on_a_pressed);
+      </programlisting>
+    </informalexample>
+  </partintro>
+</part>
