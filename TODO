@@ -1,18 +1,14 @@
 - packaging
--- intltoolize
 -- GIR
 -- .spec
 -- debian
 -- add more tests
--- add more doc comments including sample code
 
 - eekboard
 -- xklavier "model" and "options" configuration
 -- delay xklavier config menu creation
--- typing monitor (create a full-screen window and handle all the key events)
+-- a11y
 
 - libeek
--- GtkDrawingArea backend
--- compute font sizes from keysym types (LETTER or FUNCTION)
 -- matchbox-keyboard layout engine
 -- delay initialization of XKB and XKL layouts

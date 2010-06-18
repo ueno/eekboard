@@ -17,4 +17,4 @@
 # 02110-1301 USA
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = eek src tests docs
+SUBDIRS = eek src tests docs po

@@ -23,6 +23,7 @@ AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
 AC_CONFIG_MACRO_DIR([m4])
 LT_INIT
+IT_PROG_INTLTOOL([0.35.0])
 
 PKG_CHECK_MODULES([GLIB2], [glib-2.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
@@ -78,7 +79,14 @@ GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 EEK_API_VERSION=0.1
 AC_SUBST(EEK_API_VERSION)
 
+dnl to re-generate eek/*-keysym-labels.txt
 AC_CHECK_PROGS([PYTHON], [python])
+
+dnl define GETTEXT_* variables
+GETTEXT_PACKAGE=$PACKAGE
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only architecture-independent data directory.])
+AM_GLIB_GNU_GETTEXT
 
 AC_CONFIG_HEADERS([eek/config.h])
 AC_CONFIG_FILES([Makefile
@@ -88,6 +96,7 @@ tests/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
+po/Makefile.in
 eek/libeek.pc
 eek/libeek-clutter.pc
 eek/libeek-xkb.pc
