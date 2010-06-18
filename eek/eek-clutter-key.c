@@ -18,10 +18,6 @@
  * 02110-1301 USA
  */
 
-/**
- * SECTION:eek-clutter-key
- * @short_description: #EekKey embedding a #ClutterActor
- */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */

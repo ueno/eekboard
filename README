@@ -20,22 +20,23 @@ lot of bugs and lacks documentation.
 
 * libeek API (not fixed)
 
-libeek provides only two kinds of objects.  One is "keyboard element"
-and another is "keyboard layout engine".  A keyboard element
-represents either a keyboard, a section, or a key.  Each element
-implements the Builder pattern[1] so that it can be converted into a
-UI widget (ClutterActor, GTK+ button, ...).  A layout engine arranges
-keyboard elements using information from external configuration
-mechanisms (XKB, matchbox-keyboard layouts in XML, ...)
+Since libeek is designed as simple as possible, it provides only two
+kinds of objects.  One is "keyboard element" and another is "keyboard
+layout engine".  A keyboard element represents either a keyboard, a
+section, or a key.  Each element implements the Builder pattern[1] so
+that it can be converted into a UI widget (ClutterActor,
+GtkDrawingArea, ...).  A layout engine arranges keyboard elements
+using information from external configuration mechanisms (libxklavier,
+XKB, matchbox-keyboard layouts in XML, ...)
 
-Here is a sample code which utilizes Clutter-based keyboard elements
-and an XKB-based layout engine:
+Here is a sample code which utilizes Clutter keyboard elements
+and libxklavier layout engine:
 
  1: EekKeyboard *keyboard;
  2: EekLayout *layout;
  3:
- 4: /* Create a keyboard layout using XKB configuration. */
- 5: layout = eek_xkb_layout_new (NULL, "kinesis", "in");
+ 4: /* Create a keyboard layout using libxklavier configuration. */
+ 5: layout = eek_xkl_layout_new ();
  6:
  7: /* Create a keyboard implemented as ClutterActor. */
  8: keyboard = eek_clutter_keyboard_new (640, 480);

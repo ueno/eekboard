@@ -19,11 +19,6 @@
  * 02110-1301 USA
  */
 
-/**
- * SECTION:eek-clutter-key-actor
- * @short_description: Custom #ClutterActor drawing a key shape
- */
-
 #include <cogl/cogl.h>
 #include <cogl/cogl-pango.h>
 

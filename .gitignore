@@ -28,9 +28,6 @@ missing
 stamp-h1
 libkeyactor*.tar.*
 mkinstalldirs
-docs/reference/eek/eek-overrides.txt
-docs/reference/eek/eek-sections.txt
-docs/reference/eek/eek.types
 m4/*.m4
 gtk-doc.make
 eek/eek-special-keysym-labels.h
@@ -42,6 +39,7 @@ tests/eek-xkb-test
 src/eekboard
 docs/reference/eek/*.stamp
 docs/reference/eek/*.txt
+!/docs/reference/eek/eek-sections.txt
 docs/reference/eek/xml
 docs/reference/eek/html
 docs/reference/eek/eek.signals

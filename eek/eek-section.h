@@ -44,6 +44,17 @@ struct _EekSection
     EekSectionPrivate *priv;
 };
 
+/**
+ * EekSectionClass:
+ * @set_angle: virtual function for setting rotation angle of the section
+ * @get_angle: virtual function for getting rotation angle of the section
+ * @get_n_rows: virtual function for getting the number of rows in the section
+ * @add_row: virtual function for adding a new row to the section
+ * @get_row: virtual function for accessing a row in the section
+ * @create_key: virtual function for creating key in the section
+ * @find_key_by_keycode: virtual function for accessing a key in the
+ * section by keycode
+ */
 struct _EekSectionClass
 {
     /*< private >*/

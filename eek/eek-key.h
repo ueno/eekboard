@@ -44,6 +44,24 @@ struct _EekKey
     EekKeyPrivate *priv;
 };
 
+/**
+ * EekKeyClass:
+ * @set_keycode: virtual function for setting keycode of the key
+ * @get_keycode: virtual function for getting keycode of the key
+ * @set_keysyms: virtual function for setting symbol matrix of the key
+ * @get_keysyms: virtual function for getting symbol matrix of the key
+ * @get_keysym: virtual function for getting the current symbol of the key
+ * @set_index: virtual function for setting position of the key in the
+ * section
+ * @get_index: virtual function for getting position of the key in the
+ * section
+ * @set_outline: virtual function for setting outline shape of the key
+ * @get_outline: virtual function for getting outline shape of the key
+ * @set_keysym_index: virtual function for setting group and level of the key
+ * @get_keysym_index: virtual function for getting group and level of the key
+ * @pressed: class handler for #EekKey::pressed signal
+ * @released: class handler for #EekKey::released signal
+ */
 struct _EekKeyClass
 {
     /*< private >*/

@@ -42,10 +42,16 @@ struct _EekContainer
     /*< private >*/
     EekElement parent;
 
-    /*< public >*/
     EekContainerPrivate *priv;
 };
 
+/**
+ * EekContainerClass:
+ * @foreach_child: virtual function for iterating over the container's children
+ * @find: virtual function for looking up a child
+ * @child_added: class handler for #EekContainer::child-added
+ * @child_removed: class handler for #EekContainer::child-added
+ */
 struct _EekContainerClass
 {
     /*< private >*/
@@ -64,9 +70,6 @@ struct _EekContainerClass
     EekElement *(* find)             (EekContainer  *self,
                                       EekCompareFunc func,
                                       gpointer       user_data);
-    EekElement *(* find_by_position) (EekContainer  *self,
-                                      gdouble        x,
-                                      gdouble        y);
 
     /* signals */
     void        (* child_added)      (EekContainer  *self,

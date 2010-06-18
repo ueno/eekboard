@@ -45,6 +45,18 @@ struct _EekKeyboard
     EekKeyboardPrivate *priv;
 };
 
+/**
+ * EekKeyboardClass:
+ * @set_keysym_index: virtual function for setting group and level of
+ * the entire keyboard
+ * @get_keysym_index: virtual function for getting group and level of
+ * the entire keyboard
+ * @create_section: virtual function for creating a section
+ * @set_layout: virtual function for setting layout engine
+ * @find_key_by_keycode: virtual function for finding a key in the
+ * keyboard by keycode
+ * @realize: virtual function for applying a layout to the keyboard
+ */
 struct _EekKeyboardClass
 {
     /*< private >*/

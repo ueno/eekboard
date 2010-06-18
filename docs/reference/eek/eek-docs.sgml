@@ -23,10 +23,12 @@
     <xi:include href="xml/eek-types.xml"/>
   </chapter>
   <chapter>
-    <title>Clutter keyboard elements</title>
+    <title>Clutter keyboard</title>
     <xi:include href="xml/eek-clutter-keyboard.xml"/>
-    <xi:include href="xml/eek-clutter-section.xml"/>
-    <xi:include href="xml/eek-clutter-key.xml"/>
+  </chapter>
+  <chapter>
+    <title>GTK keyboard</title>
+    <xi:include href="xml/eek-gtk-keyboard.xml"/>
   </chapter>
   <chapter>
     <title>XKB layout engine</title>

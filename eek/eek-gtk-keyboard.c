@@ -20,7 +20,7 @@
 
 /**
  * SECTION:eek-gtk-keyboard
- * @short_description: #EekKeyboard embedding a #GtkActor
+ * @short_description: #EekKeyboard that can be converted into a #GtkWidget
  */
 #include <string.h>
 

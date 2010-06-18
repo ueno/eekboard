@@ -34,6 +34,14 @@ G_BEGIN_DECLS
 typedef struct _EekLayoutIface EekLayoutIface;
 typedef struct _EekLayout EekLayout;
 
+/**
+ * EekLayoutIface:
+ * @apply: virtual function for applying the layout to a keyboard
+ * @get_group: virtual function for getting the current group setting
+ * of the layout
+ * @group_changed: class handler for #EekLayout::group-changed signal
+ * @changed: class handler for #EekLayout::changed signal
+ */
 struct _EekLayoutIface
 {
     /*< private >*/

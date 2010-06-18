@@ -22,9 +22,30 @@
 
 #include <glib-object.h>
 
+/**
+ * EEK_INVALID_KEYSYM:
+ *
+ * Pseudo keysym used for error reporting.
+ */
 #define EEK_INVALID_KEYSYM ((guint)(-1))
+
+/**
+ * EEK_INVALID_KEYCODE:
+ *
+ * Pseudo keycode used for error reporting.
+ */
 #define EEK_INVALID_KEYCODE ((guint)(-1))
 
+/**
+ * EekKeysymCategory:
+ * @EEK_KEYSYM_CATEGORY_LETTER: the symbol represents an alphabet letter
+ * @EEK_KEYSYM_CATEGORY_FUNCTION: the symbol represents a function
+ * @EEK_KEYSYM_CATEGORY_KEYNAME: the symbol does not have meaning but
+ * have a name
+ * @EEK_KEYSYM_CATEGORY_UNKNOWN: used for error reporting
+ *
+ * Category of the key symbols.
+ */
 typedef enum {
     EEK_KEYSYM_CATEGORY_LETTER,
     EEK_KEYSYM_CATEGORY_FUNCTION,

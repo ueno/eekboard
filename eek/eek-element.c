@@ -317,7 +317,7 @@ eek_element_set_bounds (EekElement  *element,
  *
  * Get the bounding box of @element.  Note that if @element has
  * parent, position of @bounds are relative to the parent.  To obtain
- * the absolute position, use #eek_element_get_absolute_position().
+ * the absolute position, use eek_element_get_absolute_position().
  */
 void
 eek_element_get_bounds (EekElement  *element,
