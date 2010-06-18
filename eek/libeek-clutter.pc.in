@@ -21,9 +21,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: EEK-Clutter
+Name: libeek-clutter
 Description: A Library to Create Keyboard-like UI (Clutter Support)
-URL: http://github.com/ueno/eek
+URL: http://github.com/ueno/eekboard
 Version: @VERSION@
 Libs: -L${libdir} -leek -leek-clutter
 Libs.private: @GOBJECT2_LIBS@ @CLUTTER_LIBS@
