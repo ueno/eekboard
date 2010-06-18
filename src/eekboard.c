@@ -97,7 +97,9 @@ static const char ui_description[] =
     "      <menuitem action='Quit'/>"
     "    </menu>"
     "    <menu action='KeyboardMenu'>"
+#if 0
     "      <menuitem action='MonitorKeyEvent'/>"
+#endif
     "      <menu action='SetLayout'>"
     "        <placeholder name='LayoutsPH'/>"
     "      </menu>"
@@ -369,39 +371,6 @@ create_menus (Eekboard      *eekboard,
     create_layouts_menu (eekboard, ui_manager);
 }
 
-static void
-on_resize (GObject *object,
-	   GParamSpec *param_spec,
-	   gpointer user_data)
-{
-    Eekboard *eekboard = user_data;
-    GValue value = {0};
-    gfloat width, height, scale;
-    ClutterActor *stage, *actor;
-
-    actor = eek_clutter_keyboard_get_actor
-        (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
-    stage = clutter_actor_get_stage (actor);
-
-    g_object_get (G_OBJECT(stage), "width", &width, NULL);
-    g_object_get (G_OBJECT(stage), "height", &height, NULL);
-
-    g_value_init (&value, G_TYPE_DOUBLE);
-
-    scale = width > height ? width / eekboard->width :
-        width / eekboard->height;
-
-    g_value_set_double (&value, scale);
-    g_object_set_property (G_OBJECT (stage),
-                           "scale-x",
-                           &value);
-
-    g_value_set_double (&value, scale);
-    g_object_set_property (G_OBJECT (stage),
-                           "scale-y",
-                           &value);
-}
-
 static GtkWidget *
 create_widget_clutter (Eekboard *eekboard,
                        gint      initial_width,
@@ -433,10 +402,6 @@ create_widget_clutter (Eekboard *eekboard,
     clutter_actor_get_size (actor, &eekboard->width, &eekboard->height);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
     clutter_actor_set_size (stage, eekboard->width, eekboard->height);
-    g_signal_connect (stage, "notify::width",
-                      G_CALLBACK (on_resize), eekboard);
-    g_signal_connect (stage, "notify::height",
-                      G_CALLBACK (on_resize), eekboard);
     return eekboard->widget;
 }
 
@@ -525,19 +490,6 @@ main (int argc, char *argv[])
     env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
     if (env && g_strcmp0 (env, "1") == 0)
         use_clutter = FALSE;
-
-    if (use_clutter &&
-        clutter_feature_available (CLUTTER_FEATURE_SWAP_EVENTS) &&
-#ifdef CLUTTER_GTK_CHECK_VERSION
-        !CLUTTER_GTK_CHECK_VERSION(0, 10, 5)
-#else
-        TRUE
-#endif
-        ) {
-        g_warning ("Clutter-Gtk <= 0.10.4 does not work well with "
-                   "Clutter >= 1.2...fallback to GTK");
-        use_clutter = FALSE;
-    }
 
     if (use_clutter &&
         gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {

@@ -20,7 +20,7 @@
 
 /**
  * SECTION:eek-clutter-keyboard
- * @short_description: #EekKeyboard embedding a #ClutterActor
+ * @short_description: #EekKeyboard that can be converted into a #ClutterActor
  */
 #include <string.h>
 
@@ -219,7 +219,38 @@ on_clutter_key_release_event (ClutterActor *actor,
 }
 
 static void
-on_clutter_realize (ClutterActor *actor, gpointer user_data)
+on_clutter_stage_resize (GObject *object,
+                         GParamSpec *param_spec,
+                         gpointer user_data)
+{
+    ClutterActor *stage = object;
+    EekClutterKeyboard *keyboard = user_data;
+    GValue value = {0};
+    gfloat width, height, scale;
+    EekBounds bounds;
+
+    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
+    g_object_get (G_OBJECT(stage), "width", &width, NULL);
+    g_object_get (G_OBJECT(stage), "height", &height, NULL);
+
+    g_value_init (&value, G_TYPE_DOUBLE);
+
+    scale = width > height ? width / bounds.width : width / bounds.height;
+
+    g_value_set_double (&value, scale);
+    g_object_set_property (G_OBJECT (stage),
+                           "scale-x",
+                           &value);
+
+    g_value_set_double (&value, scale);
+    g_object_set_property (G_OBJECT (stage),
+                           "scale-y",
+                           &value);
+}
+
+static void
+on_clutter_realize (ClutterActor *actor,
+                    gpointer      user_data)
 {
     EekClutterKeyboard *keyboard = user_data;
     EekClutterKeyboardPrivate *priv =
@@ -231,8 +262,12 @@ on_clutter_realize (ClutterActor *actor, gpointer user_data)
         g_signal_connect (stage, "key-press-event",
                           G_CALLBACK (on_clutter_key_press_event), keyboard);
     priv->key_release_event_handler =
-    g_signal_connect (stage, "key-release-event",
-                      G_CALLBACK (on_clutter_key_release_event), keyboard);
+        g_signal_connect (stage, "key-release-event",
+                          G_CALLBACK (on_clutter_key_release_event), keyboard);
+    g_signal_connect (stage, "notify::width",
+                      G_CALLBACK (on_clutter_stage_resize), keyboard);
+    g_signal_connect (stage, "notify::height",
+                      G_CALLBACK (on_clutter_stage_resize), keyboard);
 }
 
 static void
