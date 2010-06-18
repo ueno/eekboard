@@ -40,8 +40,14 @@ PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
 PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
-PKG_CHECK_MODULES([ATK], [atk], ,
-  [AC_MSG_ERROR([ATK not found])])
+
+AC_MSG_CHECKING([whether you enable eekboard])
+AC_ARG_ENABLE(eekboard,
+              AS_HELP_STRING([--enable-eekboard=no/yes],
+                             [Build standalone application "ekboard" default=yes]),,
+              enable_eekboard=yes)
+AC_MSG_RESULT($enable_eekboard)
+AM_CONDITIONAL(ENABLE_EEKBOARD, [test x$enable_eekboard = xyes])
 
 AC_MSG_CHECKING([whether you enable Clutter])
 AC_ARG_ENABLE(clutter,
@@ -54,7 +60,6 @@ if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
     [AC_MSG_ERROR([Clutter not found])])
   AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
-  enable_clutter_gtk=no
   PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],
     [enable_clutter_gtk=yes])
   if test x$enable_clutter_gtk = xno; then

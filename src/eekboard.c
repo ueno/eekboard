@@ -29,7 +29,9 @@
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <libxklavier/xklavier.h>
+#if 0
 #include <atk/atk.h>
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -99,9 +101,11 @@ typedef struct _LayoutCallbackData LayoutCallbackData;
 
 static void       on_about      (GtkAction       *action,
                                  GtkWidget       *window);
+#if 0
 static void       on_monitor_key_event_toggled
                                 (GtkToggleAction *action,
                                  GtkWidget       *window);
+#endif
 static GtkWidget *create_widget (Eekboard        *eekboard,
                                  gint           initial_width,
                                  gint           initial_height);
@@ -144,10 +148,12 @@ static const GtkActionEntry action_entry[] = {
     {"About", GTK_STOCK_ABOUT, NULL, NULL, NULL, G_CALLBACK (on_about)}
 };
 
+#if 0
 static const GtkToggleActionEntry toggle_action_entry[] = {
     {"MonitorKeyEvent", NULL, N_("Monitor Key Typing"), NULL, NULL,
      G_CALLBACK(on_monitor_key_event_toggled), FALSE}
 };
+#endif
 
 static void
 on_about (GtkAction * action, GtkWidget *window)
@@ -170,10 +176,10 @@ on_about (GtkAction * action, GtkWidget *window)
                          "wrap-license", TRUE, NULL);
 }
 
+#if 0
 static gint
 key_snoop (AtkKeyEventStruct *event, gpointer func_data)
 {
-    g_debug ("key_snoop");
     return FALSE;
 }
 
@@ -195,6 +201,7 @@ on_monitor_key_event_toggled (GtkToggleAction *action,
             eekboard->key_event_listener = 0;
         }
 }
+#endif
 
 static void
 on_key_pressed (EekKeyboard *keyboard,
@@ -385,9 +392,11 @@ create_menus (Eekboard      *eekboard,
 
     gtk_action_group_add_actions (action_group, action_entry,
                                   G_N_ELEMENTS (action_entry), window);
+#if 0
     gtk_action_group_add_toggle_actions (action_group, toggle_action_entry,
                                          G_N_ELEMENTS (toggle_action_entry),
                                          window);
+#endif
 
     gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
     gtk_ui_manager_add_ui_from_string (ui_manager, ui_description, -1, NULL);

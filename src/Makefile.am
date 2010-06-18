@@ -16,9 +16,25 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
+if ENABLE_EEKBOARD
 bin_PROGRAMS = eekboard
-eekboard_CFLAGS = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(GTK2_CFLAGS) $(XKB_CFLAGS) $(LIBXKLAVIER_CFLAGS) $(LIBFAKEKEY_CFLAGS) $(ATK_CFLAGS)
-eekboard_LDFLAGS = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(top_builddir)/eek/libeek-gtk.la $(GOBJECT2_LIBS) $(GTK2_CFLAGS) $(XKB_LIBS) $(LIBXKLAVIER_LIBS) $(LIBFAKEKEY_LIBS) $(ATK_LIBS)
+eekboard_CFLAGS = \
+	-I$(top_srcdir) \
+	$(GOBJECT2_CFLAGS) \
+	$(GTK2_CFLAGS) \
+	$(XKB_CFLAGS) \
+	$(LIBXKLAVIER_CFLAGS) \
+	$(LIBFAKEKEY_CFLAGS)
+
+eekboard_LDFLAGS = \
+	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eek/libeek-xkl.la \
+	$(top_builddir)/eek/libeek-gtk.la \
+	$(GOBJECT2_LIBS) \
+	$(GTK2_CFLAGS) \
+	$(XKB_LIBS) \
+	$(LIBXKLAVIER_LIBS) \
+	$(LIBFAKEKEY_LIBS)
 
 if HAVE_CLUTTER
 eekboard_CFLAGS += $(CLUTTER_CFLAGS)
@@ -28,4 +44,5 @@ endif
 if HAVE_CLUTTER_GTK
 eekboard_CFLAGS += $(CLUTTER_GTK_CFLAGS)
 eekboard_LDFLAGS += $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
+endif
 endif
