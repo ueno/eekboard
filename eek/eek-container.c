@@ -133,7 +133,6 @@ eek_container_real_find_by_position (EekContainer *self,
 {
     EekBounds bounds;
     FbpData data;
-    EekElement *element;
 
     eek_element_get_bounds (EEK_ELEMENT(self), &bounds);
     data.x = x - bounds.x;

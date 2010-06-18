@@ -44,6 +44,8 @@ PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
 PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
+PKG_CHECK_MODULES([ATK], [atk], ,
+  [AC_MSG_ERROR([ATK not found])])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 

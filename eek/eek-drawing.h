@@ -1,8 +1,7 @@
 #ifndef EEK_DRAWING_H
 #define EEK_DRAWING_H 1
 
-#include <cairo/cairo.h>
-#include <pango/pango.h>
+#include <pango/pangocairo.h>
 #include "eek-keyboard.h"
 #include "eek-keysym.h"
 #include "eek-types.h"
@@ -18,6 +17,10 @@ void eek_get_fonts            (EekKeyboard           *keyboard,
 
 void eek_draw_outline         (cairo_t               *cr,
                                EekOutline            *outline);
+
+void eek_draw_key_label       (cairo_t               *cr,
+                               EekKey                *key,
+                               PangoFontDescription **fonts);
 
 void eek_draw_rounded_polygon (cairo_t               *cr,
                                gboolean               filled,

@@ -22,6 +22,7 @@
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <libxklavier/xklavier.h>
+#include <atk/atk.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -58,6 +59,7 @@ struct _Eekboard {
     FakeKey *fakekey;
     GtkWidget *widget;
     gfloat width, height;
+    guint key_event_listener;
 
     EekKeyboard *keyboard;
     EekLayout *layout;          /* FIXME: eek_keyboard_get_layout() */
@@ -143,11 +145,30 @@ on_about (GtkAction * action, GtkWidget *window)
                          "wrap-license", TRUE, NULL);
 }
 
+static gint
+key_snoop (AtkKeyEventStruct *event, gpointer func_data)
+{
+    g_debug ("key_snoop");
+    return FALSE;
+}
+
 static void
 on_monitor_key_event_toggled (GtkToggleAction *action,
                               GtkWidget *window)
 {
-    g_warning ("not implemented");
+
+    Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
+
+    if (gtk_toggle_action_get_active (action)) {
+        if (eekboard->key_event_listener == 0)
+            eekboard->key_event_listener =
+                atk_add_key_event_listener (key_snoop, eekboard);
+        g_warning ("failed to enable ATK key event listener");
+    } else
+        if (eekboard->key_event_listener != 0) {
+            atk_remove_key_event_listener (eekboard->key_event_listener);
+            eekboard->key_event_listener = 0;
+        }
 }
 
 static void
@@ -162,7 +183,6 @@ on_key_pressed (EekKeyboard *keyboard,
 #if DEBUG
     g_debug ("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
 #endif
-    fakekey_press_keysym (eekboard->fakekey, keysym, eekboard->modifiers);
     if (keysym == XK_Shift_L || keysym == XK_Shift_R) {
         gint group, level;
 
@@ -174,7 +194,8 @@ on_key_pressed (EekKeyboard *keyboard,
         eekboard->modifiers ^= ControlMask;
     } else if (keysym == XK_Alt_L || keysym == XK_Alt_R) {
         eekboard->modifiers ^= Mod1Mask;
-    }
+    } else
+        fakekey_press_keysym (eekboard->fakekey, keysym, eekboard->modifiers);
 }
 
 static void
@@ -505,12 +526,25 @@ main (int argc, char *argv[])
     if (env && g_strcmp0 (env, "1") == 0)
         use_clutter = FALSE;
 
-    if (use_clutter) {
-        if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
-            g_warning ("Can't init Clutter-Gtk");
-            use_clutter = FALSE;
-        }
+    if (use_clutter &&
+        clutter_feature_available (CLUTTER_FEATURE_SWAP_EVENTS) &&
+#ifdef CLUTTER_GTK_CHECK_VERSION
+        !CLUTTER_GTK_CHECK_VERSION(0, 10, 5)
+#else
+        TRUE
+#endif
+        ) {
+        g_warning ("Clutter-Gtk <= 0.10.4 does not work well with "
+                   "Clutter >= 1.2...fallback to GTK");
+        use_clutter = FALSE;
     }
+
+    if (use_clutter &&
+        gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        g_warning ("Can't init Clutter-Gtk...fallback to GTK");
+        use_clutter = FALSE;
+    }
+
     if (!use_clutter && !gtk_init_check (&argc, &argv)) {
         g_warning ("Can't init GTK");
         exit (1);
@@ -526,6 +560,7 @@ main (int argc, char *argv[])
     vbox = gtk_vbox_new (FALSE, 0);
 
     eekboard = eekboard_new (use_clutter);
+    g_object_set_data (G_OBJECT(window), "eekboard", eekboard);
     widget = create_widget (eekboard, CSW, CSH);
     
     ui_manager = gtk_ui_manager_new ();

@@ -207,6 +207,44 @@ eek_draw_outline (cairo_t *cr, EekOutline *outline)
                               outline->num_points);
 }
 
+void
+eek_draw_key_label (cairo_t               *cr,
+                    EekKey                *key,
+                    PangoFontDescription **fonts)
+{
+    guint keysym;
+    EekKeysymCategory category;
+    const gchar *label;
+    PangoLayout *layout;
+    PangoRectangle logical_rect = { 0, };
+    EekBounds bounds;
+
+    keysym = eek_key_get_keysym (key);
+    if (keysym == EEK_INVALID_KEYSYM)
+        return;
+
+    category = eek_keysym_get_category (keysym);
+    if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
+        return;
+
+    label = eek_keysym_to_string (keysym);
+    if (!label)
+        return;
+
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    layout = pango_cairo_create_layout (cr);
+    pango_layout_set_font_description (layout, fonts[category]);
+    pango_layout_set_width (layout, PANGO_SCALE * bounds.width);
+    pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);
+    pango_layout_set_text (layout, label, -1);
+    pango_layout_get_extents (layout, NULL, &logical_rect);
+    cairo_rel_move_to (cr,
+                   (bounds.width - logical_rect.width / PANGO_SCALE) / 2,
+                   (bounds.height - logical_rect.height / PANGO_SCALE) / 2);
+    pango_cairo_show_layout (cr, layout);
+    g_object_unref (layout);
+}
+
 /*
  * The functions below are borrowed from
  * libgnomekbd/gkbd-keyboard-drawing.c.

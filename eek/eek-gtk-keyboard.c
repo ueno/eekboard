@@ -40,16 +40,54 @@ G_DEFINE_TYPE (EekGtkKeyboard, eek_gtk_keyboard, EEK_TYPE_KEYBOARD);
 #define EEK_GTK_KEYBOARD_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_GTK_KEYBOARD, EekGtkKeyboardPrivate))
 
+#define SCALE 1.5
 
 struct _EekGtkKeyboardPrivate
 {
-    GtkWidget *widget;          /* GtkDrawingArea */
+    GtkWidget *widget;
+
+    /* pixmap of entire keyboard (for expose event) */
     GdkPixmap *pixmap;
-    GdkColor *dark_color;
-    cairo_t *cr;
-    PangoLayout *layout;
+
+    /* mapping from outline pointer to pixmap */
+    GHashTable *outline_pixmaps;
+
+    /* mapping from outline pointer to large pixmap */
+    GHashTable *outline_large_pixmaps;
+
     PangoFontDescription *fonts[EEK_KEYSYM_CATEGORY_LAST];
 };
+
+static void prepare_keyboard_pixmap (EekGtkKeyboard *keyboard);
+
+static void
+eek_gtk_keyboard_real_set_keysym_index (EekKeyboard *self,
+                                        gint         group,
+                                        gint         level)
+{
+    gint g, l;
+
+    eek_keyboard_get_keysym_index (self, &g, &l);
+    EEK_KEYBOARD_CLASS(eek_gtk_keyboard_parent_class)->
+        set_keysym_index (self, group, level);
+    if (g != group || l != level) {
+        EekGtkKeyboard *keyboard = EEK_GTK_KEYBOARD(self);
+        EekGtkKeyboardPrivate *priv =
+            EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+        GtkStateType state;
+        GtkAllocation allocation;
+
+        prepare_keyboard_pixmap (keyboard);
+        state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
+        gtk_widget_get_allocation (GTK_WIDGET (priv->widget), &allocation);
+        gdk_draw_drawable (gtk_widget_get_window (priv->widget),
+                           gtk_widget_get_style (priv->widget)->fg_gc[state],
+                           priv->pixmap,
+                           0, 0,
+                           0, 0,
+                           allocation.width, allocation.height);
+    }
+}
 
 static void
 eek_gtk_keyboard_dispose (GObject *object)
@@ -69,6 +107,9 @@ eek_gtk_keyboard_finalize (GObject *object)
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
     gint i;
 
+    g_hash_table_unref (priv->outline_pixmaps);
+    g_hash_table_unref (priv->outline_large_pixmaps);
+
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++)
         pango_font_description_free (priv->fonts[i]);
 }
@@ -76,11 +117,13 @@ eek_gtk_keyboard_finalize (GObject *object)
 static void
 eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
 {
+    EekKeyboardClass *keyboard_class = EEK_KEYBOARD_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekGtkKeyboardPrivate));
 
+    keyboard_class->set_keysym_index = eek_gtk_keyboard_real_set_keysym_index;
     gobject_class->dispose = eek_gtk_keyboard_dispose;
     gobject_class->finalize = eek_gtk_keyboard_finalize;
 }
@@ -93,6 +136,16 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
     priv = self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     priv->widget = NULL;
     priv->pixmap = NULL;
+    priv->outline_pixmaps =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               g_object_unref);
+    priv->outline_large_pixmaps =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               g_object_unref);
     memset (priv->fonts, 0, sizeof priv->fonts);
 }
 
@@ -107,123 +160,143 @@ eek_gtk_keyboard_new (void)
     return g_object_new (EEK_TYPE_GTK_KEYBOARD, NULL);
 }
 
-static void
-draw_key (EekElement *element, gpointer user_data)
+struct _DrawingContext
 {
-    EekKeyboard *keyboard = user_data;
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    EekGtkKeyboard *keyboard;
+    cairo_t *cr;
+    GdkColor *fg, *bg;
+};
+typedef struct _DrawingContext DrawingContext;
+
+static void
+prepare_keyboard_pixmap_key_callback (EekElement *element,
+                                      gpointer    user_data)
+{
+    DrawingContext *context = user_data;
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(context->keyboard);
     EekKey *key = EEK_KEY(element);
-    EekOutline *outline;
     EekBounds bounds;
-    guint keysym;
+    EekOutline *outline;
+    GdkPixmap *pixmap;
 
-    cairo_save (priv->cr);
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    cairo_translate (priv->cr, bounds.x, bounds.y);
+    eek_element_get_bounds (element, &bounds);
+
     outline = eek_key_get_outline (key);
-    eek_draw_outline (priv->cr, outline);
+    pixmap = g_hash_table_lookup (priv->outline_pixmaps, outline);
+    if (!pixmap) {
+        cairo_t *cr;
 
-    gdk_cairo_set_source_color (priv->cr, priv->dark_color);
-
-    keysym = eek_key_get_keysym (key);
-    if (keysym != EEK_INVALID_KEYSYM) {
-        const gchar *label = eek_keysym_to_string (keysym);
-        PangoRectangle logical_rect = { 0, };
-        EekKeysymCategory category = eek_keysym_get_category (keysym);
-
-        if (category != EEK_KEYSYM_CATEGORY_UNKNOWN && label) {
-            pango_layout_set_font_description (priv->layout,
-                                               priv->fonts[category]);
-            pango_layout_set_text (priv->layout, label, -1);
-            pango_layout_get_extents (priv->layout, NULL, &logical_rect);
-
-            cairo_move_to
-                (priv->cr,
-                 (bounds.width - logical_rect.width / PANGO_SCALE) / 2,
-                 (bounds.height - logical_rect.height / PANGO_SCALE) / 2);
-
-            pango_layout_set_width (priv->layout, PANGO_SCALE * bounds.width);
-            pango_layout_set_ellipsize (priv->layout, PANGO_ELLIPSIZE_END);
-            pango_cairo_show_layout (priv->cr, priv->layout);
-        }
+        pixmap =
+            gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
+                            bounds.width, bounds.height, -1);
+        cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+        gdk_cairo_set_source_color (cr, context->bg);
+        cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
+        gdk_cairo_set_source_color (cr, context->fg);
+        eek_draw_outline (cr, outline);
+        cairo_destroy (cr);
+        g_hash_table_insert (priv->outline_pixmaps, outline, pixmap);
     }
-    cairo_restore (priv->cr);
+
+    cairo_save (context->cr);
+    cairo_translate (context->cr, bounds.x, bounds.y);
+
+    gdk_cairo_set_source_pixmap (context->cr, pixmap, 0, 0);
+    cairo_rectangle (context->cr, 0, 0, bounds.width, bounds.height);
+    cairo_fill (context->cr);
+
+    cairo_move_to (context->cr, 0, 0);
+    gdk_cairo_set_source_color (context->cr, context->fg);
+    eek_draw_key_label (context->cr, key, priv->fonts);
+
+    cairo_restore (context->cr);
 }
 
 static void
-draw_section (EekElement *element, gpointer user_data)
+prepare_keyboard_pixmap_section_callback (EekElement *element,
+                                          gpointer    user_data)
 {
-    EekKeyboard *keyboard = user_data;
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    DrawingContext *context = user_data;
     EekBounds bounds;
 
-    gdk_cairo_set_source_color (priv->cr, priv->dark_color);
     eek_element_get_bounds (element, &bounds);
+    cairo_save (context->cr);
+    cairo_translate (context->cr, bounds.x, bounds.y);
+    eek_container_foreach_child (EEK_CONTAINER(element),
+                                 prepare_keyboard_pixmap_key_callback,
+                                 context);
+    cairo_restore (context->cr);
+}
 
-    cairo_save (priv->cr);
-    cairo_translate (priv->cr, bounds.x, bounds.y);
+static void
+drawing_context_init (DrawingContext *context, EekGtkKeyboard *keyboard)
+{
+    EekGtkKeyboardPrivate *priv = keyboard->priv;
+    GtkStateType state;
+    GdkColormap *colormap;
 
-#if 0
-    cairo_rectangle (priv->cr, 0, 0, bounds.width, bounds.height);
-    cairo_stroke (priv->cr);
-#endif
+    state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
+    context->keyboard = keyboard;
+    context->fg = &gtk_widget_get_style (GTK_WIDGET (priv->widget))->fg[state];
+    context->bg = &gtk_widget_get_style (GTK_WIDGET (priv->widget))->bg[state];
+}
 
-    eek_container_foreach_child (EEK_CONTAINER(element), draw_key,
-                                 keyboard);
-    cairo_restore (priv->cr);
+static void
+prepare_keyboard_pixmap (EekGtkKeyboard *keyboard)
+{
+    EekGtkKeyboardPrivate *priv = keyboard->priv;
+    GtkAllocation allocation;
+    GtkStateType state;
+    DrawingContext context;
+
+    gtk_widget_get_allocation (GTK_WIDGET (priv->widget), &allocation);
+    priv->pixmap =
+        gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
+                        allocation.width, allocation.height, -1);
+
+    /* blank background */
+    state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
+    gdk_draw_rectangle
+        (priv->pixmap,
+         gtk_widget_get_style (GTK_WIDGET(priv->widget))->base_gc[state],
+         TRUE,
+         0, 0, allocation.width, allocation.height);
+
+    /* draw sections on the canvas */
+    drawing_context_init (&context, keyboard);
+    context.cr = gdk_cairo_create (GDK_DRAWABLE (priv->pixmap));
+    eek_container_foreach_child (EEK_CONTAINER(keyboard),
+                                 prepare_keyboard_pixmap_section_callback,
+                                 &context);
+    cairo_destroy (context.cr);
 }
 
 static gboolean
-on_gtk_expose_event (GtkWidget      *widget,
-                     GdkEventExpose *event,
-                     gpointer        user_data)
+on_expose_event (GtkWidget      *widget,
+                 GdkEventExpose *event,
+                 gpointer        user_data)
 {
     EekGtkKeyboard *keyboard = user_data;
     EekGtkKeyboardPrivate *priv =
         EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
-    GtkStateType state = gtk_widget_get_state (GTK_WIDGET (widget));
+    GtkStateType state = gtk_widget_get_state (widget);
 
     if (!priv->pixmap) {
-        GtkStateType state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
-        GtkAllocation allocation;
-	PangoContext *context;
-        PangoFontDescription *default_font_desc;
-        
-        context = gtk_widget_get_pango_context (GTK_WIDGET (priv->widget));
-	priv->layout = pango_layout_new (context);
+        /* compute font sizes which fit in each key shape */
+        PangoFontDescription *base_font;
+        PangoContext *context;
+        PangoLayout *layout;
 
-        /* compute font sizes */
-        default_font_desc =
-            gtk_widget_get_style (GTK_WIDGET(priv->widget))->font_desc;
-        pango_layout_set_font_description (priv->layout, default_font_desc);
-        eek_get_fonts (EEK_KEYBOARD(keyboard), priv->layout, priv->fonts);
+        context = gtk_widget_get_pango_context (priv->widget);
+        layout = pango_layout_new (context);
+        base_font = gtk_widget_get_style (priv->widget)->font_desc;
+        pango_layout_set_font_description (layout, base_font);
+        eek_get_fonts (EEK_KEYBOARD(keyboard), layout, priv->fonts);
 
-        /* create priv->pixmap */
-	gtk_widget_set_double_buffered (GTK_WIDGET (priv->widget), FALSE);
-        gtk_widget_get_allocation (GTK_WIDGET (priv->widget), &allocation);
-        priv->pixmap =
-            gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
-                            allocation.width, allocation.height, -1);
-
-        /* blank background */
-        gdk_draw_rectangle
-            (priv->pixmap,
-             gtk_widget_get_style (GTK_WIDGET(priv->widget))->base_gc[state],
-             TRUE,
-             0, 0, allocation.width, allocation.height);
-
-        /* draw sections on the canvas */
-        priv->cr = gdk_cairo_create (GDK_DRAWABLE (priv->pixmap));
-        priv->dark_color =
-            &gtk_widget_get_style (GTK_WIDGET (priv->widget))->dark[state];
-
-        eek_container_foreach_child (EEK_CONTAINER(keyboard), draw_section,
-                                     keyboard);
-
-        cairo_destroy (priv->cr);
-        priv->cr = NULL;
-        priv->dark_color = NULL;
+        prepare_keyboard_pixmap (keyboard);
     }
+    g_return_val_if_fail (priv->pixmap, FALSE);
 
     gdk_draw_drawable (gtk_widget_get_window (widget),
                        gtk_widget_get_style (widget)->fg_gc[state],
@@ -234,8 +307,92 @@ on_gtk_expose_event (GtkWidget      *widget,
     return TRUE;
 }
 
+static void
+key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
+{
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    EekBounds bounds;
+    EekOutline *outline;
+    gdouble ax, ay;
+    GdkPixmap *pixmap, *texture;
+    DrawingContext context;
+    GtkStateType state;
+    cairo_t *cr;
+
+    drawing_context_init (&context, keyboard);
+
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    eek_element_get_absolute_position (EEK_ELEMENT(key), &ax, &ay);
+
+    outline = eek_key_get_outline (key);
+    texture = g_hash_table_lookup (priv->outline_large_pixmaps, outline);
+    if (!texture) {
+        texture =
+            gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
+                            bounds.width * SCALE, bounds.height * SCALE, -1);
+        cr = gdk_cairo_create (GDK_DRAWABLE (texture));
+        cairo_scale (cr, SCALE, SCALE);
+        gdk_cairo_set_source_color (cr, context.bg);
+        cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
+        gdk_cairo_set_source_color (cr, context.fg);
+        eek_draw_outline (cr, outline);
+        cairo_destroy (cr);
+        g_hash_table_insert (priv->outline_large_pixmaps, outline, texture);
+    }
+
+    pixmap =
+        gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
+                        bounds.width * SCALE, bounds.height * SCALE, -1);
+    cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+    gdk_cairo_set_source_pixmap (cr, texture, 0, 0);
+    cairo_rectangle (cr, 0, 0, bounds.width * SCALE, bounds.height * SCALE);
+    cairo_fill (cr);
+
+    cairo_move_to (cr, 0, 0);
+    cairo_scale (cr, SCALE, SCALE);
+    gdk_cairo_set_source_color (cr, context.fg);
+    eek_draw_key_label (cr, key, priv->fonts);
+    cairo_destroy (cr);
+
+    state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
+    gdk_draw_drawable (gtk_widget_get_window (priv->widget),
+                       gtk_widget_get_style (priv->widget)->fg_gc[state],
+                       pixmap,
+                       0, 0,
+                       ax - (bounds.width * SCALE - bounds.width) / 2,
+                       ay - (bounds.height * SCALE - bounds.height) / 2,
+                       bounds.width * SCALE, bounds.height * SCALE);
+    g_object_unref (pixmap);
+}
+
+static void
+key_shrink (EekGtkKeyboard *keyboard, EekKey *key)
+{
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    EekBounds bounds;
+    gdouble ax, ay;
+    GtkStateType state;
+
+    g_return_if_fail (priv->pixmap);
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    eek_element_get_absolute_position (EEK_ELEMENT(key), &ax, &ay);
+    state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
+
+    ax -= (bounds.width * SCALE - bounds.width) / 2;
+    ay -= (bounds.height * SCALE - bounds.height) / 2;
+
+    gdk_draw_drawable (gtk_widget_get_window (priv->widget),
+                       gtk_widget_get_style (priv->widget)->fg_gc[state],
+                       priv->pixmap,
+                       ax, ay,
+                       ax, ay,
+                       bounds.width * SCALE, bounds.height * SCALE);
+}
+
 static gboolean
-on_gtk_button_event (GtkWidget      *widget,
+on_button_event (GtkWidget      *widget,
                      GdkEventButton *event,
                      gpointer        user_data)
 {
@@ -254,9 +411,11 @@ on_gtk_button_event (GtkWidget      *widget,
         if (key)
             switch (event->type) {
             case GDK_BUTTON_PRESS:
+                key_enlarge (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
                 g_signal_emit_by_name (keyboard, "key-pressed", key);
                 return TRUE;
             case GDK_BUTTON_RELEASE:
+                key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
                 g_signal_emit_by_name (keyboard, "key-released", key);
                 return TRUE;
             default:
@@ -275,17 +434,19 @@ eek_gtk_keyboard_get_widget (EekGtkKeyboard *keyboard)
     if (!priv->widget) {
         priv->widget = gtk_drawing_area_new ();
         g_object_ref_sink (priv->widget);
+
+        gtk_widget_set_double_buffered (priv->widget, FALSE);
         gtk_widget_set_events (priv->widget,
                                GDK_EXPOSURE_MASK |
                                GDK_KEY_PRESS_MASK |
                                GDK_BUTTON_PRESS_MASK |
                                GDK_BUTTON_RELEASE_MASK);
         g_signal_connect (priv->widget, "expose_event",
-                          G_CALLBACK (on_gtk_expose_event), keyboard);
+                          G_CALLBACK (on_expose_event), keyboard);
         g_signal_connect (priv->widget, "button-press-event",
-                          G_CALLBACK (on_gtk_button_event), keyboard);
+                          G_CALLBACK (on_button_event), keyboard);
         g_signal_connect (priv->widget, "button-release-event",
-                          G_CALLBACK (on_gtk_button_event), keyboard);
+                          G_CALLBACK (on_button_event), keyboard);
         eek_keyboard_realize (EEK_KEYBOARD(keyboard));
     }
     return priv->widget;
