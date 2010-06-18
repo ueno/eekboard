@@ -90,12 +90,12 @@ HTML_IMAGES=
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
-content_files=
+content_files=eek-overview.xml
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
 # e.g. expand_content_files=running.sgml
-expand_content_files=
+expand_content_files=eek-overview.xml
 
 # CFLAGS and LDFLAGS for compiling gtkdoc-scangobj with your library.
 # Only needed if you are using gtkdoc-scangobj to dynamically query widget
@@ -104,13 +104,15 @@ expand_content_files=
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS = $(GOBJECT2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
-	$(top_srcdir)/eek/libeek-clutter.la \
 	$(top_srcdir)/eek/libeek-gtk.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
 	$(top_srcdir)/eek/libeek-xkl.la \
 	$(GOBJECT2_LIBS) \
-	$(CLUTTER_LIBS) \
 	$(XKB_LIBS)
+
+if HAVE_CLUTTER
+GTKDOC_LIBS += $(top_srcdir)/eek/libeek-clutter.la $(CLUTTER_LIBS)
+endif
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

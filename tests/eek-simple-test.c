@@ -18,7 +18,6 @@
  * 02110-1301 USA
  */
 #include "eek.h"
-#include "eek-clutter.h"
 
 static void
 test_create (void)
@@ -37,38 +36,11 @@ test_create (void)
     g_assert (EEK_IS_KEY(key1));
 }
 
-#if 0
-static void
-test_create_clutter (void)
-{
-    EekKeyboard *keyboard;
-    EekSection *section;
-    EekKey *key0, *key1;
-    ClutterActor *actor;
-
-    keyboard = eek_clutter_keyboard_new (640.0, 480.0);
-    section = eek_keyboard_create_section (keyboard);
-    g_assert (EEK_IS_SECTION(section));
-    eek_section_add_row (section, 2, EEK_ORIENTATION_HORIZONTAL);
-    key0 = eek_section_create_key (section, 0, 0);
-    g_assert (EEK_IS_KEY(key0));
-    key1 = eek_section_create_key (section, 1, 0);
-    g_assert (EEK_IS_KEY(key1));
-    actor = eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard));
-    g_assert (CLUTTER_IS_ACTOR(actor));
-    g_object_unref (keyboard);
-}
-#endif
-
 int
 main (int argc, char **argv)
 {
     g_type_init ();
     g_test_init (&argc, &argv, NULL);
     g_test_add_func ("/eek-simple-test/create", test_create);
-#if 0
-    clutter_init (&argc, &argv);
-    g_test_add_func ("/eek-simple-test/create-clutter", test_create_clutter);
-#endif
     return g_test_run ();
 }

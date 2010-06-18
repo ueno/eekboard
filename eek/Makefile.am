@@ -18,10 +18,13 @@
 
 lib_LTLIBRARIES = \
 	libeek.la \
-	libeek-clutter.la \
 	libeek-gtk.la \
 	libeek-xkb.la \
 	libeek-xkl.la
+
+if HAVE_CLUTTER
+lib_LTLIBRARIES += libeek-clutter.la
+endif
 
 libeek_la_SOURCES = \
 	eek-layout.c \
@@ -47,6 +50,7 @@ libeek_la_SOURCES = \
 libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS)
 libeek_la_LIBADD = $(GOBJECT2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 
+if HAVE_CLUTTER
 libeek_clutter_la_SOURCES = \
 	eek-clutter-keyboard.c \
 	eek-clutter-keyboard.h \
@@ -64,6 +68,7 @@ libeek_clutter_la_SOURCES = \
 
 libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)
 libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS)
+endif
 
 libeek_gtk_la_SOURCES = \
 	eek-gtk-keyboard.c \

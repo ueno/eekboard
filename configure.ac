@@ -32,10 +32,6 @@ PKG_CHECK_MODULES([CAIRO], [cairo], ,
   [AC_MSG_ERROR([Cairo not found])])
 PKG_CHECK_MODULES([PANGO], [pango], ,
   [AC_MSG_ERROR([Pango not found])])
-PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
-  [AC_MSG_ERROR([Clutter not found])])
-PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10], ,
-  [AC_MSG_ERROR([clutter-gtk not found])])
 PKG_CHECK_MODULES([GTK2], [gtk+-2.0 gdk-2.0], ,
   [AC_MSG_ERROR([GTK2 not found])])
 PKG_CHECK_MODULES([XKB], [x11], ,
@@ -46,6 +42,31 @@ PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
 PKG_CHECK_MODULES([ATK], [atk], ,
   [AC_MSG_ERROR([ATK not found])])
+
+AC_MSG_CHECKING([whether you enable Clutter])
+AC_ARG_ENABLE(clutter,
+              AS_HELP_STRING([--enable-clutter=no/yes],
+                             [Enable Clutter user interface default=yes]),,
+              enable_clutter=yes)
+AC_MSG_RESULT($enable_clutter)
+
+if test x$enable_clutter = xyes; then
+  PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
+    [AC_MSG_ERROR([Clutter not found])])
+  AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
+  enable_clutter_gtk=no
+  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],
+    [enable_clutter_gtk=yes])
+  if test x$enable_clutter_gtk = xno; then
+    PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10],
+      [enable_clutter_gtk=yes])
+  fi
+  if test x$enable_clutter_gtk = xyes; then
+    AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
+  fi
+fi
+AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
+AM_CONDITIONAL(HAVE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 

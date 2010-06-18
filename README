@@ -4,48 +4,26 @@ eekboard is a virtual keyboard software package which ships with a
 standalone virtual keyboard application ("eekboard"), and a library to
 create keyboard-like UI ("libeek").
 
-*NOTE* eekboard is still under heavy development. The code has still a
-lot of bugs and lacks documentation.
+* Requirements
+
+  * GLib2, GTK2, Cairo, Pango, Libxklavier...
+  * Clutter (optional)
+  * Clutter-Gtk (optional)
 
 * How to test
 
-  $ sudo apt-get install libclutter-gtk-0.10-dev libxklavier-dev \
-	libfakekey-dev python
+If you build from git repo:
+
   $ git clone git://github.com/ueno/eekboard.git
   $ cd eekboard
   $ ./autogen.sh --prefix=/usr --enable-gtk-doc
+
+Otherwise start from here:
+
+  $ ./configure
   $ make
   $ sudo make install
   $ eekboard
 
-* libeek API (not fixed)
-
-Since libeek is designed as simple as possible, it provides only two
-kinds of objects.  One is "keyboard element" and another is "keyboard
-layout engine".  A keyboard element represents either a keyboard, a
-section, or a key.  Each element implements the Builder pattern[1] so
-that it can be converted into a UI widget (ClutterActor,
-GtkDrawingArea, ...).  A layout engine arranges keyboard elements
-using information from external configuration mechanisms (libxklavier,
-XKB, matchbox-keyboard layouts in XML, ...)
-
-Here is a sample code which utilizes Clutter keyboard elements
-and libxklavier layout engine:
-
- 1: EekKeyboard *keyboard;
- 2: EekLayout *layout;
- 3:
- 4: /* Create a keyboard layout using libxklavier configuration. */
- 5: layout = eek_xkl_layout_new ();
- 6:
- 7: /* Create a keyboard implemented as ClutterActor. */
- 8: keyboard = eek_clutter_keyboard_new (640, 480);
- 9:
-10: /* Apply the layout to the keyboard. */
-11: eek_keyboard_set_layout (keyboard, layout);
-12: 
-13: clutter_group_add (CLUTTER_GROUP(stage),
-14: 		       eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard)));
-
-Footnotes: 
-[1]  http://en.wikipedia.org/wiki/Builder_pattern
+*NOTE* some version combination of Clutter & Clutter-Gtk does not
+cooperate well.  Try "EEKBOARD_DISABLE_CLUTTER=1 eekboard"

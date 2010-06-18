@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if HAVE_CLUTTER_GTK
 #include <clutter-gtk/clutter-gtk.h>
+#endif
+
 #include <fakekey/fakekey.h>
 #include <glib/gi18n.h>
 #include <gdk/gdkx.h>
@@ -32,12 +35,21 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
+#if HAVE_CLUTTER_GTK
 #include "eek/eek-clutter.h"
+#endif
+
 #include "eek/eek-gtk.h"
 #include "eek/eek-xkl.h"
 
 #define CSW 640
 #define CSH 480
+
+#if HAVE_CLUTTER_GTK
+#define USE_CLUTTER TRUE
+#else
+#define USE_CLUTTER FALSE
+#endif
 
 #define LICENSE \
     "This program is free software: you can redistribute it and/or modify " \
@@ -58,7 +70,7 @@ struct _Eekboard {
     Display *display;
     FakeKey *fakekey;
     GtkWidget *widget;
-    gfloat width, height;
+    gint width, height;
     guint key_event_listener;
 
     EekKeyboard *keyboard;
@@ -87,8 +99,15 @@ static void       on_monitor_key_event_toggled
                                 (GtkToggleAction *action,
                                  GtkWidget       *window);
 static GtkWidget *create_widget (Eekboard        *eekboard,
-                                 gfloat           initial_width,
-                                 gfloat           initial_height);
+                                 gint           initial_width,
+                                 gint           initial_height);
+static GtkWidget *create_widget_gtk (Eekboard        *eekboard,
+                                     gint           initial_width,
+                                     gint           initial_height);
+
+#if !HAVE_CLUTTER_GTK
+#define create_widget create_widget_gtk
+#endif
 
 static const char ui_description[] =
     "<ui>"
@@ -371,6 +390,7 @@ create_menus (Eekboard      *eekboard,
     create_layouts_menu (eekboard, ui_manager);
 }
 
+#if HAVE_CLUTTER_GTK
 static GtkWidget *
 create_widget_clutter (Eekboard *eekboard,
                        gint      initial_width,
@@ -404,6 +424,7 @@ create_widget_clutter (Eekboard *eekboard,
     clutter_actor_set_size (stage, eekboard->width, eekboard->height);
     return eekboard->widget;
 }
+#endif
 
 static GtkWidget *
 create_widget_gtk (Eekboard *eekboard,
@@ -432,16 +453,18 @@ create_widget_gtk (Eekboard *eekboard,
     return eekboard->widget;
 }
 
+#if HAVE_CLUTTER_GTK
 static GtkWidget *
 create_widget (Eekboard *eekboard,
-               gfloat    initial_width,
-               gfloat    initial_height)
+               gint    initial_width,
+               gint    initial_height)
 {
     if (eekboard->use_clutter)
         return create_widget_clutter (eekboard, initial_width, initial_height);
     else
         return create_widget_gtk (eekboard, initial_width, initial_height);
 }
+#endif
 
 Eekboard *
 eekboard_new (gboolean use_clutter)
@@ -482,7 +505,7 @@ int
 main (int argc, char *argv[])
 {
     const gchar *env;
-    gboolean use_clutter = TRUE;
+    gboolean use_clutter = USE_CLUTTER;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window;
     GtkUIManager *ui_manager;
@@ -491,11 +514,13 @@ main (int argc, char *argv[])
     if (env && g_strcmp0 (env, "1") == 0)
         use_clutter = FALSE;
 
+#if HAVE_CLUTTER_GTK
     if (use_clutter &&
         gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
         g_warning ("Can't init Clutter-Gtk...fallback to GTK");
         use_clutter = FALSE;
     }
+#endif
 
     if (!use_clutter && !gtk_init_check (&argc, &argv)) {
         g_warning ("Can't init GTK");
