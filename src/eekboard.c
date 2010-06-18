@@ -37,10 +37,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif  /* HAVE_CONFIG_H */
-
 #if HAVE_CLUTTER_GTK
 #include "eek/eek-clutter.h"
 #endif
@@ -539,6 +535,13 @@ main (int argc, char *argv[])
         g_warning ("Can't init GTK");
         exit (1);
     }
+
+#ifdef ENABLE_NLS
+    bindtextdomain (GETTEXT_PACKAGE, EEKBOARD_LOCALEDIR);
+    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
+    gtk_set_locale ();
+#endif
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_can_focus (window, FALSE);
