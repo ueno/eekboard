@@ -235,7 +235,7 @@ on_clutter_stage_resize (GObject *object,
 
     g_value_init (&value, G_TYPE_DOUBLE);
 
-    scale = width > height ? width / bounds.width : width / bounds.height;
+    scale = width > height ? width / bounds.width : height / bounds.height;
 
     g_value_set_double (&value, scale);
     g_object_set_property (G_OBJECT (stage),
