@@ -1,5 +1,5 @@
 <part id="eek-overview">
-  <title>Overview</title>
+  <title>Usage Overview</title>
   <partintro>
 
     <para>libeek is a library to create keyboard-like user interface.
@@ -19,7 +19,7 @@
     from external configuration mechanisms (libxklavier, XKB,
     matchbox-keyboard layouts in XML, aso)</para>
 
-    <para>Here is a sample code which creates a keyboard-like #ClutterActor using the system layout information from libxklavier:</para>
+    <para>Here is a sample code which creates a keyboard-like #ClutterActor using the system keyboard layout using libxklavier:</para>
 
     <informalexample>
       <programlisting>
@@ -47,7 +47,7 @@ clutter_group_add (CLUTTER_GROUP(stage),
     and eek_clutter_keyboard_get_actor() with
     eek_gtk_keyboard_get_widget().</para>
 
-    <para>Another interesting feature is that there is logical represention (model) of keyboard distinct from the UI widget (view).  More precisely, #EekKeyboard contains one or more #EekSection's and #EekSection contains one or more #EekKey's, and each element may send events when a user clicked on the UI widget.  For example, with the following code, when a user pushed a key widget with keycode 0x38 assigned, on_a_pressed will be called.</para>
+    <para>There is logical represention (model) of keyboard distinct from the UI widget (view).  More precisely, a keyboard is represented as a tree of #EekElement -- #EekKeyboard contains one or more #EekSection's and #EekSection contains one or more #EekKey's.  Each element can be  event source when user events on the UI widget occurs.  For example, with the following code, when a user pushed a key widget with keycode 0x38 assigned, on_a_pressed will be called.</para>
     <informalexample>
       <programlisting>
 /* Find a key element in the logical keyboard. */
@@ -55,5 +55,6 @@ EekKey *key = eek_keyboard_find_key_by_keycode (keyboard, 0x38);
 g_signal_connect (key, "pressed", on_a_pressed);
       </programlisting>
     </informalexample>
+    <para>In this way, application developers do not need to know the differences between the underlying UI widgets after creation.</para>
   </partintro>
 </part>

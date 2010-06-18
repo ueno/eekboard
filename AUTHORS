@@ -1,0 +1,6 @@
+eekboard is written by Daiki Ueno <ueno@unixuser.org>
+
+Cairo keyboard drawing functions are borrowed from the libgnomekbd
+library by Sergey V. Udaltsov <svu@gnome.org>.  See the comments in
+eek/eek-drawing.c for detail.
+
