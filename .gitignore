@@ -47,3 +47,8 @@ docs/reference/eek/eek.args
 docs/reference/eek/eek.hierarchy
 docs/reference/eek/eek.interfaces
 docs/reference/eek/eek.prerequisites
+po/*.gmo
+po/Makefile.in.in
+po/POTFILES
+po/stamp-it
+
