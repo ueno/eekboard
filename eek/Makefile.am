@@ -104,15 +104,19 @@ eek_HEADERS = \
 	$(top_srcdir)/eek/eek-layout.h \
 	$(top_srcdir)/eek/eek-keysym.h \
 	$(top_srcdir)/eek/eek-types.h \
-	$(top_srcdir)/eek/eek-clutter-keyboard.h \
-	$(top_srcdir)/eek/eek-clutter-section.h \
-	$(top_srcdir)/eek/eek-clutter-key.h \
 	$(top_srcdir)/eek/eek-xkb-layout.h \
 	$(top_srcdir)/eek/eek-xkl-layout.h \
 	$(top_srcdir)/eek/eek.h \
-	$(top_srcdir)/eek/eek-clutter.h \
 	$(top_srcdir)/eek/eek-xkb.h \
 	$(top_srcdir)/eek/eek-xkl.h
+
+if HAVE_CLUTTER
+eek_HEADERS += \
+	$(top_srcdir)/eek/eek-clutter-keyboard.h \
+	$(top_srcdir)/eek/eek-clutter-section.h \
+	$(top_srcdir)/eek/eek-clutter-key.h \
+	$(top_srcdir)/eek/eek-clutter.h
+endif
 
 eek-keysym.c: eek-special-keysym-labels.h eek-unicode-keysym-labels.h eek-keyname-keysym-labels.h
 

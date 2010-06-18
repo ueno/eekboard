@@ -394,6 +394,33 @@ create_menus (Eekboard      *eekboard,
     create_layouts_menu (eekboard, ui_manager);
 }
 
+static GtkWidget *
+create_widget_gtk (Eekboard *eekboard,
+                   gint      initial_width,
+                   gint      initial_height)
+{
+    EekBounds bounds;
+
+    bounds.x = bounds.y = 0;
+    bounds.width = initial_width;
+    bounds.height = initial_height;
+
+    eekboard->keyboard = eek_gtk_keyboard_new ();
+    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
+    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    g_signal_connect (eekboard->keyboard, "key-pressed",
+                      G_CALLBACK(on_key_pressed), eekboard);
+    g_signal_connect (eekboard->keyboard, "key-released",
+                      G_CALLBACK(on_key_released), eekboard);
+
+    eekboard->widget =
+        eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard->keyboard));
+    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    eekboard->width = bounds.width;
+    eekboard->height = bounds.height;
+    return eekboard->widget;
+}
+
 #if HAVE_CLUTTER_GTK
 static GtkWidget *
 create_widget_clutter (Eekboard *eekboard,
@@ -423,41 +450,14 @@ create_widget_clutter (Eekboard *eekboard,
 
     actor = eek_clutter_keyboard_get_actor
         (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
-    clutter_actor_get_size (actor, &eekboard->width, &eekboard->height);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
-    clutter_actor_set_size (stage, eekboard->width, eekboard->height);
-    return eekboard->widget;
-}
-#endif
-
-static GtkWidget *
-create_widget_gtk (Eekboard *eekboard,
-                   gint      initial_width,
-                   gint      initial_height)
-{
-    EekBounds bounds;
-
-    bounds.x = bounds.y = 0;
-    bounds.width = initial_width;
-    bounds.height = initial_height;
-
-    eekboard->keyboard = eek_gtk_keyboard_new ();
-    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
-    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    g_signal_connect (eekboard->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), eekboard);
-    g_signal_connect (eekboard->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), eekboard);
-
-    eekboard->widget =
-        eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard->keyboard));
     eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    clutter_actor_set_size (stage, bounds.width, bounds.height);
     eekboard->width = bounds.width;
     eekboard->height = bounds.height;
     return eekboard->widget;
 }
 
-#if HAVE_CLUTTER_GTK
 static GtkWidget *
 create_widget (Eekboard *eekboard,
                gint    initial_width,
