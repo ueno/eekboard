@@ -24,11 +24,11 @@
 #include <clutter-gtk/clutter-gtk.h>
 #endif
 
-#include <fakekey/fakekey.h>
 #include <glib/gi18n.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <libxklavier/xklavier.h>
+#include <fakekey/fakekey.h>
 #if 0
 #include <atk/atk.h>
 #endif
@@ -519,6 +519,11 @@ main (int argc, char *argv[])
     GtkWidget *widget, *vbox, *menubar, *window;
     GtkUIManager *ui_manager;
 
+#ifdef ENABLE_NLS
+    bindtextdomain (GETTEXT_PACKAGE, EEKBOARD_LOCALEDIR);
+    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+#endif
+
     env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
     if (env && g_strcmp0 (env, "1") == 0)
         use_clutter = FALSE;
@@ -535,13 +540,6 @@ main (int argc, char *argv[])
         g_warning ("Can't init GTK");
         exit (1);
     }
-
-#ifdef ENABLE_NLS
-    bindtextdomain (GETTEXT_PACKAGE, EEKBOARD_LOCALEDIR);
-    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-
-    gtk_set_locale ();
-#endif
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_can_focus (window, FALSE);

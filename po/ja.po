@@ -1,15 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Japanese translations for eekboard package
+# eekboard パッケージに対する英訳.
+# Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
+# This file is distributed under the same license as the eekboard package.
+# Daiki Ueno <ueno@unixuser.org>, 2010.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: eekboard 0.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-06-18 18:10+0900\n"
-"PO-Revision-Date: 2010-06-18 18:20+0900\n"
+"PO-Revision-Date: 2010-06-18 18:46+0900\n"
 "Last-Translator: Daiki Ueno <ueno@unixuser.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
