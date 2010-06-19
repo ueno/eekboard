@@ -59,7 +59,7 @@ AC_MSG_RESULT($enable_clutter)
 
 if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
-    [AC_MSG_ERROR([Clutter not found])])
+    [AC_MSG_ERROR([Clutter not found -- install it or add --disable-clutter])])
   AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
   PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],
     [enable_clutter_gtk=yes])
