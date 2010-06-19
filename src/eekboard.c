@@ -385,6 +385,7 @@ create_menus (Eekboard      *eekboard,
     GtkActionGroup *action_group;
 
     action_group = gtk_action_group_new ("MenuActions");
+    gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 
     gtk_action_group_add_actions (action_group, action_entry,
                                   G_N_ELEMENTS (action_entry), window);
