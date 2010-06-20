@@ -76,6 +76,10 @@ struct _EekContainerClass
                                       EekElement    *element);
     void        (* child_removed)    (EekContainer  *self,
                                       EekElement    *element);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType       eek_container_get_type         (void) G_GNUC_CONST;

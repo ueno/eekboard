@@ -53,6 +53,10 @@ struct _EekClutterKeyActorClass
     /* signals */
     void (* pressed) (EekClutterKeyActor *self);
     void (* released) (EekClutterKeyActor *self);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType         eek_clutter_key_actor_get_type

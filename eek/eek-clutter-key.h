@@ -49,6 +49,10 @@ struct _EekClutterKeyClass
 {
     /*< private >*/
     EekKeyClass parent_class;
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType         eek_clutter_key_get_type  (void) G_GNUC_CONST;

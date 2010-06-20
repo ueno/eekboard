@@ -56,6 +56,10 @@ struct _EekLayoutIface
     void (* group_changed) (EekLayout   *self,
                             gint         group);
     void (* changed)       (EekLayout   *self);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType eek_layout_get_type  (void) G_GNUC_CONST;

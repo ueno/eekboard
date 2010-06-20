@@ -47,6 +47,10 @@ struct _EekXklLayoutClass
 {
     /*< private >*/
     EekXkbLayoutClass parent_class;
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType      eek_xkl_layout_get_type     (void) G_GNUC_CONST;

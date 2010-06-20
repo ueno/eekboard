@@ -80,6 +80,10 @@ struct _EekSectionClass
 
     EekKey *(* find_key_by_keycode) (EekSection     *self,
                                      guint           keycode);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType   eek_section_get_type            (void) G_GNUC_CONST;

@@ -48,6 +48,10 @@ struct _EekClutterSectionClass
 {
     /*< private >*/
     EekSectionClass parent_class;
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType         eek_clutter_section_get_type  (void) G_GNUC_CONST;

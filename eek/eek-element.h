@@ -59,6 +59,10 @@ struct _EekElementClass
 
     void                  (* get_bounds) (EekElement  *self,
                                           EekBounds   *bounds);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType                 eek_element_get_type              (void) G_GNUC_CONST;

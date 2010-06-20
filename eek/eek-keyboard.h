@@ -77,6 +77,10 @@ struct _EekKeyboardClass
     EekKey     *(* find_key_by_keycode) (EekKeyboard *self,
                                          guint        keycode);
     void        (* realize)             (EekKeyboard *self);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType       eek_keyboard_get_type            (void) G_GNUC_CONST;
