@@ -442,6 +442,65 @@ eek_xkl_layout_set_options (EekXklLayout *layout,
 }
 
 /**
+ * eek_xkl_layout_enable_option:
+ * @layout: an #EekXklLayout
+ * @option: option name
+ *
+ * Set the option of @layout (in the Libxklavier terminology).
+ * Returns: %TRUE if the option is successfully set, %FALSE otherwise
+ */
+gboolean
+eek_xkl_layout_enable_option  (EekXklLayout *layout,
+                               const gchar  *option)
+{
+    gchar **options, **_options;
+    gint i, j;
+
+    options = eek_xkl_layout_get_options (layout);
+    for (i = 0; options && options[i]; i++)
+        if (g_strcmp0 (options[i], option) == 0)
+            return TRUE;
+    _options = g_new0 (gchar *, (i + 2));
+    for (j = 0; j < i; j++)
+        _options[j] = g_strdup (options[j]);
+    _options[i] = g_strdup (option);
+    /* eek_xkl_layout_set_options() will free _options and its elements. */
+    return eek_xkl_layout_set_options (layout, _options);
+}
+
+/**
+ * eek_xkl_layout_disable_option:
+ * @layout: an #EekXklLayout
+ * @option: option name
+ *
+ * Unset the option of @layout (in the Libxklavier terminology).
+ * Returns: %TRUE if the option is successfully unset, %FALSE otherwise
+ */
+gboolean
+eek_xkl_layout_disable_option (EekXklLayout *layout,
+                               const gchar  *option)
+{
+    gchar **options, **_options;
+    gint i, j, k;
+
+    options = eek_xkl_layout_get_options (layout);
+    if (!options)
+        return TRUE;
+    for (i = 0, k = 0; options[i]; i++)
+        if (g_strcmp0 (options[i], option) == 0)
+            k = i;
+    if (options[k] == NULL)
+        return TRUE;
+    _options = g_new0 (gchar *, i);
+    for (j = 0; j < k; j++)
+        _options[j] = g_strdup (options[j]);
+    for (j = k + 1; j < i; j++)
+        _options[j] = g_strdup (options[j]);
+    /* eek_xkl_layout_set_options() will free _options and its elements. */
+    return eek_xkl_layout_set_options (layout, _options);
+}
+
+/**
  * eek_xkl_layout_get_model:
  * @layout: an #EekXklLayout
  *
@@ -551,4 +610,26 @@ set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
         xkl_xkb_config_native_cleanup (priv->engine, &names);
     }
     return success;
+}
+
+/**
+ * eek_xkl_layout_get_option:
+ * @layout: an #EekXklLayout
+ * @option: option name
+ *
+ * Tell if the option of @layout (in the Libxklavier terminology) is set.
+ * Returns: %TRUE if the option is set, %FALSE otherwise
+ */
+gboolean
+eek_xkl_layout_get_option (EekXklLayout *layout,
+                           const gchar  *option)
+{
+    gchar **options;
+    gint i;
+
+    options = eek_xkl_layout_get_options (layout);
+    for (i = 0; options && options[i]; i++)
+        if (g_strcmp0 (options[i], option) == 0)
+            return TRUE;
+    return FALSE;
 }
