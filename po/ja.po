@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eekboard 0.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-18 18:10+0900\n"
-"PO-Revision-Date: 2010-06-18 18:46+0900\n"
+"POT-Creation-Date: 2010-06-21 12:42+0900\n"
+"PO-Revision-Date: 2010-06-21 12:45+0900\n"
 "Last-Translator: Daiki Ueno <ueno@unixuser.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -17,30 +17,46 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/eekboard.c:143
+#: ../src/eekboard.c:195
 msgid "_File"
 msgstr "ファイル"
 
-#: ../src/eekboard.c:144
+#: ../src/eekboard.c:196
 msgid "_Keyboard"
 msgstr "キーボード"
 
-#: ../src/eekboard.c:145
+#: ../src/eekboard.c:197
 msgid "_Help"
 msgstr "ヘルプ"
 
-#: ../src/eekboard.c:147
-msgid "Set Layout"
-msgstr "レイアウトの設定"
+#: ../src/eekboard.c:199
+msgid "Country"
+msgstr "国"
 
-#: ../src/eekboard.c:153
+#: ../src/eekboard.c:201
+msgid "Language"
+msgstr "言語"
+
+#: ../src/eekboard.c:203
+msgid "Model"
+msgstr "モデル"
+
+#: ../src/eekboard.c:205
+msgid "Layout"
+msgstr "レイアウト"
+
+#: ../src/eekboard.c:207
+msgid "Option"
+msgstr "オプション"
+
+#: ../src/eekboard.c:214
 msgid "Monitor Key Typing"
-msgstr "打鍵モニタ"
+msgstr "打鍵をモニタ"
 
-#: ../src/eekboard.c:171
+#: ../src/eekboard.c:232
 msgid "A virtual keyboard for GNOME"
 msgstr "GNOME 向け仮想キーボード"
 
-#: ../src/eekboard.c:175
+#: ../src/eekboard.c:236
 msgid "Eekboard web site"
 msgstr "Eekboard のウェブサイト"

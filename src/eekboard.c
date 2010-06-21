@@ -162,10 +162,10 @@ static const char ui_description[] =
 #if 0
     "      <menuitem action='MonitorKeyEvent'/>"
 #endif
-    "      <menu action='ByCountry'>"
+    "      <menu action='Country'>"
     "        <placeholder name='CountriesPH'/>"
     "      </menu>"
-    "      <menu action='ByLanguage'>"
+    "      <menu action='Language'>"
     "        <placeholder name='LanguagesPH'/>"
     "      </menu>"
     "      <separator/>"
@@ -185,8 +185,8 @@ static const char ui_description[] =
     "  </menubar>"
     "</ui>";
 
-#define COUNTRIES_UI_PATH "/MainMenu/KeyboardMenu/ByCountry/CountriesPH"
-#define LANGUAGES_UI_PATH "/MainMenu/KeyboardMenu/ByLanguage/LanguagesPH"
+#define COUNTRIES_UI_PATH "/MainMenu/KeyboardMenu/Country/CountriesPH"
+#define LANGUAGES_UI_PATH "/MainMenu/KeyboardMenu/Language/LanguagesPH"
 #define MODELS_UI_PATH "/MainMenu/KeyboardMenu/Model/ModelsPH"
 #define LAYOUTS_UI_PATH "/MainMenu/KeyboardMenu/Layout/LayoutsPH"
 #define OPTIONS_UI_PATH "/MainMenu/KeyboardMenu/Option/OptionsPH"
@@ -196,9 +196,9 @@ static const GtkActionEntry action_entry[] = {
     {"KeyboardMenu", NULL, N_("_Keyboard")},
     {"HelpMenu", NULL, N_("_Help")},
     {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (gtk_main_quit)},
-    {"ByCountry", NULL, N_("By Country"), NULL, NULL,
+    {"Country", NULL, N_("Country"), NULL, NULL,
      G_CALLBACK(on_countries_menu)},
-    {"ByLanguage", NULL, N_("By Language"), NULL, NULL,
+    {"Language", NULL, N_("Language"), NULL, NULL,
      G_CALLBACK(on_languages_menu)},
     {"Model", NULL, N_("Model"), NULL, NULL,
      G_CALLBACK(on_models_menu)},
