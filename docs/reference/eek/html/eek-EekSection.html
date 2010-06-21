@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekSection</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekKeyboard.html" title="EekKeyboard">
+<link rel="next" href="eek-EekKey.html" title="EekKey">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekKeyboard.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-EekKey.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekSection.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekSection.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekSection">
+<a name="eek-EekSection"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekSection.top_of_page"></a>EekSection</span></h2>
+<p>EekSection — Base class of a section</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekSection.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekSection.html#EekSectionClass" title="EekSectionClass">EekSectionClass</a>;
+                    <a class="link" href="eek-EekSection.html#EekSectionPrivate" title="EekSectionPrivate">EekSectionPrivate</a>;
+                    <a class="link" href="eek-EekSection.html#EekSection" title="EekSection">EekSection</a>;
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekSection.html#eek-section-set-angle" title="eek_section_set_angle ()">eek_section_set_angle</a>               (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> angle</code></em>);
+<a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                <a class="link" href="eek-EekSection.html#eek-section-get-angle" title="eek_section_get_angle ()">eek_section_get_angle</a>               (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>);
+<a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                <a class="link" href="eek-EekSection.html#eek-section-get-n-rows" title="eek_section_get_n_rows ()">eek_section_get_n_rows</a>              (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekSection.html#eek-section-add-row" title="eek_section_add_row ()">eek_section_add_row</a>                 (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_columns</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> orientation</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekSection.html#eek-section-get-row" title="eek_section_get_row ()">eek_section_get_row</a>                 (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> index</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_columns</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> *orientation</code></em>);
+<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            <a class="link" href="eek-EekSection.html#eek-section-create-key" title="eek_section_create_key ()">eek_section_create_key</a>              (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> row</code></em>);
+<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            <a class="link" href="eek-EekSection.html#eek-section-find-key-by-keycode" title="eek_section_find_key_by_keycode ()">eek_section_find_key_by_keycode</a>     (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekSection.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekSection.html#EekSectionClass" title="EekSectionClass"><span class="type">EekSectionClass</span></a> class represents a section, which consists
+of one or more keys of the <a class="link" href="eek-EekKey.html#EekKeyClass" title="EekKeyClass"><span class="type">EekKeyClass</span></a> class.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekSection.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekSectionClass">
+<a name="EekSectionClass"></a><h3>EekSectionClass</h3>
+<pre class="programlisting">typedef struct {
+    void    (* set_angle)           (EekSection     *self,
+                                     gint            angle);
+    gint    (* get_angle)           (EekSection     *self);
+
+    gint    (* get_n_rows)          (EekSection     *self);
+    void    (* add_row)             (EekSection     *self,
+                                     gint            num_columns,
+                                     EekOrientation  orientation);
+    void    (* get_row)             (EekSection     *self,
+                                     gint            index,
+                                     gint           *num_columns,
+                                     EekOrientation *orientation);
+
+    EekKey *(* create_key)          (EekSection     *self,
+                                     gint            row,
+                                     gint            column);
+
+    EekKey *(* find_key_by_keycode) (EekSection     *self,
+                                     guint           keycode);
+} EekSectionClass;
+</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.set-angle"></a>set_angle</code></em> ()</span></p></td>
+<td>virtual function for setting rotation angle of the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.get-angle"></a>get_angle</code></em> ()</span></p></td>
+<td>virtual function for getting rotation angle of the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.get-n-rows"></a>get_n_rows</code></em> ()</span></p></td>
+<td>virtual function for getting the number of rows in the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.add-row"></a>add_row</code></em> ()</span></p></td>
+<td>virtual function for adding a new row to the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.get-row"></a>get_row</code></em> ()</span></p></td>
+<td>virtual function for accessing a row in the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.create-key"></a>create_key</code></em> ()</span></p></td>
+<td>virtual function for creating key in the section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekSectionClass.find-key-by-keycode"></a>find_key_by_keycode</code></em> ()</span></p></td>
+<td>virtual function for accessing a key in the
+section by keycode
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekSectionPrivate">
+<a name="EekSectionPrivate"></a><h3>EekSectionPrivate</h3>
+<pre class="programlisting">typedef struct _EekSectionPrivate EekSectionPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekSection">
+<a name="EekSection"></a><h3>EekSection</h3>
+<pre class="programlisting">typedef struct {
+} EekSection;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_set_angle ()">
+<a name="eek-section-set-angle"></a><h3>eek_section_set_angle ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_section_set_angle               (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> angle</code></em>);</pre>
+<p>
+Set rotation angle of <em class="parameter"><code>section</code></em> to <em class="parameter"><code>angle</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>angle</code></em> :</span></p></td>
+<td>rotation angle
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_get_angle ()">
+<a name="eek-section-get-angle"></a><h3>eek_section_get_angle ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                eek_section_get_angle               (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>);</pre>
+<p>
+Get rotation angle of <em class="parameter"><code>section</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_get_n_rows ()">
+<a name="eek-section-get-n-rows"></a><h3>eek_section_get_n_rows ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                eek_section_get_n_rows              (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>);</pre>
+<p>
+Get the number of rows in <em class="parameter"><code>section</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_add_row ()">
+<a name="eek-section-add-row"></a><h3>eek_section_add_row ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_section_add_row                 (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_columns</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> orientation</code></em>);</pre>
+<p>
+Add a row which has <em class="parameter"><code>num_columns</code></em> columns and whose orientation is
+<em class="parameter"><code>orientation</code></em> to <em class="parameter"><code>section</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_columns</code></em> :</span></p></td>
+<td>the number of column in the row
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>orientation</code></em> :</span></p></td>
+<td>
+<a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> of the row
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_get_row ()">
+<a name="eek-section-get-row"></a><h3>eek_section_get_row ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_section_get_row                 (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> index</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_columns</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> *orientation</code></em>);</pre>
+<p>
+Get the information about the <em class="parameter"><code>index</code></em>-th row in <em class="parameter"><code>section</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>index</code></em> :</span></p></td>
+<td>the index of row
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_columns</code></em> :</span></p></td>
+<td>pointer where the number of column in the row will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>orientation</code></em> :</span></p></td>
+<td>pointer where <a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation"><span class="type">EekOrientation</span></a> of the row will be stored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_create_key ()">
+<a name="eek-section-create-key"></a><h3>eek_section_create_key ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            eek_section_create_key              (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> row</code></em>);</pre>
+<p>
+Create an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> instance and append it to <em class="parameter"><code>section</code></em>.  This
+function is rarely called by application but called by <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
+implementation.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>column</code></em> :</span></p></td>
+<td>the column index of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>row</code></em> :</span></p></td>
+<td>the row index of the key
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_section_find_key_by_keycode ()">
+<a name="eek-section-find-key-by-keycode"></a><h3>eek_section_find_key_by_keycode ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            eek_section_find_key_by_keycode     (<em class="parameter"><code><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> *section</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);</pre>
+<p>
+Find an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> whose keycode is <em class="parameter"><code>keycode</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>section</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keycode</code></em> :</span></p></td>
+<td>a keycode
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> or NULL (if not found)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" title="See Also">
+<a name="eek-EekSection.see-also"></a><h2>See Also</h2>
+<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

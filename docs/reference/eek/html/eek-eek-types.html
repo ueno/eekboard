@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>eek-types</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekLayout.html" title="EekLayout">
+<link rel="next" href="eek-eek-keysym.html" title="eek-keysym">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekLayout.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-eek-keysym.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-eek-types.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-eek-types.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="eek-types">
+<a name="eek-eek-types"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-eek-types.top_of_page"></a>eek-types</span></h2>
+<p>eek-types — Miscellaneous types</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-eek-types.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">enum                <a class="link" href="eek-eek-types.html#EekOrientation" title="enum EekOrientation">EekOrientation</a>;
+                    <a class="link" href="eek-eek-types.html#EekKeysymMatrix" title="EekKeysymMatrix">EekKeysymMatrix</a>;
+#define             <a class="link" href="eek-eek-types.html#EEK-TYPE-KEYSYM-MATRIX:CAPS" title="EEK_TYPE_KEYSYM_MATRIX">EEK_TYPE_KEYSYM_MATRIX</a>
+<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               <a class="link" href="eek-eek-types.html#eek-keysym-matrix-get-type" title="eek_keysym_matrix_get_type ()">eek_keysym_matrix_get_type</a>          (<em class="parameter"><code><span class="type">void</span></code></em>);
+                    <a class="link" href="eek-eek-types.html#EekPoint" title="EekPoint">EekPoint</a>;
+#define             <a class="link" href="eek-eek-types.html#EEK-TYPE-POINT:CAPS" title="EEK_TYPE_POINT">EEK_TYPE_POINT</a>
+<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               <a class="link" href="eek-eek-types.html#eek-point-get-type" title="eek_point_get_type ()">eek_point_get_type</a>                  (<em class="parameter"><code><span class="type">void</span></code></em>);
+                    <a class="link" href="eek-eek-types.html#EekBounds" title="EekBounds">EekBounds</a>;
+#define             <a class="link" href="eek-eek-types.html#EEK-TYPE-BOUNDS:CAPS" title="EEK_TYPE_BOUNDS">EEK_TYPE_BOUNDS</a>
+<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               <a class="link" href="eek-eek-types.html#eek-bounds-get-type" title="eek_bounds_get_type ()">eek_bounds_get_type</a>                 (<em class="parameter"><code><span class="type">void</span></code></em>);
+<a href="../glib/glib-Basic-Types.html#gdouble"><span class="returnvalue">gdouble</span></a>             <a class="link" href="eek-eek-types.html#eek-bounds-long-side" title="eek_bounds_long_side ()">eek_bounds_long_side</a>                (<em class="parameter"><code><a class="link" href="eek-eek-types.html#EekBounds" title="EekBounds"><span class="type">EekBounds</span></a> *bounds</code></em>);
+                    <a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline">EekOutline</a>;
+#define             <a class="link" href="eek-eek-types.html#EEK-TYPE-OUTLINE:CAPS" title="EEK_TYPE_OUTLINE">EEK_TYPE_OUTLINE</a>
+<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               <a class="link" href="eek-eek-types.html#eek-outline-get-type" title="eek_outline_get_type ()">eek_outline_get_type</a>                (<em class="parameter"><code><span class="type">void</span></code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-eek-types.description"></a><h2>Description</h2>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-eek-types.details"></a><h2>Details</h2>
+<div class="refsect2" title="enum EekOrientation">
+<a name="EekOrientation"></a><h3>enum EekOrientation</h3>
+<pre class="programlisting">typedef enum {
+    EEK_ORIENTATION_VERTICAL,
+    EEK_ORIENTATION_HORIZONTAL,
+    EEK_ORIENTATION_INVALID = -1
+} EekOrientation;
+</pre>
+<p>
+Orientation of rows in sections.  Elements in a row will be
+arranged with the specified orientation.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="EEK-ORIENTATION-VERTICAL:CAPS"></a><span class="term"><code class="literal">EEK_ORIENTATION_VERTICAL</code></span></p></td>
+<td>the elements will be arranged vertically
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-ORIENTATION-HORIZONTAL:CAPS"></a><span class="term"><code class="literal">EEK_ORIENTATION_HORIZONTAL</code></span></p></td>
+<td>the elements will be arranged horizontally
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-ORIENTATION-INVALID:CAPS"></a><span class="term"><code class="literal">EEK_ORIENTATION_INVALID</code></span></p></td>
+<td>used for error reporting
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekKeysymMatrix">
+<a name="EekKeysymMatrix"></a><h3>EekKeysymMatrix</h3>
+<pre class="programlisting">typedef struct {
+    guint *data;
+    gint num_groups;
+    gint num_levels;
+} EekKeysymMatrix;
+</pre>
+<p>
+Symbol matrix of a key.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *<em class="structfield"><code><a name="EekKeysymMatrix.data"></a>data</code></em>;</span></p></td>
+<td>array of keysyms
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="EekKeysymMatrix.num-groups"></a>num_groups</code></em>;</span></p></td>
+<td>the number of groups (rows)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="EekKeysymMatrix.num-levels"></a>num_levels</code></em>;</span></p></td>
+<td>the number of levels (columns)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EEK_TYPE_KEYSYM_MATRIX">
+<a name="EEK-TYPE-KEYSYM-MATRIX:CAPS"></a><h3>EEK_TYPE_KEYSYM_MATRIX</h3>
+<pre class="programlisting">#define EEK_TYPE_KEYSYM_MATRIX (eek_keysym_matrix_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_keysym_matrix_get_type ()">
+<a name="eek-keysym-matrix-get-type"></a><h3>eek_keysym_matrix_get_type ()</h3>
+<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               eek_keysym_matrix_get_type          (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekPoint">
+<a name="EekPoint"></a><h3>EekPoint</h3>
+<pre class="programlisting">typedef struct {
+    gdouble x;
+    gdouble y;
+} EekPoint;
+</pre>
+<p>
+2D vertex
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekPoint.x"></a>x</code></em>;</span></p></td>
+<td>X coordinate of the point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekPoint.y"></a>y</code></em>;</span></p></td>
+<td>Y coordinate of the point
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EEK_TYPE_POINT">
+<a name="EEK-TYPE-POINT:CAPS"></a><h3>EEK_TYPE_POINT</h3>
+<pre class="programlisting">#define EEK_TYPE_POINT (eek_point_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_point_get_type ()">
+<a name="eek-point-get-type"></a><h3>eek_point_get_type ()</h3>
+<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               eek_point_get_type                  (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekBounds">
+<a name="EekBounds"></a><h3>EekBounds</h3>
+<pre class="programlisting">typedef struct {
+    gdouble x;
+    gdouble y;
+    gdouble width;
+    gdouble height;
+} EekBounds;
+</pre>
+<p>
+2D bounding box
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekBounds.x"></a>x</code></em>;</span></p></td>
+<td>X coordinate of the top left point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekBounds.y"></a>y</code></em>;</span></p></td>
+<td>Y coordinate of the top left point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekBounds.width"></a>width</code></em>;</span></p></td>
+<td>width of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekBounds.height"></a>height</code></em>;</span></p></td>
+<td>height of the box
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EEK_TYPE_BOUNDS">
+<a name="EEK-TYPE-BOUNDS:CAPS"></a><h3>EEK_TYPE_BOUNDS</h3>
+<pre class="programlisting">#define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_bounds_get_type ()">
+<a name="eek-bounds-get-type"></a><h3>eek_bounds_get_type ()</h3>
+<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               eek_bounds_get_type                 (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_bounds_long_side ()">
+<a name="eek-bounds-long-side"></a><h3>eek_bounds_long_side ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="returnvalue">gdouble</span></a>             eek_bounds_long_side                (<em class="parameter"><code><a class="link" href="eek-eek-types.html#EekBounds" title="EekBounds"><span class="type">EekBounds</span></a> *bounds</code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekOutline">
+<a name="EekOutline"></a><h3>EekOutline</h3>
+<pre class="programlisting">typedef struct {
+    gdouble corner_radius;
+    EekPoint *points;
+    gint num_points;
+} EekOutline;
+</pre>
+<p>
+2D rounded polygon used to draw key shape
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="EekOutline.corner-radius"></a>corner_radius</code></em>;</span></p></td>
+<td>radius of corners of rounded polygon
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="eek-eek-types.html#EekPoint" title="EekPoint"><span class="type">EekPoint</span></a> *<em class="structfield"><code><a name="EekOutline.points"></a>points</code></em>;</span></p></td>
+<td>an array of points represents a polygon
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="EekOutline.num-points"></a>num_points</code></em>;</span></p></td>
+<td>the length of <em class="parameter"><code>points</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EEK_TYPE_OUTLINE">
+<a name="EEK-TYPE-OUTLINE:CAPS"></a><h3>EEK_TYPE_OUTLINE</h3>
+<pre class="programlisting">#define EEK_TYPE_OUTLINE (eek_outline_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_outline_get_type ()">
+<a name="eek-outline-get-type"></a><h3>eek_outline_get_type ()</h3>
+<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>               eek_outline_get_type                (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

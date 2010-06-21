@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekLayout</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekKey.html" title="EekKey">
+<link rel="next" href="eek-eek-types.html" title="eek-types">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekKey.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-eek-types.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekLayout.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekLayout.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekLayout">
+<a name="eek-EekLayout"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekLayout.top_of_page"></a>EekLayout</span></h2>
+<p>EekLayout — Base interface of a layout engine</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekLayout.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekLayout.html#EekLayoutIface" title="EekLayoutIface">EekLayoutIface</a>;
+                    <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout">EekLayout</a>;
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekLayout.html#eek-layout-apply" title="eek_layout_apply ()">eek_layout_apply</a>                    (<em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);
+<a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                <a class="link" href="eek-EekLayout.html#eek-layout-get-group" title="eek_layout_get_group ()">eek_layout_get_group</a>                (<em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekLayout.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> class is a base interface of layout engine which
+arranges keyboard elements.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekLayout.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekLayoutIface">
+<a name="EekLayoutIface"></a><h3>EekLayoutIface</h3>
+<pre class="programlisting">typedef struct {
+    void (* apply)         (EekLayout   *self,
+                            EekKeyboard *keyboard);
+    gint (* get_group)     (EekLayout   *self);
+
+    /* signals */
+    void (* group_changed) (EekLayout   *self,
+                            gint         group);
+    void (* changed)       (EekLayout   *self);
+} EekLayoutIface;
+</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekLayoutIface.apply"></a>apply</code></em> ()</span></p></td>
+<td>virtual function for applying the layout to a keyboard
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekLayoutIface.get-group"></a>get_group</code></em> ()</span></p></td>
+<td>virtual function for getting the current group setting
+of the layout
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekLayoutIface.group-changed"></a>group_changed</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"group-changed"</span> signal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekLayoutIface.changed"></a>changed</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"changed"</span> signal
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekLayout">
+<a name="EekLayout"></a><h3>EekLayout</h3>
+<pre class="programlisting">typedef struct _EekLayout EekLayout;</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_layout_apply ()">
+<a name="eek-layout-apply"></a><h3>eek_layout_apply ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_layout_apply                    (<em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);</pre>
+<p>
+Apply <em class="parameter"><code>layout</code></em> to <em class="parameter"><code>keyboard</code></em>.  This function is rarely called by user
+programs but called by the subclasses of <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_layout_get_group ()">
+<a name="eek-layout-get-group"></a><h3>eek_layout_get_group ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                eek_layout_get_group                (<em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the group index from the <em class="parameter"><code>layout</code></em>.  This function normally
+called after <span class="type">"group-changed"</span> signal to change group index
+of all the keys in <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> at a time.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

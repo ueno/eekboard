@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="libeek Reference Manual" link="index.html" author="" name="eek" version="2" language="c">
+  <chapters>
+    <sub name="Usage Overview" link="eek-overview.html"/>
+    <sub name="API Manual" link="apireference.html">
+      <sub name="Base Classes, Interfaces, and Utilities" link="ch01.html">
+        <sub name="EekElement" link="eek-EekElement.html"/>
+        <sub name="EekContainer" link="eek-EekContainer.html"/>
+        <sub name="EekKeyboard" link="eek-EekKeyboard.html"/>
+        <sub name="EekSection" link="eek-EekSection.html"/>
+        <sub name="EekKey" link="eek-EekKey.html"/>
+        <sub name="EekLayout" link="eek-EekLayout.html"/>
+        <sub name="eek-types" link="eek-eek-types.html"/>
+        <sub name="eek-keysym" link="eek-eek-keysym.html"/>
+      </sub>
+      <sub name="Clutter Keyboard" link="ch02.html">
+        <sub name="EekClutterKeyboard" link="eek-EekClutterKeyboard.html"/>
+      </sub>
+      <sub name="GTK Keyboard" link="ch03.html">
+        <sub name="EekGtkKeyboard" link="eek-EekGtkKeyboard.html"/>
+      </sub>
+      <sub name="Libxklavier Layout Engine" link="ch04.html">
+        <sub name="EekXklLayout" link="eek-EekXklLayout.html"/>
+      </sub>
+      <sub name="XKB Layout Engine" link="ch05.html">
+        <sub name="EekXkbLayout" link="eek-EekXkbLayout.html"/>
+      </sub>
+      <sub name="Object Hierarchy" link="object-tree.html"/>
+      <sub name="API Index" link="api-index-full.html"/>
+    </sub>
+  </chapters>
+  <functions>
+    <keyword type="struct" name="EekElementClass" link="eek-EekElement.html#EekElementClass"/>
+    <keyword type="struct" name="EekElementPrivate" link="eek-EekElement.html#EekElementPrivate"/>
+    <keyword type="struct" name="EekElement" link="eek-EekElement.html#EekElement"/>
+    <keyword type="function" name="eek_element_set_parent ()" link="eek-EekElement.html#eek-element-set-parent"/>
+    <keyword type="function" name="eek_element_get_parent ()" link="eek-EekElement.html#eek-element-get-parent"/>
+    <keyword type="function" name="eek_element_set_name ()" link="eek-EekElement.html#eek-element-set-name"/>
+    <keyword type="function" name="eek_element_get_name ()" link="eek-EekElement.html#eek-element-get-name"/>
+    <keyword type="function" name="eek_element_set_bounds ()" link="eek-EekElement.html#eek-element-set-bounds"/>
+    <keyword type="function" name="eek_element_get_bounds ()" link="eek-EekElement.html#eek-element-get-bounds"/>
+    <keyword type="function" name="eek_element_get_absolute_position ()" link="eek-EekElement.html#eek-element-get-absolute-position"/>
+    <keyword type="struct" name="EekContainerClass" link="eek-EekContainer.html#EekContainerClass"/>
+    <keyword type="struct" name="EekContainerPrivate" link="eek-EekContainer.html#EekContainerPrivate"/>
+    <keyword type="function" name="EekCallback ()" link="eek-EekContainer.html#EekCallback"/>
+    <keyword type="function" name="EekCompareFunc ()" link="eek-EekContainer.html#EekCompareFunc"/>
+    <keyword type="struct" name="EekContainer" link="eek-EekContainer.html#EekContainer"/>
+    <keyword type="function" name="eek_container_foreach_child ()" link="eek-EekContainer.html#eek-container-foreach-child"/>
+    <keyword type="function" name="eek_container_find ()" link="eek-EekContainer.html#eek-container-find"/>
+    <keyword type="function" name="eek_container_find_by_position ()" link="eek-EekContainer.html#eek-container-find-by-position"/>
+    <keyword type="struct" name="EekKeyboardClass" link="eek-EekKeyboard.html#EekKeyboardClass"/>
+    <keyword type="struct" name="EekKeyboardPrivate" link="eek-EekKeyboard.html#EekKeyboardPrivate"/>
+    <keyword type="struct" name="EekKeyboard" link="eek-EekKeyboard.html#EekKeyboard"/>
+    <keyword type="function" name="eek_keyboard_set_keysym_index ()" link="eek-EekKeyboard.html#eek-keyboard-set-keysym-index"/>
+    <keyword type="function" name="eek_keyboard_get_keysym_index ()" link="eek-EekKeyboard.html#eek-keyboard-get-keysym-index"/>
+    <keyword type="function" name="eek_keyboard_create_section ()" link="eek-EekKeyboard.html#eek-keyboard-create-section"/>
+    <keyword type="function" name="eek_keyboard_set_layout ()" link="eek-EekKeyboard.html#eek-keyboard-set-layout"/>
+    <keyword type="function" name="eek_keyboard_realize ()" link="eek-EekKeyboard.html#eek-keyboard-realize"/>
+    <keyword type="function" name="eek_keyboard_find_key_by_keycode ()" link="eek-EekKeyboard.html#eek-keyboard-find-key-by-keycode"/>
+    <keyword type="struct" name="EekSectionClass" link="eek-EekSection.html#EekSectionClass"/>
+    <keyword type="struct" name="EekSectionPrivate" link="eek-EekSection.html#EekSectionPrivate"/>
+    <keyword type="struct" name="EekSection" link="eek-EekSection.html#EekSection"/>
+    <keyword type="function" name="eek_section_set_angle ()" link="eek-EekSection.html#eek-section-set-angle"/>
+    <keyword type="function" name="eek_section_get_angle ()" link="eek-EekSection.html#eek-section-get-angle"/>
+    <keyword type="function" name="eek_section_get_n_rows ()" link="eek-EekSection.html#eek-section-get-n-rows"/>
+    <keyword type="function" name="eek_section_add_row ()" link="eek-EekSection.html#eek-section-add-row"/>
+    <keyword type="function" name="eek_section_get_row ()" link="eek-EekSection.html#eek-section-get-row"/>
+    <keyword type="function" name="eek_section_create_key ()" link="eek-EekSection.html#eek-section-create-key"/>
+    <keyword type="function" name="eek_section_find_key_by_keycode ()" link="eek-EekSection.html#eek-section-find-key-by-keycode"/>
+    <keyword type="struct" name="EekKeyClass" link="eek-EekKey.html#EekKeyClass"/>
+    <keyword type="struct" name="EekKeyPrivate" link="eek-EekKey.html#EekKeyPrivate"/>
+    <keyword type="struct" name="EekKey" link="eek-EekKey.html#EekKey"/>
+    <keyword type="function" name="eek_key_set_keycode ()" link="eek-EekKey.html#eek-key-set-keycode"/>
+    <keyword type="function" name="eek_key_get_keycode ()" link="eek-EekKey.html#eek-key-get-keycode"/>
+    <keyword type="function" name="eek_key_set_keysyms ()" link="eek-EekKey.html#eek-key-set-keysyms"/>
+    <keyword type="function" name="eek_key_get_keysyms ()" link="eek-EekKey.html#eek-key-get-keysyms"/>
+    <keyword type="function" name="eek_key_get_keysym ()" link="eek-EekKey.html#eek-key-get-keysym"/>
+    <keyword type="function" name="eek_key_set_index ()" link="eek-EekKey.html#eek-key-set-index"/>
+    <keyword type="function" name="eek_key_get_index ()" link="eek-EekKey.html#eek-key-get-index"/>
+    <keyword type="function" name="eek_key_set_outline ()" link="eek-EekKey.html#eek-key-set-outline"/>
+    <keyword type="function" name="eek_key_get_outline ()" link="eek-EekKey.html#eek-key-get-outline"/>
+    <keyword type="function" name="eek_key_set_keysym_index ()" link="eek-EekKey.html#eek-key-set-keysym-index"/>
+    <keyword type="function" name="eek_key_get_keysym_index ()" link="eek-EekKey.html#eek-key-get-keysym-index"/>
+    <keyword type="struct" name="EekLayoutIface" link="eek-EekLayout.html#EekLayoutIface"/>
+    <keyword type="struct" name="EekLayout" link="eek-EekLayout.html#EekLayout"/>
+    <keyword type="function" name="eek_layout_apply ()" link="eek-EekLayout.html#eek-layout-apply"/>
+    <keyword type="function" name="eek_layout_get_group ()" link="eek-EekLayout.html#eek-layout-get-group"/>
+    <keyword type="enum" name="enum EekOrientation" link="eek-eek-types.html#EekOrientation"/>
+    <keyword type="struct" name="EekKeysymMatrix" link="eek-eek-types.html#EekKeysymMatrix"/>
+    <keyword type="macro" name="EEK_TYPE_KEYSYM_MATRIX" link="eek-eek-types.html#EEK-TYPE-KEYSYM-MATRIX:CAPS"/>
+    <keyword type="function" name="eek_keysym_matrix_get_type ()" link="eek-eek-types.html#eek-keysym-matrix-get-type"/>
+    <keyword type="struct" name="EekPoint" link="eek-eek-types.html#EekPoint"/>
+    <keyword type="macro" name="EEK_TYPE_POINT" link="eek-eek-types.html#EEK-TYPE-POINT:CAPS"/>
+    <keyword type="function" name="eek_point_get_type ()" link="eek-eek-types.html#eek-point-get-type"/>
+    <keyword type="struct" name="EekBounds" link="eek-eek-types.html#EekBounds"/>
+    <keyword type="macro" name="EEK_TYPE_BOUNDS" link="eek-eek-types.html#EEK-TYPE-BOUNDS:CAPS"/>
+    <keyword type="function" name="eek_bounds_get_type ()" link="eek-eek-types.html#eek-bounds-get-type"/>
+    <keyword type="function" name="eek_bounds_long_side ()" link="eek-eek-types.html#eek-bounds-long-side"/>
+    <keyword type="struct" name="EekOutline" link="eek-eek-types.html#EekOutline"/>
+    <keyword type="macro" name="EEK_TYPE_OUTLINE" link="eek-eek-types.html#EEK-TYPE-OUTLINE:CAPS"/>
+    <keyword type="function" name="eek_outline_get_type ()" link="eek-eek-types.html#eek-outline-get-type"/>
+    <keyword type="macro" name="EEK_INVALID_KEYSYM" link="eek-eek-keysym.html#EEK-INVALID-KEYSYM:CAPS"/>
+    <keyword type="macro" name="EEK_INVALID_KEYCODE" link="eek-eek-keysym.html#EEK-INVALID-KEYCODE:CAPS"/>
+    <keyword type="enum" name="enum EekKeysymCategory" link="eek-eek-keysym.html#EekKeysymCategory"/>
+    <keyword type="function" name="eek_keysym_to_string ()" link="eek-eek-keysym.html#eek-keysym-to-string"/>
+    <keyword type="function" name="eek_keysym_get_category ()" link="eek-eek-keysym.html#eek-keysym-get-category"/>
+    <keyword type="struct" name="EekClutterKeyboard" link="eek-EekClutterKeyboard.html#EekClutterKeyboard"/>
+    <keyword type="struct" name="EekClutterKeyboardClass" link="eek-EekClutterKeyboard.html#EekClutterKeyboardClass"/>
+    <keyword type="struct" name="EekClutterKeyboardPrivate" link="eek-EekClutterKeyboard.html#EekClutterKeyboardPrivate"/>
+    <keyword type="function" name="eek_clutter_keyboard_new ()" link="eek-EekClutterKeyboard.html#eek-clutter-keyboard-new"/>
+    <keyword type="function" name="eek_clutter_keyboard_get_actor ()" link="eek-EekClutterKeyboard.html#eek-clutter-keyboard-get-actor"/>
+    <keyword type="struct" name="EekGtkKeyboard" link="eek-EekGtkKeyboard.html#EekGtkKeyboard"/>
+    <keyword type="struct" name="EekGtkKeyboardClass" link="eek-EekGtkKeyboard.html#EekGtkKeyboardClass"/>
+    <keyword type="struct" name="EekGtkKeyboardPrivate" link="eek-EekGtkKeyboard.html#EekGtkKeyboardPrivate"/>
+    <keyword type="function" name="eek_gtk_keyboard_new ()" link="eek-EekGtkKeyboard.html#eek-gtk-keyboard-new"/>
+    <keyword type="function" name="eek_gtk_keyboard_get_widget ()" link="eek-EekGtkKeyboard.html#eek-gtk-keyboard-get-widget"/>
+    <keyword type="struct" name="EekXklLayout" link="eek-EekXklLayout.html#EekXklLayout"/>
+    <keyword type="struct" name="EekXklLayoutClass" link="eek-EekXklLayout.html#EekXklLayoutClass"/>
+    <keyword type="struct" name="EekXklLayoutPrivate" link="eek-EekXklLayout.html#EekXklLayoutPrivate"/>
+    <keyword type="function" name="eek_xkl_layout_new ()" link="eek-EekXklLayout.html#eek-xkl-layout-new"/>
+    <keyword type="function" name="eek_xkl_layout_set_config ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-config"/>
+    <keyword type="function" name="eek_xkl_layout_set_model ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-model"/>
+    <keyword type="function" name="eek_xkl_layout_set_layouts ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-layouts"/>
+    <keyword type="function" name="eek_xkl_layout_set_variants ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-variants"/>
+    <keyword type="function" name="eek_xkl_layout_set_options ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-options"/>
+    <keyword type="function" name="eek_xkl_layout_get_model ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-model"/>
+    <keyword type="function" name="eek_xkl_layout_get_layouts ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-layouts"/>
+    <keyword type="function" name="eek_xkl_layout_get_variants ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-variants"/>
+    <keyword type="function" name="eek_xkl_layout_get_options ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-options"/>
+    <keyword type="struct" name="EekXkbLayout" link="eek-EekXkbLayout.html#EekXkbLayout"/>
+    <keyword type="struct" name="EekXkbLayoutClass" link="eek-EekXkbLayout.html#EekXkbLayoutClass"/>
+    <keyword type="struct" name="EekXkbLayoutPrivate" link="eek-EekXkbLayout.html#EekXkbLayoutPrivate"/>
+    <keyword type="function" name="eek_xkb_layout_new ()" link="eek-EekXkbLayout.html#eek-xkb-layout-new"/>
+    <keyword type="function" name="eek_xkb_layout_set_names ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-names"/>
+    <keyword type="function" name="eek_xkb_layout_set_keycodes ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-keycodes"/>
+    <keyword type="function" name="eek_xkb_layout_set_geometry ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-geometry"/>
+    <keyword type="function" name="eek_xkb_layout_set_symbols ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-symbols"/>
+    <keyword type="function" name="eek_xkb_layout_get_keycodes ()" link="eek-EekXkbLayout.html#eek-xkb-layout-get-keycodes"/>
+    <keyword type="function" name="eek_xkb_layout_get_geometry ()" link="eek-EekXkbLayout.html#eek-xkb-layout-get-geometry"/>
+    <keyword type="function" name="eek_xkb_layout_get_symbols ()" link="eek-EekXkbLayout.html#eek-xkb-layout-get-symbols"/>
+    <keyword type="constant" name="EEK_ORIENTATION_VERTICAL" link="eek-eek-types.html#EEK-ORIENTATION-VERTICAL:CAPS"/>
+    <keyword type="constant" name="EEK_ORIENTATION_HORIZONTAL" link="eek-eek-types.html#EEK-ORIENTATION-HORIZONTAL:CAPS"/>
+    <keyword type="constant" name="EEK_ORIENTATION_INVALID" link="eek-eek-types.html#EEK-ORIENTATION-INVALID:CAPS"/>
+    <keyword type="constant" name="EEK_KEYSYM_CATEGORY_LETTER" link="eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-LETTER:CAPS"/>
+    <keyword type="constant" name="EEK_KEYSYM_CATEGORY_FUNCTION" link="eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-FUNCTION:CAPS"/>
+    <keyword type="constant" name="EEK_KEYSYM_CATEGORY_KEYNAME" link="eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-KEYNAME:CAPS"/>
+    <keyword type="constant" name="EEK_KEYSYM_CATEGORY_UNKNOWN" link="eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="EEK_KEYSYM_CATEGORY_LAST" link="eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-LAST:CAPS"/>
+  </functions>
+</book>

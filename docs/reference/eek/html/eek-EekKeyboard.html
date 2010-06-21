@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekKeyboard</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekContainer.html" title="EekContainer">
+<link rel="next" href="eek-EekSection.html" title="EekSection">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekContainer.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-EekSection.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekKeyboard.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekKeyboard.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekKeyboard">
+<a name="eek-EekKeyboard"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekKeyboard.top_of_page"></a>EekKeyboard</span></h2>
+<p>EekKeyboard — Base class of a keyboard</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekKeyboard.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekKeyboard.html#EekKeyboardClass" title="EekKeyboardClass">EekKeyboardClass</a>;
+                    <a class="link" href="eek-EekKeyboard.html#EekKeyboardPrivate" title="EekKeyboardPrivate">EekKeyboardPrivate</a>;
+                    <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard">EekKeyboard</a>;
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKeyboard.html#eek-keyboard-set-keysym-index" title="eek_keyboard_set_keysym_index ()">eek_keyboard_set_keysym_index</a>       (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKeyboard.html#eek-keyboard-get-keysym-index" title="eek_keyboard_get_keysym_index ()">eek_keyboard_get_keysym_index</a>       (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *level</code></em>);
+<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="returnvalue">EekSection</span></a> *        <a class="link" href="eek-EekKeyboard.html#eek-keyboard-create-section" title="eek_keyboard_create_section ()">eek_keyboard_create_section</a>         (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKeyboard.html#eek-keyboard-set-layout" title="eek_keyboard_set_layout ()">eek_keyboard_set_layout</a>             (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKeyboard.html#eek-keyboard-realize" title="eek_keyboard_realize ()">eek_keyboard_realize</a>                (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);
+<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            <a class="link" href="eek-EekKeyboard.html#eek-keyboard-find-key-by-keycode" title="eek_keyboard_find_key_by_keycode ()">eek_keyboard_find_key_by_keycode</a>    (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekKeyboard.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekKeyboard.html#EekKeyboardClass" title="EekKeyboardClass"><span class="type">EekKeyboardClass</span></a> class represents a keyboard, which consists
+of one or more sections of the <a class="link" href="eek-EekSection.html#EekSectionClass" title="EekSectionClass"><span class="type">EekSectionClass</span></a> class.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekKeyboard.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekKeyboardClass">
+<a name="EekKeyboardClass"></a><h3>EekKeyboardClass</h3>
+<pre class="programlisting">typedef struct {
+    void        (* set_keysym_index)    (EekKeyboard *self,
+                                         gint         group,
+                                         gint         level);
+    void        (* get_keysym_index)    (EekKeyboard *self,
+                                         gint        *group,
+                                         gint        *level);
+
+    EekSection *(* create_section)      (EekKeyboard *self);
+
+    void        (* set_layout)          (EekKeyboard *self,
+                                         EekLayout   *layout);
+    EekKey     *(* find_key_by_keycode) (EekKeyboard *self,
+                                         guint        keycode);
+    void        (* realize)             (EekKeyboard *self);
+} EekKeyboardClass;
+</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.set-keysym-index"></a>set_keysym_index</code></em> ()</span></p></td>
+<td>virtual function for setting group and level of
+the entire keyboard
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.get-keysym-index"></a>get_keysym_index</code></em> ()</span></p></td>
+<td>virtual function for getting group and level of
+the entire keyboard
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.create-section"></a>create_section</code></em> ()</span></p></td>
+<td>virtual function for creating a section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.set-layout"></a>set_layout</code></em> ()</span></p></td>
+<td>virtual function for setting layout engine
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.find-key-by-keycode"></a>find_key_by_keycode</code></em> ()</span></p></td>
+<td>virtual function for finding a key in the
+keyboard by keycode
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyboardClass.realize"></a>realize</code></em> ()</span></p></td>
+<td>virtual function for applying a layout to the keyboard
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekKeyboardPrivate">
+<a name="EekKeyboardPrivate"></a><h3>EekKeyboardPrivate</h3>
+<pre class="programlisting">typedef struct _EekKeyboardPrivate EekKeyboardPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekKeyboard">
+<a name="EekKeyboard"></a><h3>EekKeyboard</h3>
+<pre class="programlisting">typedef struct {
+} EekKeyboard;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_set_keysym_index ()">
+<a name="eek-keyboard-set-keysym-index"></a><h3>eek_keyboard_set_keysym_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_keyboard_set_keysym_index       (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>);</pre>
+<p>
+Select a cell of the symbol matrix of each key on <em class="parameter"><code>keyboard</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>group</code></em> :</span></p></td>
+<td>row index of the symbol matrix of keys on <em class="parameter"><code>keyboard</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>level</code></em> :</span></p></td>
+<td>column index of the symbol matrix of keys on <em class="parameter"><code>keyboard</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_get_keysym_index ()">
+<a name="eek-keyboard-get-keysym-index"></a><h3>eek_keyboard_get_keysym_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_keyboard_get_keysym_index       (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *level</code></em>);</pre>
+<p>
+Get the current cell position of the symbol matrix of each key on <em class="parameter"><code>keyboard</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>group</code></em> :</span></p></td>
+<td>a pointer where row index of the symbol matrix of keys on
+<em class="parameter"><code>keyboard</code></em> will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>level</code></em> :</span></p></td>
+<td>a pointer where column index of the symbol matrix of keys
+on <em class="parameter"><code>keyboard</code></em> will be stored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_create_section ()">
+<a name="eek-keyboard-create-section"></a><h3>eek_keyboard_create_section ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="returnvalue">EekSection</span></a> *        eek_keyboard_create_section         (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);</pre>
+<p>
+Create an <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> instance and append it to <em class="parameter"><code>keyboard</code></em>.  This
+function is rarely called by application but called by <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
+implementation.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_set_layout ()">
+<a name="eek-keyboard-set-layout"></a><h3>eek_keyboard_set_layout ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_keyboard_set_layout             (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> *layout</code></em>);</pre>
+<p>
+Set the layout of <em class="parameter"><code>keyboard</code></em> to <em class="parameter"><code>layout</code></em>.  This actually turns
+<em class="parameter"><code>keyboard</code></em> to be ready to be drawn on the screen.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_realize ()">
+<a name="eek-keyboard-realize"></a><h3>eek_keyboard_realize ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_keyboard_realize                (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_keyboard_find_key_by_keycode ()">
+<a name="eek-keyboard-find-key-by-keycode"></a><h3>eek_keyboard_find_key_by_keycode ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="returnvalue">EekKey</span></a> *            eek_keyboard_find_key_by_keycode    (<em class="parameter"><code><a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> *keyboard</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);</pre>
+<p>
+Find an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> whose keycode is <em class="parameter"><code>keycode</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keyboard</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keycode</code></em> :</span></p></td>
+<td>a keycode
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> or NULL (if not found)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" title="See Also">
+<a name="eek-EekKeyboard.see-also"></a><h2>See Also</h2>
+<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

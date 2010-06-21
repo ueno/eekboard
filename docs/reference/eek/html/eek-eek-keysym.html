@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>eek-keysym</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-eek-types.html" title="eek-types">
+<link rel="next" href="ch02.html" title="Clutter Keyboard">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-eek-types.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="ch02.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-eek-keysym.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-eek-keysym.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="eek-keysym">
+<a name="eek-eek-keysym"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-eek-keysym.top_of_page"></a>eek-keysym</span></h2>
+<p>eek-keysym — Keysym conversion utilities</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-eek-keysym.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">#define             <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYSYM:CAPS" title="EEK_INVALID_KEYSYM">EEK_INVALID_KEYSYM</a>
+#define             <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYCODE:CAPS" title="EEK_INVALID_KEYCODE">EEK_INVALID_KEYCODE</a>
+enum                <a class="link" href="eek-eek-keysym.html#EekKeysymCategory" title="enum EekKeysymCategory">EekKeysymCategory</a>;
+const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="eek-eek-keysym.html#eek-keysym-to-string" title="eek_keysym_to_string ()">eek_keysym_to_string</a>                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);
+<a class="link" href="eek-eek-keysym.html#EekKeysymCategory" title="enum EekKeysymCategory"><span class="returnvalue">EekKeysymCategory</span></a>   <a class="link" href="eek-eek-keysym.html#eek-keysym-get-category" title="eek_keysym_get_category ()">eek_keysym_get_category</a>             (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-eek-keysym.description"></a><h2>Description</h2>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-eek-keysym.details"></a><h2>Details</h2>
+<div class="refsect2" title="EEK_INVALID_KEYSYM">
+<a name="EEK-INVALID-KEYSYM:CAPS"></a><h3>EEK_INVALID_KEYSYM</h3>
+<pre class="programlisting">#define EEK_INVALID_KEYSYM ((guint)(-1))
+</pre>
+<p>
+Pseudo keysym used for error reporting.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="EEK_INVALID_KEYCODE">
+<a name="EEK-INVALID-KEYCODE:CAPS"></a><h3>EEK_INVALID_KEYCODE</h3>
+<pre class="programlisting">#define EEK_INVALID_KEYCODE ((guint)(-1))
+</pre>
+<p>
+Pseudo keycode used for error reporting.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="enum EekKeysymCategory">
+<a name="EekKeysymCategory"></a><h3>enum EekKeysymCategory</h3>
+<pre class="programlisting">typedef enum {
+    EEK_KEYSYM_CATEGORY_LETTER,
+    EEK_KEYSYM_CATEGORY_FUNCTION,
+    EEK_KEYSYM_CATEGORY_KEYNAME,
+    EEK_KEYSYM_CATEGORY_UNKNOWN,
+    EEK_KEYSYM_CATEGORY_LAST = EEK_KEYSYM_CATEGORY_UNKNOWN
+} EekKeysymCategory;
+</pre>
+<p>
+Category of the key symbols.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="EEK-KEYSYM-CATEGORY-LETTER:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_LETTER</code></span></p></td>
+<td>the symbol represents an alphabet letter
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-KEYSYM-CATEGORY-FUNCTION:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_FUNCTION</code></span></p></td>
+<td>the symbol represents a function
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-KEYSYM-CATEGORY-KEYNAME:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_KEYNAME</code></span></p></td>
+<td>the symbol does not have meaning but
+have a name
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-KEYSYM-CATEGORY-UNKNOWN:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_UNKNOWN</code></span></p></td>
+<td>used for error reporting
+</td>
+</tr>
+<tr>
+<td><p><a name="EEK-KEYSYM-CATEGORY-LAST:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_LAST</code></span></p></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keysym_to_string ()">
+<a name="eek-keysym-to-string"></a><h3>eek_keysym_to_string ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       eek_keysym_to_string                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);</pre>
+<p>
+Return a string representation of <em class="parameter"><code>keysym</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>keysym</code></em> :</span></p></td>
+<td>keysym ID
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_keysym_get_category ()">
+<a name="eek-keysym-get-category"></a><h3>eek_keysym_get_category ()</h3>
+<pre class="programlisting"><a class="link" href="eek-eek-keysym.html#EekKeysymCategory" title="enum EekKeysymCategory"><span class="returnvalue">EekKeysymCategory</span></a>   eek_keysym_get_category             (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);</pre>
+<p>
+Return a string representation of <em class="parameter"><code>keysym</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>keysym</code></em> :</span></p></td>
+<td>keysym ID
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

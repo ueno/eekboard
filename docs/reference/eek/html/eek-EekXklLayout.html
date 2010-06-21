@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekXklLayout</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch04.html" title="Libxklavier Layout Engine">
+<link rel="prev" href="ch04.html" title="Libxklavier Layout Engine">
+<link rel="next" href="ch05.html" title="XKB Layout Engine">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="ch04.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch04.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="ch05.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekXklLayout.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekXklLayout.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekXklLayout">
+<a name="eek-EekXklLayout"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekXklLayout.top_of_page"></a>EekXklLayout</span></h2>
+<p>EekXklLayout — Layout engine using Libxklavier configuration</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekXklLayout.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout">EekXklLayout</a>;
+                    <a class="link" href="eek-EekXklLayout.html#EekXklLayoutClass" title="EekXklLayoutClass">EekXklLayoutClass</a>;
+                    <a class="link" href="eek-EekXklLayout.html#EekXklLayoutPrivate" title="EekXklLayoutPrivate">EekXklLayoutPrivate</a>;
+<a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="returnvalue">EekLayout</span></a> *         <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-new" title="eek_xkl_layout_new ()">eek_xkl_layout_new</a>                  (<em class="parameter"><code><span class="type">void</span></code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-set-config" title="eek_xkl_layout_set_config ()">eek_xkl_layout_set_config</a>           (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../libxklavier/XklConfigRec.html"><span class="type">XklConfigRec</span></a> *config</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-set-model" title="eek_xkl_layout_set_model ()">eek_xkl_layout_set_model</a>            (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *model</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-set-layouts" title="eek_xkl_layout_set_layouts ()">eek_xkl_layout_set_layouts</a>          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **layouts</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-set-variants" title="eek_xkl_layout_set_variants ()">eek_xkl_layout_set_variants</a>         (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **variants</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-set-options" title="eek_xkl_layout_set_options ()">eek_xkl_layout_set_options</a>          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **options</code></em>);
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-get-model" title="eek_xkl_layout_get_model ()">eek_xkl_layout_get_model</a>            (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-get-layouts" title="eek_xkl_layout_get_layouts ()">eek_xkl_layout_get_layouts</a>          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-get-variants" title="eek_xkl_layout_get_variants ()">eek_xkl_layout_get_variants</a>         (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-get-options" title="eek_xkl_layout_get_options ()">eek_xkl_layout_get_options</a>          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekXklLayout.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> is a simple wrapper around <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> class
+to use Libxklavier configuration.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekXklLayout.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekXklLayout">
+<a name="EekXklLayout"></a><h3>EekXklLayout</h3>
+<pre class="programlisting">typedef struct {
+} EekXklLayout;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekXklLayoutClass">
+<a name="EekXklLayoutClass"></a><h3>EekXklLayoutClass</h3>
+<pre class="programlisting">typedef struct {
+} EekXklLayoutClass;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekXklLayoutPrivate">
+<a name="EekXklLayoutPrivate"></a><h3>EekXklLayoutPrivate</h3>
+<pre class="programlisting">typedef struct _EekXklLayoutPrivate EekXklLayoutPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_new ()">
+<a name="eek-xkl-layout-new"></a><h3>eek_xkl_layout_new ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="returnvalue">EekLayout</span></a> *         eek_xkl_layout_new                  (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Create a new <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_set_config ()">
+<a name="eek-xkl-layout-set-config"></a><h3>eek_xkl_layout_set_config ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkl_layout_set_config           (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../libxklavier/XklConfigRec.html"><span class="type">XklConfigRec</span></a> *config</code></em>);</pre>
+<p>
+Reconfigure <em class="parameter"><code>layout</code></em> with <em class="parameter"><code>config</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>config</code></em> :</span></p></td>
+<td>Libxklavier configuration
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_set_model ()">
+<a name="eek-xkl-layout-set-model"></a><h3>eek_xkl_layout_set_model ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkl_layout_set_model            (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *model</code></em>);</pre>
+<p>
+Set the model name of <em class="parameter"><code>layout</code></em> configuration (in the Libxklavier terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td>model name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_set_layouts ()">
+<a name="eek-xkl-layout-set-layouts"></a><h3>eek_xkl_layout_set_layouts ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkl_layout_set_layouts          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **layouts</code></em>);</pre>
+<p>
+Set the layout names of <em class="parameter"><code>layout</code></em> (in the Libxklavier terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layouts</code></em> :</span></p></td>
+<td>layout names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_set_variants ()">
+<a name="eek-xkl-layout-set-variants"></a><h3>eek_xkl_layout_set_variants ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkl_layout_set_variants         (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **variants</code></em>);</pre>
+<p>
+Set the variant names of <em class="parameter"><code>layout</code></em> (in the Libxklavier terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>variants</code></em> :</span></p></td>
+<td>variant names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_set_options ()">
+<a name="eek-xkl-layout-set-options"></a><h3>eek_xkl_layout_set_options ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkl_layout_set_options          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **options</code></em>);</pre>
+<p>
+Set the option names of <em class="parameter"><code>layout</code></em> (in the Libxklavier terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>options</code></em> :</span></p></td>
+<td>option names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_get_model ()">
+<a name="eek-xkl-layout-get-model"></a><h3>eek_xkl_layout_get_model ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             eek_xkl_layout_get_model            (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the model name of <em class="parameter"><code>layout</code></em> configuration (in the Libxklavier terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_get_layouts ()">
+<a name="eek-xkl-layout-get-layouts"></a><h3>eek_xkl_layout_get_layouts ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            eek_xkl_layout_get_layouts          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the layout names of <em class="parameter"><code>layout</code></em> configuration (in the Libxklavier
+terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_get_variants ()">
+<a name="eek-xkl-layout-get-variants"></a><h3>eek_xkl_layout_get_variants ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            eek_xkl_layout_get_variants         (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the variant names of <em class="parameter"><code>layout</code></em> configuration (in the Libxklavier
+terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkl_layout_get_options ()">
+<a name="eek-xkl-layout-get-options"></a><h3>eek_xkl_layout_get_options ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            eek_xkl_layout_get_options          (<em class="parameter"><code><a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the option names of <em class="parameter"><code>layout</code></em> configuration (in the Libxklavier
+terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXklLayout.html#EekXklLayout" title="EekXklLayout"><span class="type">EekXklLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

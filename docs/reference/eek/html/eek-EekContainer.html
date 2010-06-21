@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekContainer</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekElement.html" title="EekElement">
+<link rel="next" href="eek-EekKeyboard.html" title="EekKeyboard">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekElement.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-EekKeyboard.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekContainer.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekContainer.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekContainer">
+<a name="eek-EekContainer"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekContainer.top_of_page"></a>EekContainer</span></h2>
+<p>EekContainer — Base class of a keyboard container</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekContainer.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekContainer.html#EekContainerClass" title="EekContainerClass">EekContainerClass</a>;
+                    <a class="link" href="eek-EekContainer.html#EekContainerPrivate" title="EekContainerPrivate">EekContainerPrivate</a>;
+<span class="returnvalue">void</span>                (<a class="link" href="eek-EekContainer.html#EekCallback" title="EekCallback ()">*EekCallback</a>)                      (<em class="parameter"><code><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> *element</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+<a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                (<a class="link" href="eek-EekContainer.html#EekCompareFunc" title="EekCompareFunc ()">*EekCompareFunc</a>)                   (<em class="parameter"><code><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> *element</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+                    <a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer">EekContainer</a>;
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekContainer.html#eek-container-foreach-child" title="eek_container_foreach_child ()">eek_container_foreach_child</a>         (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekCallback" title="EekCallback ()"><span class="type">EekCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+<a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="returnvalue">EekElement</span></a> *        <a class="link" href="eek-EekContainer.html#eek-container-find" title="eek_container_find ()">eek_container_find</a>                  (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekCompareFunc" title="EekCompareFunc ()"><span class="type">EekCompareFunc</span></a> func</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+<a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="returnvalue">EekElement</span></a> *        <a class="link" href="eek-EekContainer.html#eek-container-find-by-position" title="eek_container_find_by_position ()">eek_container_find_by_position</a>      (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> x</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> y</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekContainer.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekContainer.html#EekContainerClass" title="EekContainerClass"><span class="type">EekContainerClass</span></a> class represents a keyboard container, which
+shall be used to implement <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> and <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekContainer.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekContainerClass">
+<a name="EekContainerClass"></a><h3>EekContainerClass</h3>
+<pre class="programlisting">typedef struct {
+    void        (* foreach_child)    (EekContainer  *self,
+                                      EekCallback    callback,
+                                      gpointer       user_data);
+    EekElement *(* find)             (EekContainer  *self,
+                                      EekCompareFunc func,
+                                      gpointer       user_data);
+
+    /* signals */
+    void        (* child_added)      (EekContainer  *self,
+                                      EekElement    *element);
+    void        (* child_removed)    (EekContainer  *self,
+                                      EekElement    *element);
+} EekContainerClass;
+</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekContainerClass.foreach-child"></a>foreach_child</code></em> ()</span></p></td>
+<td>virtual function for iterating over the container's children
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekContainerClass.find"></a>find</code></em> ()</span></p></td>
+<td>virtual function for looking up a child
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekContainerClass.child-added"></a>child_added</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"child-added"</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekContainerClass.child-removed"></a>child_removed</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"child-added"</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekContainerPrivate">
+<a name="EekContainerPrivate"></a><h3>EekContainerPrivate</h3>
+<pre class="programlisting">typedef struct _EekContainerPrivate EekContainerPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekCallback ()">
+<a name="EekCallback"></a><h3>EekCallback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*EekCallback)                      (<em class="parameter"><code><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> *element</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekCompareFunc ()">
+<a name="EekCompareFunc"></a><h3>EekCompareFunc ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>                (*EekCompareFunc)                   (<em class="parameter"><code><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> *element</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekContainer">
+<a name="EekContainer"></a><h3>EekContainer</h3>
+<pre class="programlisting">typedef struct {
+} EekContainer;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_container_foreach_child ()">
+<a name="eek-container-foreach-child"></a><h3>eek_container_foreach_child ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_container_foreach_child         (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekCallback" title="EekCallback ()"><span class="type">EekCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+<p>
+Enumerate children of <em class="parameter"><code>container</code></em> and run <em class="parameter"><code>callback</code></em> with each child.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>container</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekContainer.html#EekCallback" title="EekCallback ()"><span class="type">EekCallback</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>additional data passed to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_container_find ()">
+<a name="eek-container-find"></a><h3>eek_container_find ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="returnvalue">EekElement</span></a> *        eek_container_find                  (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekCompareFunc" title="EekCompareFunc ()"><span class="type">EekCompareFunc</span></a> func</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+<p>
+Find a child which matches the criteria supplied as <em class="parameter"><code>func</code></em>, in <em class="parameter"><code>container</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>container</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td>function to be used to compare two children
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>additional data passed to <em class="parameter"><code>func</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> or NULL on failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_container_find_by_position ()">
+<a name="eek-container-find-by-position"></a><h3>eek_container_find_by_position ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="returnvalue">EekElement</span></a> *        eek_container_find_by_position      (<em class="parameter"><code><a class="link" href="eek-EekContainer.html#EekContainer" title="EekContainer"><span class="type">EekContainer</span></a> *container</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> x</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> y</code></em>);</pre>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

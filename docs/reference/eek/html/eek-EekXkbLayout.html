@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekXkbLayout</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch05.html" title="XKB Layout Engine">
+<link rel="prev" href="ch05.html" title="XKB Layout Engine">
+<link rel="next" href="object-tree.html" title="Object Hierarchy">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="ch05.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch05.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="object-tree.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekXkbLayout.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekXkbLayout.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekXkbLayout">
+<a name="eek-EekXkbLayout"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekXkbLayout.top_of_page"></a>EekXkbLayout</span></h2>
+<p>EekXkbLayout — Layout engine using XKB configuration</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekXkbLayout.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout">EekXkbLayout</a>;
+                    <a class="link" href="eek-EekXkbLayout.html#EekXkbLayoutClass" title="EekXkbLayoutClass">EekXkbLayoutClass</a>;
+                    <a class="link" href="eek-EekXkbLayout.html#EekXkbLayoutPrivate" title="EekXkbLayoutPrivate">EekXkbLayoutPrivate</a>;
+<a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="returnvalue">EekLayout</span></a> *         <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-new" title="eek_xkb_layout_new ()">eek_xkb_layout_new</a>                  (<em class="parameter"><code><span class="type">void</span></code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-names" title="eek_xkb_layout_set_names ()">eek_xkb_layout_set_names</a>            (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><span class="type">XkbComponentNamesRec</span> *names</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-keycodes" title="eek_xkb_layout_set_keycodes ()">eek_xkb_layout_set_keycodes</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keycodes</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-geometry" title="eek_xkb_layout_set_geometry ()">eek_xkb_layout_set_geometry</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *geometry</code></em>);
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-symbols" title="eek_xkb_layout_set_symbols ()">eek_xkb_layout_set_symbols</a>          (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *symbols</code></em>);
+const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-get-keycodes" title="eek_xkb_layout_get_keycodes ()">eek_xkb_layout_get_keycodes</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);
+const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-get-geometry" title="eek_xkb_layout_get_geometry ()">eek_xkb_layout_get_geometry</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);
+const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-get-symbols" title="eek_xkb_layout_get_symbols ()">eek_xkb_layout_get_symbols</a>          (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekXkbLayout.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> inherits <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> class and arranges keyboard
+elements using XKB.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekXkbLayout.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekXkbLayout">
+<a name="EekXkbLayout"></a><h3>EekXkbLayout</h3>
+<pre class="programlisting">typedef struct {
+} EekXkbLayout;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekXkbLayoutClass">
+<a name="EekXkbLayoutClass"></a><h3>EekXkbLayoutClass</h3>
+<pre class="programlisting">typedef struct {
+} EekXkbLayoutClass;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekXkbLayoutPrivate">
+<a name="EekXkbLayoutPrivate"></a><h3>EekXkbLayoutPrivate</h3>
+<pre class="programlisting">typedef struct _EekXkbLayoutPrivate EekXkbLayoutPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_new ()">
+<a name="eek-xkb-layout-new"></a><h3>eek_xkb_layout_new ()</h3>
+<pre class="programlisting"><a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="returnvalue">EekLayout</span></a> *         eek_xkb_layout_new                  (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Create a new <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_set_names ()">
+<a name="eek-xkb-layout-set-names"></a><h3>eek_xkb_layout_set_names ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkb_layout_set_names            (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code><span class="type">XkbComponentNamesRec</span> *names</code></em>);</pre>
+<p>
+Set the XKB component names to <em class="parameter"><code>layout</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>names</code></em> :</span></p></td>
+<td>XKB component names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_set_keycodes ()">
+<a name="eek-xkb-layout-set-keycodes"></a><h3>eek_xkb_layout_set_keycodes ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkb_layout_set_keycodes         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keycodes</code></em>);</pre>
+<p>
+Set the keycodes component (in the XKB terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keycodes</code></em> :</span></p></td>
+<td>component name for keycodes
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_set_geometry ()">
+<a name="eek-xkb-layout-set-geometry"></a><h3>eek_xkb_layout_set_geometry ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkb_layout_set_geometry         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *geometry</code></em>);</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>geometry</code></em> :</span></p></td>
+<td>component name for geometry
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_set_symbols ()">
+<a name="eek-xkb-layout-set-symbols"></a><h3>eek_xkb_layout_set_symbols ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkb_layout_set_symbols          (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
+                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *symbols</code></em>);</pre>
+<p>
+Set the symbols component (in the XKB terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>symbols</code></em> :</span></p></td>
+<td>component name for symbols
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the component name is successfully set, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_get_keycodes ()">
+<a name="eek-xkb-layout-get-keycodes"></a><h3>eek_xkb_layout_get_keycodes ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       eek_xkb_layout_get_keycodes         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the keycodes component name (in the XKB terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_get_geometry ()">
+<a name="eek-xkb-layout-get-geometry"></a><h3>eek_xkb_layout_get_geometry ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       eek_xkb_layout_get_geometry         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the geometry component name (in the XKB terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_xkb_layout_get_symbols ()">
+<a name="eek-xkb-layout-get-symbols"></a><h3>eek_xkb_layout_get_symbols ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       eek_xkb_layout_get_symbols          (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>);</pre>
+<p>
+Get the symbols component name (in the XKB terminology).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>layout</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>

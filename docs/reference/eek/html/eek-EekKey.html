@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EekKey</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="libeek Reference Manual">
+<link rel="up" href="ch01.html" title="Base Classes, Interfaces, and Utilities">
+<link rel="prev" href="eek-EekSection.html" title="EekSection">
+<link rel="next" href="eek-EekLayout.html" title="EekLayout">
+<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="eek-EekSection.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libeek Reference Manual</th>
+<td><a accesskey="n" href="eek-EekLayout.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#eek-EekKey.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#eek-EekKey.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry" title="EekKey">
+<a name="eek-EekKey"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="eek-EekKey.top_of_page"></a>EekKey</span></h2>
+<p>EekKey — Base class of a key</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="eek-EekKey.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">                    <a class="link" href="eek-EekKey.html#EekKeyClass" title="EekKeyClass">EekKeyClass</a>;
+                    <a class="link" href="eek-EekKey.html#EekKeyPrivate" title="EekKeyPrivate">EekKeyPrivate</a>;
+                    <a class="link" href="eek-EekKey.html#EekKey" title="EekKey">EekKey</a>;
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-set-keycode" title="eek_key_set_keycode ()">eek_key_set_keycode</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);
+<a href="../glib/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>               <a class="link" href="eek-EekKey.html#eek-key-get-keycode" title="eek_key_get_keycode ()">eek_key_get_keycode</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-set-keysyms" title="eek_key_set_keysyms ()">eek_key_set_keysyms</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *keysyms</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_groups</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_levels</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-get-keysyms" title="eek_key_get_keysyms ()">eek_key_get_keysyms</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> **keysyms</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_groups</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_levels</code></em>);
+<a href="../glib/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>               <a class="link" href="eek-EekKey.html#eek-key-get-keysym" title="eek_key_get_keysym ()">eek_key_get_keysym</a>                  (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-set-index" title="eek_key_set_index ()">eek_key_set_index</a>                   (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> row</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-get-index" title="eek_key_get_index ()">eek_key_get_index</a>                   (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *row</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-set-outline" title="eek_key_set_outline ()">eek_key_set_outline</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline"><span class="type">EekOutline</span></a> *outline</code></em>);
+<a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline"><span class="returnvalue">EekOutline</span></a> *        <a class="link" href="eek-EekKey.html#eek-key-get-outline" title="eek_key_get_outline ()">eek_key_get_outline</a>                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-set-keysym-index" title="eek_key_set_keysym_index ()">eek_key_set_keysym_index</a>            (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="eek-EekKey.html#eek-key-get-keysym-index" title="eek_key_get_keysym_index ()">eek_key_get_keysym_index</a>            (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *level</code></em>);
+</pre>
+</div>
+<div class="refsect1" title="Description">
+<a name="eek-EekKey.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="eek-EekKey.html#EekKeyClass" title="EekKeyClass"><span class="type">EekKeyClass</span></a> class represents a key.
+</p>
+</div>
+<div class="refsect1" title="Details">
+<a name="eek-EekKey.details"></a><h2>Details</h2>
+<div class="refsect2" title="EekKeyClass">
+<a name="EekKeyClass"></a><h3>EekKeyClass</h3>
+<pre class="programlisting">typedef struct {
+    void        (* set_keycode)      (EekKey     *self,
+                                      guint       keycode);
+    guint       (* get_keycode)      (EekKey     *self);
+    void        (* set_keysyms)      (EekKey     *self,
+                                      guint      *keysyms,
+                                      gint        num_groups,
+                                      gint        num_levels);
+    void        (* get_keysyms)      (EekKey     *self,
+                                      guint     **keysyms,
+                                      gint       *num_groups,
+                                      gint       *num_levels);
+    guint       (* get_keysym)       (EekKey     *self);
+
+    void        (* set_index)        (EekKey     *self,
+                                      gint        column,
+                                      gint        row);
+    void        (* get_index)        (EekKey     *self,
+                                      gint       *column,
+                                      gint       *row);
+
+    void        (* set_outline)      (EekKey     *self,
+                                      EekOutline *outline);
+    EekOutline *(* get_outline)      (EekKey     *self);
+
+    void        (* set_keysym_index) (EekKey     *self,
+                                      gint        group,
+                                      gint        level);
+    void        (* get_keysym_index) (EekKey     *self,
+                                      gint       *group,
+                                      gint       *level);
+
+    /* signals */
+    void        (* pressed)          (EekKey     *key);
+    void        (* released)         (EekKey     *key);
+} EekKeyClass;
+</pre>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.set-keycode"></a>set_keycode</code></em> ()</span></p></td>
+<td>virtual function for setting keycode of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-keycode"></a>get_keycode</code></em> ()</span></p></td>
+<td>virtual function for getting keycode of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.set-keysyms"></a>set_keysyms</code></em> ()</span></p></td>
+<td>virtual function for setting symbol matrix of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-keysyms"></a>get_keysyms</code></em> ()</span></p></td>
+<td>virtual function for getting symbol matrix of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-keysym"></a>get_keysym</code></em> ()</span></p></td>
+<td>virtual function for getting the current symbol of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.set-index"></a>set_index</code></em> ()</span></p></td>
+<td>virtual function for setting position of the key in the
+section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-index"></a>get_index</code></em> ()</span></p></td>
+<td>virtual function for getting position of the key in the
+section
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.set-outline"></a>set_outline</code></em> ()</span></p></td>
+<td>virtual function for setting outline shape of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-outline"></a>get_outline</code></em> ()</span></p></td>
+<td>virtual function for getting outline shape of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.set-keysym-index"></a>set_keysym_index</code></em> ()</span></p></td>
+<td>virtual function for setting group and level of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.get-keysym-index"></a>get_keysym_index</code></em> ()</span></p></td>
+<td>virtual function for getting group and level of the key
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.pressed"></a>pressed</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"pressed"</span> signal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="EekKeyClass.released"></a>released</code></em> ()</span></p></td>
+<td>class handler for <span class="type">"released"</span> signal
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="EekKeyPrivate">
+<a name="EekKeyPrivate"></a><h3>EekKeyPrivate</h3>
+<pre class="programlisting">typedef struct _EekKeyPrivate EekKeyPrivate;</pre>
+</div>
+<hr>
+<div class="refsect2" title="EekKey">
+<a name="EekKey"></a><h3>EekKey</h3>
+<pre class="programlisting">typedef struct {
+} EekKey;
+</pre>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_set_keycode ()">
+<a name="eek-key-set-keycode"></a><h3>eek_key_set_keycode ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_set_keycode                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keycode</code></em>);</pre>
+<p>
+Set keycode of <em class="parameter"><code>key</code></em> to <em class="parameter"><code>keycode</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keycode</code></em> :</span></p></td>
+<td>keycode
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_keycode ()">
+<a name="eek-key-get-keycode"></a><h3>eek_key_get_keycode ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>               eek_key_get_keycode                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);</pre>
+<p>
+Get keycode of <em class="parameter"><code>key</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> keycode or <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYCODE:CAPS" title="EEK_INVALID_KEYCODE"><code class="literal">EEK_INVALID_KEYCODE</code></a> on failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_set_keysyms ()">
+<a name="eek-key-set-keysyms"></a><h3>eek_key_set_keysyms ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_set_keysyms                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *keysyms</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_groups</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> num_levels</code></em>);</pre>
+<p>
+Set the symbol matrix of <em class="parameter"><code>key</code></em> to <em class="parameter"><code>keysyms</code></em>.  The length of <em class="parameter"><code>keysyms</code></em>
+is <em class="parameter"><code>num_groups</code></em> * <em class="parameter"><code>num_levels</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keysyms</code></em> :</span></p></td>
+<td>symbol matrix of <em class="parameter"><code>key</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_groups</code></em> :</span></p></td>
+<td>number of groups (rows) of <em class="parameter"><code>keysyms</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_levels</code></em> :</span></p></td>
+<td>number of levels (columns) of <em class="parameter"><code>keysyms</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_keysyms ()">
+<a name="eek-key-get-keysyms"></a><h3>eek_key_get_keysyms ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_get_keysyms                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> **keysyms</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_groups</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *num_levels</code></em>);</pre>
+<p>
+Get the symbol matrix of <em class="parameter"><code>key</code></em>.  If either <em class="parameter"><code>keysyms</code></em>, <em class="parameter"><code>num_groups</code></em>, or
+<em class="parameter"><code>num_levels</code></em> are NULL, this function does not try to get the value.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>keysyms</code></em> :</span></p></td>
+<td>pointer where symbol matrix of <em class="parameter"><code>key</code></em> will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_groups</code></em> :</span></p></td>
+<td>pointer where the number of groups (rows) of <em class="parameter"><code>keysyms</code></em>
+will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>num_levels</code></em> :</span></p></td>
+<td>pointer where the number of levels (columns) of
+<em class="parameter"><code>keysyms</code></em> will be stored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_keysym ()">
+<a name="eek-key-get-keysym"></a><h3>eek_key_get_keysym ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>               eek_key_get_keysym                  (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);</pre>
+<p>
+Get the current symbol of <em class="parameter"><code>key</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a symbol or <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYSYM:CAPS" title="EEK_INVALID_KEYSYM"><code class="literal">EEK_INVALID_KEYSYM</code></a> on failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_set_index ()">
+<a name="eek-key-set-index"></a><h3>eek_key_set_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_set_index                   (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> row</code></em>);</pre>
+<p>
+Set the index of <em class="parameter"><code>key</code></em> (i.e. logical location of <em class="parameter"><code>key</code></em> in
+<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>) to <em class="parameter"><code>column</code></em> and <em class="parameter"><code>row</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>column</code></em> :</span></p></td>
+<td>column index of <em class="parameter"><code>key</code></em> in <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>row</code></em> :</span></p></td>
+<td>row index of <em class="parameter"><code>key</code></em> in <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_index ()">
+<a name="eek-key-get-index"></a><h3>eek_key_get_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_get_index                   (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *column</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *row</code></em>);</pre>
+<p>
+Get the index of <em class="parameter"><code>key</code></em> (i.e. logical location of <em class="parameter"><code>key</code></em> in
+<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>column</code></em> :</span></p></td>
+<td>pointer where the column index of <em class="parameter"><code>key</code></em> in <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>row</code></em> :</span></p></td>
+<td>pointer where the row index of <em class="parameter"><code>key</code></em> in <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> will be stored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_set_outline ()">
+<a name="eek-key-set-outline"></a><h3>eek_key_set_outline ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_set_outline                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline"><span class="type">EekOutline</span></a> *outline</code></em>);</pre>
+<p>
+Set the outline shape of <em class="parameter"><code>key</code></em> to <em class="parameter"><code>outline</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>outline</code></em> :</span></p></td>
+<td>outline of <em class="parameter"><code>key</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_outline ()">
+<a name="eek-key-get-outline"></a><h3>eek_key_get_outline ()</h3>
+<pre class="programlisting"><a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline"><span class="returnvalue">EekOutline</span></a> *        eek_key_get_outline                 (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>);</pre>
+<p>
+Get the outline shape of <em class="parameter"><code>key</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an <a class="link" href="eek-eek-types.html#EekOutline" title="EekOutline"><span class="type">EekOutline</span></a> pointer or NULL on failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_set_keysym_index ()">
+<a name="eek-key-set-keysym-index"></a><h3>eek_key_set_keysym_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_set_keysym_index            (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>);</pre>
+<p>
+Set the current group and/or level index of <em class="parameter"><code>key</code></em> in its symbol
+matrix to <em class="parameter"><code>group</code></em> and <em class="parameter"><code>level</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>group</code></em> :</span></p></td>
+<td>group (row) index of <em class="parameter"><code>key</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>level</code></em> :</span></p></td>
+<td>level (column) index of <em class="parameter"><code>key</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="eek_key_get_keysym_index ()">
+<a name="eek-key-get-keysym-index"></a><h3>eek_key_get_keysym_index ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                eek_key_get_keysym_index            (<em class="parameter"><code><a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a> *key</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *group</code></em>,
+                                                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *level</code></em>);</pre>
+<p>
+Get the current group and/or level index of <em class="parameter"><code>key</code></em> in its symbol
+matrix.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>an <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>group</code></em> :</span></p></td>
+<td>pointer where group (row) index of <em class="parameter"><code>key</code></em> will be stored
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>level</code></em> :</span></p></td>
+<td>pointer where level (column) index of <em class="parameter"><code>key</code></em> will be stored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.14</div>
+</body>
+</html>
