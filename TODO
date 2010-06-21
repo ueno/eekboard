@@ -5,8 +5,6 @@
 -- add more tests
 
 - eekboard
--- xklavier "model" and "options" configuration
--- delay xklavier config menu creation
 -- a11y
 
 - libeek
