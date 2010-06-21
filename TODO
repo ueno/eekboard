@@ -6,7 +6,13 @@
 
 - eekboard
 -- a11y
+-- display current configuration
+-- add command line options
 
 - libeek
 -- matchbox-keyboard layout engine
 -- delay initialization of XKB and XKL layouts
+-- add eek_keyboard_find_by_position(), that takes account of section
+   rotation, in addition to eek_container_find_by_position()
+-- add mechanism to change appearances (colors?) of UI widgets
+   depending on modifier states
