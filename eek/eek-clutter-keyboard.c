@@ -223,7 +223,7 @@ on_clutter_stage_resize (GObject *object,
                          GParamSpec *param_spec,
                          gpointer user_data)
 {
-    ClutterActor *stage = object;
+    ClutterActor *stage = CLUTTER_ACTOR(object);
     EekClutterKeyboard *keyboard = user_data;
     GValue value = {0};
     gfloat width, height, scale;
