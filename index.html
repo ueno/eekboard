@@ -52,22 +52,39 @@
       a virtual keyboard for GNOME
     </div>
 
-    <p>eekboard is a virtual keyboard software package which ships with a
-standalone virtual keyboard application ("eekboard"), and a library to
-create keyboard-like UI ("libeek").</p>
+    <p>eekboard is a virtual keyboard software package which ships
+      with a standalone virtual keyboard application
+      (<samp>eekboard</samp>), and a library to create keyboard-like
+      UI (<samp>libeek</samp>).</p>
+    <h2>Screenshots</h2>
     <p><img src="docs/reference/eek/html/eekboard0.png"/></p>
     <h2>Documentation</h2>
     <p>
       <ul>
-	<li><a href="docs/reference/eek/html/index.html">Libeek Manual</a></li>
+	<li><a href="docs/reference/eek/html/index.html">libeek Reference Manual</a></li>
       </ul>
     </p>
+    <h2>Installation</h2>
+    	<p>
+	  <ul>
+	    <li>Requirements: GLib, GTK+, libxklavier, libfakekey</li>
+	    <li>Optional: Clutter, Clutter-Gtk
+	  </ul>
+	    <pre>
+  $ ./configure
+  $ make
+  $ sudo make install
+  $ eekboard
+	    </pre>
+	    *NOTE* some version combination of Clutter & Clutter-Gtk does not
+cooperate well. Try "EEKBOARD_DISABLE_CLUTTER=1 eekboard"
+	</p>
+	  
     <h2>Authors</h2>
-<p>Daiki Ueno (ueno@unixuser.org)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Daiki Ueno (ueno@unixuser.org)<br/>      </p>
-
-
+<p>eekboard is written by Daiki Ueno (ueno at unixuser.org)<br/>
+Cairo keyboard drawing functions are borrowed from the libgnomekbd
+library by Sergey V. Udaltsov &ltlsvu at gnome.org&gt;.  See the comments in
+eek/eek-drawing.c for detail.<br/></p>
     <h2>Download</h2>
     <p>
       You can download this project in either
