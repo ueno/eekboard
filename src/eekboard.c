@@ -325,13 +325,15 @@ on_changed (EekLayout *layout, gpointer user_data)
 {
     Eekboard *eekboard = user_data;
     GtkWidget *vbox, *widget;
+    GtkAllocation allocation;
 
+    gtk_widget_get_allocation (GTK_WIDGET (eekboard->widget), &allocation);
     vbox = gtk_widget_get_parent (eekboard->widget);
     /* gtk_widget_destroy() seems not usable for GtkClutterEmbed */
     gtk_container_remove (GTK_CONTAINER(vbox), eekboard->widget);
 
     g_object_unref (eekboard->keyboard);
-    widget = create_widget (eekboard, eekboard->width, eekboard->height);
+    widget = create_widget (eekboard, allocation.width, allocation.height);
     gtk_container_add (GTK_CONTAINER(vbox), widget);
     gtk_widget_show_all (vbox);
 }
