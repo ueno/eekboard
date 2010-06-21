@@ -128,7 +128,11 @@ eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
 	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libeek.pc libeek-clutter.pc libeek-xkb.pc libeek-xkl.pc
+pkgconfig_DATA = libeek.pc \
+	libeek-clutter.pc \
+	libeek-gtk.pc \
+	libeek-xkb.pc \
+	libeek-xkl.pc
 
 DISTCLEANFILES = \
 	eek-special-keysym-labels.h \

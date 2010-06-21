@@ -100,6 +100,7 @@ docs/reference/eek/Makefile
 po/Makefile.in
 eek/libeek.pc
 eek/libeek-clutter.pc
+eek/libeek-gtk.pc
 eek/libeek-xkb.pc
 eek/libeek-xkl.pc])
 AC_OUTPUT
