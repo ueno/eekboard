@@ -8,6 +8,7 @@
 -- a11y
 -- display current configuration
 -- add command line options
+-- notify user if there is no focused window
 
 - libeek
 -- matchbox-keyboard layout engine
