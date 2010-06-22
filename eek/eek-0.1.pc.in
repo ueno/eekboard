@@ -23,7 +23,7 @@ includedir=@includedir@
 
 Name: EEK
 Description: A Library to Create Keyboard-like UI
-URL: http://github.com/ueno/eekboard
+URL: http://ueno.github.com/eekboard/
 Version: @VERSION@
 Requires: gobject-2.0
 Libs: -L${libdir} -leek

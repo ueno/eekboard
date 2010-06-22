@@ -23,7 +23,7 @@ includedir=@includedir@
 
 Name: libeek-gtk
 Description: A Library to Create Keyboard-like UI (GTK Support)
-URL: http://github.com/ueno/eekboard
+URL: http://ueno.github.com/eekboard/
 Version: @VERSION@
 Requires: eek-@EEK_API_VERSION@ gtk+-2.0
 Libs: -L${libdir} -leek-gtk

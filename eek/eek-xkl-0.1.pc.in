@@ -23,7 +23,7 @@ includedir=@includedir@
 
 Name: libeek-xkl
 Description: A Library to Create Keyboard-like UI (Libxklavier Support)
-URL: http://github.com/ueno/eekboard
+URL: http://ueno.github.com/eekboard/
 Version: @VERSION@
 Requires: eek-xkb-@EEK_API_VERSION@ libxklavier
 Libs: -L${libdir} -leek-xkl
