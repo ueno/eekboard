@@ -4,23 +4,25 @@
 
     <para>libeek is a library to create keyboard-like user interface.
     Since it is designed as simple as possible, it provides only two
-    kinds of objects.  One is <emphasis>keyboard element</emphasis>
-    (derived from #EekElement) and another is <emphasis>keyboard
-    layout engine</emphasis> (which implements the #EekLayout
-    interface).</para>
+    kind of objects.  One is <emphasis>keyboard element</emphasis>
+    (objects derived from #EekElement) and another is
+    <emphasis>keyboard layout engine</emphasis> (objects which
+    implements the #EekLayout interface).</para>
 
     <para>A keyboard element represents either a keyboard
     (#EekKeyboard), a section (#EekSection), or a key (#EekKey).  Each
-    element implements the Builder design pattern so that it can be
-    converted into a UI widget (#ClutterActor, #GtkDrawingArea,
+    element implements the Builder design pattern so that it can map
+    itself to different UI widgets (#ClutterActor, #GtkDrawingArea,
     aso).</para>
 
     <para>A layout engine arranges keyboard elements using information
     from external configuration mechanisms (libxklavier, XKB,
     matchbox-keyboard layouts in XML, aso)</para>
 
-    <para>Here is a sample code which creates a keyboard-like #ClutterActor using the system keyboard layout using libxklavier:</para>
-
+    <para>Here is a sample code which demonstrates (1) keyboard
+    elements are arranged with the system keyboard layout using
+    libxklavier and (2) keyboard elements are mapped into
+    #ClutterActor:</para>
     <informalexample>
       <programlisting>
 EekKeyboard *keyboard;
@@ -40,14 +42,26 @@ clutter_group_add (CLUTTER_GROUP(stage),
       </programlisting>
     </informalexample>
 
-    <para>One of the most interesting features of libeek is that UI
-    backends can be switched easily.  For example, to create a
-    keyboard-like #GtkWidget instead of #ClutterActor, all you need is
-    to replace eek_clutter_keyboard_new() with eek_gtk_keyboard_new()
-    and eek_clutter_keyboard_get_actor() with
-    eek_gtk_keyboard_get_widget().</para>
+    <para>The most interesting feature of libeek is that developer can
+    choose arbitrary combination of UI toolkits and layout engine
+    supported by libeek.  For example, to create a keyboard-like
+    #GtkWidget instead of #ClutterActor, all you need is to replace
+    eek_clutter_keyboard_new() with eek_gtk_keyboard_new() and
+    eek_clutter_keyboard_get_actor() with
+    eek_gtk_keyboard_get_widget().  Similarly, if you want to use XKB
+    configuration directly (without libxklavier), you will only need to
+    replace eek_xkl_layout_new () with eek_xkb_layout_new().</para>
 
-    <para>There is logical represention (model) of keyboard distinct from the UI widget (view).  More precisely, a keyboard is represented as a tree of #EekElement -- #EekKeyboard contains one or more #EekSection's and #EekSection contains one or more #EekKey's.  Each element can be  event source when user events on the UI widget occurs.  For example, with the following code, when a user pushed a key widget with keycode 0x38 assigned, on_a_pressed will be called.</para>
+    <para>To achieve the portability between different UI toolkits,
+    there is a seperate represention of keyboard elements apart from
+    the actual UI widgets.  For example, a keyboard is represented as a tree of
+    #EekElement -- #EekKeyboard contains one or more #EekSection's and
+    #EekSection contains one or more #EekKey's.  Each element can relay
+    events when user taps on the UI widget.</para>
+    <para>
+      Here is another sample code which demonstrates logical events on
+      #EekElement:
+    </para>
     <informalexample>
       <programlisting>
 /* Find a key element in the logical keyboard. */
@@ -55,6 +69,6 @@ EekKey *key = eek_keyboard_find_key_by_keycode (keyboard, 0x38);
 g_signal_connect (key, "pressed", on_a_pressed);
       </programlisting>
     </informalexample>
-    <para>In this way, application developers do not need to know the differences between the underlying UI widgets after creation.</para>
+    <para>When user pushed a widget which looks like "a" key (i.e. keycode 0x38), on_a_pressed will be called.</para>
   </partintro>
 </part>
