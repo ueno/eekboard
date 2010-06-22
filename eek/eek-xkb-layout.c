@@ -169,8 +169,10 @@ create_key (EekXkbLayout *layout,
             outline->num_points = xkboutline->num_points;
             outline->points = g_new0 (EekPoint, outline->num_points);
             for (i = 0; i < xkboutline->num_points; i++) {
-                outline->points[i].x = xkb_to_pixmap_coord(layout, xkboutline->points[i].x);
-                outline->points[i].y = xkb_to_pixmap_coord(layout, xkboutline->points[i].y);
+                outline->points[i].x =
+                    xkb_to_pixmap_coord(layout, xkboutline->points[i].x);
+                outline->points[i].y =
+                    xkb_to_pixmap_coord(layout, xkboutline->points[i].y);
             }
         }
         g_hash_table_insert (priv->outline_hash, xkbshape, outline);
@@ -418,7 +420,8 @@ eek_xkb_layout_real_get_group (EekLayout *self)
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
     XkbStateRec state;
 
-    g_return_val_if_fail (XkbGetState (priv->display, XkbUseCoreKbd, &state), -1);
+    g_return_val_if_fail (XkbGetState (priv->display, XkbUseCoreKbd, &state),
+                          -1);
     return state.group;
 }
 
@@ -618,9 +621,9 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
  * @geometry: geometry component name
  *
  * Set the XKB component names to @layout.  This function is merely a
- * wrapper around eek_xkb_layout_set_names() to avoid passing an
- * XkbComponentNamesRec pointer (which is not currently available in
- * the gobject-introspection repository).
+ * wrapper around eek_xkb_layout_set_names() to avoid passing a
+ * pointer of XkbComponentNamesRec, which is not currently available
+ * in the gobject-introspection repository.
  *
  * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  */
@@ -634,6 +637,7 @@ eek_xkb_layout_set_names_full (EekXkbLayout *layout,
                                const gchar  *geometry)
 {
     XkbComponentNamesRec names;
+
     names.keymap = keymap;
     names.keycodes = keycodes;
     names.types = types;

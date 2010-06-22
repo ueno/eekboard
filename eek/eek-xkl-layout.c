@@ -355,9 +355,9 @@ eek_xkl_layout_set_config (EekXklLayout *layout,
  *
  * Reconfigure @layout with @model, @layouts, @variants, and @options.
  * This function is merely a wrapper around
- * eek_xkl_layout_set_config() to avoid passing an XklConfigRec
- * pointer (which is not currently available in the
- * gobject-introspection repository).
+ * eek_xkl_layout_set_config() to avoid passing a pointer of
+ * XklConfigRec, which is not currently available in the
+ * gobject-introspection repository.
  *
  * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  */
