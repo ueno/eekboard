@@ -638,12 +638,12 @@ eek_xkb_layout_set_names_full (EekXkbLayout *layout,
 {
     XkbComponentNamesRec names;
 
-    names.keymap = keymap;
-    names.keycodes = keycodes;
-    names.types = types;
-    names.compat = compat;
-    names.symbols = symbols;
-    names.geometry = geometry;
+    names.keymap = (char *)keymap;
+    names.keycodes = (char *)keycodes;
+    names.types = (char *)types;
+    names.compat = (char *)compat;
+    names.symbols = (char *)symbols;
+    names.geometry = (char *)geometry;
     return eek_xkb_layout_set_names (layout, &names);
 }
 
