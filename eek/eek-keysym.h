@@ -51,10 +51,11 @@ typedef enum {
     EEK_KEYSYM_CATEGORY_FUNCTION,
     EEK_KEYSYM_CATEGORY_KEYNAME,
     EEK_KEYSYM_CATEGORY_UNKNOWN,
+    /*< private >*/
     EEK_KEYSYM_CATEGORY_LAST = EEK_KEYSYM_CATEGORY_UNKNOWN
 } EekKeysymCategory;
 
-G_CONST_RETURN gchar *eek_keysym_to_string (guint keysym);
+gchar *eek_keysym_to_string (guint keysym);
 EekKeysymCategory eek_keysym_get_category (guint keysym);
 
 #endif  /* EEK_KEYSYM_H */

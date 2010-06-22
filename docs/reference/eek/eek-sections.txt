@@ -123,6 +123,7 @@ EekXklLayoutClass
 EekXklLayoutPrivate
 eek_xkl_layout_new
 eek_xkl_layout_set_config
+eek_xkl_layout_set_config_full
 eek_xkl_layout_set_model
 eek_xkl_layout_set_layouts
 eek_xkl_layout_set_variants
@@ -131,6 +132,9 @@ eek_xkl_layout_get_model
 eek_xkl_layout_get_layouts
 eek_xkl_layout_get_variants
 eek_xkl_layout_get_options
+eek_xkl_layout_disable_option
+eek_xkl_layout_enable_option
+eek_xkl_layout_get_option
 <SUBSECTION Standard>
 EEK_XKL_LAYOUT
 EEK_IS_XKL_LAYOUT
@@ -149,6 +153,7 @@ EekXkbLayoutClass
 EekXkbLayoutPrivate
 eek_xkb_layout_new
 eek_xkb_layout_set_names
+eek_xkb_layout_set_names_full
 eek_xkb_layout_set_keycodes
 eek_xkb_layout_set_geometry
 eek_xkb_layout_set_symbols

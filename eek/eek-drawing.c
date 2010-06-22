@@ -90,7 +90,7 @@ egf_key_callback (EekElement *element,
     gdouble font_size;
     guint keysym;
     EekBounds bounds;
-    const gchar *label;
+    gchar *label;
 
     keysym = eek_key_get_keysym (key);
     if (keysym == EEK_INVALID_KEYSYM ||
@@ -217,7 +217,7 @@ eek_draw_key_label (cairo_t               *cr,
 {
     guint keysym;
     EekKeysymCategory category;
-    const gchar *label;
+    gchar *label;
     PangoLayout *layout;
     PangoRectangle logical_rect = { 0, };
     EekBounds bounds;

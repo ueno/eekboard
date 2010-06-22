@@ -41,7 +41,7 @@ struct eek_keysym_label {
 #include "eek-unicode-keysym-labels.h"
 #include "eek-keyname-keysym-labels.h"
 
-static G_CONST_RETURN gchar *
+static gchar *
 unichar_to_utf8 (gunichar uc)
 {
     if (g_unichar_isgraph (uc)) {
@@ -65,7 +65,7 @@ keysym_label_compare (const void *key0, const void *key1)
 
 static gboolean
 find_keysym (guint              keysym,
-             const gchar      **label,
+             gchar            **label,
              EekKeysymCategory *category)
 {
     struct eek_keysym_label bsearch_key, *bsearch_val;
@@ -144,10 +144,10 @@ find_keysym (guint              keysym,
  *
  * Return a string representation of @keysym.
  */
-G_CONST_RETURN gchar *
+gchar *
 eek_keysym_to_string (guint keysym)
 {
-    const gchar *label;
+    gchar *label;
 
     if (find_keysym (keysym, &label, NULL))
         return label;
