@@ -360,6 +360,7 @@ eek_xkl_layout_set_config (EekXklLayout *layout,
  * gobject-introspection repository.
  *
  * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ * Since: 0.0.2
  */
 gboolean
 eek_xkl_layout_set_config_full (EekXklLayout *layout,

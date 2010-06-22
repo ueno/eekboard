@@ -626,6 +626,7 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
  * in the gobject-introspection repository.
  *
  * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ * Since: 0.0.2
  */
 gboolean
 eek_xkb_layout_set_names_full (EekXkbLayout *layout,
