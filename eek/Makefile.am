@@ -47,8 +47,8 @@ libeek_la_SOURCES = \
 	eek-unicode-keysym-labels.h \
 	eek-keyname-keysym-labels.h
 
-libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS)
-libeek_la_LIBADD = $(GOBJECT2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
+libeek_la_LIBADD = $(GOBJECT2_LIBS)
 
 if HAVE_CLUTTER
 libeek_clutter_la_SOURCES = \
@@ -66,8 +66,8 @@ libeek_clutter_la_SOURCES = \
 	eek-drawing.c \
 	eek-clutter.h
 
-libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)
-libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS)
+libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 endif
 
 libeek_gtk_la_SOURCES = \
@@ -77,8 +77,8 @@ libeek_gtk_la_SOURCES = \
 	eek-drawing.c \
 	eek-gtk.h
 
-libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS)
-libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS)
+libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 
 libeek_xkb_la_SOURCES = \
 	eek-xkb-layout.h \
@@ -145,3 +145,58 @@ EXTRA_DIST = \
 	special-keysym-labels.txt \
 	unicode-keysym-labels.txt \
 	keyname-keysym-labels.txt
+
+CLEANFILES =
+
+-include $(INTROSPECTION_MAKEFILE)
+INTROSPECTION_GIRS =
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir)
+INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
+
+if HAVE_INTROSPECTION
+
+Eek-0.1.gir: libeek.la
+Eek_0_1_gir_INCLUDES = GObject-2.0
+Eek_0_1_gir_CFLAGS = $(libeek_la_CFLAGS)
+Eek_0_1_gir_LIBS = libeek.la
+Eek_0_1_gir_FILES = $(libeek_la_SOURCES)
+
+EekGtk-0.1.gir: libeek-gtk.la
+EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-2.0 Eek-0.1
+EekGtk_0_1_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
+EekGtk_0_1_gir_LIBS = libeek-gtk.la
+EekGtk_0_1_gir_FILES = $(libeek_gtk_la_SOURCES)
+
+EekClutter-0.1.gir: libeek-clutter.la
+EekClutter_0_1_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek-0.1
+EekClutter_0_1_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
+EekClutter_0_1_gir_LIBS = libeek-clutter.la
+EekClutter_0_1_gir_FILES = $(libeek_clutter_la_SOURCES)
+
+EekXkb-0.1.gir: libeek-xkb.la
+EekXkb_0_1_gir_INCLUDES = GObject-2.0 Eek-0.1
+EekXkb_0_1_gir_CFLAGS = $(libeek_xkb_la_CFLAGS)
+EekXkb_0_1_gir_LIBS = libeek-xkb.la
+EekXkb_0_1_gir_FILES = $(libeek_xkb_la_SOURCES)
+
+EekXkl-0.1.gir: libeek-xkl.la
+EekXkl_0_1_gir_INCLUDES = GObject-2.0 EekXkb-0.1
+EekXkl_0_1_gir_CFLAGS = $(libeek_xkl_la_CFLAGS)
+EekXkl_0_1_gir_LIBS = libeek-xkl.la
+EekXkl_0_1_gir_FILES = $(libeek_xkl_la_SOURCES)
+
+INTROSPECTION_GIRS += \
+	Eek-0.1.gir \
+	EekGtk-0.1.gir \
+	EekClutter-0.1.gir \
+	EekXkb-0.1.gir \
+	EekXkl-0.1.gir
+
+girdir = $(datadir)/gir-1.0
+gir_DATA = $(INTROSPECTION_GIRS)
+
+typelibdir = $(libdir)/girepository-1.0
+typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
+
+CLEANFILES += $(gir_DATA) $(typelib_DATA)
+endif

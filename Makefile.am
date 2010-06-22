@@ -18,3 +18,4 @@
 
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = eek src tests docs po
+DISTCHECK_CONFIGURE_FLAGS = --enable-introspection

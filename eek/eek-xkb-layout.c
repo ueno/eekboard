@@ -564,7 +564,7 @@ eek_xkb_layout_new (void)
 }
 
 /**
- * eek_xkb_layout_set_names:
+ * eek_xkb_layout_set_names: (skip)
  * @layout: an #EekXkbLayout
  * @names: XKB component names
  *

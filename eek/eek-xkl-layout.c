@@ -318,7 +318,7 @@ merge_xkl_config_rec (XklConfigRec *dst, XklConfigRec *src)
 }
 
 /**
- * eek_xkl_layout_set_config:
+ * eek_xkl_layout_set_config: (skip)
  * @layout: an #EekXklLayout
  * @config: Libxklavier configuration
  *
