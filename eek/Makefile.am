@@ -46,7 +46,6 @@ libeek_la_SOURCES = \
 	eek-special-keysym-labels.h \
 	eek-unicode-keysym-labels.h \
 	eek-keyname-keysym-labels.h
-
 libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
 libeek_la_LIBADD = $(GOBJECT2_LIBS)
 
@@ -104,9 +103,11 @@ eek_HEADERS = \
 	$(top_srcdir)/eek/eek-layout.h \
 	$(top_srcdir)/eek/eek-keysym.h \
 	$(top_srcdir)/eek/eek-types.h \
+	$(top_srcdir)/eek/eek-gtk-keyboard.h \
 	$(top_srcdir)/eek/eek-xkb-layout.h \
 	$(top_srcdir)/eek/eek-xkl-layout.h \
 	$(top_srcdir)/eek/eek.h \
+	$(top_srcdir)/eek/eek-gtk.h \
 	$(top_srcdir)/eek/eek-xkb.h \
 	$(top_srcdir)/eek/eek-xkl.h
 
@@ -115,6 +116,7 @@ eek_HEADERS += \
 	$(top_srcdir)/eek/eek-clutter-keyboard.h \
 	$(top_srcdir)/eek/eek-clutter-section.h \
 	$(top_srcdir)/eek/eek-clutter-key.h \
+	$(top_srcdir)/eek/eek-clutter-drawing-context.h \
 	$(top_srcdir)/eek/eek-clutter.h
 endif
 
@@ -128,11 +130,12 @@ eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
 	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libeek.pc \
-	libeek-clutter.pc \
-	libeek-gtk.pc \
-	libeek-xkb.pc \
-	libeek-xkl.pc
+pkgconfig_DATA = \
+	eek-$(EEK_API_VERSION).pc \
+	eek-clutter-$(EEK_API_VERSION).pc \
+	eek-gtk-$(EEK_API_VERSION).pc \
+	eek-xkb-$(EEK_API_VERSION).pc \
+	eek-xkl-$(EEK_API_VERSION).pc
 
 DISTCLEANFILES = \
 	eek-special-keysym-labels.h \
@@ -156,7 +159,8 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 if HAVE_INTROSPECTION
 
 Eek-0.1.gir: libeek.la
-Eek_0_1_gir_INCLUDES = GObject-2.0
+Eek_0_1_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
+Eek_0_1_gir_INCLUDES = GLib-2.0 GObject-2.0
 Eek_0_1_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek_0_1_gir_LIBS = libeek.la
 Eek_0_1_gir_FILES = $(libeek_la_SOURCES)

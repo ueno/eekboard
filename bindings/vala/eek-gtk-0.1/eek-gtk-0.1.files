@@ -1,0 +1,3 @@
+include/eek-0.1/eek/eek-gtk-keyboard.h
+include/eek-0.1/eek/eek-gtk.h
+lib/libeek-gtk.so

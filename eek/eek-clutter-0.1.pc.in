@@ -21,10 +21,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libeek-xkl
-Description: A Library to Create Keyboard-like UI (Libxklavier Support)
+Name: libeek-clutter
+Description: A Library to Create Keyboard-like UI (Clutter Support)
 URL: http://github.com/ueno/eekboard
 Version: @VERSION@
-Libs: -L${libdir} -leek-xkl
-Libs.private: @GTK2_LIBS@ @LIBXKLAVIER_LIBS@
+Requires: eek-@EEK_API_VERSION@ clutter-1.0
+Libs: -L${libdir} -leek-clutter
 Cflags: -I${includedir}/eek-@EEK_API_VERSION@

@@ -21,10 +21,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libeek-gtk
-Description: A Library to Create Keyboard-like UI (GTK Support)
+Name: libeek-xkl
+Description: A Library to Create Keyboard-like UI (Libxklavier Support)
 URL: http://github.com/ueno/eekboard
 Version: @VERSION@
-Libs: -L${libdir} -leek -leek-gtk
-Libs.private: @GOBJECT2_LIBS@ @GTK2_LIBS@
+Requires: eek-xkb-@EEK_API_VERSION@ libxklavier
+Libs: -L${libdir} -leek-xkl
 Cflags: -I${includedir}/eek-@EEK_API_VERSION@

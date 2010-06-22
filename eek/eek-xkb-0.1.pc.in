@@ -16,6 +16,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = eek src tests bindings docs po
-DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libeek-xkb
+Description: A Library to Create Keyboard-like UI (XKB Support)
+URL: http://github.com/ueno/eekboard
+Version: @VERSION@
+Requires: eek-@EEK_API_VERSION@ gtk+-x11-2.0
+Libs: -L${libdir} -leek-xkb
+Cflags: -I${includedir}/eek-@EEK_API_VERSION@

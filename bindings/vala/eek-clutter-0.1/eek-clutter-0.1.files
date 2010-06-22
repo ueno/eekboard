@@ -1,0 +1,6 @@
+include/eek-0.1/eek/eek-clutter-keyboard.h
+include/eek-0.1/eek/eek-clutter-section.h
+include/eek-0.1/eek/eek-clutter-key.h
+include/eek-0.1/eek/eek-clutter-drawing-context.h
+lib/libeek-clutter.so
+

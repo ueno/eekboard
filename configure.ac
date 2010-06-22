@@ -42,6 +42,14 @@ PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
 PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
 
+AC_MSG_CHECKING([whether you enable Vala language support])
+AC_ARG_ENABLE(vala,
+              AS_HELP_STRING([--enable-vala=no/yes],
+                             [Enable Vala language binding default=yes]),,
+              enable_vala=yes)
+AC_MSG_RESULT($enable_vala)
+AM_CONDITIONAL(ENABLE_VALA, [test x$enable_vala = xyes])
+
 AC_MSG_CHECKING([whether you enable eekboard])
 AC_ARG_ENABLE(eekboard,
               AS_HELP_STRING([--enable-eekboard=no/yes],
@@ -96,13 +104,15 @@ AC_CONFIG_FILES([Makefile
 eek/Makefile
 src/Makefile
 tests/Makefile
+bindings/Makefile
+bindings/vala/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
 po/Makefile.in
-eek/libeek.pc
-eek/libeek-clutter.pc
-eek/libeek-gtk.pc
-eek/libeek-xkb.pc
-eek/libeek-xkl.pc])
+eek/eek-${EEK_API_VERSION}.pc
+eek/eek-clutter-${EEK_API_VERSION}.pc
+eek/eek-gtk-${EEK_API_VERSION}.pc
+eek/eek-xkb-${EEK_API_VERSION}.pc
+eek/eek-xkl-${EEK_API_VERSION}.pc])
 AC_OUTPUT
