@@ -115,6 +115,7 @@ eek_gtk_keyboard_finalize (GObject *object)
 
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++)
         pango_font_description_free (priv->fonts[i]);
+    G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->finalize (object);
 }
 
 static void
