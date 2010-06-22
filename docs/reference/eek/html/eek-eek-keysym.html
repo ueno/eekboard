@@ -40,7 +40,7 @@
 <pre class="synopsis">#define             <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYSYM:CAPS" title="EEK_INVALID_KEYSYM">EEK_INVALID_KEYSYM</a>
 #define             <a class="link" href="eek-eek-keysym.html#EEK-INVALID-KEYCODE:CAPS" title="EEK_INVALID_KEYCODE">EEK_INVALID_KEYCODE</a>
 enum                <a class="link" href="eek-eek-keysym.html#EekKeysymCategory" title="enum EekKeysymCategory">EekKeysymCategory</a>;
-const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="eek-eek-keysym.html#eek-keysym-to-string" title="eek_keysym_to_string ()">eek_keysym_to_string</a>                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             <a class="link" href="eek-eek-keysym.html#eek-keysym-to-string" title="eek_keysym_to_string ()">eek_keysym_to_string</a>                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);
 <a class="link" href="eek-eek-keysym.html#EekKeysymCategory" title="enum EekKeysymCategory"><span class="returnvalue">EekKeysymCategory</span></a>   <a class="link" href="eek-eek-keysym.html#eek-keysym-get-category" title="eek_keysym_get_category ()">eek_keysym_get_category</a>             (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);
 </pre>
 </div>
@@ -74,6 +74,7 @@ Pseudo keycode used for error reporting.
     EEK_KEYSYM_CATEGORY_FUNCTION,
     EEK_KEYSYM_CATEGORY_KEYNAME,
     EEK_KEYSYM_CATEGORY_UNKNOWN,
+    /*&lt; private &gt;*/
     EEK_KEYSYM_CATEGORY_LAST = EEK_KEYSYM_CATEGORY_UNKNOWN
 } EekKeysymCategory;
 </pre>
@@ -104,17 +105,13 @@ have a name
 <td>used for error reporting
 </td>
 </tr>
-<tr>
-<td><p><a name="EEK-KEYSYM-CATEGORY-LAST:CAPS"></a><span class="term"><code class="literal">EEK_KEYSYM_CATEGORY_LAST</code></span></p></td>
-<td></td>
-</tr>
 </tbody>
 </table></div>
 </div>
 <hr>
 <div class="refsect2" title="eek_keysym_to_string ()">
 <a name="eek-keysym-to-string"></a><h3>eek_keysym_to_string ()</h3>
-<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       eek_keysym_to_string                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);</pre>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             eek_keysym_to_string                (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> keysym</code></em>);</pre>
 <p>
 Return a string representation of <em class="parameter"><code>keysym</code></em>.
 </p>

@@ -120,6 +120,7 @@
     <function name="EekXklLayoutPrivate" link="eek-EekXklLayout.html#EekXklLayoutPrivate"/>
     <function name="eek_xkl_layout_new ()" link="eek-EekXklLayout.html#eek-xkl-layout-new"/>
     <function name="eek_xkl_layout_set_config ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-config"/>
+    <function name="eek_xkl_layout_set_config_full ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-config-full"/>
     <function name="eek_xkl_layout_set_model ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-model"/>
     <function name="eek_xkl_layout_set_layouts ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-layouts"/>
     <function name="eek_xkl_layout_set_variants ()" link="eek-EekXklLayout.html#eek-xkl-layout-set-variants"/>
@@ -128,11 +129,15 @@
     <function name="eek_xkl_layout_get_layouts ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-layouts"/>
     <function name="eek_xkl_layout_get_variants ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-variants"/>
     <function name="eek_xkl_layout_get_options ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-options"/>
+    <function name="eek_xkl_layout_disable_option ()" link="eek-EekXklLayout.html#eek-xkl-layout-disable-option"/>
+    <function name="eek_xkl_layout_enable_option ()" link="eek-EekXklLayout.html#eek-xkl-layout-enable-option"/>
+    <function name="eek_xkl_layout_get_option ()" link="eek-EekXklLayout.html#eek-xkl-layout-get-option"/>
     <function name="EekXkbLayout" link="eek-EekXkbLayout.html#EekXkbLayout"/>
     <function name="EekXkbLayoutClass" link="eek-EekXkbLayout.html#EekXkbLayoutClass"/>
     <function name="EekXkbLayoutPrivate" link="eek-EekXkbLayout.html#EekXkbLayoutPrivate"/>
     <function name="eek_xkb_layout_new ()" link="eek-EekXkbLayout.html#eek-xkb-layout-new"/>
     <function name="eek_xkb_layout_set_names ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-names"/>
+    <function name="eek_xkb_layout_set_names_full ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-names-full"/>
     <function name="eek_xkb_layout_set_keycodes ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-keycodes"/>
     <function name="eek_xkb_layout_set_geometry ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-geometry"/>
     <function name="eek_xkb_layout_set_symbols ()" link="eek-EekXkbLayout.html#eek-xkb-layout-set-symbols"/>

@@ -111,7 +111,6 @@
 <ANCHOR id="EEK-KEYSYM-CATEGORY-FUNCTION:CAPS" href="eek/eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-FUNCTION:CAPS">
 <ANCHOR id="EEK-KEYSYM-CATEGORY-KEYNAME:CAPS" href="eek/eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-KEYNAME:CAPS">
 <ANCHOR id="EEK-KEYSYM-CATEGORY-UNKNOWN:CAPS" href="eek/eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-UNKNOWN:CAPS">
-<ANCHOR id="EEK-KEYSYM-CATEGORY-LAST:CAPS" href="eek/eek-eek-keysym.html#EEK-KEYSYM-CATEGORY-LAST:CAPS">
 <ANCHOR id="eek-keysym-to-string" href="eek/eek-eek-keysym.html#eek-keysym-to-string">
 <ANCHOR id="eek-keysym-get-category" href="eek/eek-eek-keysym.html#eek-keysym-get-category">
 <ANCHOR id="eek-EekClutterKeyboard" href="eek/eek-EekClutterKeyboard.html">
@@ -141,6 +140,7 @@
 <ANCHOR id="EekXklLayoutPrivate" href="eek/eek-EekXklLayout.html#EekXklLayoutPrivate">
 <ANCHOR id="eek-xkl-layout-new" href="eek/eek-EekXklLayout.html#eek-xkl-layout-new">
 <ANCHOR id="eek-xkl-layout-set-config" href="eek/eek-EekXklLayout.html#eek-xkl-layout-set-config">
+<ANCHOR id="eek-xkl-layout-set-config-full" href="eek/eek-EekXklLayout.html#eek-xkl-layout-set-config-full">
 <ANCHOR id="eek-xkl-layout-set-model" href="eek/eek-EekXklLayout.html#eek-xkl-layout-set-model">
 <ANCHOR id="eek-xkl-layout-set-layouts" href="eek/eek-EekXklLayout.html#eek-xkl-layout-set-layouts">
 <ANCHOR id="eek-xkl-layout-set-variants" href="eek/eek-EekXklLayout.html#eek-xkl-layout-set-variants">
@@ -149,6 +149,9 @@
 <ANCHOR id="eek-xkl-layout-get-layouts" href="eek/eek-EekXklLayout.html#eek-xkl-layout-get-layouts">
 <ANCHOR id="eek-xkl-layout-get-variants" href="eek/eek-EekXklLayout.html#eek-xkl-layout-get-variants">
 <ANCHOR id="eek-xkl-layout-get-options" href="eek/eek-EekXklLayout.html#eek-xkl-layout-get-options">
+<ANCHOR id="eek-xkl-layout-disable-option" href="eek/eek-EekXklLayout.html#eek-xkl-layout-disable-option">
+<ANCHOR id="eek-xkl-layout-enable-option" href="eek/eek-EekXklLayout.html#eek-xkl-layout-enable-option">
+<ANCHOR id="eek-xkl-layout-get-option" href="eek/eek-EekXklLayout.html#eek-xkl-layout-get-option">
 <ANCHOR id="eek-EekXkbLayout" href="eek/eek-EekXkbLayout.html">
 <ANCHOR id="eek-EekXkbLayout.synopsis" href="eek/eek-EekXkbLayout.html#eek-EekXkbLayout.synopsis">
 <ANCHOR id="eek-EekXkbLayout.description" href="eek/eek-EekXkbLayout.html#eek-EekXkbLayout.description">
@@ -158,6 +161,7 @@
 <ANCHOR id="EekXkbLayoutPrivate" href="eek/eek-EekXkbLayout.html#EekXkbLayoutPrivate">
 <ANCHOR id="eek-xkb-layout-new" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-new">
 <ANCHOR id="eek-xkb-layout-set-names" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-set-names">
+<ANCHOR id="eek-xkb-layout-set-names-full" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-set-names-full">
 <ANCHOR id="eek-xkb-layout-set-keycodes" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-set-keycodes">
 <ANCHOR id="eek-xkb-layout-set-geometry" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-set-geometry">
 <ANCHOR id="eek-xkb-layout-set-symbols" href="eek/eek-EekXkbLayout.html#eek-xkb-layout-set-symbols">
