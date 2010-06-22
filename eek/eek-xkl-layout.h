@@ -20,6 +20,7 @@
 #ifndef EEK_XKL_LAYOUT_H
 #define EEK_XKL_LAYOUT_H 1
 
+#include <libxklavier/xklavier.h>
 #include "eek-xkb-layout.h"
 
 G_BEGIN_DECLS
