@@ -26,19 +26,22 @@
 <div></div>
 <p>libeek is a library to create keyboard-like user interface.
     Since it is designed as simple as possible, it provides only two
-    kinds of objects.  One is <span class="emphasis"><em>keyboard element</em></span>
-    (derived from <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a>) and another is <span class="emphasis"><em>keyboard
-    layout engine</em></span> (which implements the <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a>
-    interface).</p>
+    kind of objects.  One is <span class="emphasis"><em>keyboard element</em></span>
+    (objects derived from <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a>) and another is
+    <span class="emphasis"><em>keyboard layout engine</em></span> (objects which
+    implements the <a class="link" href="eek-EekLayout.html#EekLayout" title="EekLayout"><span class="type">EekLayout</span></a> interface).</p>
 <p>A keyboard element represents either a keyboard
     (<a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>), a section (<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>), or a key (<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>).  Each
-    element implements the Builder design pattern so that it can be
-    converted into a UI widget (<a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, <span class="type">GtkDrawingArea</span>,
+    element implements the Builder design pattern so that it can map
+    itself to different UI widgets (<a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, <span class="type">GtkDrawingArea</span>,
     aso).</p>
 <p>A layout engine arranges keyboard elements using information
     from external configuration mechanisms (libxklavier, XKB,
     matchbox-keyboard layouts in XML, aso)</p>
-<p>Here is a sample code which creates a keyboard-like <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a> using the system keyboard layout using libxklavier:</p>
+<p>Here is a sample code which demonstrates (1) keyboard
+    elements are arranged with the system keyboard layout using
+    libxklavier and (2) keyboard elements are mapped into
+    <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>:</p>
 <div class="informalexample">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -76,13 +79,25 @@
   </table>
 </div>
 
-<p>One of the most interesting features of libeek is that UI
-    backends can be switched easily.  For example, to create a
-    keyboard-like <span class="type">GtkWidget</span> instead of <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, all you need is
-    to replace <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-new" title="eek_clutter_keyboard_new ()"><code class="function">eek_clutter_keyboard_new()</code></a> with <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-new" title="eek_gtk_keyboard_new ()"><code class="function">eek_gtk_keyboard_new()</code></a>
-    and <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-get-actor" title="eek_clutter_keyboard_get_actor ()"><code class="function">eek_clutter_keyboard_get_actor()</code></a> with
-    <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-get-widget" title="eek_gtk_keyboard_get_widget ()"><code class="function">eek_gtk_keyboard_get_widget()</code></a>.</p>
-<p>There is logical represention (model) of keyboard distinct from the UI widget (view).  More precisely, a keyboard is represented as a tree of <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> -- <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> contains one or more <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>'s and <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> contains one or more <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>'s.  Each element can be  event source when user events on the UI widget occurs.  For example, with the following code, when a user pushed a key widget with keycode 0x38 assigned, on_a_pressed will be called.</p>
+<p>The most interesting feature of libeek is that developer can
+    choose arbitrary combination of UI toolkits and layout engine
+    supported by libeek.  For example, to create a keyboard-like
+    <span class="type">GtkWidget</span> instead of <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, all you need is to replace
+    <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-new" title="eek_clutter_keyboard_new ()"><code class="function">eek_clutter_keyboard_new()</code></a> with <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-new" title="eek_gtk_keyboard_new ()"><code class="function">eek_gtk_keyboard_new()</code></a> and
+    <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-get-actor" title="eek_clutter_keyboard_get_actor ()"><code class="function">eek_clutter_keyboard_get_actor()</code></a> with
+    <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-get-widget" title="eek_gtk_keyboard_get_widget ()"><code class="function">eek_gtk_keyboard_get_widget()</code></a>.  Similarly, if you want to use XKB
+    configuration directly (without libxklavier), you will only need to
+    replace <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-new" title="eek_xkl_layout_new ()"><code class="function">eek_xkl_layout_new()</code></a> with <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-new" title="eek_xkb_layout_new ()"><code class="function">eek_xkb_layout_new()</code></a>.</p>
+<p>To achieve the portability between different UI toolkits,
+    there is a seperate represention of keyboard elements apart from
+    the actual UI widgets.  For example, a keyboard is represented as a tree of
+    <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> -- <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> contains one or more <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>'s and
+    <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> contains one or more <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>'s.  Each element can relay
+    events when user taps on the UI widget.</p>
+<p>
+      Here is another sample code which demonstrates logical events on
+      <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a>:
+    </p>
 <div class="informalexample">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -98,7 +113,7 @@
   </table>
 </div>
 
-<p>In this way, application developers do not need to know the differences between the underlying UI widgets after creation.</p>
+<p>When user pushed a widget which looks like "a" key (i.e. keycode 0x38), on_a_pressed will be called.</p>
 </div>
 </div>
 <div class="footer">
