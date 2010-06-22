@@ -52,12 +52,12 @@ clutter_group_add (CLUTTER_GROUP(stage),
     configuration directly (without libxklavier), you will only need to
     replace eek_xkl_layout_new () with eek_xkb_layout_new().</para>
 
-    <para>To achieve the portability between different UI toolkits,
+    <para>To achieve portability across different UI toolkits,
     there is a seperate represention of keyboard elements apart from
     the actual UI widgets.  For example, a keyboard is represented as a tree of
     #EekElement -- #EekKeyboard contains one or more #EekSection's and
-    #EekSection contains one or more #EekKey's.  Each element can relay
-    events when user taps on the UI widget.</para>
+    #EekSection contains one or more #EekKey's.  Each element may emit
+    events when user pushes the corresponding UI widget.</para>
     <para>
       Here is another sample code which demonstrates logical events on
       #EekElement:
