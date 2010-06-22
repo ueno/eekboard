@@ -88,12 +88,12 @@
     <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-get-widget" title="eek_gtk_keyboard_get_widget ()"><code class="function">eek_gtk_keyboard_get_widget()</code></a>.  Similarly, if you want to use XKB
     configuration directly (without libxklavier), you will only need to
     replace <a class="link" href="eek-EekXklLayout.html#eek-xkl-layout-new" title="eek_xkl_layout_new ()"><code class="function">eek_xkl_layout_new()</code></a> with <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-new" title="eek_xkb_layout_new ()"><code class="function">eek_xkb_layout_new()</code></a>.</p>
-<p>To achieve the portability between different UI toolkits,
+<p>To achieve portability across different UI toolkits,
     there is a seperate represention of keyboard elements apart from
     the actual UI widgets.  For example, a keyboard is represented as a tree of
     <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a> -- <a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a> contains one or more <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>'s and
-    <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> contains one or more <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>'s.  Each element can relay
-    events when user taps on the UI widget.</p>
+    <a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a> contains one or more <a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>'s.  Each element may emit
+    events when user pushes the corresponding UI widget.</p>
 <p>
       Here is another sample code which demonstrates logical events on
       <a class="link" href="eek-EekElement.html#EekElement" title="EekElement"><span class="type">EekElement</span></a>:
