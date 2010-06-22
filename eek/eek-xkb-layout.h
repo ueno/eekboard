@@ -60,6 +60,16 @@ EekLayout            *eek_xkb_layout_new       (void);
 
 gboolean              eek_xkb_layout_set_names (EekXkbLayout         *layout,
                                                 XkbComponentNamesRec *names);
+
+gboolean              eek_xkb_layout_set_names_full
+                                               (EekXkbLayout         *layout,
+                                                const gchar          *keymap,
+                                                const gchar          *keycodes,
+                                                const gchar          *types,
+                                                const gchar          *compat,
+                                                const gchar          *symbols,
+                                                const gchar          *geometry);
+                                        
 gboolean              eek_xkb_layout_set_keycodes
                                                (EekXkbLayout         *layout,
                                                 const gchar          *keycodes);

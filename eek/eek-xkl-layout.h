@@ -54,32 +54,38 @@ struct _EekXklLayoutClass
     gpointer pdummy[24];
 };
 
-GType      eek_xkl_layout_get_type       (void) G_GNUC_CONST;
+GType      eek_xkl_layout_get_type        (void) G_GNUC_CONST;
 
-EekLayout *eek_xkl_layout_new            (void);
+EekLayout *eek_xkl_layout_new             (void);
 
-gboolean   eek_xkl_layout_set_config     (EekXklLayout *layout,
-                                          XklConfigRec *config);
+gboolean   eek_xkl_layout_set_config      (EekXklLayout *layout,
+                                           XklConfigRec *config);
 
-gboolean   eek_xkl_layout_set_model      (EekXklLayout *layout,
-                                          const gchar  *model);
-gboolean   eek_xkl_layout_set_layouts    (EekXklLayout *layout,
-                                          gchar       **layouts);
-gboolean   eek_xkl_layout_set_variants   (EekXklLayout *layout,
-                                          gchar       **variants);
-gboolean   eek_xkl_layout_set_options    (EekXklLayout *layout,
-                                          gchar       **options);
-gboolean   eek_xkl_layout_enable_option  (EekXklLayout *layout,
-                                          const gchar  *option);
-gboolean   eek_xkl_layout_disable_option (EekXklLayout *layout,
-                                          const gchar  *option);
+gboolean   eek_xkl_layout_set_config_full (EekXklLayout *layout,
+                                           gchar        *model,
+                                           gchar       **layouts,
+                                           gchar       **variants,
+                                           gchar       **options);
 
-gchar     *eek_xkl_layout_get_model      (EekXklLayout *layout);
-gchar    **eek_xkl_layout_get_layouts    (EekXklLayout *layout);
-gchar    **eek_xkl_layout_get_variants   (EekXklLayout *layout);
-gchar    **eek_xkl_layout_get_options    (EekXklLayout *layout);
-gboolean   eek_xkl_layout_get_option     (EekXklLayout *layout,
-                                          const gchar  *option);
+gboolean   eek_xkl_layout_set_model       (EekXklLayout *layout,
+                                           const gchar  *model);
+gboolean   eek_xkl_layout_set_layouts     (EekXklLayout *layout,
+                                           gchar       **layouts);
+gboolean   eek_xkl_layout_set_variants    (EekXklLayout *layout,
+                                           gchar       **variants);
+gboolean   eek_xkl_layout_set_options     (EekXklLayout *layout,
+                                           gchar       **options);
+gboolean   eek_xkl_layout_enable_option   (EekXklLayout *layout,
+                                           const gchar  *option);
+gboolean   eek_xkl_layout_disable_option  (EekXklLayout *layout,
+                                           const gchar  *option);
+
+gchar     *eek_xkl_layout_get_model       (EekXklLayout *layout);
+gchar    **eek_xkl_layout_get_layouts     (EekXklLayout *layout);
+gchar    **eek_xkl_layout_get_variants    (EekXklLayout *layout);
+gchar    **eek_xkl_layout_get_options     (EekXklLayout *layout);
+gboolean   eek_xkl_layout_get_option      (EekXklLayout *layout,
+                                           const gchar  *option);
 
 G_END_DECLS
 #endif				/* #ifndef EEK_XKL_LAYOUT_H */

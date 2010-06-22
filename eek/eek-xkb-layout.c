@@ -608,6 +608,42 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
 }
 
 /**
+ * eek_xkb_layout_set_names_full:
+ * @layout: an #EekXkbLayout
+ * @keymap: keymap component name
+ * @keycodes: keycodes component name
+ * @types: types component name
+ * @compat: compat component name
+ * @symbols: symbols component name
+ * @geometry: geometry component name
+ *
+ * Set the XKB component names to @layout.  This function is merely a
+ * wrapper around eek_xkb_layout_set_names() to avoid passing an
+ * XkbComponentNamesRec pointer (which is not currently available in
+ * the gobject-introspection repository).
+ *
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
+eek_xkb_layout_set_names_full (EekXkbLayout *layout,
+                               const gchar  *keymap,
+                               const gchar  *keycodes,
+                               const gchar  *types,
+                               const gchar  *compat,
+                               const gchar  *symbols,
+                               const gchar  *geometry)
+{
+    XkbComponentNamesRec names;
+    names.keymap = keymap;
+    names.keycodes = keycodes;
+    names.types = types;
+    names.compat = compat;
+    names.symbols = symbols;
+    names.geometry = geometry;
+    return eek_xkb_layout_set_names (layout, &names);
+}
+
+/**
  * eek_xkb_layout_set_keycodes:
  * @layout: an #EekXkbLayout
  * @keycodes: component name for keycodes

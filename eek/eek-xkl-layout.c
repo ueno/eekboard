@@ -346,6 +346,42 @@ eek_xkl_layout_set_config (EekXklLayout *layout,
 }
 
 /**
+ * eek_xkl_layout_set_config_full:
+ * @layout: an #EekXklLayout
+ * @model: Libxklavier model name
+ * @layouts: Libxklavier layouts
+ * @variants: Libxklavier variants
+ * @options: Libxklavier options
+ *
+ * Reconfigure @layout with @model, @layouts, @variants, and @options.
+ * This function is merely a wrapper around
+ * eek_xkl_layout_set_config() to avoid passing an XklConfigRec
+ * pointer (which is not currently available in the
+ * gobject-introspection repository).
+ *
+ * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ */
+gboolean
+eek_xkl_layout_set_config_full (EekXklLayout *layout,
+                                gchar *model,
+                                gchar **layouts,
+                                gchar **variants,
+                                gchar **options)
+{
+    XklConfigRec *config;
+    gboolean success;
+
+    config = xkl_config_rec_new ();
+    config->model = g_strdup (model);
+    config->layouts = g_strdupv (layouts);
+    config->variants = g_strdupv (variants);
+    config->options = g_strdupv (options);
+    success = eek_xkl_layout_set_config (layout, config);
+    g_object_unref (config);
+    return success;
+}
+
+/**
  * eek_xkl_layout_set_model:
  * @layout: an #EekXklLayout
  * @model: model name
