@@ -99,9 +99,12 @@ egf_key_callback (EekElement *element,
 
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     label = eek_keysym_to_string (keysym);
+    if (!label)
+        return;
     font_size = get_font_size (label, &bounds, data->layout);
     if (font_size < data->font_size && font_size >= data->minimum_font_size)
         data->font_size = font_size;
+    g_free (label);
 }
 
 static void
@@ -242,6 +245,7 @@ eek_draw_key_label (cairo_t               *cr,
                    (bounds.width - logical_rect.width / PANGO_SCALE) / 2,
                    (bounds.height - logical_rect.height / PANGO_SCALE) / 2);
     pango_cairo_show_layout (cr, layout);
+    g_free (label);
     g_object_unref (layout);
 }
 

@@ -302,6 +302,7 @@ on_expose_event (GtkWidget      *widget,
         base_font = gtk_widget_get_style (priv->widget)->font_desc;
         pango_layout_set_font_description (layout, base_font);
         eek_get_fonts (EEK_KEYBOARD(keyboard), layout, priv->fonts);
+        g_object_unref (layout);
 
         prepare_keyboard_pixmap (keyboard);
     }
