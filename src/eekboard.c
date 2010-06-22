@@ -136,6 +136,8 @@ static void       on_options_menu   (GtkAction       *action,
                                      GtkWidget       *window);
 static void       on_about          (GtkAction       *action,
                                      GtkWidget       *window);
+static void       on_quit           (GtkAction *      action,
+                                     GtkWidget       *window);
 #if 0
 static void       on_monitor_key_event_toggled
                                     (GtkToggleAction *action,
@@ -195,7 +197,7 @@ static const GtkActionEntry action_entry[] = {
     {"FileMenu", NULL, N_("_File")},
     {"KeyboardMenu", NULL, N_("_Keyboard")},
     {"HelpMenu", NULL, N_("_Help")},
-    {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (gtk_main_quit)},
+    {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (on_quit)},
     {"Country", NULL, N_("Country"), NULL, NULL,
      G_CALLBACK(on_countries_menu)},
     {"Language", NULL, N_("Language"), NULL, NULL,
@@ -235,6 +237,19 @@ on_about (GtkAction * action, GtkWidget *window)
                          "http://github.com/ueno/eek/",
                          "website-label", _("Eekboard web site"),
                          "wrap-license", TRUE, NULL);
+}
+
+static void
+on_quit (GtkAction * action, GtkWidget *window)
+{
+    Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
+
+    g_object_unref (eekboard->keyboard);
+    g_object_unref (eekboard->layout);
+    g_object_unref (eekboard->registry);
+    g_object_unref (eekboard->engine);
+    g_slice_free (Eekboard, eekboard);
+    gtk_main_quit ();
 }
 
 #if 0
