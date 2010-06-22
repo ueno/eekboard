@@ -23,6 +23,7 @@
  * @short_description: #EekKeyboard that can be converted into a #GtkWidget
  */
 #include <string.h>
+#include <math.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -222,12 +223,15 @@ prepare_keyboard_pixmap_section_callback (EekElement *element,
 {
     DrawingContext *context = user_data;
     EekBounds bounds;
+    gint angle;
 
     eek_element_get_bounds (element, &bounds);
+    angle = eek_section_get_angle (EEK_SECTION(element));
     cairo_save (context->cr);
     cairo_translate (context->cr,
                      bounds.x,
                      bounds.y);
+    cairo_rotate (context->cr, angle * M_PI / 180);
     eek_container_foreach_child (EEK_CONTAINER(element),
                                  prepare_keyboard_pixmap_key_callback,
                                  context);
