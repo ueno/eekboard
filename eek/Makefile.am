@@ -171,11 +171,13 @@ EekGtk_0_1_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
 EekGtk_0_1_gir_LIBS = libeek-gtk.la
 EekGtk_0_1_gir_FILES = $(libeek_gtk_la_SOURCES)
 
+if HAVE_CLUTTER
 EekClutter-0.1.gir: libeek-clutter.la
 EekClutter_0_1_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek-0.1
 EekClutter_0_1_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
 EekClutter_0_1_gir_LIBS = libeek-clutter.la
 EekClutter_0_1_gir_FILES = $(libeek_clutter_la_SOURCES)
+endif
 
 EekXkb-0.1.gir: libeek-xkb.la
 EekXkb_0_1_gir_INCLUDES = GObject-2.0 Eek-0.1
@@ -192,9 +194,13 @@ EekXkl_0_1_gir_FILES = $(libeek_xkl_la_SOURCES)
 INTROSPECTION_GIRS += \
 	Eek-0.1.gir \
 	EekGtk-0.1.gir \
-	EekClutter-0.1.gir \
 	EekXkb-0.1.gir \
 	EekXkl-0.1.gir
+
+if HAVE_CLUTTER
+INTROSPECTION_GIRS += \
+	EekClutter-0.1.gir
+endif
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
