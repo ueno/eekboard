@@ -400,7 +400,11 @@ eek_xkl_layout_set_model (EekXklLayout *layout,
     
     g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
-    config->model = (gchar *)model;
+    /* config->model will be freed on g_object_unref (config) */
+    if (model)
+        config->model = g_strdup (model);
+    else
+        config->model = NULL;
     success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
     return success;
@@ -424,7 +428,11 @@ eek_xkl_layout_set_layouts (EekXklLayout *layout,
 
     g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
-    config->layouts = layouts;
+    /* config->layouts will be freed on g_object_unref (config) */
+    if (layouts)
+        config->layouts = g_strdupv (layouts);
+    else
+        config->layouts = layouts;
     success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
     return success;
@@ -448,7 +456,11 @@ eek_xkl_layout_set_variants (EekXklLayout *layout,
 
     g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
-    config->variants = variants;
+    /* config->variants will be freed on g_object_unref (config) */
+    if (variants)
+        config->variants = g_strdupv (variants);
+    else
+        config->variants = NULL;
     success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
     return success;
@@ -472,7 +484,11 @@ eek_xkl_layout_set_options (EekXklLayout *layout,
 
     g_return_val_if_fail (priv, FALSE);
     config = xkl_config_rec_new ();
-    config->options = options;
+    /* config->options will be freed on g_object_unref (config) */
+    if (options)
+        config->options = options;
+    else
+        config->options = NULL;
     success = eek_xkl_layout_set_config (layout, config);
     g_object_unref (config);
     return success;
