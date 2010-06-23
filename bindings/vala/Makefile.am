@@ -29,22 +29,22 @@ eek-$(EEK_API_VERSION).vapi:
 	vapigen --library eek-$(EEK_API_VERSION) \
 		eek-$(EEK_API_VERSION)/eek-$(EEK_API_VERSION).gi
 
-eek-clutter-$(EEK_API_VERSION).vapi:
+eek-clutter-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
 	vapigen --vapidir=$(builddir) --library eek-clutter-$(EEK_API_VERSION) \
 		--pkg eek-0.1 --pkg clutter-1.0 \
 		eek-clutter-$(EEK_API_VERSION)/eek-clutter-$(EEK_API_VERSION).gi
 
-eek-gtk-$(EEK_API_VERSION).vapi:
+eek-gtk-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
 	vapigen --vapidir=$(builddir) --library eek-gtk-$(EEK_API_VERSION) \
 		--pkg eek-0.1 --pkg gtk+-2.0 \
 		eek-gtk-$(EEK_API_VERSION)/eek-gtk-$(EEK_API_VERSION).gi
 
-eek-xkb-$(EEK_API_VERSION).vapi:
+eek-xkb-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
 	vapigen --vapidir=$(builddir) --library eek-xkb-$(EEK_API_VERSION) \
 		--pkg eek-0.1 \
 		eek-xkb-$(EEK_API_VERSION)/eek-xkb-$(EEK_API_VERSION).gi
 
-eek-xkl-$(EEK_API_VERSION).vapi:
+eek-xkl-$(EEK_API_VERSION).vapi: eek-xkb-$(EEK_API_VERSION).vapi
 	vapigen --vapidir=$(builddir) --library eek-xkl-$(EEK_API_VERSION) \
 		--pkg eek-0.1 --pkg eek-xkb-0.1 \
 		eek-xkl-$(EEK_API_VERSION)/eek-xkl-$(EEK_API_VERSION).gi

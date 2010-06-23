@@ -165,27 +165,27 @@ Eek_0_1_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek_0_1_gir_LIBS = libeek.la
 Eek_0_1_gir_FILES = $(libeek_la_SOURCES)
 
-EekGtk-0.1.gir: libeek-gtk.la
+EekGtk-0.1.gir: libeek-gtk.la Eek-0.1.gir
 EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-2.0 Eek-0.1
 EekGtk_0_1_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
 EekGtk_0_1_gir_LIBS = libeek-gtk.la
 EekGtk_0_1_gir_FILES = $(libeek_gtk_la_SOURCES)
 
 if HAVE_CLUTTER
-EekClutter-0.1.gir: libeek-clutter.la
+EekClutter-0.1.gir: libeek-clutter.la Eek-0.1.gir
 EekClutter_0_1_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek-0.1
 EekClutter_0_1_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
 EekClutter_0_1_gir_LIBS = libeek-clutter.la
 EekClutter_0_1_gir_FILES = $(libeek_clutter_la_SOURCES)
 endif
 
-EekXkb-0.1.gir: libeek-xkb.la
+EekXkb-0.1.gir: libeek-xkb.la Eek-0.1.gir
 EekXkb_0_1_gir_INCLUDES = GObject-2.0 Eek-0.1
 EekXkb_0_1_gir_CFLAGS = $(libeek_xkb_la_CFLAGS)
 EekXkb_0_1_gir_LIBS = libeek-xkb.la
 EekXkb_0_1_gir_FILES = $(libeek_xkb_la_SOURCES)
 
-EekXkl-0.1.gir: libeek-xkl.la
+EekXkl-0.1.gir: libeek-xkl.la EekXkb-0.1.gir
 EekXkl_0_1_gir_INCLUDES = GObject-2.0 EekXkb-0.1
 EekXkl_0_1_gir_CFLAGS = $(libeek_xkl_la_CFLAGS)
 EekXkl_0_1_gir_LIBS = libeek-xkl.la
