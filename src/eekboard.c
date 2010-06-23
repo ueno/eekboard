@@ -244,6 +244,7 @@ on_quit (GtkAction * action, GtkWidget *window)
 {
     Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
 
+    fakekey_release (eekboard->fakekey);
     g_object_unref (eekboard->keyboard);
     g_object_unref (eekboard->layout);
     g_object_unref (eekboard->registry);
