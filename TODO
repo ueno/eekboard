@@ -1,17 +1,16 @@
 - packaging
--- GIR
--- .spec
 -- debian
 -- add more tests
 
 - eekboard
 -- a11y
 -- display current configuration
--- add command line options
 -- notify user if there is no focused window
+-- startup in the tray
 
 - libeek
--- matchbox-keyboard layout engine
+-- Caribou layout engine (XML)
+-- matchbox-keyboard layout engine (XML)
 -- delay initialization of XKB and XKL layouts
 -- add eek_keyboard_find_by_position(), that takes account of section
    rotation, in addition to eek_container_find_by_position()
