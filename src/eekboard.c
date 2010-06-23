@@ -143,6 +143,7 @@ static void       on_monitor_key_event_toggled
                                     (GtkToggleAction *action,
                                      GtkWidget       *window);
 #endif
+static void       eekboard_free     (Eekboard        *eekboard);
 static GtkWidget *create_widget     (Eekboard        *eekboard,
                                      gint             initial_width,
                                      gint             initial_height);
@@ -218,6 +219,32 @@ static const GtkToggleActionEntry toggle_action_entry[] = {
 };
 #endif
 
+static gchar *opt_model = NULL;
+static gchar *opt_layouts = NULL;
+static gchar *opt_options = NULL;
+static gboolean opt_list_models = FALSE;
+static gboolean opt_list_layouts = FALSE;
+static gboolean opt_list_options = FALSE;
+static gboolean opt_version = FALSE;
+
+static const GOptionEntry options[] = {
+    {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
+     N_("Keyboard model to display")},
+    {"layouts", 'L', 0, G_OPTION_ARG_STRING, &opt_layouts,
+     N_("Keyboard layouts to display, separated with commas")},
+    {"options", 'O', 0, G_OPTION_ARG_STRING, &opt_options,
+     N_("Keyboard layout options to display, separated with commas")},
+    {"list-models", '\0', 0, G_OPTION_ARG_NONE, &opt_list_models,
+     N_("List keyboard models")},
+    {"list-layouts", '\0', 0, G_OPTION_ARG_NONE, &opt_list_layouts,
+     N_("List all available keyboard layouts and variants")},
+    {"list-options", 'O', 0, G_OPTION_ARG_NONE, &opt_list_options,
+     N_("List all available keyboard layout options")},
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
+     N_("Display version")},
+    {NULL}
+};
+
 static void
 on_about (GtkAction * action, GtkWidget *window)
 {
@@ -245,11 +272,7 @@ on_quit (GtkAction * action, GtkWidget *window)
     Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
 
     fakekey_release (eekboard->fakekey);
-    g_object_unref (eekboard->keyboard);
-    g_object_unref (eekboard->layout);
-    g_object_unref (eekboard->registry);
-    g_object_unref (eekboard->engine);
-    g_slice_free (Eekboard, eekboard);
+    eekboard_free (eekboard);
     gtk_main_quit ();
 }
 
@@ -972,6 +995,36 @@ eekboard_new (gboolean use_clutter)
         g_warning ("Can't create layout");
         return NULL;
     }
+    if (opt_model)
+        eek_xkl_layout_set_model (EEK_XKL_LAYOUT(eekboard->layout), opt_model);
+    if (opt_layouts) {
+        gchar **layouts, **variants;
+        gint i;
+        layouts = g_strsplit (opt_layouts, ",", -1);
+        variants = g_strdupv (layouts);
+        for (i = 0; layouts[i]; i++) {
+            gchar *layout = layouts[i], *variant = variants[i],
+                *variant_start, *variant_end;
+
+            variant_start = strchr (layout, '(');
+            variant_end = strrchr (layout, ')');
+            if (variant_start && variant_end) {
+                *variant_start++ = '\0';
+                g_strlcpy (variant, variant_start,
+                           variant_end - variant_start + 1);
+            } else
+                *variant = '\0';
+        }
+        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(eekboard->layout), layouts);
+        g_strfreev (layouts);
+        g_strfreev (variants);
+    }
+    if (opt_options) {
+        gchar **options;
+        options = g_strsplit (opt_options, ",", -1);
+        eek_xkl_layout_set_options (EEK_XKL_LAYOUT(eekboard->layout), options);
+        g_strfreev (options);
+    }
     g_signal_connect (eekboard->layout, "changed",
                       G_CALLBACK(on_changed), eekboard);
 
@@ -980,9 +1033,70 @@ eekboard_new (gboolean use_clutter)
     eekboard->registry = xkl_config_registry_get_instance (eekboard->engine);
     xkl_config_registry_load (eekboard->registry, FALSE);
 
-    create_widget (eekboard, CSW, CSH);
-
     return eekboard;
+}
+
+static void
+eekboard_free (Eekboard *eekboard)
+{
+    if (eekboard->layout)
+        g_object_unref (eekboard->layout);
+#if 0
+    if (eekboard->keyboard)
+        g_object_unref (eekboard->keyboard);
+#endif
+    if (eekboard->registry)
+        g_object_unref (eekboard->registry);
+    if (eekboard->engine)
+        g_object_unref (eekboard->engine);
+    g_slice_free (Eekboard, eekboard);
+}
+
+static void
+print_layout (XklConfigRegistry   *registry,
+              const XklConfigItem *item,
+              gpointer             user_data)
+{
+    GSList *variants = NULL;
+    xkl_config_registry_foreach_layout_variant (registry,
+                                                item->name,
+                                                collect_variant,
+                                                &variants);
+    if (!variants)
+        printf ("%s: %s\n", item->name, item->description);
+    else {
+        GSList *head;
+        for (head = variants; head; head = head->next) {
+            XklConfigItem *_item = head->data;
+            
+            printf ("%s(%s): %s %s\n",
+                    item->name,
+                    _item->name,
+                    item->description,
+                    _item->description);
+            g_slice_free (XklConfigItem, _item);
+        }
+        g_slist_free (variants);
+    }
+}
+
+static void
+print_item (XklConfigRegistry *registry,
+            const XklConfigItem *item,
+            gpointer user_data)
+{
+    printf ("%s: %s\n", item->name, item->description);
+}
+
+static void
+print_option_group (XklConfigRegistry *registry,
+                    const XklConfigItem *item,
+                    gpointer user_data)
+{
+    xkl_config_registry_foreach_option (registry,
+                                        item->name,
+                                        print_item,
+                                        NULL);
 }
 
 int
@@ -992,6 +1106,17 @@ main (int argc, char *argv[])
     gboolean use_clutter = USE_CLUTTER;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window;
+    GOptionContext *context;
+
+    context = g_option_context_new ("eekboard");
+    g_option_context_add_main_entries (context, options, NULL);
+    g_option_context_parse (context, &argc, &argv, NULL);
+    g_option_context_free (context);
+
+    if (opt_version) {
+        g_print ("eekboard %s\n", VERSION);
+        exit (0);
+    }
 
 #ifdef ENABLE_NLS
     bindtextdomain (GETTEXT_PACKAGE, EEKBOARD_LOCALEDIR);
@@ -1015,6 +1140,29 @@ main (int argc, char *argv[])
         exit (1);
     }
 
+    eekboard = eekboard_new (use_clutter);
+    if (opt_list_models) {
+        xkl_config_registry_foreach_model (eekboard->registry,
+                                           print_item,
+                                           NULL);
+        eekboard_free (eekboard);
+        exit (0);
+    }
+    if (opt_list_layouts) {
+        xkl_config_registry_foreach_layout (eekboard->registry,
+                                            print_layout,
+                                            NULL);
+        eekboard_free (eekboard);
+        exit (0);
+    }
+    if (opt_list_options) {
+        xkl_config_registry_foreach_option_group (eekboard->registry,
+                                                  print_option_group,
+                                                  NULL);
+        eekboard_free (eekboard);
+        exit (0);
+    }
+
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_can_focus (window, FALSE);
     g_object_set (G_OBJECT(window), "accept_focus", FALSE, NULL);
@@ -1024,7 +1172,6 @@ main (int argc, char *argv[])
 
     vbox = gtk_vbox_new (FALSE, 0);
 
-    eekboard = eekboard_new (use_clutter);
     g_object_set_data (G_OBJECT(window), "eekboard", eekboard);
     widget = create_widget (eekboard, CSW, CSH);
     
