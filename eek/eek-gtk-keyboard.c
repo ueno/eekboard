@@ -80,6 +80,9 @@ eek_gtk_keyboard_real_set_keysym_index (EekKeyboard *self,
         GtkStateType state;
         GtkAllocation allocation;
 
+        if (!priv->widget || !gtk_widget_get_realized (priv->widget))
+            return;
+
         prepare_keyboard_pixmap (keyboard);
         state = gtk_widget_get_state (GTK_WIDGET (priv->widget));
         gtk_widget_get_allocation (GTK_WIDGET (priv->widget), &allocation);
