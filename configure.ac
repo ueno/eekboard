@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-AC_INIT([eekboard], [0.0.3], [ueno@unixuser.org])
+AC_INIT([eekboard], [0.0.4], [ueno@unixuser.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_PREREQ(2.63)
 AM_INIT_AUTOMAKE
