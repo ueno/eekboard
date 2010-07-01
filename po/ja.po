@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: eekboard 0.0.0\n"
+"Project-Id-Version: eekboard 0.0.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-21 12:42+0900\n"
-"PO-Revision-Date: 2010-06-21 12:45+0900\n"
+"POT-Creation-Date: 2010-06-23 16:52+0900\n"
+"PO-Revision-Date: 2010-06-23 16:55+0900\n"
 "Last-Translator: Daiki Ueno <ueno@unixuser.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -17,46 +17,74 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/eekboard.c:195
+#: ../src/eekboard.c:198
 msgid "_File"
 msgstr "ファイル"
 
-#: ../src/eekboard.c:196
+#: ../src/eekboard.c:199
 msgid "_Keyboard"
 msgstr "キーボード"
 
-#: ../src/eekboard.c:197
+#: ../src/eekboard.c:200
 msgid "_Help"
 msgstr "ヘルプ"
 
-#: ../src/eekboard.c:199
+#: ../src/eekboard.c:202
 msgid "Country"
 msgstr "国"
 
-#: ../src/eekboard.c:201
+#: ../src/eekboard.c:204
 msgid "Language"
 msgstr "言語"
 
-#: ../src/eekboard.c:203
+#: ../src/eekboard.c:206
 msgid "Model"
 msgstr "モデル"
 
-#: ../src/eekboard.c:205
+#: ../src/eekboard.c:208
 msgid "Layout"
 msgstr "レイアウト"
 
-#: ../src/eekboard.c:207
+#: ../src/eekboard.c:210
 msgid "Option"
 msgstr "オプション"
 
-#: ../src/eekboard.c:214
+#: ../src/eekboard.c:217
 msgid "Monitor Key Typing"
 msgstr "打鍵をモニタ"
 
 #: ../src/eekboard.c:232
+msgid "Keyboard model to display"
+msgstr "表示するキーボードのモデル"
+
+#: ../src/eekboard.c:234
+msgid "Keyboard layouts to display, separated with commas"
+msgstr "表示するキーボードのレイアウト，カンマ区切り"
+
+#: ../src/eekboard.c:236
+msgid "Keyboard layout options to display, separated with commas"
+msgstr "表示するキーボードのオプション，カンマ区切り"
+
+#: ../src/eekboard.c:238
+msgid "List keyboard models"
+msgstr "キーボードのモデルを一覧"
+
+#: ../src/eekboard.c:240
+msgid "List all available keyboard layouts and variants"
+msgstr "利用可能なキーボードのレイアウトとバリアントを一覧"
+
+#: ../src/eekboard.c:242
+msgid "List all available keyboard layout options"
+msgstr "利用可能なキーボードのレイアウトオプションを一覧"
+
+#: ../src/eekboard.c:244
+msgid "Display version"
+msgstr "バージョンを表示"
+
+#: ../src/eekboard.c:261
 msgid "A virtual keyboard for GNOME"
 msgstr "GNOME 向け仮想キーボード"
 
-#: ../src/eekboard.c:236
+#: ../src/eekboard.c:265
 msgid "Eekboard web site"
 msgstr "Eekboard のウェブサイト"
