@@ -22,6 +22,9 @@
 
 #if HAVE_CLUTTER_GTK
 #include <clutter-gtk/clutter-gtk.h>
+#if NEED_SWAP_EVENT_WORKAROUND
+#include <clutter/x11/clutter-x11.h>
+#endif
 #endif
 
 #include <glib/gi18n.h>
@@ -75,6 +78,7 @@
 
 struct _Eekboard {
     gboolean use_clutter;
+    gboolean need_swap_event_workaround;
     Display *display;
     FakeKey *fakekey;
     GtkWidget *widget;
@@ -920,6 +924,26 @@ create_widget_gtk (Eekboard *eekboard,
 }
 
 #if HAVE_CLUTTER_GTK
+#if NEED_SWAP_EVENT_WORKAROUND
+static GdkFilterReturn
+gtk_clutter_filter_func (GdkXEvent *native_event,
+                         GdkEvent  *event,
+                         gpointer   user_data)
+{
+  XEvent *xevent = native_event;
+
+  clutter_x11_handle_event (xevent);
+
+  return GDK_FILTER_CONTINUE;
+}
+
+static void
+on_gtk_clutter_embed_realize (GtkWidget *widget, gpointer user_data)
+{
+    gdk_window_add_filter (NULL, gtk_clutter_filter_func, widget);
+}
+#endif
+
 static GtkWidget *
 create_widget_clutter (Eekboard *eekboard,
                        gint      initial_width,
@@ -942,6 +966,11 @@ create_widget_clutter (Eekboard *eekboard,
                       G_CALLBACK(on_key_released), eekboard);
 
     eekboard->widget = gtk_clutter_embed_new ();
+#if NEED_SWAP_EVENT_WORKAROUND
+    if (eekboard->need_swap_event_workaround)
+        g_signal_connect (eekboard->widget, "realize",
+                          G_CALLBACK(on_gtk_clutter_embed_realize), NULL);
+#endif
     stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(eekboard->widget));
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
     clutter_stage_set_user_resizable (CLUTTER_STAGE (stage), TRUE);
@@ -969,12 +998,13 @@ create_widget (Eekboard *eekboard,
 #endif
 
 Eekboard *
-eekboard_new (gboolean use_clutter)
+eekboard_new (gboolean use_clutter, gboolean need_swap_event_workaround)
 {
     Eekboard *eekboard;
 
     eekboard = g_slice_new0 (Eekboard);
     eekboard->use_clutter = use_clutter;
+    eekboard->need_swap_event_workaround = need_swap_event_workaround;
     eekboard->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     if (!eekboard->display) {
         g_slice_free (Eekboard, eekboard);
@@ -1104,6 +1134,7 @@ main (int argc, char *argv[])
 {
     const gchar *env;
     gboolean use_clutter = USE_CLUTTER;
+    gboolean need_swap_event_workaround = FALSE;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window;
     GOptionContext *context;
@@ -1133,6 +1164,13 @@ main (int argc, char *argv[])
         g_warning ("Can't init Clutter-Gtk...fallback to GTK");
         use_clutter = FALSE;
     }
+#ifdef NEED_SWAP_EVENT_WORKAROUND
+    if (use_clutter &&
+        clutter_feature_available (CLUTTER_FEATURE_SWAP_EVENTS)) {
+        g_warning ("Enabling GLX_INTEL_swap_event workaround for Clutter-Gtk");
+        need_swap_event_workaround = TRUE;
+    }
+#endif
 #endif
 
     if (!use_clutter && !gtk_init_check (&argc, &argv)) {
@@ -1140,7 +1178,7 @@ main (int argc, char *argv[])
         exit (1);
     }
 
-    eekboard = eekboard_new (use_clutter);
+    eekboard = eekboard_new (use_clutter, need_swap_event_workaround);
     if (opt_list_models) {
         xkl_config_registry_foreach_model (eekboard->registry,
                                            print_item,

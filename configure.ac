@@ -69,18 +69,15 @@ if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
     [AC_MSG_ERROR([Clutter not found -- install it or add --disable-clutter])])
   AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
-  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],
-    [enable_clutter_gtk=yes])
-  if test x$enable_clutter_gtk = xno; then
-    PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10],
-      [enable_clutter_gtk=yes])
-  fi
-  if test x$enable_clutter_gtk = xyes; then
-    AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
-  fi
+  need_swap_event_workaround=no
+  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],,
+    [PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10 clutter-x11-1.0],
+      [need_swap_event_workaround=yes])])
+  AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
+  AC_DEFINE([NEED_SWAP_EVENT_WORKAROUND], [1],
+    [Define if GLX_INTEL_swap_event work around is needed])
 fi
 AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
-AM_CONDITIONAL(HAVE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 

@@ -37,12 +37,7 @@ eekboard_LDFLAGS = \
 	$(LIBFAKEKEY_LIBS)
 
 if HAVE_CLUTTER
-eekboard_CFLAGS += $(CLUTTER_CFLAGS)
-eekboard_LDFLAGS += $(CLUTTER_LIBS)
-endif
-
-if HAVE_CLUTTER_GTK
-eekboard_CFLAGS += $(CLUTTER_GTK_CFLAGS)
-eekboard_LDFLAGS += $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
+eekboard_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
+eekboard_LDFLAGS += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif
 endif
