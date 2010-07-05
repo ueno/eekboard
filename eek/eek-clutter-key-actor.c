@@ -103,28 +103,6 @@ eek_clutter_key_actor_real_paint (ClutterActor *self)
     g_object_unref (layout);
 }
 
-/* FIXME: This is a workaround for the bug
- * http://bugzilla.openedhand.com/show_bug.cgi?id=2137 A developer
- * says this is not a right way to solve the original problem.
- */
-static void
-eek_clutter_key_actor_real_get_preferred_width (ClutterActor *self,
-                                                gfloat        for_height,
-                                                gfloat       *min_width_p,
-                                                gfloat       *natural_width_p)
-{
-    PangoLayout *layout;
-
-    /* Draw the label on the key - just to validate the glyph cache. */
-    layout = clutter_actor_create_pango_layout (self, NULL);
-    draw_key_on_layout (EEK_CLUTTER_KEY_ACTOR(self), layout);
-    cogl_pango_ensure_glyph_cache_for_layout (layout);
-    g_object_unref (layout);
-
-    CLUTTER_ACTOR_CLASS (eek_clutter_key_actor_parent_class)->
-        get_preferred_width (self, for_height, min_width_p, natural_width_p);
-}
-
 static void
 eek_clutter_key_actor_real_pressed (EekClutterKeyActor *self)
 {
@@ -181,12 +159,6 @@ eek_clutter_key_actor_class_init (EekClutterKeyActorClass *klass)
                               sizeof (EekClutterKeyActorPrivate));
 
     actor_class->paint = eek_clutter_key_actor_real_paint;
-    /* FIXME: This is a workaround for the bug
-     * http://bugzilla.openedhand.com/show_bug.cgi?id=2137 A developer
-     * says this is not a right way to solve the original problem.
-     */
-    actor_class->get_preferred_width =
-        eek_clutter_key_actor_real_get_preferred_width;
 
     gobject_class->dispose = eek_clutter_key_actor_dispose;
 
