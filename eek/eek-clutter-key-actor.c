@@ -52,6 +52,7 @@ struct _EekClutterKeyActorPrivate
     EekClutterDrawingContext *context;
     EekKey *key;
     ClutterActor *texture;
+    gboolean is_pressed;
 };
 
 static ClutterActor *get_texture          (EekClutterKeyActor *actor);
@@ -195,8 +196,11 @@ on_button_press_event (ClutterActor *actor,
     EekClutterKeyActorPrivate *priv =
         EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
 
-    /* priv->key will send back PRESSED event of actor. */
-    g_signal_emit_by_name (priv->key, "pressed");
+    if (!priv->is_pressed) {
+        priv->is_pressed = TRUE;
+        /* priv->key will send back PRESSED event of actor. */
+        g_signal_emit_by_name (priv->key, "pressed");
+    }
 }
 
 static void
@@ -207,8 +211,27 @@ on_button_release_event (ClutterActor *actor,
     EekClutterKeyActorPrivate *priv =
         EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
 
-    /* priv->key will send back RELEASED event of actor. */
-    g_signal_emit_by_name (priv->key, "released");
+    if (priv->is_pressed) {
+        priv->is_pressed = FALSE;
+        /* priv->key will send back RELEASED event of actor. */
+        g_signal_emit_by_name (priv->key, "released");
+    }
+}
+
+static gboolean
+on_leave_event (ClutterActor *actor,
+                ClutterEvent *event,
+                gpointer      user_data)
+{
+    EekClutterKeyActorPrivate *priv =
+        EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(actor);
+
+    if (priv->is_pressed) {
+        priv->is_pressed = FALSE;
+        /* priv->key will send back RELEASED event of actor. */
+        g_signal_emit_by_name (priv->key, "released");
+    }
+    return FALSE;
 }
 
 static void
@@ -219,12 +242,15 @@ eek_clutter_key_actor_init (EekClutterKeyActor *self)
     priv = self->priv = EEK_CLUTTER_KEY_ACTOR_GET_PRIVATE(self);
     priv->key = NULL;
     priv->texture = NULL;
-    
+
     clutter_actor_set_reactive (CLUTTER_ACTOR(self), TRUE);
+
     g_signal_connect (self, "button-press-event",
                       G_CALLBACK (on_button_press_event), NULL);
     g_signal_connect (self, "button-release-event",
                       G_CALLBACK (on_button_release_event), NULL);
+    g_signal_connect (self, "leave-event",
+                      G_CALLBACK (on_leave_event), NULL);
 }
 
 ClutterActor *

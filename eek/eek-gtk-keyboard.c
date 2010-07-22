@@ -59,6 +59,8 @@ struct _EekGtkKeyboardPrivate
     PangoFontDescription *fonts[EEK_KEYSYM_CATEGORY_LAST];
 
     gdouble scale;
+
+    EekKey *key;
 };
 
 static void prepare_keyboard_pixmap (EekGtkKeyboard *keyboard);
@@ -155,6 +157,7 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
                                g_object_unref);
     memset (priv->fonts, 0, sizeof priv->fonts);
     priv->scale = 1.0;
+    priv->key = NULL;
 }
 
 /**
@@ -413,8 +416,8 @@ key_shrink (EekGtkKeyboard *keyboard, EekKey *key)
 
 static gboolean
 on_button_event (GtkWidget      *widget,
-                     GdkEventButton *event,
-                     gpointer        user_data)
+                 GdkEventButton *event,
+                 gpointer        user_data)
 {
     EekElement *keyboard = user_data, *section, *key;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
@@ -434,12 +437,22 @@ on_button_event (GtkWidget      *widget,
         if (key)
             switch (event->type) {
             case GDK_BUTTON_PRESS:
+                if (priv->key == key)
+                    return FALSE;
+                if (priv->key) {
+                    key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
+                    g_signal_emit_by_name (keyboard, "key-released", priv->key);
+                }
                 key_enlarge (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
                 g_signal_emit_by_name (keyboard, "key-pressed", key);
+                priv->key = key;
                 return TRUE;
             case GDK_BUTTON_RELEASE:
-                key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
-                g_signal_emit_by_name (keyboard, "key-released", key);
+                if (!priv->key)
+                    return FALSE;
+                key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
+                g_signal_emit_by_name (keyboard, "key-released", priv->key);
+                priv->key = NULL;
                 return TRUE;
             default:
                 return FALSE;
@@ -447,6 +460,7 @@ on_button_event (GtkWidget      *widget,
     }
     return FALSE;
 }
+
 static void
 on_size_allocate (GtkWidget     *widget,
                   GtkAllocation *allocation,
@@ -469,6 +483,7 @@ on_size_allocate (GtkWidget     *widget,
         allocation->width / bounds.width :
         allocation->height / bounds.height;
 }
+
 GtkWidget *
 eek_gtk_keyboard_get_widget (EekGtkKeyboard *keyboard)
 {
