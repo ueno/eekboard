@@ -32,9 +32,7 @@
 #include <gtk/gtk.h>
 #include <libxklavier/xklavier.h>
 #include <fakekey/fakekey.h>
-#if 0
-#include <atk/atk.h>
-#endif
+#include <cspi/spi.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -83,7 +81,6 @@ struct _Eekboard {
     FakeKey *fakekey;
     GtkWidget *widget;
     gint width, height;
-    guint key_event_listener;
     XklEngine *engine;
     XklConfigRegistry *registry;
     GtkUIManager *ui_manager;
@@ -142,11 +139,9 @@ static void       on_about          (GtkAction       *action,
                                      GtkWidget       *window);
 static void       on_quit           (GtkAction *      action,
                                      GtkWidget       *window);
-#if 0
 static void       on_monitor_key_event_toggled
                                     (GtkToggleAction *action,
                                      GtkWidget       *window);
-#endif
 static void       eekboard_free     (Eekboard        *eekboard);
 static GtkWidget *create_widget     (Eekboard        *eekboard,
                                      gint             initial_width,
@@ -166,9 +161,7 @@ static const char ui_description[] =
     "      <menuitem action='Quit'/>"
     "    </menu>"
     "    <menu action='KeyboardMenu'>"
-#if 0
     "      <menuitem action='MonitorKeyEvent'/>"
-#endif
     "      <menu action='Country'>"
     "        <placeholder name='CountriesPH'/>"
     "      </menu>"
@@ -216,12 +209,10 @@ static const GtkActionEntry action_entry[] = {
     {"About", GTK_STOCK_ABOUT, NULL, NULL, NULL, G_CALLBACK (on_about)}
 };
 
-#if 0
 static const GtkToggleActionEntry toggle_action_entry[] = {
     {"MonitorKeyEvent", NULL, N_("Monitor Key Typing"), NULL, NULL,
      G_CALLBACK(on_monitor_key_event_toggled), FALSE}
 };
-#endif
 
 static gchar *opt_model = NULL;
 static gchar *opt_layouts = NULL;
@@ -280,32 +271,50 @@ on_quit (GtkAction * action, GtkWidget *window)
     gtk_main_quit ();
 }
 
-#if 0
-static gint
-key_snoop (AtkKeyEventStruct *event, gpointer func_data)
+static SPIBoolean
+keystroke_listener (const AccessibleKeystroke *stroke,
+                    void                      *user_data)
 {
-    return FALSE;
+    Eekboard *eekboard = user_data;
+    EekKey *key;
+
+    //g_return_val_if_fail (stroke->modifiers == SPI_KEYMASK_UNMODIFIED, FALSE);
+    key = eek_keyboard_find_key_by_keycode (eekboard->keyboard,
+                                            stroke->keycode);
+    g_return_val_if_fail (key, FALSE);
+    if (stroke->type == SPI_KEY_PRESSED)
+        g_signal_emit_by_name (key, "pressed");
+    else
+        g_signal_emit_by_name (key, "released");
+    return TRUE;
 }
+
+static AccessibleEventListener* keystrokeListener;
 
 static void
 on_monitor_key_event_toggled (GtkToggleAction *action,
-                              GtkWidget *window)
+                              GtkWidget       *window)
 {
 
     Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
 
+    if (!keystrokeListener) {
+        keystrokeListener =
+            SPI_createAccessibleKeystrokeListener (keystroke_listener,
+                                                   eekboard);
+    }
     if (gtk_toggle_action_get_active (action)) {
-        if (eekboard->key_event_listener == 0)
-            eekboard->key_event_listener =
-                atk_add_key_event_listener (key_snoop, eekboard);
-        g_warning ("failed to enable ATK key event listener");
+        if (!SPI_registerAccessibleKeystrokeListener (keystrokeListener,
+                                                      SPI_KEYSET_ALL_KEYS,
+                                                      0,
+                                                      SPI_KEY_PRESSED |
+                                                      SPI_KEY_RELEASED,
+                                                      SPI_KEYLISTENER_NOSYNC))
+            g_warning ("failed to register keystroke listener");
     } else
-        if (eekboard->key_event_listener != 0) {
-            atk_remove_key_event_listener (eekboard->key_event_listener);
-            eekboard->key_event_listener = 0;
-        }
+        if (!SPI_deregisterAccessibleKeystrokeListener (keystrokeListener, 0))
+            g_warning ("failed to deregister keystroke listener");
 }
-#endif
 
 static void
 on_key_pressed (EekKeyboard *keyboard,
@@ -861,11 +870,9 @@ create_menus (Eekboard      *eekboard,
 
     gtk_action_group_add_actions (action_group, action_entry,
                                   G_N_ELEMENTS (action_entry), window);
-#if 0
     gtk_action_group_add_toggle_actions (action_group, toggle_action_entry,
                                          G_N_ELEMENTS (toggle_action_entry),
                                          window);
-#endif
 
     gtk_ui_manager_insert_action_group (eekboard->ui_manager, action_group, 0);
     gtk_ui_manager_add_ui_from_string (eekboard->ui_manager, ui_description, -1, NULL);
@@ -1153,6 +1160,8 @@ main (int argc, char *argv[])
     bindtextdomain (GETTEXT_PACKAGE, EEKBOARD_LOCALEDIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 #endif
+
+    SPI_init ();
 
     env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
     if (env && g_strcmp0 (env, "1") == 0)

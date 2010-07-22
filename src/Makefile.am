@@ -24,17 +24,19 @@ eekboard_CFLAGS = \
 	$(GTK2_CFLAGS) \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
-	$(LIBFAKEKEY_CFLAGS)
+	$(LIBFAKEKEY_CFLAGS) \
+	$(CSPI_CFLAGS)
 
 eekboard_LDFLAGS = \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(top_builddir)/eek/libeek-gtk.la \
 	$(GOBJECT2_LIBS) \
-	$(GTK2_CFLAGS) \
+	$(GTK2_LIBS) \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS) \
-	$(LIBFAKEKEY_LIBS)
+	$(LIBFAKEKEY_LIBS) \
+	$(CSPI_LIBS)
 
 if HAVE_CLUTTER
 eekboard_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)

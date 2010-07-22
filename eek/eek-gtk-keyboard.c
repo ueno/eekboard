@@ -179,6 +179,9 @@ struct _DrawingContext
 };
 typedef struct _DrawingContext DrawingContext;
 
+static void on_key_pressed (EekKey *key, gpointer user_data);
+static void on_key_released (EekKey *key, gpointer user_data);
+
 static void
 prepare_keyboard_pixmap_key_callback (EekElement *element,
                                       gpointer    user_data)
@@ -192,6 +195,11 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     GdkPixmap *texture;
 
     eek_element_get_bounds (element, &bounds);
+
+    g_signal_connect (key, "pressed", G_CALLBACK(on_key_pressed),
+                      context->keyboard);
+    g_signal_connect (key, "released", G_CALLBACK(on_key_released),
+                      context->keyboard);
 
     outline = eek_key_get_outline (key);
     texture = g_hash_table_lookup (priv->outline_textures, outline);
@@ -414,6 +422,71 @@ key_shrink (EekGtkKeyboard *keyboard, EekKey *key)
                        bounds.height * SCALE * priv->scale);
 }
 
+static void
+on_key_pressed (EekKey *key, gpointer user_data)
+{
+    EekGtkKeyboard *keyboard = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    key_enlarge (EEK_GTK_KEYBOARD(keyboard), key);
+    priv->key = key;
+}
+
+static void
+on_key_released (EekKey *key, gpointer user_data)
+{
+    EekGtkKeyboard *keyboard = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    if (priv->key)
+        key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
+    priv->key = NULL;
+}
+
+static void
+press_key (EekGtkKeyboard *keyboard, EekKey *key)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    if (priv->key != key) {
+        if (priv->key)
+            g_signal_emit_by_name (priv->key, "released", keyboard);
+        g_signal_emit_by_name (key, "pressed", keyboard);
+    }
+}
+
+static void
+release_key (EekGtkKeyboard *keyboard)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    if (priv->key)
+        g_signal_emit_by_name (priv->key, "released", keyboard);
+}
+
+static gboolean
+on_key_event (GtkWidget   *widget,
+              GdkEventKey *event,
+              gpointer     user_data)
+{
+    EekGtkKeyboard *keyboard = user_data;
+    EekKey *key;
+
+    key = eek_keyboard_find_key_by_keycode (EEK_KEYBOARD(keyboard),
+                                            event->hardware_keycode);
+    if (!key)
+        return FALSE;
+    switch (event->type) {
+    case GDK_KEY_PRESS:
+        press_key (keyboard, key);
+        return TRUE;
+    case GDK_KEY_RELEASE:
+        release_key (keyboard);
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 static gboolean
 on_button_event (GtkWidget      *widget,
                  GdkEventButton *event,
@@ -434,29 +507,18 @@ on_button_event (GtkWidget      *widget,
         key = eek_container_find_by_position (EEK_CONTAINER(section),
                                               x,
                                               y);
-        if (key)
-            switch (event->type) {
-            case GDK_BUTTON_PRESS:
-                if (priv->key == key)
-                    return FALSE;
-                if (priv->key) {
-                    key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
-                    g_signal_emit_by_name (keyboard, "key-released", priv->key);
-                }
-                key_enlarge (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
-                g_signal_emit_by_name (keyboard, "key-pressed", key);
-                priv->key = key;
-                return TRUE;
-            case GDK_BUTTON_RELEASE:
-                if (!priv->key)
-                    return FALSE;
-                key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
-                g_signal_emit_by_name (keyboard, "key-released", priv->key);
-                priv->key = NULL;
-                return TRUE;
-            default:
-                return FALSE;
-            }
+        if (!key)
+            return FALSE;
+        switch (event->type) {
+        case GDK_BUTTON_PRESS:
+            press_key (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
+            return TRUE;
+        case GDK_BUTTON_RELEASE:
+            release_key (EEK_GTK_KEYBOARD(keyboard));
+            return TRUE;
+        default:
+            return FALSE;
+        }
     }
     return FALSE;
 }
@@ -498,12 +560,17 @@ eek_gtk_keyboard_get_widget (EekGtkKeyboard *keyboard)
         gtk_widget_set_events (priv->widget,
                                GDK_EXPOSURE_MASK |
                                GDK_KEY_PRESS_MASK |
+                               GDK_KEY_RELEASE_MASK |
                                GDK_BUTTON_PRESS_MASK |
                                GDK_BUTTON_RELEASE_MASK);
         g_signal_connect (priv->widget, "expose_event",
                           G_CALLBACK (on_expose_event), keyboard);
         g_signal_connect (priv->widget, "size-allocate",
                           G_CALLBACK (on_size_allocate), keyboard);
+        g_signal_connect (priv->widget, "key-press-event",
+                          G_CALLBACK (on_key_event), keyboard);
+        g_signal_connect (priv->widget, "key-release-event",
+                          G_CALLBACK (on_key_event), keyboard);
         g_signal_connect (priv->widget, "button-press-event",
                           G_CALLBACK (on_button_event), keyboard);
         g_signal_connect (priv->widget, "button-release-event",

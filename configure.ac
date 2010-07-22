@@ -41,6 +41,8 @@ PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
 PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
+PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
+  [AC_MSG_ERROR([AT-SPI C not found])])
 
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
