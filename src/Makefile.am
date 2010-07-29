@@ -22,6 +22,7 @@ eekboard_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GOBJECT2_CFLAGS) \
 	$(GTK2_CFLAGS) \
+	$(GCONF2_CFLAGS) \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
 	$(LIBFAKEKEY_CFLAGS) \
@@ -33,6 +34,7 @@ eekboard_LDFLAGS = \
 	$(top_builddir)/eek/libeek-gtk.la \
 	$(GOBJECT2_LIBS) \
 	$(GTK2_LIBS) \
+	$(GCONF2_LIBS) \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS) \
 	$(LIBFAKEKEY_LIBS) \

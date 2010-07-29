@@ -30,6 +30,7 @@
 #include <glib/gi18n.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
+#include <gconf/gconf-client.h>
 #include <libxklavier/xklavier.h>
 #include <fakekey/fakekey.h>
 #include <cspi/spi.h>
@@ -77,9 +78,10 @@
 struct _Eekboard {
     gboolean use_clutter;
     gboolean need_swap_event_workaround;
+    gboolean accessibility_enabled;
     Display *display;
     FakeKey *fakekey;
-    GtkWidget *widget;
+    GtkWidget *widget, *window;
     gint width, height;
     XklEngine *engine;
     XklConfigRegistry *registry;
@@ -272,8 +274,26 @@ on_quit (GtkAction * action, GtkWidget *window)
 }
 
 static SPIBoolean
-keystroke_listener (const AccessibleKeystroke *stroke,
-                    void                      *user_data)
+a11y_focus_listener (const AccessibleEvent *event,
+                     void                  *user_data)
+{
+    Eekboard *eekboard = user_data;
+    Accessible *acc = event->source;
+    AccessibleStateSet *state_set = Accessible_getStateSet (acc);
+
+    if (AccessibleStateSet_contains (state_set, SPI_STATE_EDITABLE) ||
+        Accessible_getRole (acc) == SPI_ROLE_TERMINAL) {
+        gtk_widget_show (eekboard->window);
+    } else {
+        gtk_widget_hide (eekboard->window);
+    }
+
+    return FALSE;
+}
+
+static SPIBoolean
+a11y_keystroke_listener (const AccessibleKeystroke *stroke,
+                         void                      *user_data)
 {
     Eekboard *eekboard = user_data;
     EekKey *key;
@@ -289,6 +309,7 @@ keystroke_listener (const AccessibleKeystroke *stroke,
     return TRUE;
 }
 
+static AccessibleEventListener* focusListener;
 static AccessibleEventListener* keystrokeListener;
 
 static void
@@ -300,7 +321,7 @@ on_monitor_key_event_toggled (GtkToggleAction *action,
 
     if (!keystrokeListener) {
         keystrokeListener =
-            SPI_createAccessibleKeystrokeListener (keystroke_listener,
+            SPI_createAccessibleKeystrokeListener (a11y_keystroke_listener,
                                                    eekboard);
     }
     if (gtk_toggle_action_get_active (action)) {
@@ -326,6 +347,7 @@ on_key_pressed (EekKeyboard *keyboard,
 
     keysym = eek_key_get_keysym (key);
     EEKBOARD_NOTE("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
+    
     if (keysym == XK_Shift_L || keysym == XK_Shift_R) {
         gint group, level;
 
@@ -1005,13 +1027,16 @@ create_widget (Eekboard *eekboard,
 #endif
 
 Eekboard *
-eekboard_new (gboolean use_clutter, gboolean need_swap_event_workaround)
+eekboard_new (gboolean use_clutter,
+              gboolean need_swap_event_workaround,
+              gboolean accessibility_enabled)
 {
     Eekboard *eekboard;
 
     eekboard = g_slice_new0 (Eekboard);
     eekboard->use_clutter = use_clutter;
     eekboard->need_swap_event_workaround = need_swap_event_workaround;
+    eekboard->accessibility_enabled = accessibility_enabled;
     eekboard->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     if (!eekboard->display) {
         g_slice_free (Eekboard, eekboard);
@@ -1142,9 +1167,12 @@ main (int argc, char *argv[])
     const gchar *env;
     gboolean use_clutter = USE_CLUTTER;
     gboolean need_swap_event_workaround = FALSE;
+    gboolean accessibility_enabled = FALSE;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window;
+    GConfClient *gconfc;
     GOptionContext *context;
+    GError *error;
 
     context = g_option_context_new ("eekboard");
     g_option_context_add_main_entries (context, options, NULL);
@@ -1161,7 +1189,18 @@ main (int argc, char *argv[])
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 #endif
 
-    SPI_init ();
+    gconfc = gconf_client_get_default ();
+    if (gconf_client_get_bool (gconfc,
+                               "/desktop/gnome/interface/accessibility",
+                               &error) ||
+        gconf_client_get_bool (gconfc,
+                               "/desktop/gnome/interface/accessibility2",
+                               &error)) {
+        if (SPI_init () == 0)
+            accessibility_enabled = TRUE;
+        else
+            g_warning("AT-SPI initialization failed");
+    }
 
     env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
     if (env && g_strcmp0 (env, "1") == 0)
@@ -1187,7 +1226,9 @@ main (int argc, char *argv[])
         exit (1);
     }
 
-    eekboard = eekboard_new (use_clutter, need_swap_event_workaround);
+    eekboard = eekboard_new (use_clutter,
+                             need_swap_event_workaround,
+                             accessibility_enabled);
     if (opt_list_models) {
         xkl_config_registry_foreach_model (eekboard->registry,
                                            print_item,
@@ -1232,6 +1273,21 @@ main (int argc, char *argv[])
     gtk_widget_set_size_request (widget, eekboard->width, eekboard->height);
     gtk_widget_show_all (window);
     gtk_widget_set_size_request (widget, -1, -1);
+
+    eekboard->window = window;
+    if (eekboard->accessibility_enabled) {
+        fprintf (stderr,
+                 "As GNOME accessibility support enabled, "
+                 "eekboard is starting without a window.\n"
+                 "To make eekboard show up, click on some window with "
+                 "an editable widget.\n");
+        gtk_widget_hide (window);
+
+        focusListener = SPI_createAccessibleEventListener (a11y_focus_listener,
+                                                           eekboard);
+        SPI_registerGlobalEventListener (focusListener,
+                                         "object:state-changed:focused");
+    }
 
     gtk_main ();
 

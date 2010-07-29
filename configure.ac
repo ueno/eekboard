@@ -35,6 +35,8 @@ PKG_CHECK_MODULES([PANGO], [pango], ,
   [AC_MSG_ERROR([Pango not found])])
 PKG_CHECK_MODULES([GTK2], [gtk+-2.0 gdk-2.0], ,
   [AC_MSG_ERROR([GTK2 not found])])
+PKG_CHECK_MODULES([GCONF2], [gconf-2.0], ,
+  [AC_MSG_ERROR([GConf not found])])
 PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
