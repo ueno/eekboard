@@ -86,27 +86,30 @@ struct _EekSectionClass
     gpointer pdummy[24];
 };
 
-GType   eek_section_get_type            (void) G_GNUC_CONST;
+GType   eek_section_get_type             (void) G_GNUC_CONST;
 
-void    eek_section_set_angle           (EekSection     *section,
-                                         gint            angle);
-gint    eek_section_get_angle           (EekSection     *section);
+void    eek_section_set_angle            (EekSection     *section,
+                                          gint            angle);
+gint    eek_section_get_angle            (EekSection     *section);
 
-gint    eek_section_get_n_rows          (EekSection     *section);
-void    eek_section_add_row             (EekSection     *section,
-                                         gint            num_columns,
-                                         EekOrientation  orientation);
-void    eek_section_get_row             (EekSection     *section,
-                                         gint            index,
-                                         gint           *num_columns,
-                                         EekOrientation *orientation);
+gint    eek_section_get_n_rows           (EekSection     *section);
+void    eek_section_add_row              (EekSection     *section,
+                                          gint            num_columns,
+                                          EekOrientation  orientation);
+void    eek_section_get_row              (EekSection     *section,
+                                          gint            index,
+                                          gint           *num_columns,
+                                          EekOrientation *orientation);
 
-EekKey *eek_section_create_key          (EekSection     *section,
-                                         gint            column,
-                                         gint            row);
+EekKey *eek_section_create_key           (EekSection     *section,
+                                          gint            column,
+                                          gint            row);
 
-EekKey *eek_section_find_key_by_keycode (EekSection     *section,
-                                         guint           keycode);
+EekKey *eek_section_find_key_by_keycode  (EekSection     *section,
+                                          guint           keycode);
+EekKey *eek_section_find_key_by_position (EekSection     *section,
+                                          gdouble         x,
+                                          gdouble         y);
 
 G_END_DECLS
 #endif  /* EEK_SECTION_H */

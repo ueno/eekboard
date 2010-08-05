@@ -231,23 +231,16 @@ eek_container_find (EekContainer  *container,
                                                      user_data);
 }
 
-struct _FbpData
-{
-    EekKey *key;
-    gint x, y;
-};
-typedef struct _FbpData FbpData;
-
 static gint
 compare_element_by_position (EekElement *element, gpointer user_data)
 {
     EekBounds bounds;
-    FbpData *data = user_data;
+    EekPoint *point = user_data;
 
     eek_element_get_bounds (element, &bounds);
-    if (bounds.x <= data->x && bounds.y <= data->y &&
-        data->x <= (bounds.x + bounds.width) &&
-        data->y <= (bounds.y + bounds.height))
+    if (bounds.x <= point->x && bounds.y <= point->y &&
+        point->x <= (bounds.x + bounds.width) &&
+        point->y <= (bounds.y + bounds.height))
         return 0;
     return -1;
 }
@@ -258,13 +251,13 @@ eek_container_find_by_position (EekContainer *container,
                                 gdouble       y)
 {
     EekBounds bounds;
-    FbpData data;
+    EekPoint point;
 
     g_return_val_if_fail (EEK_IS_CONTAINER(container), NULL);
     eek_element_get_bounds (EEK_ELEMENT(container), &bounds);
-    data.x = x - bounds.x;
-    data.y = y - bounds.y;
+    point.x = x - bounds.x;
+    point.y = y - bounds.y;
     return eek_container_find (container,
                                compare_element_by_position,
-                               &data);
+                               &point);
 }

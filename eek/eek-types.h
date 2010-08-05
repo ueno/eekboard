@@ -80,6 +80,8 @@ typedef struct _EekPoint EekPoint;
 
 #define EEK_TYPE_POINT (eek_point_get_type ())
 GType eek_point_get_type (void) G_GNUC_CONST;
+void  eek_point_rotate   (EekPoint *point,
+                          gint      angle);
 
 /**
  * EekBounds:
