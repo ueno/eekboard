@@ -47,7 +47,7 @@ libeek_la_SOURCES = \
 	eek-unicode-keysym-labels.h \
 	eek-keyname-keysym-labels.h
 libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
-libeek_la_LIBADD = $(GOBJECT2_LIBS)
+libeek_la_LIBADD = $(GOBJECT2_LIBS) -lm
 
 if HAVE_CLUTTER
 libeek_clutter_la_SOURCES = \

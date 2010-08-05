@@ -28,6 +28,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-types.h"
+#include <math.h>
 
 /* EekKeysymMatrix */
 static EekKeysymMatrix *
@@ -79,6 +80,19 @@ eek_point_get_type (void)
                                           (GBoxedCopyFunc)eek_point_copy,
                                           (GBoxedFreeFunc)eek_point_free);
     return our_type;
+}
+
+void
+eek_point_rotate (EekPoint *point, gint angle)
+{
+    EekPoint *p;
+    gdouble r, phi;
+
+    phi = atan2 (point->y, point->x);
+    r = sqrt (point->x * point->x + point->y * point->y);
+    phi += angle * M_PI / 180;
+    point->x = r * cos (phi);
+    point->y = r * sin (phi);
 }
 
 /* EekBounds */

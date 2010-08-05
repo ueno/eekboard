@@ -484,3 +484,59 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
     return EEK_KEYBOARD_GET_CLASS(keyboard)->find_key_by_keycode (keyboard,
                                                                   keycode);
 }
+
+static gint
+compare_section_by_position (EekElement *element, gpointer user_data)
+{
+    EekSection *section = EEK_SECTION(element);
+    EekPoint *point = user_data;
+    gint angle;
+    EekBounds bounds;
+    EekPoint rotated;
+
+    eek_element_get_bounds (element, &bounds);
+    rotated.x = point->x - bounds.x;
+    rotated.y = point->y - bounds.y;
+    angle = eek_section_get_angle (section);
+    eek_point_rotate (&rotated, -angle);
+
+    if (0 <= rotated.x && 0 <= rotated.y &&
+        rotated.x <= bounds.width &&
+        rotated.y <= bounds.height)
+        return 0;
+    return -1;
+}
+
+static EekSection *
+eek_keyboard_find_section_by_position (EekKeyboard *keyboard,
+                                       gdouble      x,
+                                       gdouble      y)
+{
+    EekBounds bounds;
+    EekPoint point;
+
+    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
+    point.x = x - bounds.x;
+    point.y = y - bounds.y;
+    return eek_container_find (EEK_CONTAINER(keyboard),
+                               compare_section_by_position,
+                               &point);
+}
+
+EekKey *
+eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
+                                   gdouble      x,
+                                   gdouble      y)
+{
+    EekSection *section;
+    EekBounds bounds;
+
+    section = eek_keyboard_find_section_by_position (keyboard, x, y);
+    if (!section)
+        return NULL;
+
+    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
+    x -= bounds.x;
+    y -= bounds.y;
+    return eek_section_find_key_by_position (section, x, y);
+}

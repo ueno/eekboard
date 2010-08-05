@@ -83,22 +83,25 @@ struct _EekKeyboardClass
     gpointer pdummy[24];
 };
 
-GType       eek_keyboard_get_type            (void) G_GNUC_CONST;
+GType       eek_keyboard_get_type             (void) G_GNUC_CONST;
 
-void        eek_keyboard_set_keysym_index    (EekKeyboard *keyboard,
-                                              gint         group,
-                                              gint         level);
-void        eek_keyboard_get_keysym_index    (EekKeyboard *keyboard,
-                                              gint        *group,
-                                              gint        *level);
+void        eek_keyboard_set_keysym_index     (EekKeyboard *keyboard,
+                                               gint         group,
+                                               gint         level);
+void        eek_keyboard_get_keysym_index     (EekKeyboard *keyboard,
+                                               gint        *group,
+                                               gint        *level);
 
-EekSection *eek_keyboard_create_section      (EekKeyboard *keyboard);
+EekSection *eek_keyboard_create_section       (EekKeyboard *keyboard);
 
-void        eek_keyboard_set_layout          (EekKeyboard *keyboard,
-                                              EekLayout   *layout);
-void        eek_keyboard_realize             (EekKeyboard *keyboard);
-EekKey     *eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
-                                              guint        keycode);
+void        eek_keyboard_set_layout           (EekKeyboard *keyboard,
+                                               EekLayout   *layout);
+void        eek_keyboard_realize              (EekKeyboard *keyboard);
+EekKey     *eek_keyboard_find_key_by_keycode  (EekKeyboard *keyboard,
+                                               guint        keycode);
+EekKey     *eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
+                                               gdouble      x,
+                                               gdouble      y);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */
