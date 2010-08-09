@@ -26,7 +26,8 @@ eekboard_CFLAGS = \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
 	$(LIBFAKEKEY_CFLAGS) \
-	$(CSPI_CFLAGS)
+	$(CSPI_CFLAGS) \
+	$(NOTIFY_CFLAGS)
 
 eekboard_LDFLAGS = \
 	$(top_builddir)/eek/libeek.la \
@@ -38,7 +39,8 @@ eekboard_LDFLAGS = \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS) \
 	$(LIBFAKEKEY_LIBS) \
-	$(CSPI_LIBS)
+	$(CSPI_LIBS) \
+	$(NOTIFY_LIBS)
 
 if HAVE_CLUTTER
 eekboard_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
