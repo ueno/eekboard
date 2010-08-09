@@ -34,6 +34,7 @@
 #include <libxklavier/xklavier.h>
 #include <fakekey/fakekey.h>
 #include <cspi/spi.h>
+#include <libnotify/notify.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -81,6 +82,7 @@ struct _Eekboard {
     gboolean accessibility_enabled;
     Display *display;
     FakeKey *fakekey;
+    GConfClient *gconfc;
     GtkWidget *widget, *window;
     gint width, height;
     XklEngine *engine;
@@ -1161,6 +1163,20 @@ print_option_group (XklConfigRegistry *registry,
                                         NULL);
 }
 
+static void
+on_notify_never_show (NotifyNotification *notification,
+                      char *action,
+                      gpointer user_data)
+{
+    Eekboard *eekboard = user_data;
+    GError *error;
+
+    gconf_client_set_bool (eekboard->gconfc,
+                           "/apps/eekboard/inhibit-startup-notify",
+                           TRUE,
+                           &error);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -1170,8 +1186,8 @@ main (int argc, char *argv[])
     gboolean accessibility_enabled = FALSE;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window;
-    GConfClient *gconfc;
     GOptionContext *context;
+    GConfClient *gconfc;
     GError *error;
 
     context = g_option_context_new ("eekboard");
@@ -1189,6 +1205,7 @@ main (int argc, char *argv[])
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 #endif
 
+    error = NULL;
     gconfc = gconf_client_get_default ();
     if (gconf_client_get_bool (gconfc,
                                "/desktop/gnome/interface/accessibility",
@@ -1274,13 +1291,35 @@ main (int argc, char *argv[])
     gtk_widget_show_all (window);
     gtk_widget_set_size_request (widget, -1, -1);
 
+    notify_init ("eekboard");
     eekboard->window = window;
+    eekboard->gconfc = gconfc;
     if (eekboard->accessibility_enabled) {
-        fprintf (stderr,
+        NotifyNotification *notification;
+
+        error = NULL;
+        if (!gconf_client_get_bool (eekboard->gconfc,
+                                    "/apps/eekboard/inhibit-startup-notify",
+                                    &error)) {
+            notification = notify_notification_new
+                ("eekboard started in background",
                  "As GNOME accessibility support enabled, "
                  "eekboard is starting without a window.\n"
                  "To make eekboard show up, click on some window with "
-                 "an editable widget.\n");
+                 "an editable widget.",
+                 NULL,
+                 NULL);
+            notify_notification_add_action
+                (notification,
+                 "dont-ask",
+                 "Don't show up",
+                 NOTIFY_ACTION_CALLBACK(on_notify_never_show),
+                 eekboard,
+                 NULL);
+            error = NULL;
+            notify_notification_show (notification, &error);
+        }
+ 
         gtk_widget_hide (window);
 
         focusListener = SPI_createAccessibleEventListener (a11y_focus_listener,
