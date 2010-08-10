@@ -83,6 +83,7 @@ struct _Eekboard {
     Display *display;
     FakeKey *fakekey;
     GConfClient *gconfc;
+    Accessible *acc;
     GtkWidget *widget, *window;
     gint width, height;
     XklEngine *engine;
@@ -275,6 +276,19 @@ on_quit (GtkAction * action, GtkWidget *window)
     gtk_main_quit ();
 }
 
+static void
+set_location (Eekboard   *eekboard,
+              Accessible *acc)
+{
+    AccessibleComponent *component = Accessible_getComponent (acc);
+    long int x, y, width, height;
+
+    AccessibleComponent_getExtents (component,
+                                    &x, &y, &width, &height,
+                                    SPI_COORD_TYPE_SCREEN);
+    gtk_window_move (GTK_WINDOW(eekboard->window), x, y + height);
+}
+
 static SPIBoolean
 a11y_focus_listener (const AccessibleEvent *event,
                      void                  *user_data)
@@ -282,12 +296,39 @@ a11y_focus_listener (const AccessibleEvent *event,
     Eekboard *eekboard = user_data;
     Accessible *acc = event->source;
     AccessibleStateSet *state_set = Accessible_getStateSet (acc);
+    AccessibleRole role = Accessible_getRole (acc);
 
+    /* Ignore focus on eekboard itself since eekboard itself has GTK+
+       widgets. */
+    if (gtk_widget_has_focus (eekboard->window))
+        return FALSE;
+
+    /* The logic is borrowed from Caribou. */
     if (AccessibleStateSet_contains (state_set, SPI_STATE_EDITABLE) ||
-        Accessible_getRole (acc) == SPI_ROLE_TERMINAL) {
-        gtk_widget_show (eekboard->window);
-    } else if (!gtk_widget_has_focus (eekboard->window)) {
-        gtk_widget_hide (eekboard->window);
+        role == SPI_ROLE_TERMINAL) {
+        switch (role) {
+        case SPI_ROLE_TEXT:
+        case SPI_ROLE_PARAGRAPH:
+        case SPI_ROLE_PASSWORD_TEXT:
+        case SPI_ROLE_TERMINAL:
+            if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
+                set_location (eekboard, acc);
+                gtk_widget_show (eekboard->window);
+                eekboard->acc = acc;
+            } else if (event->detail1 == 0 && acc == eekboard->acc) {
+                gtk_widget_hide (eekboard->window);
+                eekboard->acc = NULL;
+            }
+        case SPI_ROLE_ENTRY:
+            if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
+                set_location (eekboard, acc);
+                gtk_widget_show (eekboard->window);
+                eekboard->acc = acc;
+            } else if (event->detail1 == 0 && acc == eekboard->acc) {
+                gtk_widget_hide (eekboard->window);
+                eekboard->acc = NULL;
+            }
+        }
     }
 
     return FALSE;
@@ -1326,6 +1367,8 @@ main (int argc, char *argv[])
                                                            eekboard);
         SPI_registerGlobalEventListener (focusListener,
                                          "object:state-changed:focused");
+        SPI_registerGlobalEventListener (focusListener,
+                                         "focus:");
     }
 
     gtk_main ();
