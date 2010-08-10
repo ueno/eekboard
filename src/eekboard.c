@@ -286,7 +286,7 @@ a11y_focus_listener (const AccessibleEvent *event,
     if (AccessibleStateSet_contains (state_set, SPI_STATE_EDITABLE) ||
         Accessible_getRole (acc) == SPI_ROLE_TERMINAL) {
         gtk_widget_show (eekboard->window);
-    } else {
+    } else if (!gtk_widget_has_focus (eekboard->window)) {
         gtk_widget_hide (eekboard->window);
     }
 
