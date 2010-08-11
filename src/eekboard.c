@@ -1476,6 +1476,60 @@ main (int argc, char *argv[])
         exit (0);
     }
 
+    if (opt_config) {
+        ConfigContext context;
+        GMarkupParseContext *pcontext;
+        GFile *file;
+        GError *error;
+        GFileInputStream *stream;
+        gchar buf[BUFSIZ];
+        GSList *head;
+        gint i;
+
+        memset (&context, 0, sizeof context);
+        file = g_file_new_for_path (opt_config);
+
+        error = NULL;
+        stream = g_file_read (file, NULL, &error);
+        if (!stream) {
+            eekboard_free (eekboard);
+            g_print ("Can't read configuration file: %s\n", opt_config);
+            exit (1);
+        }
+
+        pcontext = g_markup_parse_context_new (&config_parser,
+                                               0,
+                                               &context,
+                                               NULL);
+        while (1) {
+            gssize len;
+                
+            error = NULL;
+            len = g_input_stream_read (stream, buf, sizeof buf, NULL,
+                                       &error);
+            if (len <= 0)
+                break;
+
+            error = NULL;
+            if (!g_markup_parse_context_parse (pcontext, buf, len, &error))
+                break;
+        }
+        g_object_unref (stream);
+
+        error = NULL;
+        g_markup_parse_context_end_parse (pcontext, &error);
+        g_markup_parse_context_free (pcontext);
+        g_object_unref (file);
+
+        if (context.list) {
+            eekboard->config =
+                g_slice_alloc0 ((g_slist_length (context.list) + 1) *
+                                sizeof (*eekboard->config));
+            for (i = 0, head = context.list; head; head = head->next)
+                eekboard->config[i++] = head->data;
+        }
+    }
+
     window = gtk_window_new (opt_standalone ?
                              GTK_WINDOW_TOPLEVEL :
                              GTK_WINDOW_POPUP);
@@ -1494,56 +1548,6 @@ main (int argc, char *argv[])
         create_menus (eekboard, window);
         menubar = gtk_ui_manager_get_widget (eekboard->ui_manager, "/MainMenu");
         gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
-    }
-
-    if (opt_config) {
-        ConfigContext context;
-        GMarkupParseContext *pcontext;
-        GFile *file;
-        GError *error;
-        GFileInputStream *stream;
-        gchar buf[BUFSIZ];
-        GSList *head;
-        gint i;
-
-        memset (&context, 0, sizeof context);
-        file = g_file_new_for_path (opt_config);
-
-        error = NULL;
-        stream = g_file_read (file, NULL, &error);
-        if (stream) {
-            pcontext = g_markup_parse_context_new (&config_parser,
-                                                   0,
-                                                   &context,
-                                                   NULL);
-            while (1) {
-                gssize len;
-                
-                error = NULL;
-                len = g_input_stream_read (stream, buf, sizeof buf, NULL,
-                                           &error);
-                if (len <= 0)
-                    break;
-
-                error = NULL;
-                if (!g_markup_parse_context_parse (pcontext, buf, len, &error))
-                    break;
-            }
-            g_object_unref (stream);
-
-            error = NULL;
-            g_markup_parse_context_end_parse (pcontext, &error);
-            g_markup_parse_context_free (pcontext);
-        }
-        g_object_unref (file);
-
-        if (context.list) {
-            eekboard->config =
-                g_slice_alloc0 ((g_slist_length (context.list) + 1) *
-                                sizeof (*eekboard->config));
-            for (i = 0, head = context.list; head; head = head->next)
-                eekboard->config[i++] = head->data;
-        }
     }
 
     if (eekboard->config) {
