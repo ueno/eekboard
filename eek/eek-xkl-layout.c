@@ -565,7 +565,7 @@ eek_xkl_layout_get_model (EekXklLayout *layout)
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
 
     g_return_val_if_fail (priv, NULL);
-    return priv->config->model;
+    return g_strdup (priv->config->model);
 }
 
 /**
@@ -581,7 +581,7 @@ eek_xkl_layout_get_layouts (EekXklLayout *layout)
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
 
     g_return_val_if_fail (priv, NULL);
-    return priv->config->layouts;
+    return g_strdupv (priv->config->layouts);
 }
 
 /**
@@ -597,7 +597,7 @@ eek_xkl_layout_get_variants (EekXklLayout *layout)
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
 
     g_return_val_if_fail (priv, NULL);
-    return priv->config->variants;
+    return g_strdupv (priv->config->variants);
 }
 
 /**
@@ -613,7 +613,7 @@ eek_xkl_layout_get_options (EekXklLayout *layout)
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (layout);
 
     g_return_val_if_fail (priv, NULL);
-    return priv->config->options;
+    return g_strdupv (priv->config->options);
 }
 
 static gboolean

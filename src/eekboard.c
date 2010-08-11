@@ -76,15 +76,23 @@
     "You should have received a copy of the GNU General Public License " \
     "along with this program.  If not, see <http://www.gnu.org/licenses/>. " \
 
+struct _Config {
+    gchar *name;
+    XklConfigRec *rec;
+};
+typedef struct _Config Config;
+
 struct _Eekboard {
     gboolean use_clutter;
     gboolean need_swap_event_workaround;
     gboolean accessibility_enabled;
+    Config **config;
+    gint active_config;
     Display *display;
     FakeKey *fakekey;
     GConfClient *gconfc;
     Accessible *acc;
-    GtkWidget *widget, *window;
+    GtkWidget *widget, *window, *combo;
     gint width, height;
     XklEngine *engine;
     XklConfigRegistry *registry;
@@ -230,6 +238,7 @@ static gboolean opt_version = FALSE;
 static gchar *opt_toolkit = NULL;
 #endif
 static gboolean opt_standalone = FALSE;
+static gchar *opt_config = NULL;
 
 static const GOptionEntry options[] = {
     {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -250,6 +259,8 @@ static const GOptionEntry options[] = {
 #endif
     {"standalone", 's', 0, G_OPTION_ARG_NONE, &opt_standalone,
      N_("Start as a standalone application")},
+    {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
+     N_("Specify configuration file")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
      N_("Display version")},
     {NULL}
@@ -1080,6 +1091,31 @@ create_widget (Eekboard *eekboard,
 }
 #endif
 
+static void
+parse_layouts (XklConfigRec *rec, const gchar *_layouts)
+{
+    gchar **layouts, **variants;
+    gint i;
+
+    layouts = g_strsplit (_layouts, ",", -1);
+    variants = g_strdupv (layouts);
+    for (i = 0; layouts[i]; i++) {
+        gchar *layout = layouts[i], *variant = variants[i],
+            *variant_start, *variant_end;
+
+        variant_start = strchr (layout, '(');
+        variant_end = strrchr (layout, ')');
+        if (variant_start && variant_end) {
+            *variant_start++ = '\0';
+            g_strlcpy (variant, variant_start,
+                       variant_end - variant_start + 1);
+        } else
+            *variant = '\0';
+    }
+    rec->layouts = layouts;
+    rec->variants = variants;
+}
+
 Eekboard *
 eekboard_new (gboolean use_clutter,
               gboolean need_swap_event_workaround,
@@ -1091,6 +1127,7 @@ eekboard_new (gboolean use_clutter,
     eekboard->use_clutter = use_clutter;
     eekboard->need_swap_event_workaround = need_swap_event_workaround;
     eekboard->accessibility_enabled = accessibility_enabled;
+    eekboard->active_config = -1;
     eekboard->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     if (!eekboard->display) {
         g_slice_free (Eekboard, eekboard);
@@ -1114,26 +1151,14 @@ eekboard_new (gboolean use_clutter,
     if (opt_model)
         eek_xkl_layout_set_model (EEK_XKL_LAYOUT(eekboard->layout), opt_model);
     if (opt_layouts) {
-        gchar **layouts, **variants;
-        gint i;
-        layouts = g_strsplit (opt_layouts, ",", -1);
-        variants = g_strdupv (layouts);
-        for (i = 0; layouts[i]; i++) {
-            gchar *layout = layouts[i], *variant = variants[i],
-                *variant_start, *variant_end;
+        XklConfigRec *rec = xkl_config_rec_new ();
 
-            variant_start = strchr (layout, '(');
-            variant_end = strrchr (layout, ')');
-            if (variant_start && variant_end) {
-                *variant_start++ = '\0';
-                g_strlcpy (variant, variant_start,
-                           variant_end - variant_start + 1);
-            } else
-                *variant = '\0';
-        }
-        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(eekboard->layout), layouts);
-        g_strfreev (layouts);
-        g_strfreev (variants);
+        parse_layouts (rec, opt_layouts);
+        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(eekboard->layout),
+                                    rec->layouts);
+        eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(eekboard->layout),
+                                     rec->variants);
+        g_object_unref (rec);
     }
     if (opt_options) {
         gchar **options;
@@ -1229,6 +1254,126 @@ on_notify_never_show (NotifyNotification *notification,
                            &error);
 }
 
+static void
+on_layout_changed (GtkComboBox *combo,
+                   gpointer     user_data)
+{
+    Eekboard *eekboard = user_data;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    gint active;
+
+    model = gtk_combo_box_get_model (combo);
+    gtk_combo_box_get_active_iter (combo, &iter);
+    gtk_tree_model_get (model, &iter, 1, &active, -1);
+
+    if (eekboard->active_config != active) {
+        XklConfigRec *config, *config_base = eekboard->config[active]->rec;
+
+        config = xkl_config_rec_new ();
+        if (config_base->model)
+            config->model = g_strdup (config_base->model);
+        else
+            config->model = eek_xkl_layout_get_model (eekboard->layout);
+
+        if (config_base->layouts)
+            config->layouts = g_strdupv (config_base->layouts);
+        else
+            config->layouts = eek_xkl_layout_get_layouts (eekboard->layout);
+
+        if (config_base->variants)
+            config->variants = g_strdupv (config_base->variants);
+        else
+            config->variants = eek_xkl_layout_get_variants (eekboard->layout);
+
+        if (config_base->options)
+            config->options = g_strdupv (config_base->options);
+        else
+            config->options = eek_xkl_layout_get_options (eekboard->layout);
+
+        eek_xkl_layout_set_config (eekboard->layout, config);
+        g_object_unref (config);
+
+        eekboard->active_config = active;
+    }
+}
+
+struct _ConfigContext {
+    GSList *list;
+    GString *text;
+};
+typedef struct _ConfigContext ConfigContext;
+
+static void
+config_parser_start_element (GMarkupParseContext *pcontext,
+                             const gchar         *element_name,
+                             const gchar        **attribute_names,
+                             const gchar        **attribute_values,
+                             gpointer             user_data,
+                             GError             **error)
+{
+    ConfigContext *context = user_data;
+    if (g_strcmp0 (element_name, "config") == 0) {
+        Config *config = g_slice_new0 (Config);
+        config->rec = xkl_config_rec_new ();
+        context->list = g_slist_prepend (context->list, config);
+    } else
+        context->text = g_string_sized_new (100);
+}
+
+static void
+config_parser_end_element (GMarkupParseContext *pcontext,
+                           const gchar         *element_name,
+                           gpointer             user_data,
+                           GError             **error)
+{
+    ConfigContext *context = user_data;
+    Config *config = context->list->data;
+    gchar *text;
+
+    if (g_strcmp0 (element_name, "config") == 0 &&
+        !config->name) {
+        if (error)
+            *error = g_error_new (G_MARKUP_ERROR,
+                                  G_MARKUP_ERROR_INVALID_CONTENT,
+                                  "\"name\" is missing");
+        return;
+    }
+
+    if (!context->text)
+        return;
+
+    text = g_string_free (context->text, FALSE);
+    context->text = NULL;
+
+    if (g_strcmp0 (element_name, "name") == 0)
+        config->name = text;
+    else if (g_strcmp0 (element_name, "model") == 0)
+        config->rec->model = text;
+    else if (g_strcmp0 (element_name, "layouts") == 0)
+        parse_layouts (config->rec, text);
+    else if (g_strcmp0 (element_name, "options") == 0)
+        config->rec->options = g_strsplit (text, ",", -1);
+}
+
+static void
+config_parser_text (GMarkupParseContext *pcontext,
+                    const gchar         *text,
+                    gsize                text_len,  
+                    gpointer             user_data,
+                    GError             **error)
+{
+    ConfigContext *context = user_data;
+    if (context->text)
+        context->text = g_string_append_len (context->text, text, text_len);
+}
+
+GMarkupParser config_parser = {
+    .start_element = config_parser_start_element,
+    .end_element = config_parser_end_element,
+    .text = config_parser_text
+};
+
 int
 main (int argc, char *argv[])
 {
@@ -1237,7 +1382,7 @@ main (int argc, char *argv[])
     gboolean need_swap_event_workaround = FALSE;
     gboolean accessibility_enabled = FALSE;
     Eekboard *eekboard;
-    GtkWidget *widget, *vbox, *menubar, *window;
+    GtkWidget *widget, *vbox, *menubar, *window, *combo = NULL;
     GOptionContext *context;
     GConfClient *gconfc;
     GError *error;
@@ -1351,6 +1496,81 @@ main (int argc, char *argv[])
         gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
     }
 
+    if (opt_config) {
+        ConfigContext context;
+        GMarkupParseContext *pcontext;
+        GFile *file;
+        GError *error;
+        GFileInputStream *stream;
+        gchar buf[BUFSIZ];
+        GSList *head;
+        gint i;
+
+        memset (&context, 0, sizeof context);
+        file = g_file_new_for_path (opt_config);
+
+        error = NULL;
+        stream = g_file_read (file, NULL, &error);
+        if (stream) {
+            pcontext = g_markup_parse_context_new (&config_parser,
+                                                   0,
+                                                   &context,
+                                                   NULL);
+            while (1) {
+                gssize len;
+                
+                error = NULL;
+                len = g_input_stream_read (stream, buf, sizeof buf, NULL,
+                                           &error);
+                if (len <= 0)
+                    break;
+
+                error = NULL;
+                if (!g_markup_parse_context_parse (pcontext, buf, len, &error))
+                    break;
+            }
+            g_object_unref (stream);
+
+            error = NULL;
+            g_markup_parse_context_end_parse (pcontext, &error);
+            g_markup_parse_context_free (pcontext);
+        }
+        g_object_unref (file);
+
+        if (context.list) {
+            eekboard->config =
+                g_slice_alloc0 ((g_slist_length (context.list) + 1) *
+                                sizeof (*eekboard->config));
+            for (i = 0, head = context.list; head; head = head->next)
+                eekboard->config[i++] = head->data;
+        }
+    }
+
+    if (eekboard->config) {
+        GtkListStore *store;
+        GtkTreeIter iter;
+        GtkCellRenderer *renderer;
+        int i;
+        
+        store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_INT);
+        for (i = 0; eekboard->config[i]; i++) {
+            gtk_list_store_append (store, &iter);
+            gtk_list_store_set (store, &iter,
+                                0, eekboard->config[i]->name,
+                                1, i,
+                                -1);
+        }
+        combo = gtk_combo_box_new_with_model (GTK_TREE_MODEL(store));
+        renderer = gtk_cell_renderer_text_new ();
+        gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo),
+                                    renderer, TRUE);
+        gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
+                                        renderer, "text", 0, NULL);
+        gtk_box_pack_end (GTK_BOX (vbox), combo, FALSE, FALSE, 0);
+        g_signal_connect (combo, "changed", G_CALLBACK(on_layout_changed),
+                          eekboard);
+    }
+
     gtk_container_add (GTK_CONTAINER(vbox), widget);
     gtk_container_add (GTK_CONTAINER(window), vbox);
   
@@ -1396,6 +1616,11 @@ main (int argc, char *argv[])
         SPI_registerGlobalEventListener (focusListener,
                                          "focus:");
     }
+
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+
+    if (combo)
+        gtk_combo_box_set_active (combo, 0);
 
     gtk_main ();
 
