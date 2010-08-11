@@ -514,13 +514,15 @@ eek_keyboard_find_section_by_position (EekKeyboard *keyboard,
 {
     EekBounds bounds;
     EekPoint point;
+    EekElement *element;
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     point.x = x - bounds.x;
     point.y = y - bounds.y;
-    return eek_container_find (EEK_CONTAINER(keyboard),
-                               compare_section_by_position,
-                               &point);
+    element = eek_container_find (EEK_CONTAINER(keyboard),
+                                  compare_section_by_position,
+                                  &point);
+    return EEK_SECTION(element);
 }
 
 EekKey *

@@ -492,9 +492,9 @@ on_button_event (GtkWidget      *widget,
                  GdkEventButton *event,
                  gpointer        user_data)
 {
-    EekGtkKeyboard *keyboard = EEK_GTK_KEYBOARD(user_data), *key;
+    EekGtkKeyboard *keyboard = EEK_GTK_KEYBOARD(user_data);
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
-    EekBounds bounds;
+    EekKey *key;
     gdouble x, y;
 
     x = (gdouble)event->x / priv->scale;
@@ -503,7 +503,7 @@ on_button_event (GtkWidget      *widget,
     if (key)
         switch (event->type) {
         case GDK_BUTTON_PRESS:
-            press_key (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(key));
+            press_key (EEK_GTK_KEYBOARD(keyboard), key);
             return TRUE;
         case GDK_BUTTON_RELEASE:
             release_key (EEK_GTK_KEYBOARD(keyboard));

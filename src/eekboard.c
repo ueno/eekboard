@@ -97,6 +97,7 @@ struct _Eekboard {
     XklEngine *engine;
     XklConfigRegistry *registry;
     GtkUIManager *ui_manager;
+    gulong on_key_pressed_id, on_key_released_id;
 
     guint countries_merge_id;
     GtkActionGroup *countries_action_group;
@@ -152,9 +153,6 @@ static void       on_about          (GtkAction       *action,
                                      GtkWidget       *window);
 static void       on_quit           (GtkAction *      action,
                                      GtkWidget       *window);
-static void       on_monitor_key_event_toggled
-                                    (GtkToggleAction *action,
-                                     GtkWidget       *window);
 static void       eekboard_free     (Eekboard        *eekboard);
 static GtkWidget *create_widget     (Eekboard        *eekboard,
                                      gint             initial_width,
@@ -174,7 +172,6 @@ static const char ui_description[] =
     "      <menuitem action='Quit'/>"
     "    </menu>"
     "    <menu action='KeyboardMenu'>"
-    "      <menuitem action='MonitorKeyEvent'/>"
     "      <menu action='Country'>"
     "        <placeholder name='CountriesPH'/>"
     "      </menu>"
@@ -220,11 +217,6 @@ static const GtkActionEntry action_entry[] = {
     {"Option", NULL, N_("Option"), NULL, NULL,
      G_CALLBACK(on_options_menu)},
     {"About", GTK_STOCK_ABOUT, NULL, NULL, NULL, G_CALLBACK (on_about)}
-};
-
-static const GtkToggleActionEntry toggle_action_entry[] = {
-    {"MonitorKeyEvent", NULL, N_("Monitor Key Typing"), NULL, NULL,
-     G_CALLBACK(on_monitor_key_event_toggled), FALSE}
 };
 
 static gchar *opt_model = NULL;
@@ -349,6 +341,8 @@ a11y_focus_listener (const AccessibleEvent *event,
                 gtk_widget_hide (eekboard->window);
                 eekboard->acc = NULL;
             }
+        default:
+            ;
         }
     }
 
@@ -361,46 +355,47 @@ a11y_keystroke_listener (const AccessibleKeystroke *stroke,
 {
     Eekboard *eekboard = user_data;
     EekKey *key;
-
-    //g_return_val_if_fail (stroke->modifiers == SPI_KEYMASK_UNMODIFIED, FALSE);
+    guint keysym;
+    guint ignored_keysyms[] = {XK_Shift_L,
+                               XK_Shift_R,
+                               XK_Control_L,
+                               XK_Control_R,
+                               XK_Alt_L,
+                               XK_Alt_R};
+    gint i;
+    
     key = eek_keyboard_find_key_by_keycode (eekboard->keyboard,
                                             stroke->keycode);
     if (!key)
         return FALSE;
-    if (stroke->type == SPI_KEY_PRESSED)
+
+    /* XXX: Ignore modifier keys since there is no way to receive
+       SPI_KEY_RELEASED event for them. */
+    keysym = eek_key_get_keysym (key);
+    for (i = 0; i < G_N_ELEMENTS(ignored_keysyms) &&
+             keysym != ignored_keysyms[i]; i++)
+        ;
+    if (i != G_N_ELEMENTS(ignored_keysyms))
+        return FALSE;
+
+    if (stroke->type == SPI_KEY_PRESSED) {
+        g_signal_handler_block (eekboard->keyboard,
+                                eekboard->on_key_pressed_id);
         g_signal_emit_by_name (key, "pressed");
-    else
+        g_signal_handler_unblock (eekboard->keyboard,
+                                  eekboard->on_key_pressed_id);
+    } else {
+        g_signal_handler_block (eekboard->keyboard,
+                                eekboard->on_key_released_id);
         g_signal_emit_by_name (key, "released");
+        g_signal_handler_unblock (eekboard->keyboard,
+                                  eekboard->on_key_released_id);
+    }
     return TRUE;
 }
 
 static AccessibleEventListener* focusListener;
 static AccessibleEventListener* keystrokeListener;
-
-static void
-on_monitor_key_event_toggled (GtkToggleAction *action,
-                              GtkWidget       *window)
-{
-
-    Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
-
-    if (!keystrokeListener) {
-        keystrokeListener =
-            SPI_createAccessibleKeystrokeListener (a11y_keystroke_listener,
-                                                   eekboard);
-    }
-    if (gtk_toggle_action_get_active (action)) {
-        if (!SPI_registerAccessibleKeystrokeListener (keystrokeListener,
-                                                      SPI_KEYSET_ALL_KEYS,
-                                                      0,
-                                                      SPI_KEY_PRESSED |
-                                                      SPI_KEY_RELEASED,
-                                                      SPI_KEYLISTENER_NOSYNC))
-            g_warning ("failed to register keystroke listener");
-    } else
-        if (!SPI_deregisterAccessibleKeystrokeListener (keystrokeListener, 0))
-            g_warning ("failed to deregister keystroke listener");
-}
 
 static void
 on_key_pressed (EekKeyboard *keyboard,
@@ -957,9 +952,6 @@ create_menus (Eekboard      *eekboard,
 
     gtk_action_group_add_actions (action_group, action_entry,
                                   G_N_ELEMENTS (action_entry), window);
-    gtk_action_group_add_toggle_actions (action_group, toggle_action_entry,
-                                         G_N_ELEMENTS (toggle_action_entry),
-                                         window);
 
     gtk_ui_manager_insert_action_group (eekboard->ui_manager, action_group, 0);
     gtk_ui_manager_add_ui_from_string (eekboard->ui_manager, ui_description, -1, NULL);
@@ -1004,10 +996,12 @@ create_widget_gtk (Eekboard *eekboard,
     eekboard->keyboard = eek_gtk_keyboard_new ();
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
     eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    g_signal_connect (eekboard->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), eekboard);
-    g_signal_connect (eekboard->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), eekboard);
+    eekboard->on_key_pressed_id =
+        g_signal_connect (eekboard->keyboard, "key-pressed",
+                          G_CALLBACK(on_key_pressed), eekboard);
+    eekboard->on_key_released_id =
+        g_signal_connect (eekboard->keyboard, "key-released",
+                          G_CALLBACK(on_key_released), eekboard);
 
     eekboard->widget =
         eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard->keyboard));
@@ -1054,10 +1048,12 @@ create_widget_clutter (Eekboard *eekboard,
     eekboard->keyboard = eek_clutter_keyboard_new ();
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
     eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    g_signal_connect (eekboard->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), eekboard);
-    g_signal_connect (eekboard->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), eekboard);
+    eekboard->on_key_pressed_id =
+        g_signal_connect (eekboard->keyboard, "key-pressed",
+                          G_CALLBACK(on_key_pressed), eekboard);
+    eekboard->on_key_released_id =
+        g_signal_connect (eekboard->keyboard, "key-released",
+                          G_CALLBACK(on_key_released), eekboard);
 
     eekboard->widget = gtk_clutter_embed_new ();
 #if NEED_SWAP_EVENT_WORKAROUND
@@ -1274,24 +1270,28 @@ on_layout_changed (GtkComboBox *combo,
         if (config_base->model)
             config->model = g_strdup (config_base->model);
         else
-            config->model = eek_xkl_layout_get_model (eekboard->layout);
+            config->model =
+                eek_xkl_layout_get_model (EEK_XKL_LAYOUT(eekboard->layout));
 
         if (config_base->layouts)
             config->layouts = g_strdupv (config_base->layouts);
         else
-            config->layouts = eek_xkl_layout_get_layouts (eekboard->layout);
+            config->layouts =
+                eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(eekboard->layout));
 
         if (config_base->variants)
             config->variants = g_strdupv (config_base->variants);
         else
-            config->variants = eek_xkl_layout_get_variants (eekboard->layout);
+            config->variants =
+                eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(eekboard->layout));
 
         if (config_base->options)
             config->options = g_strdupv (config_base->options);
         else
-            config->options = eek_xkl_layout_get_options (eekboard->layout);
+            config->options =
+                eek_xkl_layout_get_options (EEK_XKL_LAYOUT(eekboard->layout));
 
-        eek_xkl_layout_set_config (eekboard->layout, config);
+        eek_xkl_layout_set_config (EEK_XKL_LAYOUT(eekboard->layout), config);
         g_object_unref (config);
 
         eekboard->active_config = active;
@@ -1505,7 +1505,8 @@ main (int argc, char *argv[])
             gssize len;
                 
             error = NULL;
-            len = g_input_stream_read (stream, buf, sizeof buf, NULL,
+            len = g_input_stream_read (G_INPUT_STREAM(stream),
+                                       buf, sizeof buf, NULL,
                                        &error);
             if (len <= 0)
                 break;
@@ -1585,46 +1586,65 @@ main (int argc, char *argv[])
     notify_init ("eekboard");
     eekboard->window = window;
     eekboard->gconfc = gconfc;
-    if (!opt_standalone && eekboard->accessibility_enabled) {
-        NotifyNotification *notification;
+    if (eekboard->accessibility_enabled) {
+        if (!opt_standalone) {
+            NotifyNotification *notification;
 
-        error = NULL;
-        if (!gconf_client_get_bool (eekboard->gconfc,
-                                    "/apps/eekboard/inhibit-startup-notify",
-                                    &error)) {
-            notification = notify_notification_new
-                ("eekboard started in background",
-                 "As GNOME accessibility support enabled, "
-                 "eekboard is starting without a window.\n"
-                 "To make eekboard show up, click on some window with "
-                 "an editable widget.",
-                 "keyboard",
-                 NULL);
-            notify_notification_add_action
-                (notification,
-                 "dont-ask",
-                 "Don't show up",
-                 NOTIFY_ACTION_CALLBACK(on_notify_never_show),
-                 eekboard,
-                 NULL);
             error = NULL;
-            notify_notification_show (notification, &error);
-        }
+            if (!gconf_client_get_bool (eekboard->gconfc,
+                                        "/apps/eekboard/inhibit-startup-notify",
+                                        &error)) {
+                notification = notify_notification_new
+                    ("eekboard started in background",
+                     "As GNOME accessibility support enabled, "
+                     "eekboard is starting without a window.\n"
+                     "To make eekboard show up, click on some window with "
+                     "an editable widget.",
+                     "keyboard",
+                     NULL);
+                notify_notification_add_action
+                    (notification,
+                     "dont-ask",
+                     "Don't show up",
+                     NOTIFY_ACTION_CALLBACK(on_notify_never_show),
+                     eekboard,
+                     NULL);
+                error = NULL;
+                notify_notification_show (notification, &error);
+            }
  
-        gtk_widget_hide (window);
+            gtk_widget_hide (window);
 
-        focusListener = SPI_createAccessibleEventListener (a11y_focus_listener,
-                                                           eekboard);
-        SPI_registerGlobalEventListener (focusListener,
-                                         "object:state-changed:focused");
-        SPI_registerGlobalEventListener (focusListener,
-                                         "focus:");
+            focusListener =
+                SPI_createAccessibleEventListener (a11y_focus_listener,
+                                                   eekboard);
+            SPI_registerGlobalEventListener (focusListener,
+                                             "object:state-changed:focused");
+            SPI_registerGlobalEventListener (focusListener,
+                                             "focus:");
+        }
+
+        /* monitor key events */
+        if (!keystrokeListener) {
+            keystrokeListener =
+                SPI_createAccessibleKeystrokeListener (a11y_keystroke_listener,
+                                                       eekboard);
+        }
+
+        if (!SPI_registerAccessibleKeystrokeListener
+            (keystrokeListener,
+             SPI_KEYSET_ALL_KEYS,
+             0,
+             SPI_KEY_PRESSED |
+             SPI_KEY_RELEASED,
+             SPI_KEYLISTENER_NOSYNC))
+            g_warning ("failed to register keystroke listener");
     }
 
     g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
     if (combo)
-        gtk_combo_box_set_active (combo, 0);
+        gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
 
     gtk_main ();
 

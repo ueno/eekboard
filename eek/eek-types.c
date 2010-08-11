@@ -85,7 +85,6 @@ eek_point_get_type (void)
 void
 eek_point_rotate (EekPoint *point, gint angle)
 {
-    EekPoint *p;
     gdouble r, phi;
 
     phi = atan2 (point->y, point->x);
