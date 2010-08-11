@@ -438,20 +438,19 @@ on_key_released (EekKey *key, gpointer user_data)
     EekGtkKeyboard *keyboard = user_data;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
 
-    if (priv->key)
+    if (priv->key) {
         key_shrink (EEK_GTK_KEYBOARD(keyboard), EEK_KEY(priv->key));
-    priv->key = NULL;
+        priv->key = NULL;
+    }
+    key_shrink (EEK_GTK_KEYBOARD(keyboard), key);
 }
 
 static void
 press_key (EekGtkKeyboard *keyboard, EekKey *key)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
-    if (priv->key != key) {
-        if (priv->key)
-            g_signal_emit_by_name (priv->key, "released", keyboard);
+    if (priv->key != key)
         g_signal_emit_by_name (key, "pressed", keyboard);
-    }
 }
 
 static void
