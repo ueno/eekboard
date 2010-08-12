@@ -33,7 +33,7 @@
 <p>A keyboard element represents either a keyboard
     (<a class="link" href="eek-EekKeyboard.html#EekKeyboard" title="EekKeyboard"><span class="type">EekKeyboard</span></a>), a section (<a class="link" href="eek-EekSection.html#EekSection" title="EekSection"><span class="type">EekSection</span></a>), or a key (<a class="link" href="eek-EekKey.html#EekKey" title="EekKey"><span class="type">EekKey</span></a>).  Each
     element implements the Builder design pattern so that it can map
-    itself to different UI widgets (<a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, <span class="type">GtkDrawingArea</span>,
+    itself to different UI widgets (<a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, <a href="../gtk/GtkDrawingArea.html"><span class="type">GtkDrawingArea</span></a>,
     aso).</p>
 <p>A layout engine arranges keyboard elements using information
     from external configuration mechanisms (libxklavier, XKB,
@@ -60,8 +60,8 @@
 12
 13
 14</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="normal"><a href="eek-EekKeyboard.html#EekKeyboard">EekKeyboard</a> </span><span class="symbol">*</span><span class="normal">keyboard</span><span class="symbol">;</span>
-<span class="normal"><a href="eek-EekLayout.html#EekLayout">EekLayout</a> </span><span class="symbol">*</span><span class="normal">layout</span><span class="symbol">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="usertype">EekKeyboard</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">keyboard</span><span class="symbol">;</span>
+<span class="usertype">EekLayout</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">layout</span><span class="symbol">;</span>
 
 <span class="comment">/* Create a keyboard layout using libxklavier configuration. */</span>
 <span class="normal">layout </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="eek-EekXklLayout.html#eek-xkl-layout-new">eek_xkl_layout_new</a></span><span class="normal"> </span><span class="symbol">();</span>
@@ -82,7 +82,7 @@
 <p>The most interesting feature of libeek is that developer can
     choose arbitrary combination of UI toolkits and layout engine
     supported by libeek.  For example, to create a keyboard-like
-    <span class="type">GtkWidget</span> instead of <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, all you need is to replace
+    <a href="../gtk/GtkWidget.html"><span class="type">GtkWidget</span></a> instead of <a href="../clutter/ClutterActor.html"><span class="type">ClutterActor</span></a>, all you need is to replace
     <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-new" title="eek_clutter_keyboard_new ()"><code class="function">eek_clutter_keyboard_new()</code></a> with <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-new" title="eek_gtk_keyboard_new ()"><code class="function">eek_gtk_keyboard_new()</code></a> and
     <a class="link" href="eek-EekClutterKeyboard.html#eek-clutter-keyboard-get-actor" title="eek_clutter_keyboard_get_actor ()"><code class="function">eek_clutter_keyboard_get_actor()</code></a> with
     <a class="link" href="eek-EekGtkKeyboard.html#eek-gtk-keyboard-get-widget" title="eek_gtk_keyboard_get_widget ()"><code class="function">eek_gtk_keyboard_get_widget()</code></a>.  Similarly, if you want to use XKB
@@ -106,7 +106,7 @@
 2
 3</pre></td>
         <td class="listing_code"><pre class="programlisting"><span class="comment">/* Find a key element in the logical keyboard. */</span>
-<span class="normal"><a href="eek-EekKey.html#EekKey">EekKey</a> </span><span class="symbol">*</span><span class="normal">key </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="eek-EekKeyboard.html#eek-keyboard-find-key-by-keycode">eek_keyboard_find_key_by_keycode</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">keyboard</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0x38</span><span class="symbol">);</span>
+<span class="usertype">EekKey</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">key </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="eek-EekKeyboard.html#eek-keyboard-find-key-by-keycode">eek_keyboard_find_key_by_keycode</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">keyboard</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0x38</span><span class="symbol">);</span>
 <span class="function"><a href="../gobject/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">key</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"pressed"</span><span class="symbol">,</span><span class="normal"> on_a_pressed</span><span class="symbol">);</span></pre></td>
       </tr>
     </tbody>

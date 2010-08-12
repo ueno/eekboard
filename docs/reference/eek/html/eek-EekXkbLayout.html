@@ -44,12 +44,7 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-names" title="eek_xkb_layout_set_names ()">eek_xkb_layout_set_names</a>            (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
                                                          <em class="parameter"><code><span class="type">XkbComponentNamesRec</span> *names</code></em>);
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-names-full" title="eek_xkb_layout_set_names_full ()">eek_xkb_layout_set_names_full</a>       (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keymap</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keycodes</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *types</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *compat</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *symbols</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *geometry</code></em>);
+                                                         <em class="parameter"><code>...</code></em>);
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-keycodes" title="eek_xkb_layout_set_keycodes ()">eek_xkb_layout_set_keycodes</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
                                                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keycodes</code></em>);
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-geometry" title="eek_xkb_layout_set_geometry ()">eek_xkb_layout_set_geometry</a>         (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
@@ -106,17 +101,16 @@ Create a new <a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="Ee
 <div class="refsect2" title="eek_xkb_layout_set_names_full ()">
 <a name="eek-xkb-layout-set-names-full"></a><h3>eek_xkb_layout_set_names_full ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            eek_xkb_layout_set_names_full       (<em class="parameter"><code><a class="link" href="eek-EekXkbLayout.html#EekXkbLayout" title="EekXkbLayout"><span class="type">EekXkbLayout</span></a> *layout</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keymap</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *keycodes</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *types</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *compat</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *symbols</code></em>,
-                                                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *geometry</code></em>);</pre>
+                                                         <em class="parameter"><code>...</code></em>);</pre>
 <p>
 Set the XKB component names to <em class="parameter"><code>layout</code></em>.  This function is merely a
 wrapper around <a class="link" href="eek-EekXkbLayout.html#eek-xkb-layout-set-names" title="eek_xkb_layout_set_names ()"><code class="function">eek_xkb_layout_set_names()</code></a> to avoid passing a
 pointer of XkbComponentNamesRec, which is not currently available
 in the gobject-introspection repository.
+</p>
+<p>
+Available component names are: keymap, keycodes, types, compat,
+symbols, geometry.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -127,33 +121,8 @@ in the gobject-introspection repository.
 </td>
 </tr>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>keymap</code></em> :</span></p></td>
-<td>keymap component name
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>keycodes</code></em> :</span></p></td>
-<td>keycodes component name
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>types</code></em> :</span></p></td>
-<td>types component name
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>compat</code></em> :</span></p></td>
-<td>compat component name
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>symbols</code></em> :</span></p></td>
-<td>symbols component name
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>geometry</code></em> :</span></p></td>
-<td>geometry component name
+<td><p><span class="term"><em class="parameter"><code>...</code></em> :</span></p></td>
+<td>pairs of component name and value, terminated by -1.
 </td>
 </tr>
 <tr>
