@@ -19,3 +19,4 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = eek src tests bindings docs po
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
+EXTRA_DIST = eekboard-sample.conf
