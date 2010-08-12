@@ -95,29 +95,29 @@ libeek_xkl_la_LIBADD = libeek-xkb.la $(GTK2_LIBS) $(LIBXKLAVIER_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
 eek_HEADERS = \
-	$(top_srcdir)/eek/eek-element.h \
-	$(top_srcdir)/eek/eek-container.h \
-	$(top_srcdir)/eek/eek-keyboard.h \
-	$(top_srcdir)/eek/eek-section.h \
-	$(top_srcdir)/eek/eek-key.h \
-	$(top_srcdir)/eek/eek-layout.h \
-	$(top_srcdir)/eek/eek-keysym.h \
-	$(top_srcdir)/eek/eek-types.h \
-	$(top_srcdir)/eek/eek-gtk-keyboard.h \
-	$(top_srcdir)/eek/eek-xkb-layout.h \
-	$(top_srcdir)/eek/eek-xkl-layout.h \
-	$(top_srcdir)/eek/eek.h \
-	$(top_srcdir)/eek/eek-gtk.h \
-	$(top_srcdir)/eek/eek-xkb.h \
-	$(top_srcdir)/eek/eek-xkl.h
+	$(srcdir)/eek-element.h \
+	$(srcdir)/eek-container.h \
+	$(srcdir)/eek-keyboard.h \
+	$(srcdir)/eek-section.h \
+	$(srcdir)/eek-key.h \
+	$(srcdir)/eek-layout.h \
+	$(srcdir)/eek-keysym.h \
+	$(srcdir)/eek-types.h \
+	$(srcdir)/eek-gtk-keyboard.h \
+	$(srcdir)/eek-xkb-layout.h \
+	$(srcdir)/eek-xkl-layout.h \
+	$(srcdir)/eek.h \
+	$(srcdir)/eek-gtk.h \
+	$(srcdir)/eek-xkb.h \
+	$(srcdir)/eek-xkl.h
 
 if HAVE_CLUTTER
 eek_HEADERS += \
-	$(top_srcdir)/eek/eek-clutter-keyboard.h \
-	$(top_srcdir)/eek/eek-clutter-section.h \
-	$(top_srcdir)/eek/eek-clutter-key.h \
-	$(top_srcdir)/eek/eek-clutter-drawing-context.h \
-	$(top_srcdir)/eek/eek-clutter.h
+	$(srcdir)/eek-clutter-keyboard.h \
+	$(srcdir)/eek-clutter-section.h \
+	$(srcdir)/eek-clutter-key.h \
+	$(srcdir)/eek-clutter-drawing-context.h \
+	$(srcdir)/eek-clutter.h
 endif
 
 eek-keysym.c: eek-special-keysym-labels.h eek-unicode-keysym-labels.h eek-keyname-keysym-labels.h
@@ -153,7 +153,7 @@ CLEANFILES =
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
-INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir)
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(builddir)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
 if HAVE_INTROSPECTION
