@@ -63,12 +63,10 @@ gboolean              eek_xkb_layout_set_names (EekXkbLayout         *layout,
 
 gboolean              eek_xkb_layout_set_names_full
                                                (EekXkbLayout         *layout,
-                                                const gchar          *keymap,
-                                                const gchar          *keycodes,
-                                                const gchar          *types,
-                                                const gchar          *compat,
-                                                const gchar          *symbols,
-                                                const gchar          *geometry);
+                                                ...);
+gboolean              eek_xkb_layout_set_names_full_valist
+                                               (EekXkbLayout         *layout,
+                                                va_list               var_args);
                                         
 gboolean              eek_xkb_layout_set_keycodes
                                                (EekXkbLayout         *layout,

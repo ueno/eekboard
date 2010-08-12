@@ -31,6 +31,7 @@
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBgeom.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -613,38 +614,64 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
 /**
  * eek_xkb_layout_set_names_full:
  * @layout: an #EekXkbLayout
- * @keymap: keymap component name
- * @keycodes: keycodes component name
- * @types: types component name
- * @compat: compat component name
- * @symbols: symbols component name
- * @geometry: geometry component name
+ * @Varargs: pairs of component name and value, terminated by -1.
  *
  * Set the XKB component names to @layout.  This function is merely a
  * wrapper around eek_xkb_layout_set_names() to avoid passing a
  * pointer of XkbComponentNamesRec, which is not currently available
  * in the gobject-introspection repository.
  *
+ * Available component names are: keymap, keycodes, types, compat,
+ * symbols, geometry.
+ *
  * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
  * Since: 0.0.2
  */
 gboolean
 eek_xkb_layout_set_names_full (EekXkbLayout *layout,
-                               const gchar  *keymap,
-                               const gchar  *keycodes,
-                               const gchar  *types,
-                               const gchar  *compat,
-                               const gchar  *symbols,
-                               const gchar  *geometry)
+                               ...)
+{
+    va_list var_args;
+    va_start (var_args, layout);
+    eek_xkb_layout_set_names_full_valist (layout, var_args);
+    va_end (var_args);
+}
+
+/**
+ * eek_xkb_layout_set_names_full_valist:
+ * @layout: an #EekXkbLayout
+ * @var_args: <type>va_list</type> of pairs of component name and value.
+ *
+ * See eek_xkb_layout_set_names_full(), this version takes a
+ * <type>va_list</type> for language bindings to use.
+ *
+ * Since: 0.0.5
+ */
+gboolean
+eek_xkb_layout_set_names_full_valist (EekXkbLayout *layout,
+                                      va_list       var_args)
 {
     XkbComponentNamesRec names;
+    gchar *name, *value;
 
-    names.keymap = (char *)keymap;
-    names.keycodes = (char *)keycodes;
-    names.types = (char *)types;
-    names.compat = (char *)compat;
-    names.symbols = (char *)symbols;
-    names.geometry = (char *)geometry;
+    memset (&names, 0, sizeof names);
+    name = va_arg (var_args, gchar *);
+    while (name != (gchar *)-1) {
+        value = va_arg (var_args, gchar *);
+        if (g_strcmp0 (name, "keymap") == 0)
+            names.keymap = (char *)value;
+        else if (g_strcmp0 (name, "keycodes") == 0)
+            names.keycodes = (char *)value;
+        else if (g_strcmp0 (name, "types") == 0)
+            names.types = (char *)value;
+        else if (g_strcmp0 (name, "compat") == 0)
+            names.compat = (char *)value;
+        else if (g_strcmp0 (name, "symbols") == 0)
+            names.symbols = (char *)value;
+        else if (g_strcmp0 (name, "geometry") == 0)
+            names.geometry = (char *)value;
+        name = va_arg (var_args, gchar *);
+    }
     return eek_xkb_layout_set_names (layout, &names);
 }
 
