@@ -614,7 +614,7 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
 /**
  * eek_xkb_layout_set_names_full:
  * @layout: an #EekXkbLayout
- * @Varargs: pairs of component name and value, terminated by -1.
+ * @Varargs: pairs of component name and value, terminated by NULL.
  *
  * Set the XKB component names to @layout.  This function is merely a
  * wrapper around eek_xkb_layout_set_names() to avoid passing a
@@ -656,7 +656,7 @@ eek_xkb_layout_set_names_full_valist (EekXkbLayout *layout,
 
     memset (&names, 0, sizeof names);
     name = va_arg (var_args, gchar *);
-    while (name != (gchar *)-1) {
+    while (name) {
         value = va_arg (var_args, gchar *);
         if (g_strcmp0 (name, "keymap") == 0)
             names.keymap = (char *)value;
