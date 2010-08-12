@@ -27,68 +27,68 @@ lib_LTLIBRARIES += libeek-clutter.la
 endif
 
 libeek_la_SOURCES = \
-	eek-layout.c \
-	eek-layout.h \
-	eek-element.c \
-	eek-element.h \
-	eek-container.c \
-	eek-container.h \
-	eek-keyboard.c \
-	eek-keyboard.h \
-	eek-section.c \
-	eek-section.h \
-	eek-key.c \
-	eek-key.h \
-	eek-types.h \
-	eek-types.c \
-	eek-keysym.h \
-	eek-keysym.c \
-	eek-special-keysym-labels.h \
-	eek-unicode-keysym-labels.h \
-	eek-keyname-keysym-labels.h
+	$(srcdir)/eek-layout.c \
+	$(srcdir)/eek-layout.h \
+	$(srcdir)/eek-element.c \
+	$(srcdir)/eek-element.h \
+	$(srcdir)/eek-container.c \
+	$(srcdir)/eek-container.h \
+	$(srcdir)/eek-keyboard.c \
+	$(srcdir)/eek-keyboard.h \
+	$(srcdir)/eek-section.c \
+	$(srcdir)/eek-section.h \
+	$(srcdir)/eek-key.c \
+	$(srcdir)/eek-key.h \
+	$(srcdir)/eek-types.h \
+	$(srcdir)/eek-types.c \
+	$(srcdir)/eek-keysym.h \
+	$(srcdir)/eek-keysym.c \
+	$(srcdir)/eek-special-keysym-labels.h \
+	$(srcdir)/eek-unicode-keysym-labels.h \
+	$(srcdir)/eek-keyname-keysym-labels.h
 libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
 libeek_la_LIBADD = $(GOBJECT2_LIBS) -lm
 
 if HAVE_CLUTTER
 libeek_clutter_la_SOURCES = \
-	eek-clutter-keyboard.c \
-	eek-clutter-keyboard.h \
-	eek-clutter-section.c \
-	eek-clutter-section.h \
-	eek-clutter-key.c \
-	eek-clutter-key.h \
-	eek-clutter-key-actor.c \
-	eek-clutter-key-actor.h \
-	eek-clutter-drawing-context.c \
-	eek-clutter-drawing-context.h \
-	eek-drawing.h \
-	eek-drawing.c \
-	eek-clutter.h
+	$(srcdir)/eek-clutter-keyboard.c \
+	$(srcdir)/eek-clutter-keyboard.h \
+	$(srcdir)/eek-clutter-section.c \
+	$(srcdir)/eek-clutter-section.h \
+	$(srcdir)/eek-clutter-key.c \
+	$(srcdir)/eek-clutter-key.h \
+	$(srcdir)/eek-clutter-key-actor.c \
+	$(srcdir)/eek-clutter-key-actor.h \
+	$(srcdir)/eek-clutter-drawing-context.c \
+	$(srcdir)/eek-clutter-drawing-context.h \
+	$(srcdir)/eek-drawing.h \
+	$(srcdir)/eek-drawing.c \
+	$(srcdir)/eek-clutter.h
 
 libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
 libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 endif
 
 libeek_gtk_la_SOURCES = \
-	eek-gtk-keyboard.c \
-	eek-gtk-keyboard.h \
-	eek-drawing.h \
-	eek-drawing.c \
-	eek-gtk.h
+	$(srcdir)/eek-gtk-keyboard.c \
+	$(srcdir)/eek-gtk-keyboard.h \
+	$(srcdir)/eek-drawing.h \
+	$(srcdir)/eek-drawing.c \
+	$(srcdir)/eek-gtk.h
 
 libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
 libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 
 libeek_xkb_la_SOURCES = \
-	eek-xkb-layout.h \
-	eek-xkb-layout.c
+	$(srcdir)/eek-xkb-layout.h \
+	$(srcdir)/eek-xkb-layout.c
 
 libeek_xkb_la_CFLAGS = $(GTK2_CFLAGS) $(XKB_CFLAGS)
 libeek_xkb_la_LIBADD = libeek.la $(GTK2_LIBS) $(XKB_LIBS)
 
 libeek_xkl_la_SOURCES = \
-	eek-xkl-layout.h \
-	eek-xkl-layout.c
+	$(srcdir)/eek-xkl-layout.h \
+	$(srcdir)/eek-xkl-layout.c
 
 libeek_xkl_la_CFLAGS = $(GTK2_CFLAGS) $(LIBXKLAVIER_CFLAGS)
 libeek_xkl_la_LIBADD = libeek-xkb.la $(GTK2_LIBS) $(LIBXKLAVIER_LIBS)

@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-#include "eek-xkb.h"
+#include "eek/eek-xkb.h"
 
 /* For gdk_x11_display_get_xdisplay().  See main(). */
 #include <gtk/gtk.h>
