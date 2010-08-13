@@ -226,13 +226,17 @@ eek_key_real_get_keysym_index (EekKey *self,
 static void
 eek_key_real_pressed (EekKey *key)
 {
+#if DEBUG
     g_debug ("pressed %X", eek_key_get_keycode (key));
+#endif
 }
 
 static void
 eek_key_real_released (EekKey *key)
 {
+#if DEBUG
     g_debug ("released %X", eek_key_get_keycode (key));
+#endif
 }
 
 static void
