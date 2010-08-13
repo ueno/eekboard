@@ -485,6 +485,13 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                                                   keycode);
 }
 
+struct _FkbpData {
+    gdouble x;
+    gdouble y;
+    EekKey *key;
+};
+typedef struct _FkbpData FkbpData;
+
 static gint
 compare_section_by_position (EekElement *element, gpointer user_data)
 {
@@ -507,22 +514,22 @@ compare_section_by_position (EekElement *element, gpointer user_data)
     return -1;
 }
 
-static EekSection *
-eek_keyboard_find_section_by_position (EekKeyboard *keyboard,
-                                       gdouble      x,
-                                       gdouble      y)
+static void
+fkbp_foreach_child_callback (EekElement *element,
+                             gpointer user_data)
 {
-    EekBounds bounds;
+    FkbpData *data = user_data;
     EekPoint point;
-    EekElement *element;
 
-    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
-    point.x = x - bounds.x;
-    point.y = y - bounds.y;
-    element = eek_container_find (EEK_CONTAINER(keyboard),
-                                  compare_section_by_position,
-                                  &point);
-    return EEK_SECTION(element);
+    if (!data->key) {
+        point.x = data->x;
+        point.y = data->y;
+        if (compare_section_by_position (element, &point) == 0) {
+            data->key = eek_section_find_key_by_position (EEK_SECTION(element),
+                                                          point.x,
+                                                          point.y);
+        }
+    }
 }
 
 EekKey *
@@ -530,15 +537,17 @@ eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
                                    gdouble      x,
                                    gdouble      y)
 {
+    FkbpData data;
     EekSection *section;
     EekBounds bounds;
 
-    section = eek_keyboard_find_section_by_position (keyboard, x, y);
-    if (!section)
-        return NULL;
-
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
-    x -= bounds.x;
-    y -= bounds.y;
-    return eek_section_find_key_by_position (section, x, y);
+    data.x = x - bounds.x;
+    data.y = y - bounds.y;
+    data.key = NULL;
+    /* eek_container_find() cannot be used here since sections may overlap. */
+    eek_container_foreach_child (EEK_CONTAINER(keyboard),
+                                 fkbp_foreach_child_callback,
+                                 &data);
+    return data.key;
 }
