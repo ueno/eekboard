@@ -3,13 +3,10 @@
 -- add more tests
 
 - eekboard
--- a11y
--- display current configuration
--- notify user if there is no focused window
--- startup in the tray
 -- rewrite in Vala
 
 - libeek
+-- CSS based themes
 -- Caribou layout engine (XML)
 -- matchbox-keyboard layout engine (XML)
 -- delay initialization of XKB and XKL layouts
