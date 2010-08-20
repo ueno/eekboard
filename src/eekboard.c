@@ -358,6 +358,7 @@ a11y_keystroke_listener (const AccessibleKeystroke *stroke,
     guint keysym;
     guint ignored_keysyms[] = {XK_Shift_L,
                                XK_Shift_R,
+                               XK_ISO_Level3_Shift,
                                XK_Control_L,
                                XK_Control_R,
                                XK_Alt_L,
@@ -403,24 +404,35 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer user_data)
 {
     Eekboard *eekboard = user_data;
-    guint keysym;
+    gint group, level;
+    guint keysym, modifiers = 0;
 
     keysym = eek_key_get_keysym (key);
     EEKBOARD_NOTE("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
-    
-    if (keysym == XK_Shift_L || keysym == XK_Shift_R) {
-        gint group, level;
 
+    switch (keysym) {
+    case XK_Shift_L:
+    case XK_Shift_R:
         eekboard->modifiers ^= ShiftMask;
+    case XK_ISO_Level3_Shift:
+        eekboard->modifiers ^= Mod5Mask;
         eek_keyboard_get_keysym_index (keyboard, &group, &level);
         eek_keyboard_set_keysym_index (keyboard, group,
-                                       eekboard->modifiers & ShiftMask ? 1 : 0);
-    } else if (keysym == XK_Control_L || keysym == XK_Control_R) {
+                                       (eekboard->modifiers & Mod5Mask) ? 2 :
+                                       (eekboard->modifiers & ShiftMask) ? 1 :
+                                       0);
+        break;
+    case XK_Control_L:
+    case XK_Control_R:
         eekboard->modifiers ^= ControlMask;
-    } else if (keysym == XK_Alt_L || keysym == XK_Alt_R) {
+        break;
+    case XK_Alt_L:
+    case XK_Alt_R:
         eekboard->modifiers ^= Mod1Mask;
-    } else
+        break;
+    default:
         fakekey_press_keysym (eekboard->fakekey, keysym, eekboard->modifiers);
+    }
 }
 
 static void
