@@ -145,3 +145,30 @@ eek_outline_get_type (void)
                                           (GBoxedFreeFunc)eek_outline_free);
     return our_type;
 }
+
+/* EekColor */
+
+static EekColor *
+eek_color_copy (const EekColor *color)
+{
+    return g_slice_dup (EekColor, color);
+}
+
+static void
+eek_color_free (EekColor *color)
+{
+    g_slice_free (EekColor, color);
+}
+
+GType
+eek_color_get_type (void)
+{
+    static GType our_type = 0;
+
+    if (our_type == 0)
+        our_type =
+            g_boxed_type_register_static ("EekColor",
+                                          (GBoxedCopyFunc)eek_color_copy,
+                                          (GBoxedFreeFunc)eek_color_free);
+    return our_type;
+}

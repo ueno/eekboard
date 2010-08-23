@@ -4,3 +4,5 @@ Cairo keyboard drawing functions are borrowed from the libgnomekbd
 library by Sergey V. Udaltsov <svu@gnome.org>.  See the comments in
 eek/eek-drawing.c for detail.
 
+CSS theme support functions are borrowed from gnome-shell.  See the
+comments in eek/eek-theme*.[ch] for detail.

@@ -129,5 +129,26 @@ typedef struct _EekOutline EekOutline;
 #define EEK_TYPE_OUTLINE (eek_outline_get_type ())
 GType eek_outline_get_type (void) G_GNUC_CONST;
 
+/**
+ * EekColor:
+ * @red: red component of the RGB value
+ * @green: green component of the RGB value
+ * @blue: blue component of the RGB value
+ * @alpha: alpha component of the RGB value
+ *
+ * RGB color value
+ */
+struct _EekColor
+{
+    guint8 red;
+    guint8 green;
+    guint8 blue;
+    guint8 alpha;
+};
+typedef struct _EekColor EekColor;
+
+#define EEK_TYPE_COLOR (eek_color_get_type ())
+GType eek_color_get_type (void) G_GNUC_CONST;
+
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

@@ -29,10 +29,10 @@ PKG_CHECK_MODULES([GLIB2], [glib-2.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
 PKG_CHECK_MODULES([GOBJECT2], [gobject-2.0], ,
   [AC_MSG_ERROR([GObject2 not found])])
-PKG_CHECK_MODULES([CAIRO], [cairo], ,
-  [AC_MSG_ERROR([Cairo not found])])
-PKG_CHECK_MODULES([PANGO], [pango], ,
-  [AC_MSG_ERROR([Pango not found])])
+PKG_CHECK_MODULES([GIO2], [gio-2.0], ,
+  [AC_MSG_ERROR([GIO2 not found])])
+PKG_CHECK_MODULES([PANGOCAIRO], [pangocairo], ,
+  [AC_MSG_ERROR([PangoCairo not found])])
 PKG_CHECK_MODULES([GTK2], [gtk+-2.0 gdk-2.0], ,
   [AC_MSG_ERROR([GTK2 not found])])
 PKG_CHECK_MODULES([GCONF2], [gconf-2.0], ,
@@ -47,6 +47,8 @@ PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
   [AC_MSG_ERROR([AT-SPI C not found])])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], ,
   [AC_MSG_ERROR([libnotify not found])])
+PKG_CHECK_MODULES([LIBCROCO], [libcroco-0.6], ,
+  [AC_MSG_ERROR([libcroco not found])])
 
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,

@@ -26,7 +26,7 @@ if HAVE_CLUTTER
 lib_LTLIBRARIES += libeek-clutter.la
 endif
 
-libeek_la_SOURCES = \
+libeek_public_sources = \
 	$(srcdir)/eek-layout.c \
 	$(srcdir)/eek-layout.h \
 	$(srcdir)/eek-element.c \
@@ -43,11 +43,26 @@ libeek_la_SOURCES = \
 	$(srcdir)/eek-types.c \
 	$(srcdir)/eek-keysym.h \
 	$(srcdir)/eek-keysym.c \
+	$(srcdir)/eek-theme.h \
+	$(srcdir)/eek-theme.c \
+	$(srcdir)/eek-theme-node.h \
+	$(srcdir)/eek-theme-node.c \
+	$(srcdir)/eek-drawing.h \
+	$(srcdir)/eek-drawing.c \
 	$(srcdir)/eek-special-keysym-labels.h \
 	$(srcdir)/eek-unicode-keysym-labels.h \
 	$(srcdir)/eek-keyname-keysym-labels.h
-libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
-libeek_la_LIBADD = $(GOBJECT2_LIBS) -lm
+
+libeek_private_sources = \
+	$(srcdir)/eek-theme-private.h \
+	$(srcdir)/eek-theme-node-private.h
+
+libeek_la_SOURCES = \
+	$(libeek_public_sources) \
+	$(libeek_private_sources)
+
+libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(GIO2_CFLAGS) $(LIBCROCO_CFLAGS) $(PANGOCAIRO_CFLAGS)
+libeek_la_LIBADD = $(GOBJECT2_LIBS) $(GIO2_LIBS) $(LIBCROCO_LIBS) $(PANGOCAIRO_LIBS) -lm
 
 if HAVE_CLUTTER
 libeek_clutter_la_SOURCES = \
@@ -61,22 +76,18 @@ libeek_clutter_la_SOURCES = \
 	$(srcdir)/eek-clutter-key-actor.h \
 	$(srcdir)/eek-clutter-drawing-context.c \
 	$(srcdir)/eek-clutter-drawing-context.h \
-	$(srcdir)/eek-drawing.h \
-	$(srcdir)/eek-drawing.c \
 	$(srcdir)/eek-clutter.h
 
-libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS)
 libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 endif
 
 libeek_gtk_la_SOURCES = \
 	$(srcdir)/eek-gtk-keyboard.c \
 	$(srcdir)/eek-gtk-keyboard.h \
-	$(srcdir)/eek-drawing.h \
-	$(srcdir)/eek-drawing.c \
 	$(srcdir)/eek-gtk.h
 
-libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS)
 libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 
 libeek_xkb_la_SOURCES = \
@@ -160,10 +171,10 @@ if HAVE_INTROSPECTION
 
 Eek-0.1.gir: libeek.la
 Eek_0_1_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
-Eek_0_1_gir_INCLUDES = GLib-2.0 GObject-2.0
+Eek_0_1_gir_INCLUDES = GLib-2.0 GObject-2.0 PangoCairo-1.0
 Eek_0_1_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek_0_1_gir_LIBS = libeek.la
-Eek_0_1_gir_FILES = $(libeek_la_SOURCES)
+Eek_0_1_gir_FILES = $(libeek_public_sources)
 
 EekGtk-0.1.gir: libeek-gtk.la Eek-0.1.gir
 EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-2.0 Eek-0.1
