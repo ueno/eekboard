@@ -150,5 +150,12 @@ typedef struct _EekColor EekColor;
 #define EEK_TYPE_COLOR (eek_color_get_type ())
 GType eek_color_get_type (void) G_GNUC_CONST;
 
+typedef enum {
+  EEK_GRADIENT_NONE,
+  EEK_GRADIENT_VERTICAL,
+  EEK_GRADIENT_HORIZONTAL,
+  EEK_GRADIENT_RADIAL
+} EekGradientType;
+
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

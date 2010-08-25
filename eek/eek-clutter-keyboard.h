@@ -22,6 +22,7 @@
 
 #include "eek-clutter-section.h"
 #include "eek-keyboard.h"
+#include "eek-theme.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_KEYBOARD (eek_clutter_keyboard_get_type())
@@ -56,6 +57,8 @@ struct _EekClutterKeyboardClass
 GType         eek_clutter_keyboard_get_type  (void) G_GNUC_CONST;
 EekKeyboard  *eek_clutter_keyboard_new       (void);
 ClutterActor *eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard);
+void          eek_clutter_keyboard_set_theme (EekClutterKeyboard *keyboard,
+                                              EekTheme           *theme);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEYBOARD_H */

@@ -33,6 +33,7 @@ struct _EekClutterSectionPrivate
 {
     EekClutterDrawingContext *context;
     ClutterActor *actor;
+    EekThemeNode *tnode;
 };
 
 static void
@@ -111,6 +112,19 @@ eek_clutter_section_real_create_key (EekSection  *self,
     key = eek_clutter_key_new (priv->context, column, row);
     g_return_val_if_fail (key, NULL);
     
+    if (priv->tnode) {
+        EekThemeNode *tnode;
+
+        tnode = eek_theme_node_new (priv->tnode,
+                                    eek_theme_node_get_theme (priv->tnode),
+                                    NULL,
+                                    "key",
+                                    "key",
+                                    "key",
+                                    NULL);
+        eek_clutter_key_set_theme_node (key, tnode);
+    }
+
     g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
     g_signal_connect (key, "released", G_CALLBACK(released_event), self);
 
@@ -169,6 +183,7 @@ ClutterActor *
 eek_clutter_section_get_actor (EekClutterSection *section)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(section);
+    g_return_val_if_fail (priv, NULL);
     if (!priv->actor) {
         priv->actor = clutter_group_new ();
         g_object_ref_sink (priv->actor);
@@ -187,4 +202,15 @@ eek_clutter_section_new (EekClutterDrawingContext *context)
     g_object_ref_sink (G_OBJECT(section->priv->context));
 
     return EEK_SECTION(section);
+}
+
+void
+eek_clutter_section_set_theme_node (EekClutterSection *section,
+                                    EekThemeNode      *tnode)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(section);
+    g_return_if_fail (priv);
+    if (priv->tnode)
+        g_object_unref (priv->tnode);
+    priv->tnode = tnode;
 }

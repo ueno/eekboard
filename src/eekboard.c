@@ -231,6 +231,7 @@ static gchar *opt_toolkit = NULL;
 #endif
 static gboolean opt_standalone = FALSE;
 static gchar *opt_config = NULL;
+static gchar *opt_theme = NULL;
 
 static const GOptionEntry options[] = {
     {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -253,6 +254,8 @@ static const GOptionEntry options[] = {
      N_("Start as a standalone application")},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
      N_("Specify configuration file")},
+    {"theme", 't', 0, G_OPTION_ARG_STRING, &opt_theme,
+     N_("Specify theme CSS")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
      N_("Display version")},
     {NULL}
@@ -1058,6 +1061,10 @@ create_widget_clutter (Eekboard *eekboard,
     bounds.height = initial_height;
 
     eekboard->keyboard = eek_clutter_keyboard_new ();
+    if (opt_theme) {
+        EekTheme *theme = eek_theme_new (opt_theme, NULL, NULL);
+        eek_clutter_keyboard_set_theme (eekboard->keyboard, theme);
+    }
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
     eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
     eekboard->on_key_pressed_id =

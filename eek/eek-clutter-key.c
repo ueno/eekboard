@@ -34,6 +34,7 @@ struct _EekClutterKeyPrivate
 {
     EekClutterDrawingContext *context;
     ClutterActor *actor;
+    EekThemeNode *tnode;
 };
 
 static void
@@ -130,9 +131,10 @@ eek_clutter_key_get_actor (EekClutterKey *key)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
 
+    g_return_val_if_fail (priv, NULL);
     if (!priv->actor) {
         g_return_val_if_fail (priv->context, NULL);
-        priv->actor = eek_clutter_key_actor_new (priv->context, EEK_KEY(key));
+        priv->actor = eek_clutter_key_actor_new (priv->context, key);
         g_object_ref_sink (priv->actor);
     }
     return priv->actor;
@@ -151,4 +153,24 @@ eek_clutter_key_new (EekClutterDrawingContext *context, gint column, gint row)
     key->priv->context = context;
     g_object_ref_sink (key->priv->context);
     return EEK_KEY(key);
+}
+
+void
+eek_clutter_key_set_theme_node (EekClutterKey *key, EekThemeNode *tnode)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
+
+    g_return_if_fail (priv);
+    if (priv->tnode)
+        g_object_unref (priv->tnode);
+    priv->tnode = tnode;
+}
+
+EekThemeNode *
+eek_clutter_key_get_theme_node (EekClutterKey *key)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(key);
+
+    g_return_val_if_fail (priv, NULL);
+    return priv->tnode;
 }

@@ -115,6 +115,7 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
 po/Makefile.in
+data/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc

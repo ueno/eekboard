@@ -39,13 +39,6 @@ typedef struct _EekThemeNodeClass EekThemeNodeClass;
 #define EEK_IS_THEME_NODE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_THEME_NODE))
 #define EEK_THEME_NODE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_THEME_NODE, EekThemeNodeClass))
 
-typedef enum {
-  EEK_GRADIENT_NONE,
-  EEK_GRADIENT_VERTICAL,
-  EEK_GRADIENT_HORIZONTAL,
-  EEK_GRADIENT_RADIAL
-} EekGradientType;
-
 GType eek_theme_node_get_type (void) G_GNUC_CONST;
 
 EekThemeNode *eek_theme_node_new (EekThemeNode    *parent_node,   /* can be null */

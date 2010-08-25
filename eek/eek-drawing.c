@@ -181,18 +181,45 @@ eek_get_fonts (EekKeyboard           *keyboard,
 }
 
 void
-eek_draw_outline (cairo_t *cr, EekOutline *outline)
+eek_draw_outline (cairo_t        *cr,
+                  EekOutline     *outline,
+                  EekGradientType gradient_type,
+                  EekColor       *gradient_start,
+                  EekColor       *gradient_end)
 {
     cairo_pattern_t *pat;
 
     cairo_set_line_width (cr, 1);
     cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 
-    pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
-    cairo_pattern_add_color_stop_rgba (pat, 1, 0.5, 0.5, 0.5, 1);
-    cairo_pattern_add_color_stop_rgba (pat, 0, 1, 1, 1, 1);
+    switch (gradient_type) {
+    case EEK_GRADIENT_VERTICAL:
+        pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, 256.0);
+        break;
+    case EEK_GRADIENT_HORIZONTAL:
+        pat = cairo_pattern_create_linear (0.0, 0.0, 256.0, 0.0);
+        break;
+    case EEK_GRADIENT_RADIAL:
+        pat = cairo_pattern_create_radial (0.0, 0.0, 0.0,
+                                           0.0, 0.0, 256.0);
+        break;
+    default:
+        pat = NULL;
+    }
 
-    cairo_set_source (cr, pat);
+    if (pat) {
+        cairo_pattern_add_color_stop_rgba (pat, 0,
+                                           gradient_start->red / 255.0,
+                                           gradient_start->green / 255.0,
+                                           gradient_start->blue / 255.0,
+                                           gradient_start->alpha / 255.0);
+        cairo_pattern_add_color_stop_rgba (pat, 1,
+                                           gradient_end->red / 255.0,
+                                           gradient_end->green / 255.0,
+                                           gradient_end->blue / 255.0,
+                                           gradient_end->alpha / 255.0);
+        cairo_set_source (cr, pat);
+    }
 
     eek_draw_rounded_polygon (cr,
                               TRUE,
@@ -200,7 +227,8 @@ eek_draw_outline (cairo_t *cr, EekOutline *outline)
                               outline->points,
                               outline->num_points);
 
-    cairo_pattern_destroy (pat);
+    if (pat)
+        cairo_pattern_destroy (pat);
 
     cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5);
     eek_draw_rounded_polygon (cr,

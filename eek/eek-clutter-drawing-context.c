@@ -39,6 +39,8 @@ struct _EekClutterDrawingContextPrivate
 
     /* keysym category -> PangoFontDescription * */
     PangoFontDescription *category_fonts[EEK_KEYSYM_CATEGORY_LAST];
+
+    EekTheme *theme;
 };
 
 static void
@@ -129,6 +131,17 @@ eek_clutter_drawing_context_get_category_font
         EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
     g_return_val_if_fail (priv, NULL);
     return priv->category_fonts[category];
+}
+
+void
+eek_clutter_drawing_context_set_theme
+ (EekClutterDrawingContext *context,
+  EekTheme                 *theme)
+{
+    EekClutterDrawingContextPrivate *priv =
+        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
+    g_return_if_fail (priv);
+    priv->theme = theme;
 }
 
 EekClutterDrawingContext *

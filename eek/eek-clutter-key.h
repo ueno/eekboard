@@ -60,6 +60,11 @@ EekKey *      eek_clutter_key_new       (EekClutterDrawingContext *context,
                                          gint                      column,
                                          gint                      row);
 ClutterActor *eek_clutter_key_get_actor (EekClutterKey            *key);
+void          eek_clutter_key_set_theme_node
+                                        (EekClutterKey            *key,
+                                         EekThemeNode             *tnode);
+EekThemeNode *eek_clutter_key_get_theme_node
+                                        (EekClutterKey            *key);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEY_H */

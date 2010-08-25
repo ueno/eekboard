@@ -32,6 +32,7 @@
 #include "eek-clutter-drawing-context.h"
 #include "eek-keyboard.h"
 #include "eek-drawing.h"
+#include "eek-theme-node.h"
 
 G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, EEK_TYPE_KEYBOARD);
 
@@ -43,6 +44,7 @@ struct _EekClutterKeyboardPrivate
 {
     EekClutterDrawingContext *context;
     ClutterActor *actor;
+    EekThemeNode *tnode;
 
     guint key_press_event_handler;
     guint key_release_event_handler;
@@ -107,6 +109,19 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
     section = eek_clutter_section_new (priv->context);
     g_return_val_if_fail (section, NULL);
 
+    if (priv->tnode) {
+        EekThemeNode *tnode;
+
+        tnode = eek_theme_node_new (priv->tnode,
+                                    eek_theme_node_get_theme (priv->tnode),
+                                    NULL,
+                                    "section",
+                                    "section",
+                                    "section",
+                                    NULL);
+        eek_clutter_section_set_theme_node (section, tnode);
+    }
+
     g_signal_connect (section, "key-pressed",
                       G_CALLBACK(key_pressed_event), self);
     g_signal_connect (section, "key-released",
@@ -144,6 +159,10 @@ eek_clutter_keyboard_dispose (GObject *object)
         }
         g_object_unref (priv->actor);
         priv->actor = NULL;
+    }
+    if (priv->tnode) {
+        g_object_unref (priv->tnode);
+        priv->tnode = NULL;
     }
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->dispose (object);
 }
@@ -302,6 +321,8 @@ eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
 {
     EekClutterKeyboardPrivate *priv =
         EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+
+    g_return_val_if_fail (priv, NULL);
     if (!priv->actor) {
         priv->actor = clutter_group_new ();
         g_object_ref_sink (priv->actor);
@@ -313,4 +334,23 @@ eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
         update_category_fonts (keyboard);
     }
     return priv->actor;
+}
+
+void
+eek_clutter_keyboard_set_theme (EekClutterKeyboard *keyboard,
+                                EekTheme           *theme)
+{
+    EekClutterKeyboardPrivate *priv =
+        EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+
+    g_return_if_fail (priv);
+    if (priv->tnode)
+        g_object_unref (priv->tnode);
+    priv->tnode = eek_theme_node_new (NULL,
+                                      theme,
+                                      NULL,
+                                      "keyboard",
+                                      "keyboard",
+                                      "keyboard",
+                                      NULL);
 }

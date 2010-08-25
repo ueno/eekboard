@@ -5,6 +5,7 @@
 #include "eek-keyboard.h"
 #include "eek-keysym.h"
 #include "eek-types.h"
+#include "eek-theme-node.h"
 
 G_BEGIN_DECLS
 
@@ -16,7 +17,10 @@ void eek_get_fonts            (EekKeyboard           *keyboard,
                                PangoFontDescription **fonts);
 
 void eek_draw_outline         (cairo_t               *cr,
-                               EekOutline            *outline);
+                               EekOutline            *outline,
+                               EekGradientType        gradient_type,
+                               EekColor              *gradient_start,
+                               EekColor              *gradient_end);
 
 void eek_draw_key_label       (cairo_t               *cr,
                                EekKey                *key,

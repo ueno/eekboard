@@ -22,7 +22,7 @@
 
 #include <clutter/clutter.h>
 #include "eek-clutter-drawing-context.h"
-#include "eek-key.h"
+#include "eek-clutter-key.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_KEY_ACTOR (eek_clutter_key_actor_get_type())
@@ -62,7 +62,7 @@ struct _EekClutterKeyActorClass
 GType         eek_clutter_key_actor_get_type
                                         (void) G_GNUC_CONST;
 ClutterActor *eek_clutter_key_actor_new (EekClutterDrawingContext *context,
-                                         EekKey                   *key);
+                                         EekClutterKey            *key);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEY_ACTOR_H */

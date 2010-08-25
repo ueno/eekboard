@@ -50,7 +50,7 @@ G_DEFINE_TYPE (EekClutterKeyActor, eek_clutter_key_actor,
 struct _EekClutterKeyActorPrivate
 {
     EekClutterDrawingContext *context;
-    EekKey *key;
+    EekClutterKey *key;
     ClutterActor *texture;
     gboolean is_pressed;
 };
@@ -70,6 +70,7 @@ eek_clutter_key_actor_real_paint (ClutterActor *self)
     CoglColor color;
     ClutterGeometry geom;
     EekBounds bounds;
+    EekThemeNode *tnode;
 
     eek_element_get_bounds (EEK_ELEMENT(priv->key), &bounds);
     clutter_actor_set_anchor_point_from_gravity (self,
@@ -92,8 +93,13 @@ eek_clutter_key_actor_real_paint (ClutterActor *self)
     draw_key_on_layout (EEK_CLUTTER_KEY_ACTOR(self), layout);
     pango_layout_get_extents (layout, NULL, &logical_rect);
 
-    /* FIXME: Color should be configurable through a property. */
-    cogl_color_set_from_4ub (&color, 0x80, 0x00, 0x00, 0xff);
+    tnode = eek_clutter_key_get_theme_node (priv->key);
+    if (tnode) {
+        EekColor c;
+        eek_theme_node_get_foreground_color (tnode, &c);
+        cogl_color_set_from_4ub (&color, c.red, c.green, c.blue, c.alpha);
+    } else
+        cogl_color_set_from_4ub (&color, 0x80, 0x00, 0x00, 0xff);
     clutter_actor_get_allocation_geometry (self, &geom);
     cogl_pango_render_layout
         (layout,
@@ -254,7 +260,8 @@ eek_clutter_key_actor_init (EekClutterKeyActor *self)
 }
 
 ClutterActor *
-eek_clutter_key_actor_new (EekClutterDrawingContext *context, EekKey *key)
+eek_clutter_key_actor_new (EekClutterDrawingContext *context,
+                           EekClutterKey *key)
 {
     EekClutterKeyActor *actor;
 
@@ -301,19 +308,33 @@ key_shrink (ClutterActor *actor)
 
 
 static ClutterActor *
-create_texture_for_key (EekKey *key)
+create_texture_for_key (EekClutterKey *key)
 {
     ClutterActor *texture;
     cairo_t *cr;
     EekOutline *outline;
     EekBounds bounds;
+    EekThemeNode *tnode;
+    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
+    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
+        gradient_end = {0x80, 0x80, 0x80, 0xFF};
 
     outline = eek_key_get_outline (EEK_KEY(key));
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
  
     texture = clutter_cairo_texture_new (bounds.width, bounds.height);
     cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
-    eek_draw_outline (cr, outline);
+
+    tnode = eek_clutter_key_get_theme_node (key);
+    if (tnode)
+        eek_theme_node_get_background_gradient (tnode,
+                                                &gradient_type,
+                                                &gradient_start,
+                                                &gradient_end);
+    eek_draw_outline (cr, outline,
+                      gradient_type,
+                      &gradient_start,
+                      &gradient_end);
     cairo_destroy (cr);
     return texture;
 }
@@ -324,7 +345,7 @@ get_texture (EekClutterKeyActor *actor)
     ClutterActor *texture;
     EekOutline *outline;
 
-    outline = eek_key_get_outline (actor->priv->key);
+    outline = eek_key_get_outline (EEK_KEY(actor->priv->key));
     texture =
         eek_clutter_drawing_context_get_outline_texture (actor->priv->context,
                                                          outline);
@@ -349,7 +370,7 @@ draw_key_on_layout (EekClutterKeyActor *self,
     EekBounds bounds;
     PangoFontDescription *font;
 
-    keysym = eek_key_get_keysym (priv->key);
+    keysym = eek_key_get_keysym (EEK_KEY(priv->key));
     if (keysym == EEK_INVALID_KEYSYM)
         return;
     category = eek_keysym_get_category (keysym);

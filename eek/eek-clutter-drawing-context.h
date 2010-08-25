@@ -25,6 +25,7 @@
 
 #include "eek-keysym.h"
 #include "eek-types.h"
+#include "eek-theme.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_DRAWING_CONTEXT (eek_clutter_drawing_context_get_type())
@@ -77,6 +78,10 @@ void                      eek_clutter_drawing_context_set_category_font
 PangoFontDescription     *eek_clutter_drawing_context_get_category_font
                           (EekClutterDrawingContext *context,
                            EekKeysymCategory         category);
+
+void                      eek_clutter_drawing_context_set_theme
+                          (EekClutterDrawingContext *context,
+                           EekTheme                 *theme);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_DRAWING_CONTEXT_H */
