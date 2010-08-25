@@ -108,6 +108,7 @@ AC_CONFIG_HEADERS([eek/config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
 src/Makefile
+data/Makefile
 tests/Makefile
 bindings/Makefile
 bindings/vala/Makefile
@@ -115,7 +116,6 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
 po/Makefile.in
-data/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc
