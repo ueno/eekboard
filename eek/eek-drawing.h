@@ -17,6 +17,7 @@ void eek_get_fonts            (EekKeyboard           *keyboard,
                                PangoFontDescription **fonts);
 
 void eek_draw_outline         (cairo_t               *cr,
+                               EekBounds             *bounds,
                                EekOutline            *outline,
                                EekGradientType        gradient_type,
                                EekColor              *gradient_start,

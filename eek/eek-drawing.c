@@ -182,6 +182,7 @@ eek_get_fonts (EekKeyboard           *keyboard,
 
 void
 eek_draw_outline (cairo_t        *cr,
+                  EekBounds      *bounds,
                   EekOutline     *outline,
                   EekGradientType gradient_type,
                   EekColor       *gradient_start,
@@ -194,14 +195,16 @@ eek_draw_outline (cairo_t        *cr,
 
     switch (gradient_type) {
     case EEK_GRADIENT_VERTICAL:
-        pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, 256.0);
+        pat = cairo_pattern_create_linear (bounds->width / 2, 0.0,
+                                           bounds->width / 2, bounds->height);
         break;
     case EEK_GRADIENT_HORIZONTAL:
-        pat = cairo_pattern_create_linear (0.0, 0.0, 256.0, 0.0);
+        pat = cairo_pattern_create_linear (0.0, bounds->height / 2,
+                                           bounds->width, bounds->height / 2);
         break;
     case EEK_GRADIENT_RADIAL:
-        pat = cairo_pattern_create_radial (0.0, 0.0, 0.0,
-                                           0.0, 0.0, 256.0);
+        pat = cairo_pattern_create_radial (0.0, 0.0, 0,
+                                           0.0, 0.0, MIN(bounds->width, bounds->height));
         break;
     default:
         pat = NULL;

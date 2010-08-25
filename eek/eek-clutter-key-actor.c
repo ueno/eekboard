@@ -331,7 +331,9 @@ create_texture_for_key (EekClutterKey *key)
                                                 &gradient_type,
                                                 &gradient_start,
                                                 &gradient_end);
-    eek_draw_outline (cr, outline,
+    eek_draw_outline (cr,
+                      &bounds,
+                      outline,
                       gradient_type,
                       &gradient_start,
                       &gradient_end);

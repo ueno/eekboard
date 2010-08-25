@@ -1,6 +1,6 @@
 .key {
     color: #ffffff;
-    background-gradient-direction: horizontal;
+    background-gradient-direction: radial;
     background-gradient-start: #800000;
-    background-gradient-end: #FFFFFF;
+    background-gradient-end: #DD0000;
 }

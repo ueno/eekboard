@@ -215,8 +215,12 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
         gdk_cairo_set_source_color (cr, context->bg);
         cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
         gdk_cairo_set_source_color (cr, context->fg);
-        eek_draw_outline (cr, outline, EEK_GRADIENT_VERTICAL,
-                          &gradient_start, &gradient_end);
+        eek_draw_outline (cr,
+                          &bounds,
+                          outline,
+                          EEK_GRADIENT_VERTICAL,
+                          &gradient_start,
+                          &gradient_end);
         cairo_destroy (cr);
         g_hash_table_insert (priv->outline_textures, outline, texture);
     }
@@ -366,8 +370,12 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
         gdk_cairo_set_source_color (cr, context.bg);
         cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
         gdk_cairo_set_source_color (cr, context.fg);
-        eek_draw_outline (cr, outline, EEK_GRADIENT_VERTICAL,
-                          &gradient_start, &gradient_end);
+        eek_draw_outline (cr,
+                          &bounds,
+                          outline,
+                          EEK_GRADIENT_VERTICAL,
+                          &gradient_start,
+                          &gradient_end);
         cairo_destroy (cr);
         g_hash_table_insert (priv->large_outline_textures, outline, texture);
     }
