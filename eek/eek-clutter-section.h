@@ -57,9 +57,6 @@ struct _EekClutterSectionClass
 GType         eek_clutter_section_get_type  (void) G_GNUC_CONST;
 EekSection *  eek_clutter_section_new       (EekClutterDrawingContext *context);
 ClutterActor *eek_clutter_section_get_actor (EekClutterSection        *section);
-void          eek_clutter_section_set_theme_node
-                                            (EekClutterSection        *section,
-                                             EekThemeNode             *tnode);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_SECTION_H */

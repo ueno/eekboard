@@ -93,7 +93,7 @@ eek_clutter_key_actor_real_paint (ClutterActor *self)
     draw_key_on_layout (EEK_CLUTTER_KEY_ACTOR(self), layout);
     pango_layout_get_extents (layout, NULL, &logical_rect);
 
-    tnode = eek_clutter_key_get_theme_node (priv->key);
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(priv->key));
     if (tnode) {
         EekColor c;
         eek_theme_node_get_foreground_color (tnode, &c);
@@ -325,7 +325,7 @@ create_texture_for_key (EekClutterKey *key)
     texture = clutter_cairo_texture_new (bounds.width, bounds.height);
     cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
 
-    tnode = eek_clutter_key_get_theme_node (key);
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
     if (tnode)
         eek_theme_node_get_background_gradient (tnode,
                                                 &gradient_type,

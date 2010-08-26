@@ -4,3 +4,10 @@
     background-gradient-start: #800000;
     background-gradient-end: #DD0000;
 }
+
+#SPCE, #RTRN, #TAB {
+    color: #ffffff;
+    background-gradient-direction: radial;
+    background-gradient-start: #008000;
+    background-gradient-end: #00DD00;
+}

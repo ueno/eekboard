@@ -1,6 +1,7 @@
 #ifndef __EEK_THEME_NODE_PRIVATE_H__
 #define __EEK_THEME_NODE_PRIVATE_H__
 
+#include <libcroco/libcroco.h>
 #include "eek-theme-node.h"
 
 struct _EekThemeNode {

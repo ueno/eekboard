@@ -34,11 +34,13 @@
 
 #include "eek-element.h"
 #include "eek-container.h"
+#include "eek-theme-node-private.h"
 
 enum {
     PROP_0,
     PROP_NAME,
     PROP_BOUNDS,
+    PROP_THEME_NODE,
     PROP_LAST
 };
 
@@ -53,6 +55,7 @@ struct _EekElementPrivate
     gchar *name;
     EekBounds bounds;
     EekElement *parent;
+    EekThemeNode *tnode;
 };
 
 static void
@@ -90,6 +93,9 @@ eek_element_real_set_name (EekElement  *self,
     g_free (priv->name);
     priv->name = g_strdup (name);
 
+    if (priv->tnode && priv->tnode->element_id == NULL)
+        priv->tnode->element_id = g_strdup (name);
+
     g_object_notify (G_OBJECT(self), "name");
 }
 
@@ -108,6 +114,8 @@ eek_element_real_set_bounds (EekElement *self,
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
 
     priv->bounds = *bounds;
+
+    g_object_notify (G_OBJECT(self), "bounds");
 }
 
 static void
@@ -118,8 +126,36 @@ eek_element_real_get_bounds (EekElement *self,
 
     g_return_if_fail (bounds);
     *bounds = priv->bounds;
+}
 
-    g_object_notify (G_OBJECT(self), "bounds");
+static void
+eek_element_real_set_theme_node (EekElement   *self,
+                                 EekThemeNode *tnode)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    if (priv->tnode)
+        g_object_unref (priv->tnode);
+    priv->tnode = tnode;
+}
+
+static EekThemeNode *
+eek_element_real_get_theme_node (EekElement *self)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    return priv->tnode;
+}
+
+static void
+eek_element_dispose (GObject *object)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(object);
+
+    if (priv->tnode) {
+        g_object_unref (priv->tnode);
+        priv->tnode = NULL;
+    }
 }
 
 static void
@@ -146,6 +182,10 @@ eek_element_set_property (GObject      *object,
         eek_element_set_bounds (EEK_ELEMENT(object),
                                 g_value_get_boxed (value));
         break;
+    case PROP_THEME_NODE:
+        eek_element_set_theme_node (EEK_ELEMENT(object),
+                                    g_value_get_object (value));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -169,6 +209,10 @@ eek_element_get_property (GObject    *object,
         eek_element_get_bounds (EEK_ELEMENT(object), &bounds);
         g_value_set_boxed (value, &bounds);
         break;
+    case PROP_THEME_NODE:
+        g_value_set_object (value,
+                            eek_element_get_theme_node (EEK_ELEMENT(object)));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -190,6 +234,8 @@ eek_element_class_init (EekElementClass *klass)
     klass->get_name = eek_element_real_get_name;
     klass->set_bounds = eek_element_real_set_bounds;
     klass->get_bounds = eek_element_real_get_bounds;
+    klass->set_theme_node = eek_element_real_set_theme_node;
+    klass->get_theme_node = eek_element_real_get_theme_node;
 
     gobject_class->set_property = eek_element_set_property;
     gobject_class->get_property = eek_element_get_property;
@@ -221,6 +267,20 @@ eek_element_class_init (EekElementClass *klass)
                                 G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class,
                                      PROP_BOUNDS,
+                                     pspec);
+
+    /**
+     * EekElement:theme-node:
+     *
+     * The theme node of #EekElement.
+     */
+    pspec = g_param_spec_object ("theme-node",
+                                 "Theme node",
+                                 "Theme node of the element",
+                                 EEK_TYPE_THEME_NODE,
+                                 G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_THEME_NODE,
                                      pspec);
 }
 
@@ -255,7 +315,7 @@ eek_element_set_parent (EekElement *element,
  * @element: an #EekElement
  *
  * Get the parent of @element.
- * Returns: an #EekElement if the parent is set
+ * Returns: an #EekElement if the parent is set, otherwise %NULL
  */
 EekElement *
 eek_element_get_parent (EekElement *element)
@@ -350,4 +410,35 @@ eek_element_get_absolute_position (EekElement *element,
     } while ((element = eek_element_get_parent (element)) != NULL);
     *x = ax;
     *y = ay;
+}
+
+/**
+ * eek_element_set_theme_node:
+ * @element: an #EekElement
+ * @tnode: an #EekThemeNode
+ *
+ * Set the theme node of @element to @tnode.  A theme node is an
+ * #EekThemeNode object which maintains the appearance of the
+ * #EekElement.
+ */
+void
+eek_element_set_theme_node (EekElement   *element,
+                            EekThemeNode *tnode)
+{
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    EEK_ELEMENT_GET_CLASS(element)->set_theme_node (element, tnode);
+}
+
+/**
+ * eek_element_get_theme_node:
+ * @element: an #EekElement
+ *
+ * Get the theme node of @element.
+ * Returns: an #EekThemeNode if the theme node is set, otherwise %NULL
+ */
+EekThemeNode *
+eek_element_get_theme_node (EekElement  *element)
+{
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    return EEK_ELEMENT_GET_CLASS(element)->get_theme_node (element);
 }

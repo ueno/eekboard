@@ -49,7 +49,6 @@
 
 #include <gio/gio.h>
 
-#include <libcroco/libcroco.h>
 #include "eek-theme.h"
 #include "eek-theme-node.h"
 #include "eek-theme-private.h"
