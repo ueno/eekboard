@@ -330,21 +330,3 @@ eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard)
     }
     return priv->actor;
 }
-
-void
-eek_clutter_keyboard_set_theme (EekClutterKeyboard *keyboard,
-                                EekTheme           *theme)
-{
-    g_return_if_fail (EEK_IS_CLUTTER_KEYBOARD(keyboard));
-    g_return_if_fail (EEK_IS_THEME(theme));
-
-    eek_element_set_theme_node
-        (EEK_ELEMENT(keyboard),
-         eek_theme_node_new (NULL,
-                             theme,
-                             NULL,
-                             NULL,
-                             "keyboard",
-                             "keyboard",
-                             NULL));
-}

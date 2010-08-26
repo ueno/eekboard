@@ -24,6 +24,7 @@
 #include "eek-container.h"
 #include "eek-types.h"
 #include "eek-layout.h"
+#include "eek-theme.h"
 
 G_BEGIN_DECLS
 
@@ -102,6 +103,8 @@ EekKey     *eek_keyboard_find_key_by_keycode  (EekKeyboard *keyboard,
 EekKey     *eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
                                                gdouble      x,
                                                gdouble      y);
+void        eek_keyboard_set_theme            (EekKeyboard *keyboard,
+                                               EekTheme    *theme);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

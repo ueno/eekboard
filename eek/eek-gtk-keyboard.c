@@ -193,9 +193,12 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     EekBounds bounds;
     EekOutline *outline;
     GdkPixmap *texture;
+    GdkColor *fg;
+    EekThemeNode *tnode;
+    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
     EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
         gradient_end = {0x80, 0x80, 0x80, 0xFF};
-
+        
     eek_element_get_bounds (element, &bounds);
 
     g_signal_connect (key, "pressed", G_CALLBACK(on_key_pressed),
@@ -203,6 +206,7 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     g_signal_connect (key, "released", G_CALLBACK(on_key_released),
                       context->keyboard);
 
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
     outline = eek_key_get_outline (key);
     texture = g_hash_table_lookup (priv->outline_textures, outline);
     if (!texture) {
@@ -215,6 +219,12 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
         gdk_cairo_set_source_color (cr, context->bg);
         cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
         gdk_cairo_set_source_color (cr, context->fg);
+
+        if (tnode)
+            eek_theme_node_get_background_gradient (tnode,
+                                                    &gradient_type,
+                                                    &gradient_start,
+                                                    &gradient_end);
         eek_draw_outline (cr,
                           &bounds,
                           outline,
@@ -232,8 +242,18 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     cairo_rectangle (context->cr, 0, 0, bounds.width, bounds.height);
     cairo_fill (context->cr);
 
+    fg = context->fg;
+    if (tnode) {
+        EekColor c;
+        eek_theme_node_get_foreground_color (tnode, &c);
+        fg = gdk_color_copy (fg);
+        fg->pixel = 0;
+        fg->red = c.red * 256;
+        fg->green = c.green * 256;
+        fg->blue = c.blue * 256;
+    }
     cairo_move_to (context->cr, 0, 0);
-    gdk_cairo_set_source_color (context->cr, context->fg);
+    gdk_cairo_set_source_color (context->cr, fg);
     eek_draw_key_label (context->cr, key, priv->fonts);
 
     cairo_restore (context->cr);
@@ -346,10 +366,13 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
         EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
     EekBounds bounds;
     EekOutline *outline;
+    EekThemeNode *tnode;
+    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
     EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
         gradient_end = {0x80, 0x80, 0x80, 0xFF};
     gdouble ax, ay;
     GdkPixmap *pixmap, *texture;
+    GdkColor *fg;
     DrawingContext context;
     GtkStateType state;
     cairo_t *cr;
@@ -359,6 +382,7 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     eek_element_get_absolute_position (EEK_ELEMENT(key), &ax, &ay);
 
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
     outline = eek_key_get_outline (key);
     texture = g_hash_table_lookup (priv->large_outline_textures, outline);
     if (!texture) {
@@ -370,6 +394,12 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
         gdk_cairo_set_source_color (cr, context.bg);
         cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
         gdk_cairo_set_source_color (cr, context.fg);
+
+        if (tnode)
+            eek_theme_node_get_background_gradient (tnode,
+                                                    &gradient_type,
+                                                    &gradient_start,
+                                                    &gradient_end);
         eek_draw_outline (cr,
                           &bounds,
                           outline,
@@ -392,7 +422,17 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
 
     cairo_move_to (cr, 0, 0);
     cairo_scale (cr, SCALE, SCALE);
-    gdk_cairo_set_source_color (cr, context.fg);
+    fg = context.fg;
+    if (tnode) {
+        EekColor c;
+        eek_theme_node_get_foreground_color (tnode, &c);
+        fg = gdk_color_copy (fg);
+        fg->pixel = 0;
+        fg->red = c.red * 256;
+        fg->green = c.green * 256;
+        fg->blue = c.blue * 256;
+    }
+    gdk_cairo_set_source_color (cr, fg);
     eek_draw_key_label (cr, key, priv->fonts);
     cairo_destroy (cr);
 

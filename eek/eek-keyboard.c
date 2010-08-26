@@ -140,9 +140,22 @@ static EekSection *
 eek_keyboard_real_create_section (EekKeyboard *self)
 {
     EekSection *section;
+    EekThemeNode *tnode;
 
     section = g_object_new (EEK_TYPE_SECTION, NULL);
     g_return_val_if_fail (section, NULL);
+
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(self));
+    if (tnode)
+        eek_element_set_theme_node
+            (EEK_ELEMENT(section),
+             eek_theme_node_new (tnode,
+                                 eek_theme_node_get_theme (tnode),
+                                 NULL,
+                                 NULL,
+                                 "section",
+                                 "section",
+                                 NULL));
 
     g_signal_connect (section, "key-pressed",
                       G_CALLBACK(key_pressed_event), self);
@@ -550,4 +563,22 @@ eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
                                  fkbp_foreach_child_callback,
                                  &data);
     return data.key;
+}
+
+void
+eek_keyboard_set_theme (EekKeyboard *keyboard,
+                        EekTheme    *theme)
+{
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    g_return_if_fail (EEK_IS_THEME(theme));
+
+    eek_element_set_theme_node
+        (EEK_ELEMENT(keyboard),
+         eek_theme_node_new (NULL,
+                             theme,
+                             NULL,
+                             NULL,
+                             "keyboard",
+                             "keyboard",
+                             NULL));
 }
