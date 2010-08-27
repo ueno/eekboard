@@ -1011,7 +1011,7 @@ create_widget_gtk (Eekboard *eekboard,
     eekboard->keyboard = eek_gtk_keyboard_new ();
     if (opt_theme) {
         EekTheme *theme = eek_theme_new (opt_theme, NULL, NULL);
-        eek_keyboard_set_theme (eekboard->keyboard, theme);
+        eek_element_set_theme (EEK_ELEMENT(eekboard->keyboard), theme);
     }
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
     eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
@@ -1067,7 +1067,7 @@ create_widget_clutter (Eekboard *eekboard,
     eekboard->keyboard = eek_clutter_keyboard_new ();
     if (opt_theme) {
         EekTheme *theme = eek_theme_new (opt_theme, NULL, NULL);
-        eek_keyboard_set_theme (eekboard->keyboard, theme);
+        eek_element_set_theme (EEK_ELEMENT(eekboard->keyboard), theme);
     }
     eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
     eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);

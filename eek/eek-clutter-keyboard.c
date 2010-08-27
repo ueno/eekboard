@@ -99,7 +99,6 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
     EekSection *section;
     ClutterActor *actor;
-    EekThemeNode *tnode;
 
     if (!priv->context) {
         priv->context = eek_clutter_drawing_context_new ();
@@ -108,18 +107,6 @@ eek_clutter_keyboard_real_create_section (EekKeyboard *self)
 
     section = eek_clutter_section_new (priv->context);
     g_return_val_if_fail (section, NULL);
-
-    tnode = eek_element_get_theme_node (EEK_ELEMENT(self));
-    if (tnode)
-        eek_element_set_theme_node
-            (EEK_ELEMENT(section),
-             eek_theme_node_new (tnode,
-                                 eek_theme_node_get_theme (tnode),
-                                 NULL,
-                                 NULL,
-                                 "section",
-                                 "section",
-                                 NULL));
 
     g_signal_connect (section, "key-pressed",
                       G_CALLBACK(key_pressed_event), self);

@@ -508,6 +508,7 @@ eek_key_init (EekKey *self)
     priv->column = priv->row = 0;
     priv->outline = NULL;
     priv->group = priv->level = 0;
+    eek_element_set_style_class_name (EEK_ELEMENT(self), "key");
 }
 
 /**

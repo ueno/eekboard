@@ -102,7 +102,6 @@ eek_clutter_section_real_create_key (EekSection  *self,
     gint num_columns, num_rows;
     EekOrientation orientation;
     ClutterActor *actor;
-    EekThemeNode *tnode;
 
     num_rows = eek_section_get_n_rows (self);
     g_return_val_if_fail (0 <= row && row < num_rows, NULL);
@@ -112,18 +111,6 @@ eek_clutter_section_real_create_key (EekSection  *self,
     key = eek_clutter_key_new (priv->context, column, row);
     g_return_val_if_fail (key, NULL);
     
-    tnode = eek_element_get_theme_node (EEK_ELEMENT(self));
-    if (tnode)
-        eek_element_set_theme_node
-            (EEK_ELEMENT(key),
-             eek_theme_node_new (tnode,
-                                 eek_theme_node_get_theme (tnode),
-                                 NULL,
-                                 NULL,
-                                 "key",
-                                 "key",
-                                 NULL));
-
     g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
     g_signal_connect (key, "released", G_CALLBACK(released_event), self);
 

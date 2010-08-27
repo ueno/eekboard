@@ -22,7 +22,7 @@
 
 #include <glib-object.h>
 #include "eek-types.h"
-#include "eek-theme-node.h"
+#include "eek-theme.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_ELEMENT (eek_element_get_type())
@@ -47,51 +47,93 @@ struct _EekElementClass
 {
     /*< private >*/
     GInitiallyUnownedClass parent_class;
-    void                  (* set_parent)     (EekElement   *self,
-                                              EekElement   *parent);
-    EekElement           *(* get_parent)     (EekElement   *self);
-    void                  (* set_name)       (EekElement   *self,
-                                              const gchar  *name);
+    void                  (* set_parent)     (EekElement  *self,
+                                              EekElement  *parent);
+    EekElement           *(* get_parent)     (EekElement  *self);
+    void                  (* set_name)       (EekElement  *self,
+                                              const gchar *name);
 
-    G_CONST_RETURN gchar *(* get_name)       (EekElement   *self);
+    G_CONST_RETURN gchar *(* get_name)       (EekElement  *self);
 
-    void                  (* set_bounds)     (EekElement   *self,
-                                              EekBounds    *bounds);
+    void                  (* set_bounds)     (EekElement  *self,
+                                              EekBounds   *bounds);
 
-    void                  (* get_bounds)     (EekElement   *self,
-                                              EekBounds    *bounds);
+    void                  (* get_bounds)     (EekElement  *self,
+                                              EekBounds   *bounds);
 
-    void                  (* set_theme_node) (EekElement   *self,
-                                              EekThemeNode *tnode);
-    EekThemeNode         *(* get_theme_node) (EekElement   *self);
+    void                  (* set_theme)      (EekElement  *self,
+                                              EekTheme    *theme);
+    EekTheme             *(* get_theme)      (EekElement  *self);
+    EekThemeNode         *(* get_theme_node) (EekElement  *self);
+
+    /* signals */
+    void                  (* style_changed)  (EekElement  *self);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[21];
 };
 
-GType                 eek_element_get_type              (void) G_GNUC_CONST;
+GType                 eek_element_get_type   (void) G_GNUC_CONST;
 
-void                  eek_element_set_parent            (EekElement   *element,
-                                                         EekElement   *parent);
-EekElement           *eek_element_get_parent            (EekElement   *element);
-void                  eek_element_set_name              (EekElement   *element,
-                                                         const gchar  *name);
+void                  eek_element_set_parent (EekElement  *element,
+                                              EekElement  *parent);
+EekElement           *eek_element_get_parent (EekElement  *element);
+void                  eek_element_set_name   (EekElement  *element,
+                                              const gchar *name);
 
-G_CONST_RETURN gchar *eek_element_get_name              (EekElement   *element);
+G_CONST_RETURN gchar *eek_element_get_name   (EekElement  *element);
 
-void                  eek_element_set_bounds            (EekElement   *element,
-                                                         EekBounds    *bounds);
+void                  eek_element_set_bounds (EekElement  *element,
+                                              EekBounds   *bounds);
 
-void                  eek_element_get_bounds            (EekElement   *element,
-                                                         EekBounds    *bounds);
+void                  eek_element_get_bounds (EekElement  *element,
+                                              EekBounds   *bounds);
 
-void                  eek_element_get_absolute_position (EekElement   *element,
-                                                         gdouble      *x,
-                                                         gdouble      *y);
-void                  eek_element_set_theme_node        (EekElement   *element,
-                                                         EekThemeNode *tnode);
-EekThemeNode         *eek_element_get_theme_node        (EekElement   *element);
+void                  eek_element_get_absolute_position
+                                             (EekElement  *element,
+                                              gdouble     *x,
+                                              gdouble     *y);
+void                  eek_element_set_theme  (EekElement  *element,
+                                              EekTheme    *theme);
+EekTheme             *eek_element_get_theme  (EekElement  *element);
+
+void                  eek_element_set_style_class_name
+                                             (EekElement  *element,
+                                              const gchar *style_class_list);
+void                  eek_element_add_style_class_name
+                                             (EekElement  *element,
+                                              const gchar *style_class);
+void                  eek_element_remove_style_class_name
+                                             (EekElement  *element,
+                                              const gchar *style_class);
+const gchar          *eek_element_get_style_class_name
+                                             (EekElement  *element);
+gboolean              eek_element_has_style_class_name
+                                             (EekElement  *element,
+                                              const gchar *style_class);
+const gchar          *eek_element_get_style_pseudo_class
+                                             (EekElement  *element);
+gboolean              eek_element_has_style_pseudo_class
+                                             (EekElement  *element,
+                                              const gchar *pseudo_class);
+void                  eek_element_set_style_pseudo_class
+                                             (EekElement  *element,
+                                              const gchar *pseudo_class_list);
+void                  eek_element_add_style_pseudo_class
+                                             (EekElement  *element,
+                                              const gchar *pseudo_class);
+void                  eek_element_remove_style_pseudo_class
+                                             (EekElement  *element,
+                                              const gchar *pseudo_class);
+void                  eek_element_set_style  (EekElement  *element,
+                                              const gchar *style);
+const gchar          *eek_element_get_style  (EekElement  *element);
+
+void                  eek_element_style_changed
+                                             (EekElement  *element);
+EekThemeNode         *eek_element_get_theme_node
+                                             (EekElement  *element);
 
 G_END_DECLS
 #endif  /* EEK_ELEMENT_H */
