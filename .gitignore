@@ -34,6 +34,8 @@ eek/eek-special-keysym-labels.h
 eek/eek-unicode-keysym-labels.h
 eek/eek-keyname-keysym-labels.h
 eek/*.pc
+eek/*.gir
+eek/*.typelib
 tests/eek-simple-test
 tests/eek-xkb-test
 src/eekboard
@@ -51,4 +53,4 @@ po/*.gmo
 po/Makefile.in.in
 po/POTFILES
 po/stamp-it
-
+bindings/vala/*.vapi
