@@ -128,7 +128,7 @@ create_key (EekXkbLayout *layout,
     EekKey *key;
     EekBounds bounds;
     guint *keysyms = NULL;
-    gchar name[XkbKeyNameLength + 1];
+    gchar name[XkbKeyNameLength + 1], *p;
     EekOutline *outline;
     KeyCode keycode;
     gint num_groups, num_levels, num_keysyms;
@@ -207,7 +207,9 @@ create_key (EekXkbLayout *layout,
     }
 
     key = eek_section_create_key (section, column, row);
-    eek_element_set_name (EEK_ELEMENT(key), name);
+    p = g_strdup_printf ("key-%04X", keycode);
+    eek_element_set_name (EEK_ELEMENT(key), p);
+    g_free (p);
     eek_element_set_bounds (EEK_ELEMENT(key), &bounds);
     eek_key_set_keycode (key, keycode);
     eek_key_set_keysyms (key, keysyms, num_groups, num_levels);
