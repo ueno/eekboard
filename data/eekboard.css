@@ -5,9 +5,16 @@
     background-gradient-end: #DD0000;
 }
 
-#SPCE, #RTRN, #TAB {
+.key:shift {
     color: #ffffff;
     background-gradient-direction: radial;
     background-gradient-start: #008000;
     background-gradient-end: #00DD00;
+}
+
+.key:altgr {
+    color: #ffffff;
+    background-gradient-direction: radial;
+    background-gradient-start: #008080;
+    background-gradient-end: #0000DD;
 }

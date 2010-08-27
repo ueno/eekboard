@@ -206,6 +206,11 @@ eek_key_real_set_keysym_index (EekKey *self,
         level = 0;
     priv->group = group;
     priv->level = level;
+
+    eek_element_set_style_pseudo_class (EEK_ELEMENT(self), "");
+    eek_element_add_style_pseudo_class (EEK_ELEMENT(self),
+                                        level == 1 ? "shift" :
+                                        level == 2 ? "altgr" : "");
 }
 
 static void
