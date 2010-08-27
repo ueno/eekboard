@@ -416,6 +416,7 @@ on_key_pressed (EekKeyboard *keyboard,
     switch (keysym) {
     case XK_Shift_L:
     case XK_Shift_R:
+        eekboard->modifiers &= ~Mod5Mask;
         eekboard->modifiers ^= ShiftMask;
         eek_keyboard_get_keysym_index (keyboard, &group, &level);
         eek_keyboard_set_keysym_index (keyboard, group,
@@ -425,6 +426,7 @@ on_key_pressed (EekKeyboard *keyboard,
         break;
     case XK_ISO_Level3_Shift:
         eekboard->modifiers ^= Mod5Mask;
+        eekboard->modifiers &= ~ShiftMask;
         eek_keyboard_get_keysym_index (keyboard, &group, &level);
         eek_keyboard_set_keysym_index (keyboard, group,
                                        (eekboard->modifiers & Mod5Mask) ? 2 :
