@@ -25,6 +25,8 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-clutter-drawing-context.h"
+#include "eek-element.h"
+#include "eek-drawing.h"
 
 G_DEFINE_TYPE (EekClutterDrawingContext, eek_clutter_drawing_context,
                G_TYPE_INITIALLY_UNOWNED);
@@ -34,8 +36,7 @@ G_DEFINE_TYPE (EekClutterDrawingContext, eek_clutter_drawing_context,
 
 struct _EekClutterDrawingContextPrivate
 {
-    /* outline pointer -> ClutterTexture */
-    GHashTable *outline_textures;
+    GHashTable *texture_cache;
 
     /* keysym category -> PangoFontDescription * */
     PangoFontDescription *category_fonts[EEK_KEYSYM_CATEGORY_LAST];
@@ -48,9 +49,9 @@ eek_clutter_drawing_context_dispose (GObject *object)
 {
     EekClutterDrawingContextPrivate *priv =
         EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(object);
-    if (priv->outline_textures) {
-        g_hash_table_unref (priv->outline_textures);
-        priv->outline_textures = NULL;
+    if (priv->texture_cache) {
+        g_hash_table_unref (priv->texture_cache);
+        priv->texture_cache = NULL;
     }
 }
 
@@ -83,31 +84,64 @@ eek_clutter_drawing_context_init (EekClutterDrawingContext *self)
     EekClutterDrawingContextPrivate *priv;
 
     priv = self->priv = EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(self);
-    priv->outline_textures = g_hash_table_new (g_direct_hash, g_direct_equal);
+    priv->texture_cache = g_hash_table_new_full (eek_texture_source_hash,
+                                                 eek_texture_source_equal,
+                                                 eek_texture_source_free,
+                                                 g_object_unref);
     memset (priv->category_fonts, 0, sizeof *priv->category_fonts);
 }
 
-void
-eek_clutter_drawing_context_set_outline_texture
+ClutterActor *
+eek_clutter_drawing_context_get_texture
  (EekClutterDrawingContext *context,
   EekOutline               *outline,
-  ClutterActor             *texture)
+  EekBounds                *bounds,
+  EekThemeNode             *tnode)
 {
     EekClutterDrawingContextPrivate *priv =
         EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
-    g_return_if_fail (priv);
-    g_hash_table_insert (context->priv->outline_textures, outline, texture);
-}
+    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
+    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
+        gradient_end = {0x80, 0x80, 0x80, 0xFF};
+    EekTextureSource *source;
+    ClutterActor *texture;
+    cairo_t *cr;
 
-ClutterActor *
-eek_clutter_drawing_context_get_outline_texture
- (EekClutterDrawingContext *context,
-  EekOutline               *outline)
-{
-    EekClutterDrawingContextPrivate *priv =
-        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
     g_return_val_if_fail (priv, NULL);
-    return g_hash_table_lookup (context->priv->outline_textures, outline);
+    source = g_slice_new0 (EekTextureSource);
+    source->outline = outline;
+    if (tnode)
+        eek_theme_node_get_background_gradient (tnode,
+                                                &gradient_type,
+                                                &gradient_start,
+                                                &gradient_end);
+    source->gradient_type = gradient_type;
+    memcpy (&source->gradient_start, &gradient_start, sizeof(EekColor));
+    memcpy (&source->gradient_end, &gradient_end, sizeof(EekColor));
+    texture = g_hash_table_lookup (priv->texture_cache, source);
+    if (texture) {
+        eek_texture_source_free (source);
+        return clutter_clone_new (texture);
+    }
+
+    texture = clutter_cairo_texture_new (bounds->width, bounds->height);
+    cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
+
+    if (tnode) {
+        eek_theme_node_get_background_gradient (tnode,
+                                                &gradient_type,
+                                                &gradient_start,
+                                                &gradient_end);
+    }
+    eek_draw_outline (cr,
+                      bounds,
+                      outline,
+                      gradient_type,
+                      &gradient_start,
+                      &gradient_end);
+    cairo_destroy (cr);
+    g_hash_table_insert (priv->texture_cache, source, texture);
+    return texture;
 }
 
 void

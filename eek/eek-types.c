@@ -29,6 +29,7 @@
 
 #include "eek-types.h"
 #include <math.h>
+#include <string.h>
 
 /* EekKeysymMatrix */
 static EekKeysymMatrix *
@@ -171,4 +172,50 @@ eek_color_get_type (void)
                                           (GBoxedCopyFunc)eek_color_copy,
                                           (GBoxedFreeFunc)eek_color_free);
     return our_type;
+}
+
+guint
+eek_color_hash (gconstpointer v)
+{
+    const EekColor *color = v;
+    guint hash = 0;
+
+    hash ^= g_int_hash (&color->red);
+    hash ^= g_int_hash (&color->green);
+    hash ^= g_int_hash (&color->blue);
+    hash ^= g_int_hash (&color->alpha);
+    return hash;
+}
+
+/* EekTextureSource */
+
+gboolean
+eek_texture_source_equal (gconstpointer a, gconstpointer b)
+{
+    const EekTextureSource *sa = a, *sb = b;
+    return sa->outline == sb->outline &&
+        sa->gradient_type == sb->gradient_type &&
+        memcmp (&sa->gradient_start, &sb->gradient_start,
+                sizeof(EekColor)) == 0 &&
+        memcmp (&sa->gradient_end, &sb->gradient_end,
+                sizeof(EekColor)) == 0;
+}
+
+guint
+eek_texture_source_hash (gconstpointer key)
+{
+    const EekTextureSource *source = key;
+    guint hash = 0;
+
+    hash ^= g_direct_hash (source->outline);
+    hash ^= g_int_hash (&source->gradient_type);
+    hash ^= eek_color_hash (&source->gradient_start);
+    hash ^= eek_color_hash (&source->gradient_end);
+    return hash;
+}
+
+void
+eek_texture_source_free (gpointer source)
+{
+    g_slice_free (EekTextureSource, source);
 }

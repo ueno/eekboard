@@ -63,13 +63,11 @@ GType                     eek_clutter_drawing_context_get_type
 EekClutterDrawingContext *eek_clutter_drawing_context_new
                           (void);
 
-void                      eek_clutter_drawing_context_set_outline_texture
+ClutterActor             *eek_clutter_drawing_context_get_texture
                           (EekClutterDrawingContext *context,
                            EekOutline               *outline,
-                           ClutterActor             *texture);
-ClutterActor             *eek_clutter_drawing_context_get_outline_texture
-                          (EekClutterDrawingContext *context,
-                           EekOutline               *outline);
+                           EekBounds                *bounds,
+                           EekThemeNode             *tnode);
 
 void                      eek_clutter_drawing_context_set_category_font
                           (EekClutterDrawingContext *context,

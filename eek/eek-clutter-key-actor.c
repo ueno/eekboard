@@ -306,59 +306,20 @@ key_shrink (ClutterActor *actor)
                            NULL);
 }
 
-
-static ClutterActor *
-create_texture_for_key (EekClutterKey *key)
-{
-    ClutterActor *texture;
-    cairo_t *cr;
-    EekOutline *outline;
-    EekBounds bounds;
-    EekThemeNode *tnode;
-    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
-    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
-        gradient_end = {0x80, 0x80, 0x80, 0xFF};
-
-    outline = eek_key_get_outline (EEK_KEY(key));
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
- 
-    texture = clutter_cairo_texture_new (bounds.width, bounds.height);
-    cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE(texture));
-
-    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
-    if (tnode)
-        eek_theme_node_get_background_gradient (tnode,
-                                                &gradient_type,
-                                                &gradient_start,
-                                                &gradient_end);
-    eek_draw_outline (cr,
-                      &bounds,
-                      outline,
-                      gradient_type,
-                      &gradient_start,
-                      &gradient_end);
-    cairo_destroy (cr);
-    return texture;
-}
-
 static ClutterActor *
 get_texture (EekClutterKeyActor *actor)
 {
-    ClutterActor *texture;
     EekOutline *outline;
+    EekBounds bounds;
+    EekThemeNode *tnode;
 
     outline = eek_key_get_outline (EEK_KEY(actor->priv->key));
-    texture =
-        eek_clutter_drawing_context_get_outline_texture (actor->priv->context,
-                                                         outline);
-    if (texture == NULL) {
-        texture = create_texture_for_key (actor->priv->key);
-        eek_clutter_drawing_context_set_outline_texture (actor->priv->context,
-                                                         outline,
-                                                         texture);
-    } else
-        texture = clutter_clone_new (texture);
-    return texture;
+    eek_element_get_bounds (EEK_ELEMENT(actor->priv->key), &bounds);
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(actor->priv->key));
+    return eek_clutter_drawing_context_get_texture (actor->priv->context,
+                                                    outline,
+                                                    &bounds,
+                                                    tnode);
 }
 
 static void

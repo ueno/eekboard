@@ -149,6 +149,7 @@ typedef struct _EekColor EekColor;
 
 #define EEK_TYPE_COLOR (eek_color_get_type ())
 GType eek_color_get_type (void) G_GNUC_CONST;
+guint eek_color_hash (gconstpointer v);
 
 typedef enum {
   EEK_GRADIENT_NONE,
@@ -156,6 +157,20 @@ typedef enum {
   EEK_GRADIENT_HORIZONTAL,
   EEK_GRADIENT_RADIAL
 } EekGradientType;
+
+struct _EekTextureSource
+{
+    EekOutline *outline;
+    EekGradientType gradient_type;
+    EekColor gradient_start;
+    EekColor gradient_end;
+};
+typedef struct _EekTextureSource EekTextureSource;
+
+gboolean eek_texture_source_equal (gconstpointer a, gconstpointer b);
+guint eek_texture_source_hash (gconstpointer source);
+void eek_texture_source_free (gpointer source);
+
 
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

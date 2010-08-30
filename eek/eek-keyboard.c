@@ -540,7 +540,6 @@ eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
                                    gdouble      y)
 {
     FkbpData data;
-    EekSection *section;
     EekBounds bounds;
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);

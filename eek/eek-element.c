@@ -169,6 +169,18 @@ static EekThemeNode *
 eek_element_real_get_theme_node (EekElement *self)
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+    EekElement *parent = self;
+    EekTheme *theme;
+
+    /* Check if the tree is assingned a theme. */
+    while (parent) {
+        theme = eek_element_get_theme (parent);
+        if (theme)
+            break;
+        parent = eek_element_get_parent (parent);
+    }
+    if (!theme)
+        return NULL;
 
     if (priv->theme_node == NULL) {
         EekThemeNode *parent_node = NULL;

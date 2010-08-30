@@ -50,6 +50,9 @@ struct _EekGtkKeyboardPrivate
     /* pixmap of entire keyboard (for expose event) */
     GdkPixmap *pixmap;
 
+    GHashTable *texture_cache;
+    GHashTable *large_texture_cache;
+
     PangoFontDescription *fonts[EEK_KEYSYM_CATEGORY_LAST];
 
     gdouble scale;
@@ -100,6 +103,17 @@ eek_gtk_keyboard_dispose (GObject *object)
         g_object_unref (priv->widget);
         priv->widget = NULL;
     }
+
+    if (priv->texture_cache) {
+        g_hash_table_unref (priv->texture_cache);
+        priv->texture_cache = NULL;
+    }
+
+    if (priv->large_texture_cache) {
+        g_hash_table_unref (priv->large_texture_cache);
+        priv->large_texture_cache = NULL;
+    }
+
     G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->dispose (object);
 }
 
@@ -136,6 +150,16 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
     priv = self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     priv->widget = NULL;
     priv->pixmap = NULL;
+    priv->texture_cache =
+        g_hash_table_new_full (eek_texture_source_hash,
+                               eek_texture_source_equal,
+                               eek_texture_source_free,
+                               g_object_unref);
+    priv->large_texture_cache =
+        g_hash_table_new_full (eek_texture_source_hash,
+                               eek_texture_source_equal,
+                               eek_texture_source_free,
+                               g_object_unref);
     memset (priv->fonts, 0, sizeof priv->fonts);
     priv->scale = 1.0;
     priv->key = NULL;
@@ -163,6 +187,61 @@ typedef struct _DrawingContext DrawingContext;
 static void on_key_pressed (EekKey *key, gpointer user_data);
 static void on_key_released (EekKey *key, gpointer user_data);
 
+static GdkPixmap *
+get_texture (GHashTable     *texture_cache,
+             EekOutline     *outline,
+             EekBounds      *bounds,
+             DrawingContext *context,
+             EekThemeNode   *tnode,
+             gdouble         scale)
+{
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(context->keyboard);
+    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
+    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
+        gradient_end = {0x80, 0x80, 0x80, 0xFF};
+    EekTextureSource *source;
+    GdkPixmap *texture;
+    cairo_t *cr;
+
+    source = g_slice_new0 (EekTextureSource);
+    source->outline = outline;
+    if (tnode)
+        eek_theme_node_get_background_gradient (tnode,
+                                                &gradient_type,
+                                                &gradient_start,
+                                                &gradient_end);
+    source->gradient_type = gradient_type;
+    memcpy (&source->gradient_start, &gradient_start, sizeof(EekColor));
+    memcpy (&source->gradient_end, &gradient_end, sizeof(EekColor));
+    texture = g_hash_table_lookup (texture_cache, source);
+    if (texture) {
+        eek_texture_source_free (source);
+        return texture;
+    }
+
+    texture = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
+                              bounds->width * scale,
+                              bounds->height * scale,
+                              -1);
+    cr = gdk_cairo_create (GDK_DRAWABLE (texture));
+    cairo_scale (cr, scale, scale);
+    gdk_cairo_set_source_color (cr, context->bg);
+    cairo_rectangle (cr, 0, 0, bounds->width, bounds->height);
+    gdk_cairo_set_source_color (cr, context->fg);
+    eek_draw_outline (cr,
+                      bounds,
+                      source->outline,
+                      EEK_GRADIENT_VERTICAL,
+                      &gradient_start,
+                      &gradient_end);
+    cairo_destroy (cr);
+
+    g_hash_table_insert (texture_cache, source, texture);
+
+    return texture;
+}
+
 static void
 prepare_keyboard_pixmap_key_callback (EekElement *element,
                                       gpointer    user_data)
@@ -176,11 +255,7 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     GdkPixmap *texture;
     GdkColor *fg;
     EekThemeNode *tnode;
-    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
-    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
-        gradient_end = {0x80, 0x80, 0x80, 0xFF};
     guint keysym;
-    cairo_t *cr;
     static const gchar *category_class_names[EEK_KEYSYM_CATEGORY_LAST] = {
         "letter",
         "function",
@@ -208,36 +283,20 @@ prepare_keyboard_pixmap_key_callback (EekElement *element,
     g_signal_connect (key, "released", G_CALLBACK(on_key_released),
                       context->keyboard);
 
-    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
     outline = eek_key_get_outline (key);
-
-    texture = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
-                              bounds.width, bounds.height, -1);
-    cr = gdk_cairo_create (GDK_DRAWABLE (texture));
-    gdk_cairo_set_source_color (cr, context->bg);
-    cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
-    gdk_cairo_set_source_color (cr, context->fg);
-
-    if (tnode)
-        eek_theme_node_get_background_gradient (tnode,
-                                                &gradient_type,
-                                                &gradient_start,
-                                                &gradient_end);
-    eek_draw_outline (cr,
-                      &bounds,
-                      outline,
-                      EEK_GRADIENT_VERTICAL,
-                      &gradient_start,
-                      &gradient_end);
-    cairo_destroy (cr);
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
+    texture = get_texture (priv->texture_cache,
+                           outline,
+                           &bounds,
+                           context,
+                           tnode,
+                           1.0);
 
     cairo_save (context->cr);
     cairo_translate (context->cr, bounds.x, bounds.y);
-
     gdk_cairo_set_source_pixmap (context->cr, texture, 0, 0);
     cairo_rectangle (context->cr, 0, 0, bounds.width, bounds.height);
     cairo_fill (context->cr);
-    g_object_unref (texture);
 
     fg = context->fg;
     if (tnode) {
@@ -364,9 +423,6 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
     EekBounds bounds;
     EekOutline *outline;
     EekThemeNode *tnode;
-    EekGradientType gradient_type = EEK_GRADIENT_VERTICAL;
-    EekColor gradient_start = {0xFF, 0xFF, 0xFF, 0xFF},
-        gradient_end = {0x80, 0x80, 0x80, 0xFF};
     gdouble ax, ay;
     GdkPixmap *pixmap, *texture;
     GdkColor *fg;
@@ -379,28 +435,14 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     eek_element_get_absolute_position (EEK_ELEMENT(key), &ax, &ay);
 
-    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
     outline = eek_key_get_outline (key);
-    texture = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
-                              bounds.width * SCALE, bounds.height * SCALE, -1);
-    cr = gdk_cairo_create (GDK_DRAWABLE (texture));
-    cairo_scale (cr, SCALE, SCALE);
-    gdk_cairo_set_source_color (cr, context.bg);
-    cairo_rectangle (cr, 0, 0, bounds.width, bounds.height);
-    gdk_cairo_set_source_color (cr, context.fg);
-
-    if (tnode)
-        eek_theme_node_get_background_gradient (tnode,
-                                                &gradient_type,
-                                                &gradient_start,
-                                                &gradient_end);
-    eek_draw_outline (cr,
-                      &bounds,
-                      outline,
-                      EEK_GRADIENT_VERTICAL,
-                      &gradient_start,
-                      &gradient_end);
-    cairo_destroy (cr);
+    tnode = eek_element_get_theme_node (EEK_ELEMENT(key));
+    texture = get_texture (priv->large_texture_cache,
+                           outline,
+                           &bounds,
+                           &context,
+                           tnode,
+                           SCALE);
 
     pixmap =
         gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (priv->widget)),
@@ -411,7 +453,6 @@ key_enlarge (EekGtkKeyboard *keyboard, EekKey *key)
     gdk_cairo_set_source_pixmap (cr, texture, 0, 0);
     cairo_rectangle (cr, 0, 0, bounds.width * SCALE, bounds.height * SCALE);
     cairo_fill (cr);
-    g_object_unref (texture);
 
     cairo_move_to (cr, 0, 0);
     cairo_scale (cr, SCALE, SCALE);
