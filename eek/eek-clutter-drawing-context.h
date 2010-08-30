@@ -21,11 +21,8 @@
 #define EEK_CLUTTER_DRAWING_CONTEXT_H 1
 
 #include <clutter/clutter.h>
-#include <pango/pango.h>
 
-#include "eek-keysym.h"
-#include "eek-types.h"
-#include "eek-theme.h"
+#include "eek-drawing-context.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_DRAWING_CONTEXT (eek_clutter_drawing_context_get_type())
@@ -42,7 +39,7 @@ typedef struct _EekClutterDrawingContextPrivate EekClutterDrawingContextPrivate;
 struct _EekClutterDrawingContext
 {
     /*< private >*/
-    GInitiallyUnowned parent;
+    EekDrawingContext parent;
 
     /*< private >*/
     EekClutterDrawingContextPrivate *priv;
@@ -51,7 +48,7 @@ struct _EekClutterDrawingContext
 struct _EekClutterDrawingContextClass
 {
     /*< private >*/
-    GInitiallyUnownedClass parent_class;
+    EekDrawingContextClass parent_class;
 
     /*< private >*/
     /* padding */
@@ -68,18 +65,6 @@ ClutterActor             *eek_clutter_drawing_context_get_texture
                            EekOutline               *outline,
                            EekBounds                *bounds,
                            EekThemeNode             *tnode);
-
-void                      eek_clutter_drawing_context_set_category_font
-                          (EekClutterDrawingContext *context,
-                           EekKeysymCategory         category,
-                           PangoFontDescription     *fonts);
-PangoFontDescription     *eek_clutter_drawing_context_get_category_font
-                          (EekClutterDrawingContext *context,
-                           EekKeysymCategory         category);
-
-void                      eek_clutter_drawing_context_set_theme
-                          (EekClutterDrawingContext *context,
-                           EekTheme                 *theme);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_DRAWING_CONTEXT_H */

@@ -290,9 +290,8 @@ update_category_fonts (EekClutterKeyboard *keyboard)
                    layout,
                    (PangoFontDescription **)&fonts);
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++) {
-        eek_clutter_drawing_context_set_category_font (priv->context,
-                                                       i,
-                                                       fonts[i]);
+        eek_drawing_context_set_category_font
+            (EEK_DRAWING_CONTEXT(priv->context), i, fonts[i]);
         pango_font_description_free (fonts[i]);
     }
     g_object_unref (G_OBJECT(layout));

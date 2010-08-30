@@ -17,31 +17,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-
-#include <string.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
 
 #include "eek-clutter-drawing-context.h"
 #include "eek-element.h"
 #include "eek-drawing.h"
 
 G_DEFINE_TYPE (EekClutterDrawingContext, eek_clutter_drawing_context,
-               G_TYPE_INITIALLY_UNOWNED);
+               EEK_TYPE_DRAWING_CONTEXT);
 
-#define EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(obj)                                  \
+#define EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(obj)                    \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_CLUTTER_DRAWING_CONTEXT, EekClutterDrawingContextPrivate))
 
 struct _EekClutterDrawingContextPrivate
 {
     GHashTable *texture_cache;
-
-    /* keysym category -> PangoFontDescription * */
-    PangoFontDescription *category_fonts[EEK_KEYSYM_CATEGORY_LAST];
-
-    EekTheme *theme;
 };
 
 static void
@@ -53,17 +47,13 @@ eek_clutter_drawing_context_dispose (GObject *object)
         g_hash_table_unref (priv->texture_cache);
         priv->texture_cache = NULL;
     }
+    G_OBJECT_CLASS (eek_clutter_drawing_context_parent_class)->dispose (object);
 }
 
 static void
 eek_clutter_drawing_context_finalize (GObject *object)
 {
-    EekClutterDrawingContextPrivate *priv =
-        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(object);
-    gint i;
-
-    for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++)
-        pango_font_description_free (priv->category_fonts[i]);
+    G_OBJECT_CLASS (eek_clutter_drawing_context_parent_class)->finalize (object);
 }
 
 static void
@@ -88,15 +78,13 @@ eek_clutter_drawing_context_init (EekClutterDrawingContext *self)
                                                  eek_texture_source_equal,
                                                  eek_texture_source_free,
                                                  g_object_unref);
-    memset (priv->category_fonts, 0, sizeof *priv->category_fonts);
 }
 
 ClutterActor *
-eek_clutter_drawing_context_get_texture
- (EekClutterDrawingContext *context,
-  EekOutline               *outline,
-  EekBounds                *bounds,
-  EekThemeNode             *tnode)
+eek_clutter_drawing_context_get_texture (EekClutterDrawingContext *context,
+                                         EekOutline               *outline,
+                                         EekBounds                *bounds,
+                                         EekThemeNode             *tnode)
 {
     EekClutterDrawingContextPrivate *priv =
         EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
@@ -142,40 +130,6 @@ eek_clutter_drawing_context_get_texture
     cairo_destroy (cr);
     g_hash_table_insert (priv->texture_cache, source, texture);
     return texture;
-}
-
-void
-eek_clutter_drawing_context_set_category_font
- (EekClutterDrawingContext *context,
-  EekKeysymCategory         category,
-  PangoFontDescription     *font)
-{
-    EekClutterDrawingContextPrivate *priv =
-        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
-    g_return_if_fail (priv);
-    priv->category_fonts[category] = pango_font_description_copy (font);
-}
-
-PangoFontDescription *
-eek_clutter_drawing_context_get_category_font
- (EekClutterDrawingContext *context,
-  EekKeysymCategory         category)
-{
-    EekClutterDrawingContextPrivate *priv =
-        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
-    g_return_val_if_fail (priv, NULL);
-    return priv->category_fonts[category];
-}
-
-void
-eek_clutter_drawing_context_set_theme
- (EekClutterDrawingContext *context,
-  EekTheme                 *theme)
-{
-    EekClutterDrawingContextPrivate *priv =
-        EEK_CLUTTER_DRAWING_CONTEXT_GET_PRIVATE(context);
-    g_return_if_fail (priv);
-    priv->theme = theme;
 }
 
 EekClutterDrawingContext *

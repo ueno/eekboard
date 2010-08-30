@@ -633,10 +633,12 @@ gboolean
 eek_xkb_layout_set_names_full (EekXkbLayout *layout,
                                ...)
 {
+    gboolean result;
     va_list var_args;
     va_start (var_args, layout);
-    eek_xkb_layout_set_names_full_valist (layout, var_args);
+    result = eek_xkb_layout_set_names_full_valist (layout, var_args);
     va_end (var_args);
+    return result;
 }
 
 /**

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <libcroco/libcroco.h>
 #include "eek-theme-node-private.h"
+#include "eek-theme-private.h"
 
 static void eek_theme_node_init       (EekThemeNode      *node);
 static void eek_theme_node_class_init (EekThemeNodeClass *klass);

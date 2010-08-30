@@ -49,6 +49,8 @@ libeek_public_sources = \
 	$(srcdir)/eek-theme-node.c \
 	$(srcdir)/eek-drawing.h \
 	$(srcdir)/eek-drawing.c \
+	$(srcdir)/eek-drawing-context.h \
+	$(srcdir)/eek-drawing-context.c \
 	$(srcdir)/eek-special-keysym-labels.h \
 	$(srcdir)/eek-unicode-keysym-labels.h \
 	$(srcdir)/eek-keyname-keysym-labels.h

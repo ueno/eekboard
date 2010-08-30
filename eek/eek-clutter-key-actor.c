@@ -340,8 +340,8 @@ draw_key_on_layout (EekClutterKeyActor *self,
     if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
         return;
 
-    font = eek_clutter_drawing_context_get_category_font (priv->context,
-                                                          category);
+    font = eek_drawing_context_get_category_font
+        (EEK_DRAWING_CONTEXT(priv->context), category);
     pango_layout_set_font_description (layout, font);
 
     eek_element_get_bounds (EEK_ELEMENT(priv->key), &bounds);

@@ -408,7 +408,7 @@ on_key_pressed (EekKeyboard *keyboard,
 {
     Eekboard *eekboard = user_data;
     gint group, level;
-    guint keysym, modifiers = 0;
+    guint keysym;
 
     keysym = eek_key_get_keysym (key);
     EEKBOARD_NOTE("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
