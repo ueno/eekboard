@@ -76,7 +76,7 @@ if test x$enable_clutter = xyes; then
     [AC_MSG_ERROR([Clutter not found -- install it or add --disable-clutter])])
   AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
   need_swap_event_workaround=no
-  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.90],,
+  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0],,
     [PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10 clutter-x11-1.0],
       [need_swap_event_workaround=yes])])
   AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
