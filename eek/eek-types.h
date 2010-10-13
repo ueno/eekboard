@@ -24,6 +24,12 @@
 
 G_BEGIN_DECLS
 
+#define EEK_TYPE_KEYSYM_MATRIX (eek_keysym_matrix_get_type ())
+#define EEK_TYPE_POINT (eek_point_get_type ())
+#define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
+#define EEK_TYPE_OUTLINE (eek_outline_get_type ())
+
+
 /**
  * EekOrientation:
  * @EEK_ORIENTATION_VERTICAL: the elements will be arranged vertically
@@ -45,6 +51,11 @@ typedef struct _EekKey EekKey;
 typedef struct _EekSection EekSection;
 typedef struct _EekKeyboard EekKeyboard;
 
+typedef struct _EekKeysymMatrix EekKeysymMatrix;
+typedef struct _EekPoint EekPoint;
+typedef struct _EekBounds EekBounds;
+typedef struct _EekOutline EekOutline;
+
 /**
  * EekKeysymMatrix:
  * @data: array of keysyms
@@ -59,9 +70,7 @@ struct _EekKeysymMatrix
     gint num_groups;
     gint num_levels;
 };
-typedef struct _EekKeysymMatrix EekKeysymMatrix;
 
-#define EEK_TYPE_KEYSYM_MATRIX (eek_keysym_matrix_get_type ())
 GType eek_keysym_matrix_get_type (void) G_GNUC_CONST;
 
 /**
@@ -76,9 +85,7 @@ struct _EekPoint
     gdouble x;
     gdouble y;
 };
-typedef struct _EekPoint EekPoint;
 
-#define EEK_TYPE_POINT (eek_point_get_type ())
 GType eek_point_get_type (void) G_GNUC_CONST;
 void  eek_point_rotate   (EekPoint *point,
                           gint      angle);
@@ -90,18 +97,17 @@ void  eek_point_rotate   (EekPoint *point,
  * @width: width of the box
  * @height: height of the box
  *
- * 2D bounding box
+ * The rectangle containing an element's bounding box.
  */
 struct _EekBounds
 {
+    /*< public >*/
     gdouble x;
     gdouble y;
     gdouble width;
     gdouble height;
 };
-typedef struct _EekBounds EekBounds;
 
-#define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
 GType eek_bounds_get_type (void) G_GNUC_CONST;
 
 G_INLINE_FUNC gdouble
@@ -124,9 +130,7 @@ struct _EekOutline
     EekPoint *points;
     gint num_points;
 };
-typedef struct _EekOutline EekOutline;
 
-#define EEK_TYPE_OUTLINE (eek_outline_get_type ())
 GType eek_outline_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
