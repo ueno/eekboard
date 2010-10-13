@@ -151,7 +151,7 @@ static void       on_options_menu   (GtkAction       *action,
                                      GtkWidget       *window);
 static void       on_about          (GtkAction       *action,
                                      GtkWidget       *window);
-static void       on_quit           (GtkAction *      action,
+static void       on_quit_from_menu (GtkAction *      action,
                                      GtkWidget       *window);
 static void       eekboard_free     (Eekboard        *eekboard);
 static GtkWidget *create_widget     (Eekboard        *eekboard,
@@ -205,7 +205,7 @@ static const GtkActionEntry action_entry[] = {
     {"FileMenu", NULL, N_("_File")},
     {"KeyboardMenu", NULL, N_("_Keyboard")},
     {"HelpMenu", NULL, N_("_Help")},
-    {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (on_quit)},
+    {"Quit", GTK_STOCK_QUIT, NULL, NULL, NULL, G_CALLBACK (on_quit_from_menu)},
     {"Country", NULL, N_("Country"), NULL, NULL,
      G_CALLBACK(on_countries_menu)},
     {"Language", NULL, N_("Language"), NULL, NULL,
@@ -280,12 +280,24 @@ on_about (GtkAction * action, GtkWidget *window)
 }
 
 static void
-on_quit (GtkAction * action, GtkWidget *window)
+on_destroy (gpointer user_data)
 {
-    Eekboard *eekboard = g_object_get_data (G_OBJECT(window), "eekboard");
+    gtk_main_quit ();
+}
 
-    fakekey_release (eekboard->fakekey);
+static gboolean
+on_quit (gpointer user_data)
+{
+    Eekboard *eekboard = user_data;
+    /* release the currently hold key */
+    if (eekboard->fakekey)
+        fakekey_release (eekboard->fakekey);
     eekboard_free (eekboard);
+}
+
+static void
+on_quit_from_menu (GtkAction * action, GtkWidget *window)
+{
     gtk_main_quit ();
 }
 
@@ -973,6 +985,7 @@ create_menus (Eekboard      *eekboard,
 
     gtk_ui_manager_insert_action_group (eekboard->ui_manager, action_group, 0);
     gtk_ui_manager_add_ui_from_string (eekboard->ui_manager, ui_description, -1, NULL);
+    g_object_unref (action_group);
 
     eekboard->countries_action_group = gtk_action_group_new ("Countries");
     gtk_ui_manager_insert_action_group (eekboard->ui_manager,
@@ -1204,6 +1217,20 @@ eekboard_free (Eekboard *eekboard)
         g_object_unref (eekboard->registry);
     if (eekboard->engine)
         g_object_unref (eekboard->engine);
+    if (eekboard->gconfc)
+        g_object_unref (eekboard->gconfc);
+    if (eekboard->ui_manager)
+        g_object_unref (eekboard->ui_manager);
+    if (eekboard->countries_action_group)
+        g_object_unref (eekboard->countries_action_group);
+    if (eekboard->languages_action_group)
+        g_object_unref (eekboard->languages_action_group);
+    if (eekboard->models_action_group)
+        g_object_unref (eekboard->models_action_group);
+    if (eekboard->layouts_action_group)
+        g_object_unref (eekboard->layouts_action_group);
+    if (eekboard->options_action_group)
+        g_object_unref (eekboard->options_action_group);
     g_slice_free (Eekboard, eekboard);
 }
 
@@ -1556,7 +1583,7 @@ main (int argc, char *argv[])
     g_object_set (G_OBJECT(window), "accept_focus", FALSE, NULL);
     gtk_window_set_title (GTK_WINDOW(window), "Keyboard");
     g_signal_connect (G_OBJECT (window), "destroy",
-                      G_CALLBACK (gtk_main_quit), NULL);
+                      G_CALLBACK (on_destroy), eekboard);
 
     vbox = gtk_vbox_new (FALSE, 0);
 
@@ -1664,6 +1691,7 @@ main (int argc, char *argv[])
     if (combo)
         gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
 
+    gtk_quit_add (0, on_quit, eekboard);
     gtk_main ();
 
     return 0;
