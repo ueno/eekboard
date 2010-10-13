@@ -351,3 +351,45 @@ eek_element_get_absolute_position (EekElement *element,
     *x = ax;
     *y = ay;
 }
+
+/**
+ * eek_element_set_position:
+ * @element: an #EekElement
+ * @x: X coordinate of top left corner
+ * @y: Y coordinate of top left corner
+ *
+ * Set the relative position of @element.
+ */
+void
+eek_element_set_position (EekElement *element,
+                          gdouble     x,
+                          gdouble     y)
+{
+    EekBounds bounds;
+
+    eek_element_get_bounds (element, &bounds);
+    bounds.x = x;
+    bounds.y = y;
+    eek_element_set_bounds (element, &bounds);
+}
+
+/**
+ * eek_element_set_size:
+ * @element: an #EekElement
+ * @width: width of @element
+ * @height: height of @element
+ *
+ * Set the size of @element.
+ */
+void
+eek_element_set_size (EekElement  *element,
+                      gdouble      width,
+                      gdouble      height)
+{
+    EekBounds bounds;
+
+    eek_element_get_bounds (element, &bounds);
+    bounds.width = width;
+    bounds.height = height;
+    eek_element_set_bounds (element, &bounds);
+}
