@@ -20,6 +20,7 @@
 #ifndef EEK_GTK_KEYBOARD_H
 #define EEK_GTK_KEYBOARD_H 1
 
+#include <glib.h>
 #include <gtk/gtk.h>
 #include "eek-keyboard.h"
 

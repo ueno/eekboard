@@ -166,7 +166,7 @@ Eek_0_1_gir_LIBS = libeek.la
 Eek_0_1_gir_FILES = $(libeek_la_SOURCES)
 
 EekGtk-0.1.gir: libeek-gtk.la Eek-0.1.gir
-EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-2.0 Eek-0.1
+EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-3.0 Eek-0.1
 EekGtk_0_1_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
 EekGtk_0_1_gir_LIBS = libeek-gtk.la
 EekGtk_0_1_gir_FILES = $(libeek_gtk_la_SOURCES)
