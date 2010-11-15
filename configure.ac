@@ -46,10 +46,14 @@ case "$with_gtk" in
        ;;
   3.0) GTK_API_VERSION=3.0
        GTK_REQUIRED=2.91.0
-       EEK_API_VERSION=0.90
+#       EEK_API_VERSION=0.90
+#       EEK_API_MAJOR_VERSION=0
+#       EEK_API_MINOR_VERSION=90
+#       EEK_API_PC_VERSION=0.90
+       EEK_API_VERSION=0.1
        EEK_API_MAJOR_VERSION=0
-       EEK_API_MINOR_VERSION=90
-       EEK_API_PC_VERSION=0.90
+       EEK_API_MINOR_VERSION=1
+       EEK_API_PC_VERSION=0.1
        EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
        ;;
 esac
@@ -87,8 +91,24 @@ PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
   [AC_MSG_ERROR([libfakekey not found])])
 PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
   [AC_MSG_ERROR([AT-SPI C not found])])
+
 PKG_CHECK_MODULES([NOTIFY], [libnotify], ,
   [AC_MSG_ERROR([libnotify not found])])
+
+dnl libnotify >= 0.7.0 omitted the feature to attach notification to widget.
+need_libnotify_attach_workaround=0
+save_CFLAGS="$CFLAGS"
+CFLAGS="$NOTIFY_CFLAGS"
+save_LIBS="$LIBS"
+LIBS="$NOTIFY_LIBS"
+AC_TRY_LINK([#include <libnotify/notification.h>],
+  [notify_notification_new (NULL, NULL, NULL);], ,
+  [need_libnotify_attach_workaround=1])
+CFLAGS="$save_CFLAGS"
+LIBS="$save_LIBS"
+AC_DEFINE_UNQUOTED([NEED_LIBNOTIFY_ATTACH_WORKAROUND],
+  $need_libnotify_attach_workaround,
+  [Define if notify_notification_new work around is needed])
 
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
@@ -117,12 +137,14 @@ if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
     [AC_MSG_ERROR([Clutter not found -- install it or add --disable-clutter])])
   AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
-  need_swap_event_workaround=no
-  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0],,
+  have_clutter_gtk=0
+  need_swap_event_workaround=0
+  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], [have_clutter_gtk=1],
     [PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10 clutter-x11-1.0],
-      [need_swap_event_workaround=yes])])
-  AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
-  AC_DEFINE([NEED_SWAP_EVENT_WORKAROUND], [1],
+      [have_clutter_gtk=1; need_swap_event_workaround=1])])
+  AC_DEFINE_UNQUOTED([HAVE_CLUTTER_GTK], $have_clutter_gtk,
+    [Define if Clutter-Gtk is found])
+  AC_DEFINE_UNQUOTED([NEED_SWAP_EVENT_WORKAROUND], $need_swap_event_workaround,
     [Define if GLX_INTEL_swap_event work around is needed])
 fi
 AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])

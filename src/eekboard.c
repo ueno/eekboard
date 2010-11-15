@@ -1645,8 +1645,11 @@ main (int argc, char *argv[])
                      "eekboard is starting without a window.\n"
                      "To make eekboard show up, click on some window with "
                      "an editable widget.",
-                     "keyboard",
-                     NULL);
+                     "keyboard"
+#if NEED_LIBNOTIFY_ATTACH_WORKAROUND
+                     , NULL
+#endif
+                     );
                 notify_notification_add_action
                     (notification,
                      "dont-ask",
