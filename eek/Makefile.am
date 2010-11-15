@@ -76,22 +76,22 @@ libeek_gtk_la_SOURCES = \
 	$(srcdir)/eek-drawing.c \
 	$(srcdir)/eek-gtk.h
 
-libeek_gtk_la_CFLAGS = $(GTK2_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
-libeek_gtk_la_LIBADD = libeek.la $(GTK2_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_gtk_la_CFLAGS = $(GTK_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
 
 libeek_xkb_la_SOURCES = \
 	$(srcdir)/eek-xkb-layout.h \
 	$(srcdir)/eek-xkb-layout.c
 
-libeek_xkb_la_CFLAGS = $(GTK2_CFLAGS) $(XKB_CFLAGS)
-libeek_xkb_la_LIBADD = libeek.la $(GTK2_LIBS) $(XKB_LIBS)
+libeek_xkb_la_CFLAGS = $(XKB_CFLAGS) $(GTK_CFLAGS)
+libeek_xkb_la_LIBADD = libeek.la $(XKB_LIBS) $(GTK_LIBS)
 
 libeek_xkl_la_SOURCES = \
 	$(srcdir)/eek-xkl-layout.h \
 	$(srcdir)/eek-xkl-layout.c
 
-libeek_xkl_la_CFLAGS = $(GTK2_CFLAGS) $(LIBXKLAVIER_CFLAGS)
-libeek_xkl_la_LIBADD = libeek-xkb.la $(GTK2_LIBS) $(LIBXKLAVIER_LIBS)
+libeek_xkl_la_CFLAGS = $(LIBXKLAVIER_CFLAGS) $(GTK_CFLAGS)
+libeek_xkl_la_LIBADD = libeek-xkb.la $(LIBXKLAVIER_LIBS) $(GTK_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
 eek_HEADERS = \
@@ -158,48 +158,48 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
 if HAVE_INTROSPECTION
 
-Eek-0.1.gir: libeek.la
-Eek_0_1_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
-Eek_0_1_gir_INCLUDES = GLib-2.0 GObject-2.0
-Eek_0_1_gir_CFLAGS = $(libeek_la_CFLAGS)
-Eek_0_1_gir_LIBS = libeek.la
-Eek_0_1_gir_FILES = $(libeek_la_SOURCES)
+Eek@EEK_LIBRARY_SUFFIX@.gir: libeek.la
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GLib-2.0 GObject-2.0
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_la_CFLAGS)
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek.la
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_la_SOURCES)
 
-EekGtk-0.1.gir: libeek-gtk.la Eek-0.1.gir
-EekGtk_0_1_gir_INCLUDES = GObject-2.0 Gtk-3.0 Eek-0.1
-EekGtk_0_1_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
-EekGtk_0_1_gir_LIBS = libeek-gtk.la
-EekGtk_0_1_gir_FILES = $(libeek_gtk_la_SOURCES)
+EekGtk@EEK_LIBRARY_SUFFIX@.gir: libeek-gtk.la Eek@EEK_LIBRARY_SUFFIX@.gir
+EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Gtk-@GTK_API_VERSION@ Eek@EEK_LIBRARY_SUFFIX@
+EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
+EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-gtk.la
+EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_gtk_la_SOURCES)
 
 if HAVE_CLUTTER
-EekClutter-0.1.gir: libeek-clutter.la Eek-0.1.gir
-EekClutter_0_1_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek-0.1
-EekClutter_0_1_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
-EekClutter_0_1_gir_LIBS = libeek-clutter.la
-EekClutter_0_1_gir_FILES = $(libeek_clutter_la_SOURCES)
+EekClutter@EEK_LIBRARY_SUFFIX@.gir: libeek-clutter.la Eek@EEK_LIBRARY_SUFFIX@.gir
+EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek@EEK_LIBRARY_SUFFIX@
+EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
+EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-clutter.la
+EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_clutter_la_SOURCES)
 endif
 
-EekXkb-0.1.gir: libeek-xkb.la Eek-0.1.gir
-EekXkb_0_1_gir_INCLUDES = GObject-2.0 Eek-0.1
-EekXkb_0_1_gir_CFLAGS = $(libeek_xkb_la_CFLAGS)
-EekXkb_0_1_gir_LIBS = libeek-xkb.la
-EekXkb_0_1_gir_FILES = $(libeek_xkb_la_SOURCES)
+EekXkb@EEK_LIBRARY_SUFFIX@.gir: libeek-xkb.la Eek@EEK_LIBRARY_SUFFIX@.gir
+EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Eek@EEK_LIBRARY_SUFFIX@
+EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_xkb_la_CFLAGS)
+EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-xkb.la
+EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkb_la_SOURCES)
 
-EekXkl-0.1.gir: libeek-xkl.la EekXkb-0.1.gir
-EekXkl_0_1_gir_INCLUDES = GObject-2.0 EekXkb-0.1
-EekXkl_0_1_gir_CFLAGS = $(libeek_xkl_la_CFLAGS)
-EekXkl_0_1_gir_LIBS = libeek-xkl.la
-EekXkl_0_1_gir_FILES = $(libeek_xkl_la_SOURCES)
+EekXkl@EEK_LIBRARY_SUFFIX@.gir: libeek-xkl.la EekXkb@EEK_LIBRARY_SUFFIX@.gir
+EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 EekXkb@EEK_LIBRARY_SUFFIX@
+EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_xkl_la_CFLAGS)
+EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-xkl.la
+EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkl_la_SOURCES)
 
 INTROSPECTION_GIRS += \
-	Eek-0.1.gir \
-	EekGtk-0.1.gir \
-	EekXkb-0.1.gir \
-	EekXkl-0.1.gir
+	Eek@EEK_LIBRARY_SUFFIX@.gir \
+	EekGtk@EEK_LIBRARY_SUFFIX@.gir \
+	EekXkb@EEK_LIBRARY_SUFFIX@.gir \
+	EekXkl@EEK_LIBRARY_SUFFIX@.gir
 
 if HAVE_CLUTTER
 INTROSPECTION_GIRS += \
-	EekClutter-0.1.gir
+	EekClutter@EEK_LIBRARY_SUFFIX@.gir
 endif
 
 girdir = $(datadir)/gir-1.0
