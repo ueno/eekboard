@@ -326,22 +326,21 @@ prepare_keyboard_surface (EekGtkKeyboard *keyboard)
     cairo_destroy (cr);
 }
 
-static gboolean
-on_draw (GtkWidget *widget,
-         cairo_t   *cr,
-         gpointer   user_data)
+static void
+redraw_keyboard (cairo_t        *cr,
+                 EekGtkKeyboard *keyboard,
+                 gint            x,
+                 gint            y,
+                 gint            width,
+                 gint            height)
 {
-    EekGtkKeyboard *keyboard = user_data;
     EekGtkKeyboardPrivate *priv =
         EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
     GtkStyle *style;
     GtkStateType state;
-    GtkAllocation allocation;
 
-    g_return_val_if_fail (widget == priv->widget, FALSE);
-
-    style = gtk_widget_get_style (widget);
-    state = gtk_widget_get_state (widget);
+    style = gtk_widget_get_style (priv->widget);
+    state = gtk_widget_get_state (priv->widget);
 
     if (!priv->keyboard_surface) {
         PangoFontDescription *base_font;
@@ -349,7 +348,7 @@ on_draw (GtkWidget *widget,
         PangoLayout *layout;
 
         /* compute font sizes which fit in each key shape */
-        context = gtk_widget_get_pango_context (widget);
+        context = gtk_widget_get_pango_context (priv->widget);
         layout = pango_layout_new (context);
         base_font = style->font_desc;
         pango_layout_set_font_description (layout, base_font);
@@ -362,22 +361,60 @@ on_draw (GtkWidget *widget,
 
     gdk_cairo_set_source_color (cr, &style->fg[state]);
 
-    gtk_widget_get_allocation (widget, &allocation);
     cairo_set_source_surface (cr,
                               priv->keyboard_surface,
-                              0, 0);
-    cairo_rectangle (cr,
-                     0, 0,
-                     allocation.width, allocation.height);
+                              x, y);
+    cairo_rectangle (cr, x, y, width, height);
     cairo_fill (cr);
+}
+
+#if GTK_CHECK_VERSION (2, 91, 2)
+static gboolean
+on_draw (GtkWidget *widget,
+         cairo_t   *cr,
+         gpointer   user_data)
+{
+    EekGtkKeyboard *keyboard = user_data;
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    GtkAllocation allocation;
+
+    g_return_val_if_fail (widget == priv->widget, FALSE);
+
+    gtk_widget_get_allocation (priv->widget, &allocation);
+
+    redraw_keyboard (cr, keyboard, 0, 0, allocation.width, allocation.height);
 
     return TRUE;
 }
+#else
+static gboolean
+on_expose_event (GtkWidget      *widget,
+                 GdkEventExpose *event,
+                 gpointer        user_data)
+{
+    EekGtkKeyboard *keyboard = user_data;
+    EekGtkKeyboardPrivate *priv =
+        EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    cairo_t *cr;
+
+    g_return_val_if_fail (widget == priv->widget, FALSE);
+    
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
+    redraw_keyboard (cr, keyboard,
+                     event->area.x, event->area.y,
+                     event->area.width, event->area.height);
+    cairo_destroy (cr);
+
+    return TRUE;
+}
+#endif
 
 static void
-redraw_key (EekGtkKeyboard *keyboard,
+redraw_key (cairo_t        *cr,
             EekKey         *key,
-            gint            key_surface_type)
+            gint            key_surface_type,
+            EekGtkKeyboard *keyboard)
 {
     EekGtkKeyboardPrivate *priv =
         EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
@@ -388,7 +425,6 @@ redraw_key (EekGtkKeyboard *keyboard,
     GtkStyle *style;
     GtkStateType state;
     cairo_surface_t **key_surfaces, *large_surface;
-    cairo_t *cr;
 
     g_return_if_fail (priv->keyboard_surface);
 
@@ -405,8 +441,6 @@ redraw_key (EekGtkKeyboard *keyboard,
 
     x -= (width - bounds.width) / 2;
     y -= (height - bounds.height) / 2;
-
-    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
 
     style = gtk_widget_get_style (priv->widget);
     state = gtk_widget_get_state (priv->widget);
@@ -435,7 +469,6 @@ redraw_key (EekGtkKeyboard *keyboard,
         eek_draw_key_label (cr, key, priv->fonts);
         break;
     }
-    cairo_destroy (cr);
 }
 
 static void
@@ -443,8 +476,12 @@ on_key_pressed (EekKey *key, gpointer user_data)
 {
     EekGtkKeyboard *keyboard = user_data;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    cairo_t *cr;
 
-    redraw_key (EEK_GTK_KEYBOARD(keyboard), key, KEY_SURFACE_LARGE);
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
+    redraw_key (cr, key, KEY_SURFACE_LARGE, keyboard);
+    cairo_destroy (cr);
+
     priv->key = key;
 }
 
@@ -453,12 +490,15 @@ on_key_released (EekKey *key, gpointer user_data)
 {
     EekGtkKeyboard *keyboard = user_data;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    cairo_t *cr;
 
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
     if (priv->key) {
-        redraw_key (EEK_GTK_KEYBOARD(keyboard), priv->key, KEY_SURFACE_NORMAL);
+        redraw_key (cr, priv->key, KEY_SURFACE_NORMAL, keyboard);
         priv->key = NULL;
     }
-    redraw_key (EEK_GTK_KEYBOARD(keyboard), key, KEY_SURFACE_NORMAL);
+    redraw_key (cr, key, KEY_SURFACE_NORMAL, keyboard);
+    cairo_destroy (cr);
 }
 
 static void
@@ -567,8 +607,13 @@ eek_gtk_keyboard_get_widget (EekGtkKeyboard *keyboard)
                                GDK_KEY_RELEASE_MASK |
                                GDK_BUTTON_PRESS_MASK |
                                GDK_BUTTON_RELEASE_MASK);
+#if GTK_CHECK_VERSION (2, 91, 2)
         g_signal_connect (priv->widget, "draw",
                           G_CALLBACK (on_draw), keyboard);
+#else
+        g_signal_connect (priv->widget, "expose_event",
+                          G_CALLBACK (on_expose_event), keyboard);
+#endif
         g_signal_connect (priv->widget, "size-allocate",
                           G_CALLBACK (on_size_allocate), keyboard);
         g_signal_connect (priv->widget, "key-press-event",
