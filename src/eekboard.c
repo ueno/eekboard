@@ -1143,6 +1143,37 @@ parse_layouts (XklConfigRec *rec, const gchar *_layouts)
     rec->variants = variants;
 }
 
+static GdkFilterReturn
+filter_xkl_event (GdkXEvent * xev,
+                  GdkEvent *  event,
+                  gpointer    user_data)
+{
+        XEvent *xevent = (XEvent *) xev;
+        Eekboard *eekboard = user_data;
+
+        xkl_engine_filter_events (eekboard->engine, xevent);
+        return GDK_FILTER_CONTINUE;
+}
+
+static void
+on_xkl_config_changed (XklEngine *xklengine,
+                       gpointer   user_data)
+{
+}
+
+static void
+on_xkl_state_changed (XklEngine           *xklengine,
+                      XklEngineStateChange type,
+                      gint                 value,
+                      gboolean             restore,
+                      gpointer             user_data)
+{
+    Eekboard *eekboard = user_data;
+
+    if (type == GROUP_CHANGED)
+        g_signal_emit_by_name (eekboard->layout, "group_changed", value);
+}
+
 Eekboard *
 eekboard_new (gboolean use_clutter,
               gboolean need_swap_event_workaround,
@@ -1200,6 +1231,18 @@ eekboard_new (gboolean use_clutter,
     eekboard->engine = xkl_engine_get_instance (eekboard->display);
     eekboard->registry = xkl_config_registry_get_instance (eekboard->engine);
     xkl_config_registry_load (eekboard->registry, FALSE);
+    g_signal_connect (eekboard->engine, "X-config-changed",
+                      G_CALLBACK(on_xkl_config_changed), eekboard);
+    g_signal_connect (eekboard->engine, "X-state-changed",
+                      G_CALLBACK(on_xkl_state_changed), eekboard);
+
+    gdk_window_add_filter (NULL,
+                           (GdkFilterFunc)filter_xkl_event,
+                           eekboard);
+    gdk_window_add_filter (gdk_get_default_root_window (),
+                           (GdkFilterFunc) filter_xkl_event,
+                           eekboard);
+    xkl_engine_start_listen (eekboard->engine, XKLL_TRACK_KEYBOARD_STATE);
 
     return eekboard;
 }

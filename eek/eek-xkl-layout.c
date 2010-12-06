@@ -244,23 +244,6 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
     g_object_class_install_property (gobject_class, PROP_OPTIONS, pspec);
 }
 
-/* Disabled since the current EekXklLayout implementation does not
-   change the server setting. */
-#if 0
-static void
-on_state_changed (XklEngine           *xklengine,
-                  XklEngineStateChange type,
-                  gint                 value,
-                  gboolean             restore,
-                  gpointer             user_data)
-{
-    EekLayout *layout = user_data;
-
-    if (type == GROUP_CHANGED)
-        g_signal_emit_by_name (layout, "group_changed", value);
-}
-#endif
-
 static void
 eek_xkl_layout_init (EekXklLayout *self)
 {
@@ -274,13 +257,6 @@ eek_xkl_layout_init (EekXklLayout *self)
     g_return_if_fail (display);
 
     priv->engine = xkl_engine_get_instance (display);
-    /* Disabled since the current EekXklLayout implementation does not
-       change the server setting. */
-#if 0
-    g_signal_connect (priv->engine, "X-state-changed",
-                      G_CALLBACK(on_state_changed), self);
-    xkl_engine_start_listen (priv->engine, XKLL_TRACK_KEYBOARD_STATE);
-#endif
     xkl_config_rec_get_from_server (priv->config, priv->engine);
     set_xkb_component_names (self, priv->config);
 }
