@@ -293,6 +293,7 @@ on_quit (gpointer user_data)
     if (eekboard->fakekey)
         fakekey_release (eekboard->fakekey);
     eekboard_free (eekboard);
+    return TRUE;
 }
 
 static void
@@ -417,7 +418,7 @@ on_key_pressed (EekKeyboard *keyboard,
 {
     Eekboard *eekboard = user_data;
     gint group, level;
-    guint keysym, modifiers = 0;
+    guint keysym;
 
     keysym = eek_key_get_keysym (key);
     EEKBOARD_NOTE("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
@@ -1706,9 +1707,8 @@ main (int argc, char *argv[])
  
             gtk_widget_hide (window);
 
-            focusListener =
-                SPI_createAccessibleEventListener (a11y_focus_listener,
-                                                   eekboard);
+            focusListener = SPI_createAccessibleEventListener ((AccessibleEventListenerCB)a11y_focus_listener,
+                                                               eekboard);
             SPI_registerGlobalEventListener (focusListener,
                                              "object:state-changed:focused");
             SPI_registerGlobalEventListener (focusListener,

@@ -357,7 +357,7 @@ redraw_keyboard (cairo_t        *cr,
 
         prepare_keyboard_surface (keyboard);
     }
-    g_return_val_if_fail (priv->keyboard_surface, FALSE);
+    g_return_if_fail (priv->keyboard_surface);
 
     gdk_cairo_set_source_color (cr, &style->fg[state]);
 

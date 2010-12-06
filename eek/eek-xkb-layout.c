@@ -632,9 +632,13 @@ eek_xkb_layout_set_names_full (EekXkbLayout *layout,
                                ...)
 {
     va_list var_args;
+    gboolean retval;
+
     va_start (var_args, layout);
-    eek_xkb_layout_set_names_full_valist (layout, var_args);
+    retval = eek_xkb_layout_set_names_full_valist (layout, var_args);
     va_end (var_args);
+
+    return retval;
 }
 
 /**
