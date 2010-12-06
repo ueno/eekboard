@@ -1363,7 +1363,7 @@ config_parser_start_element (GMarkupParseContext *pcontext,
         config->rec = xkl_config_rec_new ();
         context->list = g_slist_prepend (context->list, config);
     } else
-        context->text = g_string_sized_new (100);
+        context->text->len = 0;
 }
 
 static void
@@ -1388,8 +1388,7 @@ config_parser_end_element (GMarkupParseContext *pcontext,
     if (!context->text)
         return;
 
-    text = g_string_free (context->text, FALSE);
-    context->text = NULL;
+    text = g_strndup (context->text->str, context->text->len);
 
     if (g_strcmp0 (element_name, "name") == 0)
         config->name = text;
@@ -1409,8 +1408,7 @@ config_parser_text (GMarkupParseContext *pcontext,
                     GError             **error)
 {
     ConfigContext *context = user_data;
-    if (context->text)
-        context->text = g_string_append_len (context->text, text, text_len);
+    context->text = g_string_append_len (context->text, text, text_len);
 }
 
 GMarkupParser config_parser = {
@@ -1531,7 +1529,6 @@ main (int argc, char *argv[])
         GSList *head;
         gint i;
 
-        memset (&context, 0, sizeof context);
         file = g_file_new_for_path (opt_config);
 
         error = NULL;
@@ -1542,6 +1539,8 @@ main (int argc, char *argv[])
             exit (1);
         }
 
+        context.list = NULL;
+        context.text = g_string_sized_new (BUFSIZ);
         pcontext = g_markup_parse_context_new (&config_parser,
                                                0,
                                                &context,
@@ -1565,6 +1564,7 @@ main (int argc, char *argv[])
         error = NULL;
         g_markup_parse_context_end_parse (pcontext, &error);
         g_markup_parse_context_free (pcontext);
+        g_string_free (context.text, TRUE);
         g_object_unref (file);
 
         if (context.list) {
