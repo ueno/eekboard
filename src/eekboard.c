@@ -229,7 +229,7 @@ static gboolean opt_version = FALSE;
 #if HAVE_CLUTTER_GTK
 static gchar *opt_toolkit = NULL;
 #endif
-static gboolean opt_standalone = FALSE;
+static gboolean opt_popup = FALSE;
 static gchar *opt_config = NULL;
 
 static const GOptionEntry options[] = {
@@ -249,8 +249,8 @@ static const GOptionEntry options[] = {
     {"toolkit", 't', 0, G_OPTION_ARG_STRING, &opt_toolkit,
      N_("Toolkit (\"clutter\" or \"gtk\")")},
 #endif
-    {"standalone", 's', 0, G_OPTION_ARG_NONE, &opt_standalone,
-     N_("Start as a standalone application")},
+    {"popup", 'p', 0, G_OPTION_ARG_NONE, &opt_popup,
+     N_("Start as a popup window")},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
      N_("Specify configuration file")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
@@ -1576,9 +1576,9 @@ main (int argc, char *argv[])
         }
     }
 
-    window = gtk_window_new (opt_standalone ?
-                             GTK_WINDOW_TOPLEVEL :
-                             GTK_WINDOW_POPUP);
+    window = gtk_window_new (opt_popup ?
+                             GTK_WINDOW_POPUP :
+                             GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_can_focus (window, FALSE);
     g_object_set (G_OBJECT(window), "accept_focus", FALSE, NULL);
     gtk_window_set_title (GTK_WINDOW(window), "Keyboard");
@@ -1590,7 +1590,7 @@ main (int argc, char *argv[])
     g_object_set_data (G_OBJECT(window), "eekboard", eekboard);
     widget = create_widget (eekboard, CSW, CSH);
 
-    if (opt_standalone) {
+    if (!opt_popup) {
         create_menus (eekboard, window);
         menubar = gtk_ui_manager_get_widget (eekboard->ui_manager, "/MainMenu");
         gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
@@ -1632,7 +1632,7 @@ main (int argc, char *argv[])
     eekboard->window = window;
     eekboard->gconfc = gconfc;
     if (eekboard->accessibility_enabled) {
-        if (!opt_standalone) {
+        if (opt_popup) {
             NotifyNotification *notification;
 
             error = NULL;
