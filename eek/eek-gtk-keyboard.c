@@ -123,7 +123,8 @@ eek_gtk_keyboard_finalize (GObject *object)
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
     gint i;
 
-    g_hash_table_unref (priv->key_surfaces);
+    cairo_surface_destroy (priv->keyboard_surface);
+    g_hash_table_destroy (priv->key_surfaces);
 
     for (i = 0; i < EEK_KEYSYM_CATEGORY_LAST; i++)
         pango_font_description_free (priv->fonts[i]);
@@ -464,8 +465,8 @@ redraw_key (cairo_t        *cr,
         gdk_cairo_set_source_color (cr, &style->fg[state]);
 
         cairo_scale (cr,
-                     key_surface_scale[KEY_SURFACE_LARGE],
-                     key_surface_scale[KEY_SURFACE_LARGE]);
+                     priv->scale * key_surface_scale[KEY_SURFACE_LARGE],
+                     priv->scale * key_surface_scale[KEY_SURFACE_LARGE]);
         eek_draw_key_label (cr, key, priv->fonts);
         break;
     }
@@ -492,11 +493,13 @@ on_key_released (EekKey *key, gpointer user_data)
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
     cairo_t *cr;
 
-    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
     if (priv->key) {
+        cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
         redraw_key (cr, priv->key, KEY_SURFACE_NORMAL, keyboard);
+        cairo_destroy (cr);
         priv->key = NULL;
     }
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (priv->widget)));
     redraw_key (cr, key, KEY_SURFACE_NORMAL, keyboard);
     cairo_destroy (cr);
 }
@@ -583,6 +586,7 @@ on_size_allocate (GtkWidget     *widget,
         cairo_surface_destroy (priv->keyboard_surface);
         priv->keyboard_surface = NULL;
     }
+    g_hash_table_remove_all (priv->key_surfaces);
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     priv->scale = allocation->width > allocation->height ?
