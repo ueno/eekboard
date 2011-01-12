@@ -231,6 +231,7 @@ static gchar *opt_toolkit = NULL;
 #endif
 static gboolean opt_popup = FALSE;
 static gchar *opt_config = NULL;
+static gboolean opt_fullscreen = FALSE;
 
 static const GOptionEntry options[] = {
     {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -251,6 +252,8 @@ static const GOptionEntry options[] = {
 #endif
     {"popup", 'p', 0, G_OPTION_ARG_NONE, &opt_popup,
      N_("Start as a popup window")},
+    {"fullscreen", 'f', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
+     N_("Start in fullscreen mode")},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
      N_("Specify configuration file")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
@@ -303,16 +306,57 @@ on_quit_from_menu (GtkAction * action, GtkWidget *window)
 }
 
 static void
-set_location (Eekboard   *eekboard,
-              Accessible *acc)
+make_fullscreen (Eekboard *eekboard)
 {
-    AccessibleComponent *component = Accessible_getComponent (acc);
+    AccessibleComponent *component = Accessible_getComponent (eekboard->acc);
+    long int x, y, width, height;
+    GdkScreen *screen;
+    gint monitor;
+    GdkRectangle rect;
+
+    screen = gdk_screen_get_default ();
+    if (eekboard->acc) {
+        AccessibleComponent_getExtents (component,
+                                        &x, &y, &width, &height,
+                                        SPI_COORD_TYPE_SCREEN);
+        monitor = gdk_screen_get_monitor_at_point (screen, x, y);
+    } else {
+        GdkWindow *root;
+
+        root = gtk_widget_get_root_window (GTK_WIDGET(eekboard->widget));
+        monitor = gdk_screen_get_monitor_at_window (screen, root);
+    }
+    gdk_screen_get_monitor_geometry (screen, monitor, &rect);
+
+    gtk_window_move (GTK_WINDOW(eekboard->window),
+                     rect.x,
+                     rect.y + rect.height / 2);
+    gtk_window_resize (GTK_WINDOW(eekboard->window),
+                       rect.width,
+                       rect.height / 2);
+}
+
+static void
+make_popup (Eekboard *eekboard)
+{
+    AccessibleComponent *component = Accessible_getComponent (eekboard->acc);
     long int x, y, width, height;
 
     AccessibleComponent_getExtents (component,
                                     &x, &y, &width, &height,
                                     SPI_COORD_TYPE_SCREEN);
+
     gtk_window_move (GTK_WINDOW(eekboard->window), x, y + height);
+}
+
+static void
+eekboard_show (Eekboard *eekboard)
+{
+    gtk_widget_show (eekboard->window);
+    if (opt_fullscreen)
+        make_fullscreen (eekboard);
+    else if (opt_popup)
+        make_popup (eekboard);
 }
 
 static SPIBoolean
@@ -338,21 +382,19 @@ a11y_focus_listener (const AccessibleEvent *event,
         case SPI_ROLE_PASSWORD_TEXT:
         case SPI_ROLE_TERMINAL:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
-                set_location (eekboard, acc);
-                gtk_widget_show (eekboard->window);
                 eekboard->acc = acc;
+                eekboard_show (eekboard);
             } else if (event->detail1 == 0 && acc == eekboard->acc) {
-                gtk_widget_hide (eekboard->window);
                 eekboard->acc = NULL;
+                gtk_widget_hide (eekboard->window);
             }
         case SPI_ROLE_ENTRY:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
-                set_location (eekboard, acc);
-                gtk_widget_show (eekboard->window);
                 eekboard->acc = acc;
+                eekboard_show (eekboard);
             } else if (event->detail1 == 0 && acc == eekboard->acc) {
-                gtk_widget_hide (eekboard->window);
                 eekboard->acc = NULL;
+                gtk_widget_hide (eekboard->window);
             }
         default:
             ;
