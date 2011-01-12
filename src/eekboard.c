@@ -352,11 +352,21 @@ make_popup (Eekboard *eekboard)
 static void
 eekboard_show (Eekboard *eekboard)
 {
+    gdouble transparency;
+    GError *error;
+    
     gtk_widget_show (eekboard->window);
     if (opt_fullscreen)
         make_fullscreen (eekboard);
     else if (opt_popup)
         make_popup (eekboard);
+
+    error = NULL;
+    transparency = gconf_client_get_float (eekboard->gconfc,
+                                           "/apps/eekboard/transparency",
+                                           &error);
+    gtk_window_set_opacity (GTK_WINDOW(eekboard->window), 1.0 - transparency);
+
 }
 
 static SPIBoolean
@@ -1376,7 +1386,7 @@ on_notify_never_show (NotifyNotification *notification,
                       gpointer user_data)
 {
     Eekboard *eekboard = user_data;
-    GError *error;
+    GError *error = NULL;
 
     gconf_client_set_bool (eekboard->gconfc,
                            "/apps/eekboard/inhibit-startup-notify",
