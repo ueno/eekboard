@@ -465,8 +465,8 @@ redraw_key (cairo_t        *cr,
         gdk_cairo_set_source_color (cr, &style->fg[state]);
 
         cairo_scale (cr,
-                     priv->scale * key_surface_scale[KEY_SURFACE_LARGE],
-                     priv->scale * key_surface_scale[KEY_SURFACE_LARGE]);
+                     key_surface_scale[KEY_SURFACE_LARGE],
+                     key_surface_scale[KEY_SURFACE_LARGE]);
         eek_draw_key_label (cr, key, priv->fonts);
         break;
     }
@@ -590,8 +590,8 @@ on_size_allocate (GtkWidget     *widget,
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     priv->scale = allocation->width > allocation->height ?
-        allocation->width / bounds.width :
-        allocation->height / bounds.height;
+        allocation->height / bounds.height :
+        allocation->width / bounds.width;
 }
 
 GtkWidget *
