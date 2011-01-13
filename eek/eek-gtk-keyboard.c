@@ -41,6 +41,12 @@ G_DEFINE_TYPE (EekGtkKeyboard, eek_gtk_keyboard, EEK_TYPE_KEYBOARD);
 #define EEK_GTK_KEYBOARD_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_GTK_KEYBOARD, EekGtkKeyboardPrivate))
 
+/* since 2.91.5 GDK_DRAWABLE was removed and gdk_cairo_create takes
+   GdkWindow as the argument */
+#ifndef GDK_DRAWABLE
+#define GDK_DRAWABLE(x) (x)
+#endif
+
 enum {
     KEY_SURFACE_NORMAL = 0,
     KEY_SURFACE_LARGE,
