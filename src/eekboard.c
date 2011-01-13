@@ -288,17 +288,6 @@ on_destroy (gpointer user_data)
     gtk_main_quit ();
 }
 
-static gboolean
-on_quit (gpointer user_data)
-{
-    Eekboard *eekboard = user_data;
-    /* release the currently hold key */
-    if (eekboard->fakekey)
-        fakekey_release (eekboard->fakekey);
-    eekboard_free (eekboard);
-    return TRUE;
-}
-
 static void
 on_quit_from_menu (GtkAction * action, GtkWidget *window)
 {
@@ -1792,8 +1781,12 @@ main (int argc, char *argv[])
     if (combo)
         gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
 
-    gtk_quit_add (0, on_quit, eekboard);
     gtk_main ();
+
+    /* release the currently held key */
+    if (eekboard->fakekey)
+        fakekey_release (eekboard->fakekey);
+    eekboard_free (eekboard);
 
     return 0;
 }
