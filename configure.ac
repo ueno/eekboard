@@ -16,13 +16,31 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-AC_INIT([eekboard], [0.0.7], [ueno@unixuser.org])
-AC_CONFIG_SRCDIR([configure.ac])
 AC_PREREQ(2.63)
-AM_INIT_AUTOMAKE
-AM_PROG_CC_C_O
+dnl AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
+
+AC_INIT([eekboard], [0.0.7], [ueno@unixuser.org])
+
+dnl Init automake
+AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE([enable])
+AC_GNU_SOURCE
+
+dnl Support silent build
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+
+dnl Check for programs
+AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CC_STDC
+AC_PROG_INSTALL
+AC_PROG_CXX
+
+# define PACKAGE_VERSION_* variables
+AM_DISABLE_STATIC
+AC_ISC_POSIX
+AC_HEADER_STDC
 LT_INIT
 IT_PROG_INTLTOOL([0.35.0])
 
@@ -70,14 +88,13 @@ AC_SUBST([EEK_LIBRARY_SUFFIX_U],[AS_TR_SH([$EEK_LIBRARY_SUFFIX])])
 AM_CONDITIONAL([HAVE_GTK_2],[test "$with_gtk" = "2.0"])
 AM_CONDITIONAL([HAVE_GTK_3],[test "$with_gtk" = "3.0"])
 
+AM_PATH_GLIB_2_0
 PKG_CHECK_MODULES([GLIB2], [glib-2.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
 PKG_CHECK_MODULES([GOBJECT2], [gobject-2.0], ,
   [AC_MSG_ERROR([GObject2 not found])])
-PKG_CHECK_MODULES([CAIRO], [cairo], ,
-  [AC_MSG_ERROR([Cairo not found])])
-PKG_CHECK_MODULES([PANGO], [pango], ,
-  [AC_MSG_ERROR([Pango not found])])
+PKG_CHECK_MODULES([PANGOCAIRO], [pangocairo], ,
+  [AC_MSG_ERROR([PangoCairo not found])])
 PKG_CHECK_MODULES([GTK], [
   gtk+-$GTK_API_VERSION >= $GTK_REQUIRED
   gdk-$GTK_API_VERSION >= $GTK_REQUIRED], ,
@@ -111,6 +128,7 @@ AC_DEFINE_UNQUOTED([NEED_LIBNOTIFY_ATTACH_WORKAROUND],
   $need_libnotify_attach_workaround,
   [Define if notify_notification_new work around is needed])
 
+dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
               AS_HELP_STRING([--enable-vala=no/yes],
@@ -119,6 +137,7 @@ AC_ARG_ENABLE(vala,
 AC_MSG_RESULT($enable_vala)
 AM_CONDITIONAL(ENABLE_VALA, [test x$enable_vala = xyes])
 
+dnl standalone application
 AC_MSG_CHECKING([whether you enable eekboard])
 AC_ARG_ENABLE(eekboard,
               AS_HELP_STRING([--enable-eekboard=no/yes],
@@ -127,6 +146,7 @@ AC_ARG_ENABLE(eekboard,
 AC_MSG_RESULT($enable_eekboard)
 AM_CONDITIONAL(ENABLE_EEKBOARD, [test x$enable_eekboard = xyes])
 
+dnl Clutter
 AC_MSG_CHECKING([whether you enable Clutter])
 AC_ARG_ENABLE(clutter,
               AS_HELP_STRING([--enable-clutter=no/yes],
@@ -181,3 +201,13 @@ eek/eek-gtk-${EEK_API_VERSION}.pc
 eek/eek-xkb-${EEK_API_VERSION}.pc
 eek/eek-xkl-${EEK_API_VERSION}.pc])
 AC_OUTPUT
+AC_MSG_RESULT([
+Build options:
+  Version                   $VERSION
+  Install prefix            $prefix
+  Build shared libs         $enable_shared
+  Build static libs         $enable_static
+  CFLAGS                    $CFLAGS
+  Build vala binding        $enable_vala
+  Build document            $enable_gtk_doc
+])

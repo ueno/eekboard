@@ -16,111 +16,139 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-lib_LTLIBRARIES = \
-	libeek.la \
-	libeek-gtk.la \
-	libeek-xkb.la \
+lib_LTLIBRARIES =				\
+	libeek.la				\
+	libeek-gtk.la				\
+	libeek-xkb.la				\
 	libeek-xkl.la
 
 if HAVE_CLUTTER
 lib_LTLIBRARIES += libeek-clutter.la
 endif
 
-libeek_la_SOURCES = \
-	$(srcdir)/eek-layout.c \
-	$(srcdir)/eek-layout.h \
-	$(srcdir)/eek-element.c \
-	$(srcdir)/eek-element.h \
-	$(srcdir)/eek-container.c \
-	$(srcdir)/eek-container.h \
-	$(srcdir)/eek-keyboard.c \
-	$(srcdir)/eek-keyboard.h \
-	$(srcdir)/eek-section.c \
-	$(srcdir)/eek-section.h \
-	$(srcdir)/eek-key.c \
-	$(srcdir)/eek-key.h \
-	$(srcdir)/eek-types.h \
-	$(srcdir)/eek-types.c \
-	$(srcdir)/eek-keysym.h \
-	$(srcdir)/eek-keysym.c \
-	$(srcdir)/eek-special-keysym-labels.h \
-	$(srcdir)/eek-unicode-keysym-labels.h \
+libeek_public_headers =				\
+	$(srcdir)/eek-keysym.h			\
+	$(srcdir)/eek-layout.h			\
+	$(srcdir)/eek-element.h			\
+	$(srcdir)/eek-container.h		\
+	$(srcdir)/eek-keyboard.h		\
+	$(srcdir)/eek-section.h			\
+	$(srcdir)/eek-key.h			\
+	$(srcdir)/eek-types.h			\
+	$(srcdir)/eek-keysym.h			\
+	$(srcdir)/eek.h
+
+libeek_sources =				\
+	$(srcdir)/eek-layout.c			\
+	$(srcdir)/eek-element.c			\
+	$(srcdir)/eek-container.c		\
+	$(srcdir)/eek-keyboard.c		\
+	$(srcdir)/eek-section.c			\
+	$(srcdir)/eek-key.c			\
+	$(srcdir)/eek-types.c			\
+	$(srcdir)/eek-keysym.c			\
+	$(srcdir)/eek-drawing.c
+
+libeek_keysym_sources =				\
+	$(srcdir)/eek-special-keysym-labels.h	\
+	$(srcdir)/eek-unicode-keysym-labels.h	\
 	$(srcdir)/eek-keyname-keysym-labels.h
-libeek_la_CFLAGS = $(GOBJECT2_CFLAGS)
-libeek_la_LIBADD = $(GOBJECT2_LIBS) -lm
+
+libeek_enumtypes_sources =			\
+	$(srcdir)/eek-enumtypes.c		\
+	$(srcdir)/eek-enumtypes.h
+
+libeek_marshallers_sources =			\
+	$(srcdir)/eek-marshallers.c		\
+	$(srcdir)/eek-marshallers.h
+
+libeek_private_headers =			\
+	$(srcdir)/eek-drawing.h			\
+	$(srcdir)/eek-special-keysym-labels.h	\
+	$(srcdir)/eek-unicode-keysym-labels.h	\
+	$(srcdir)/eek-keyname-keysym-labels.h	\
+	$(srcdir)/eek-marshallers.h
+
+BUILT_SOURCES =					\
+	$(libeek_keysym_sources)		\
+	$(libeek_marshallers_sources)
+
+libeek_la_SOURCES =				\
+	$(libeek_sources)			\
+	$(srcdir)/eek-marshallers.c
+
+libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(PANGOCAIRO_CFLAGS)
+libeek_la_LIBADD = $(GOBJECT2_LIBS) $(PANGOCAIRO_LIBS) -lm
 
 if HAVE_CLUTTER
-libeek_clutter_la_SOURCES = \
-	$(srcdir)/eek-clutter-keyboard.c \
-	$(srcdir)/eek-clutter-keyboard.h \
-	$(srcdir)/eek-clutter-section.c \
-	$(srcdir)/eek-clutter-section.h \
-	$(srcdir)/eek-clutter-key.c \
-	$(srcdir)/eek-clutter-key.h \
-	$(srcdir)/eek-clutter-key-actor.c \
-	$(srcdir)/eek-clutter-key-actor.h \
-	$(srcdir)/eek-clutter-drawing-context.c \
+libeek_clutter_public_headers =			\
+	$(srcdir)/eek-clutter-keyboard.h	\
+	$(srcdir)/eek-clutter-section.h		\
+	$(srcdir)/eek-clutter-key.h		\
 	$(srcdir)/eek-clutter-drawing-context.h \
-	$(srcdir)/eek-drawing.h \
-	$(srcdir)/eek-drawing.c \
 	$(srcdir)/eek-clutter.h
 
-libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
-libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_clutter_private_headers =		\
+	$(srcdir)/eek-clutter-key-actor.h
+
+libeek_clutter_sources =			\
+	$(srcdir)/eek-clutter-keyboard.c	\
+	$(srcdir)/eek-clutter-section.c		\
+	$(srcdir)/eek-clutter-key.c		\
+	$(srcdir)/eek-clutter-key-actor.c	\
+	$(srcdir)/eek-clutter-drawing-context.c
+
+libeek_clutter_la_SOURCES = $(libeek_clutter_sources)
+libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)
+libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS)
 endif
 
-libeek_gtk_la_SOURCES = \
-	$(srcdir)/eek-gtk-keyboard.c \
-	$(srcdir)/eek-gtk-keyboard.h \
-	$(srcdir)/eek-drawing.h \
-	$(srcdir)/eek-drawing.c \
+libeek_gtk_public_headers =			\
+	$(srcdir)/eek-gtk-keyboard.h		\
 	$(srcdir)/eek-gtk.h
+libeek_gtk_sources =				\
+	$(srcdir)/eek-gtk-keyboard.c
 
-libeek_gtk_la_CFLAGS = $(GTK_CFLAGS) $(CAIRO_LIBS) $(PANGO_LIBS)
-libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
+libeek_gtk_la_SOURCES = $(libeek_gtk_sources)
+libeek_gtk_la_CFLAGS = $(GTK_CFLAGS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS)
 
-libeek_xkb_la_SOURCES = \
-	$(srcdir)/eek-xkb-layout.h \
+libeek_xkb_public_headers =			\
+	$(srcdir)/eek-xkb-layout.h		\
+	$(srcdir)/eek-xkb.h
+
+libeek_xkb_sources =				\
 	$(srcdir)/eek-xkb-layout.c
 
+libeek_xkb_la_SOURCES = $(libeek_xkb_sources)
 libeek_xkb_la_CFLAGS = $(XKB_CFLAGS) $(GTK_CFLAGS)
 libeek_xkb_la_LIBADD = libeek.la $(XKB_LIBS) $(GTK_LIBS)
 
-libeek_xkl_la_SOURCES = \
-	$(srcdir)/eek-xkl-layout.h \
+libeek_xkl_public_headers =			\
+	$(srcdir)/eek-xkl-layout.h		\
+	$(srcdir)/eek-xkl.h
+
+libeek_xkl_sources =				\
 	$(srcdir)/eek-xkl-layout.c
 
+libeek_xkl_la_SOURCES = $(libeek_xkl_sources)
 libeek_xkl_la_CFLAGS = $(LIBXKLAVIER_CFLAGS) $(GTK_CFLAGS)
 libeek_xkl_la_LIBADD = libeek-xkb.la $(LIBXKLAVIER_LIBS) $(GTK_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
-eek_HEADERS = \
-	$(srcdir)/eek-element.h \
-	$(srcdir)/eek-container.h \
-	$(srcdir)/eek-keyboard.h \
-	$(srcdir)/eek-section.h \
-	$(srcdir)/eek-key.h \
-	$(srcdir)/eek-layout.h \
-	$(srcdir)/eek-keysym.h \
-	$(srcdir)/eek-types.h \
-	$(srcdir)/eek-gtk-keyboard.h \
-	$(srcdir)/eek-xkb-layout.h \
-	$(srcdir)/eek-xkl-layout.h \
-	$(srcdir)/eek.h \
-	$(srcdir)/eek-gtk.h \
-	$(srcdir)/eek-xkb.h \
-	$(srcdir)/eek-xkl.h
+eek_HEADERS =					\
+	$(libeek_public_headers)		\
+	$(libeek_clutter_public_headers)	\
+	$(libeek_gtk_public_headers)		\
+	$(libeek_xkb_public_headers)		\
+	$(libeek_xkl_public_headers)
 
-if HAVE_CLUTTER
-eek_HEADERS += \
-	$(srcdir)/eek-clutter-keyboard.h \
-	$(srcdir)/eek-clutter-section.h \
-	$(srcdir)/eek-clutter-key.h \
-	$(srcdir)/eek-clutter-drawing-context.h \
-	$(srcdir)/eek-clutter.h
-endif
-
-eek-keysym.c: eek-special-keysym-labels.h eek-unicode-keysym-labels.h eek-keyname-keysym-labels.h
+noinst_HEADERS =				\
+	$(libeek_private_headers)		\
+	$(libeek_clutter_private_headers)	\
+	$(libeek_gtk_private_headers)		\
+	$(libeek_xkb_private_headers)		\
+	$(libeek_xkl_private_headers)
 
 eek-special-keysym-labels.h: special-keysym-labels.txt
 	$(PYTHON) ./gen-keysym-labels.py special_keysym_labels < $< > $@
@@ -129,27 +157,36 @@ eek-unicode-keysym-labels.h: unicode-keysym-labels.txt
 eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
 	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
 
+# gen marshal
+eek-marshallers.h: eek-marshallers.list
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshallers.list --header --internal > $@.tmp && \
+	mv $@.tmp $@
+
+eek-marshallers.c: eek-marshallers.list eek-marshallers.h
+	$(AM_V_GEN) (echo "#include \"eek-marshallers.h\""; \
+	$(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshallers.list --body --internal) > $@.tmp && \
+	mv $@.tmp $@
+
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = \
-	eek-$(EEK_API_VERSION).pc \
-	eek-clutter-$(EEK_API_VERSION).pc \
-	eek-gtk-$(EEK_API_VERSION).pc \
-	eek-xkb-$(EEK_API_VERSION).pc \
+pkgconfig_DATA =				\
+	eek-$(EEK_API_VERSION).pc		\
+	eek-clutter-$(EEK_API_VERSION).pc	\
+	eek-gtk-$(EEK_API_VERSION).pc		\
+	eek-xkb-$(EEK_API_VERSION).pc		\
 	eek-xkl-$(EEK_API_VERSION).pc
 
-DISTCLEANFILES = \
-	eek-special-keysym-labels.h \
-	eek-unicode-keysym-labels.h \
-	eek-keyname-keysym-labels.h \
+CLEANFILES =
+
+DISTCLEANFILES =				\
+	$(BUILT_SOURCES)			\
 	$(pkgconfig_DATA)
 
-EXTRA_DIST = \
-	gen-keysym-labels.py \
-	special-keysym-labels.txt \
-	unicode-keysym-labels.txt \
-	keyname-keysym-labels.txt
-
-CLEANFILES =
+EXTRA_DIST =					\
+	gen-keysym-labels.py			\
+	special-keysym-labels.txt		\
+	unicode-keysym-labels.txt		\
+	keyname-keysym-labels.txt		\
+	eek-marshallers.list
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
@@ -163,42 +200,42 @@ Eek@EEK_LIBRARY_SUFFIX_U@_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GLib-2.0 GObject-2.0
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek.la
-Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_la_SOURCES)
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_sources) $(libeek_public_headers)
 
 EekGtk@EEK_LIBRARY_SUFFIX@.gir: libeek-gtk.la Eek@EEK_LIBRARY_SUFFIX@.gir
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Gtk-@GTK_API_VERSION@ Eek@EEK_LIBRARY_SUFFIX@
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-gtk.la
-EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_gtk_la_SOURCES)
+EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_gtk_sources) $(libeek_gtk_public_headers)
 
 if HAVE_CLUTTER
 EekClutter@EEK_LIBRARY_SUFFIX@.gir: libeek-clutter.la Eek@EEK_LIBRARY_SUFFIX@.gir
 EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek@EEK_LIBRARY_SUFFIX@
 EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
 EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-clutter.la
-EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_clutter_la_SOURCES)
+EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_clutter_sources) $(libeek_clutter_public_headers)
 endif
 
 EekXkb@EEK_LIBRARY_SUFFIX@.gir: libeek-xkb.la Eek@EEK_LIBRARY_SUFFIX@.gir
 EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Eek@EEK_LIBRARY_SUFFIX@
 EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_xkb_la_CFLAGS)
 EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-xkb.la
-EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkb_la_SOURCES)
+EekXkb@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkb_sources) $(libeek_xkb_public_headers)
 
 EekXkl@EEK_LIBRARY_SUFFIX@.gir: libeek-xkl.la EekXkb@EEK_LIBRARY_SUFFIX@.gir
 EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 EekXkb@EEK_LIBRARY_SUFFIX@
 EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_xkl_la_CFLAGS)
 EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-xkl.la
-EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkl_la_SOURCES)
+EekXkl@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_xkl_sources) $(libeek_xkl_public_headers)
 
-INTROSPECTION_GIRS += \
-	Eek@EEK_LIBRARY_SUFFIX@.gir \
-	EekGtk@EEK_LIBRARY_SUFFIX@.gir \
-	EekXkb@EEK_LIBRARY_SUFFIX@.gir \
+INTROSPECTION_GIRS +=				\
+	Eek@EEK_LIBRARY_SUFFIX@.gir		\
+	EekGtk@EEK_LIBRARY_SUFFIX@.gir		\
+	EekXkb@EEK_LIBRARY_SUFFIX@.gir		\
 	EekXkl@EEK_LIBRARY_SUFFIX@.gir
 
 if HAVE_CLUTTER
-INTROSPECTION_GIRS += \
+INTROSPECTION_GIRS +=				\
 	EekClutter@EEK_LIBRARY_SUFFIX@.gir
 endif
 
