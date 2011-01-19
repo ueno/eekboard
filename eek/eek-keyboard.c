@@ -66,21 +66,22 @@ struct _EekKeyboardPrivate
     gboolean is_realized;
 };
 
-struct keysym_index {
+struct _SetKeysymIndexCallbackData {
     gint group;
     gint level;
 };
+typedef struct _SetKeysymIndexCallbackData SetKeysymIndexCallbackData;
 
 static void
 set_keysym_index_for_key (EekElement *element,
                           gpointer    user_data)
 {
-    struct keysym_index *ki;
+    SetKeysymIndexCallbackData *data;
 
     g_return_if_fail (EEK_IS_KEY(element));
 
-    ki = user_data;
-    eek_key_set_keysym_index (EEK_KEY(element), ki->group, ki->level);
+    data = user_data;
+    eek_key_set_keysym_index (EEK_KEY(element), data->group, data->level);
 }
 
 static void
@@ -98,15 +99,15 @@ eek_keyboard_real_set_keysym_index (EekKeyboard *self,
                                     gint         level)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    struct keysym_index ki;
+    SetKeysymIndexCallbackData data;
 
     if (priv->group != group || priv->level != level) {
-        ki.group = priv->group = group;
-        ki.level = priv->level = level;
+        data.group = priv->group = group;
+        data.level = priv->level = level;
 
         eek_container_foreach_child (EEK_CONTAINER(self),
                                      set_keysym_index_for_section,
-                                     &ki);
+                                     &data);
 
         g_signal_emit_by_name (self, "keysym-index-changed", group, level);
     }
@@ -198,16 +199,16 @@ eek_keyboard_real_realize (EekKeyboard *self)
     priv->is_realized = TRUE;
 }
 
-struct _FkbkData {
+struct _FindKeyByKeycodeCallbackData {
     EekKey *key;
     guint keycode;
 };
-typedef struct _FkbkData FkbkData;
+typedef struct _FindKeyByKeycodeCallbackData FindKeyByKeycodeCallbackData;
 
 static gint
-compare_section_by_keycode (EekElement *element, gpointer user_data)
+find_key_by_keycode_section_callback (EekElement *element, gpointer user_data)
 {
-    FkbkData *data = user_data;
+    FindKeyByKeycodeCallbackData *data = user_data;
 
     data->key = eek_section_find_key_by_keycode (EEK_SECTION(element),
                                                  data->keycode);
@@ -220,11 +221,11 @@ static EekKey *
 eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
                                        guint        keycode)
 {
-    FkbkData data;
+    FindKeyByKeycodeCallbackData data;
 
     data.keycode = keycode;
     if (eek_container_find (EEK_CONTAINER(self),
-                            compare_section_by_keycode,
+                            find_key_by_keycode_section_callback,
                             &data))
         return data.key;
     return NULL;
@@ -513,50 +514,47 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                                                   keycode);
 }
 
-struct _FkbpData {
+struct _FindKeyByPositionCallbackData {
     gdouble x;
     gdouble y;
     EekKey *key;
 };
-typedef struct _FkbpData FkbpData;
+typedef struct _FindKeyByPositionCallbackData FindKeyByPositionCallbackData;
 
-static gint
-compare_section_by_position (EekElement *element, gpointer user_data)
+static gboolean
+section_includes_point (EekSection *section, EekPoint *point)
 {
-    EekSection *section = EEK_SECTION(element);
-    EekPoint *point = user_data;
     gint angle;
     EekBounds bounds;
     EekPoint rotated;
 
-    eek_element_get_bounds (element, &bounds);
+    eek_element_get_bounds (EEK_ELEMENT(section), &bounds);
     rotated.x = point->x - bounds.x;
     rotated.y = point->y - bounds.y;
-    angle = eek_section_get_angle (section);
+    angle = eek_section_get_angle (EEK_SECTION(section));
     eek_point_rotate (&rotated, -angle);
 
     if (0 <= rotated.x && 0 <= rotated.y &&
         rotated.x <= bounds.width &&
         rotated.y <= bounds.height)
-        return 0;
-    return -1;
+        return TRUE;
+    return FALSE;
 }
 
 static void
-fkbp_foreach_child_callback (EekElement *element,
-                             gpointer user_data)
+find_key_by_position_section_callback (EekElement *element,
+                                       gpointer user_data)
 {
-    FkbpData *data = user_data;
+    FindKeyByPositionCallbackData *data = user_data;
     EekPoint point;
 
     if (!data->key) {
         point.x = data->x;
         point.y = data->y;
-        if (compare_section_by_position (element, &point) == 0) {
+        if (section_includes_point (EEK_SECTION(element), &point))
             data->key = eek_section_find_key_by_position (EEK_SECTION(element),
                                                           point.x,
                                                           point.y);
-        }
     }
 }
 
@@ -565,7 +563,7 @@ eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
                                    gdouble      x,
                                    gdouble      y)
 {
-    FkbpData data;
+    FindKeyByPositionCallbackData data;
     EekBounds bounds;
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
@@ -574,7 +572,7 @@ eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
     data.key = NULL;
     /* eek_container_find() cannot be used here since sections may overlap. */
     eek_container_foreach_child (EEK_CONTAINER(keyboard),
-                                 fkbp_foreach_child_callback,
+                                 find_key_by_position_section_callback,
                                  &data);
     return data.key;
 }
