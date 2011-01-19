@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 #define EEK_TYPE_POINT (eek_point_get_type ())
 #define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
 #define EEK_TYPE_OUTLINE (eek_outline_get_type ())
+#define EEK_TYPE_COLOR (eek_color_get_type ())
 
 
 /**
@@ -55,6 +56,7 @@ typedef struct _EekKeysymMatrix EekKeysymMatrix;
 typedef struct _EekPoint EekPoint;
 typedef struct _EekBounds EekBounds;
 typedef struct _EekOutline EekOutline;
+typedef struct _EekColor EekColor;
 
 /**
  * EekKeysymMatrix:
@@ -132,6 +134,30 @@ struct _EekOutline
 };
 
 GType eek_outline_get_type (void) G_GNUC_CONST;
+
+/**
+ * EekColor:
+ * @red: red component of color, between 0.0 and 1.0
+ * @green: green component of color, between 0.0 and 1.0
+ * @blue: blue component of color, between 0.0 and 1.0
+ * @alpha: alpha component of color, between 0.0 and 1.0
+ *
+ * Color used for drawing.
+ */
+struct _EekColor
+{
+    gdouble red;
+    gdouble green;
+    gdouble blue;
+    gdouble alpha;
+};
+
+GType     eek_color_get_type (void) G_GNUC_CONST;
+
+EekColor *eek_color_new      (gdouble red,
+                              gdouble green,
+                              gdouble blue,
+                              gdouble alpha);
 
 G_END_DECLS
 #endif  /* EEK_TYPES_H */
