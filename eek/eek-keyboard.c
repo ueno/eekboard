@@ -34,6 +34,7 @@
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
+#include "eek-marshallers.h"
 
 enum {
     PROP_0,
@@ -45,6 +46,7 @@ enum {
 enum {
     KEY_PRESSED,
     KEY_RELEASED,
+    KEYSYM_INDEX_CHANGED,
     LAST_SIGNAL
 };
 
@@ -98,12 +100,16 @@ eek_keyboard_real_set_keysym_index (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     struct keysym_index ki;
 
-    ki.group = priv->group = group;
-    ki.level = priv->level = level;
+    if (priv->group != group || priv->level != level) {
+        ki.group = priv->group = group;
+        ki.level = priv->level = level;
 
-    eek_container_foreach_child (EEK_CONTAINER(self),
-                                 set_keysym_index_for_section,
-                                 &ki);
+        eek_container_foreach_child (EEK_CONTAINER(self),
+                                     set_keysym_index_for_section,
+                                     &ki);
+
+        g_signal_emit_by_name (self, "keysym-index-changed", group, level);
+    }
 }
 
 void
@@ -175,7 +181,7 @@ eek_keyboard_real_set_layout (EekKeyboard *self,
     g_return_if_fail (EEK_IS_LAYOUT(layout));
     priv->layout = layout;
     g_object_ref_sink (priv->layout);
-    g_signal_connect (priv->layout, "group_changed",
+    g_signal_connect (priv->layout, "group-changed",
                       G_CALLBACK(on_group_changed), self);
 }
 
@@ -379,6 +385,28 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                       G_TYPE_NONE,
                       1,
                       EEK_TYPE_KEY);
+
+    /**
+     * EekKeyboard::keysym-index-changed:
+     * @keyboard: an #EekKeyboard
+     * @group: row index of the symbol matrix of keys on @keyboard
+     * @level: column index of the symbol matrix of keys on @keyboard
+     *
+     * The ::keysym-index-changed signal is emitted each time the
+     * global configuration of group/level index changes.
+     */
+    signals[KEYSYM_INDEX_CHANGED] =
+        g_signal_new ("keysym-index-changed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      0,
+                      NULL,
+                      NULL,
+                      _eek_marshal_VOID__INT_INT,
+                      G_TYPE_NONE,
+                      2,
+                      G_TYPE_INT,
+                      G_TYPE_INT);
 }
 
 static void
