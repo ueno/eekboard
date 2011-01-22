@@ -438,26 +438,3 @@ eek_section_find_key_by_keycode (EekSection *section,
     return EEK_SECTION_GET_CLASS(section)->find_key_by_keycode (section,
                                                                 keycode);
 }
-
-EekKey *
-eek_section_find_key_by_position (EekSection *section,
-                                  gdouble     x,
-                                  gdouble     y)
-{
-    gint angle;
-    EekBounds bounds;
-    EekPoint point;
-    EekElement *key;
-
-    eek_element_get_bounds (EEK_ELEMENT(section), &bounds);
-    point.x = x - bounds.x;
-    point.y = y - bounds.y;
-    angle = eek_section_get_angle (section);
-    eek_point_rotate (&point, -angle);
-    key = eek_container_find_by_position (EEK_CONTAINER(section),
-                                          point.x + bounds.x,
-                                          point.y + bounds.y);
-    if (!key)
-        return NULL;
-    return EEK_KEY(key);
-}

@@ -108,15 +108,15 @@ eek_layout_get_type (void)
  * @layout: an #EekLayout
  * @keyboard: an #EekKeyboard
  *
- * Apply @layout to @keyboard.  This function is rarely called by user
- * programs but called by the subclasses of #EekKeyboard.
+ * Relayout @keyboard with the @layout.
  */
 void
-eek_layout_apply (EekLayout   *layout,
-                  EekKeyboard *keyboard)
+eek_layout_apply (EekLayout *layout, EekKeyboard *keyboard)
 {
     g_return_if_fail (EEK_IS_LAYOUT(layout));
-    EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+
+    return EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
 }
 
 /**

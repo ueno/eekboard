@@ -47,7 +47,8 @@ libeek_sources =				\
 	$(srcdir)/eek-key.c			\
 	$(srcdir)/eek-types.c			\
 	$(srcdir)/eek-keysym.c			\
-	$(srcdir)/eek-drawing.c
+	$(srcdir)/eek-renderer.c		\
+	$(srcdir)/eek-keyboard-drawing.c
 
 libeek_keysym_sources =				\
 	$(srcdir)/eek-special-keysym-labels.h	\
@@ -63,7 +64,7 @@ libeek_marshallers_sources =			\
 	$(srcdir)/eek-marshallers.h
 
 libeek_private_headers =			\
-	$(srcdir)/eek-drawing.h			\
+	$(srcdir)/eek-renderer.h		\
 	$(srcdir)/eek-special-keysym-labels.h	\
 	$(srcdir)/eek-unicode-keysym-labels.h	\
 	$(srcdir)/eek-keyname-keysym-labels.h	\
@@ -83,20 +84,16 @@ libeek_la_LIBADD = $(GOBJECT2_LIBS) $(PANGOCAIRO_LIBS) -lm
 if HAVE_CLUTTER
 libeek_clutter_public_headers =			\
 	$(srcdir)/eek-clutter-keyboard.h	\
-	$(srcdir)/eek-clutter-section.h		\
-	$(srcdir)/eek-clutter-key.h		\
-	$(srcdir)/eek-clutter-drawing-context.h \
 	$(srcdir)/eek-clutter.h
 
 libeek_clutter_private_headers =		\
-	$(srcdir)/eek-clutter-key-actor.h
+	$(srcdir)/eek-clutter-section.h		\
+	$(srcdir)/eek-clutter-key.h
 
 libeek_clutter_sources =			\
 	$(srcdir)/eek-clutter-keyboard.c	\
 	$(srcdir)/eek-clutter-section.c		\
-	$(srcdir)/eek-clutter-key.c		\
-	$(srcdir)/eek-clutter-key-actor.c	\
-	$(srcdir)/eek-clutter-drawing-context.c
+	$(srcdir)/eek-clutter-key.c
 
 libeek_clutter_la_SOURCES = $(libeek_clutter_sources)
 libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)

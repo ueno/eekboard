@@ -20,13 +20,6 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#if HAVE_CLUTTER_GTK
-#include <clutter-gtk/clutter-gtk.h>
-#if NEED_SWAP_EVENT_WORKAROUND
-#include <clutter/x11/clutter-x11.h>
-#endif
-#endif
-
 #include <glib/gi18n.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
@@ -40,21 +33,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if HAVE_CLUTTER_GTK
-#include "eek/eek-clutter.h"
-#endif
-
 #include "eek/eek-gtk.h"
 #include "eek/eek-xkl.h"
 
 #define CSW 640
 #define CSH 480
-
-#if HAVE_CLUTTER_GTK
-#define USE_CLUTTER TRUE
-#else
-#define USE_CLUTTER FALSE
-#endif
 
 #ifdef EEKBOARD_ENABLE_DEBUG
 #define EEKBOARD_NOTE(x,a...) g_message (G_STRLOC ": " x, ##a);
@@ -83,8 +66,6 @@ struct _Config {
 typedef struct _Config Config;
 
 struct _Eekboard {
-    gboolean use_clutter;
-    gboolean need_swap_event_workaround;
     gboolean accessibility_enabled;
     Config **config;
     gint active_config;
@@ -157,13 +138,6 @@ static void       eekboard_free     (Eekboard        *eekboard);
 static GtkWidget *create_widget     (Eekboard        *eekboard,
                                      gint             initial_width,
                                      gint             initial_height);
-static GtkWidget *create_widget_gtk (Eekboard        *eekboard,
-                                     gint             initial_width,
-                                     gint             initial_height);
-
-#if !HAVE_CLUTTER_GTK
-#define create_widget create_widget_gtk
-#endif
 
 static const char ui_description[] =
     "<ui>"
@@ -226,9 +200,6 @@ static gboolean opt_list_models = FALSE;
 static gboolean opt_list_layouts = FALSE;
 static gboolean opt_list_options = FALSE;
 static gboolean opt_version = FALSE;
-#if HAVE_CLUTTER_GTK
-static gchar *opt_toolkit = NULL;
-#endif
 static gboolean opt_popup = FALSE;
 static gchar *opt_config = NULL;
 static gboolean opt_fullscreen = FALSE;
@@ -246,10 +217,6 @@ static const GOptionEntry options[] = {
      N_("List all available keyboard layouts and variants")},
     {"list-options", 'O', 0, G_OPTION_ARG_NONE, &opt_list_options,
      N_("List all available keyboard layout options")},
-#if HAVE_CLUTTER_GTK
-    {"toolkit", 't', 0, G_OPTION_ARG_STRING, &opt_toolkit,
-     N_("Toolkit (\"clutter\" or \"gtk\")")},
-#endif
     {"popup", 'p', 0, G_OPTION_ARG_NONE, &opt_popup,
      N_("Start as a popup window")},
     {"fullscreen", 'f', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
@@ -467,7 +434,7 @@ on_key_pressed (EekKeyboard *keyboard,
     switch (keysym) {
     case XK_Shift_L:
     case XK_Shift_R:
-        eekboard->modifiers |= ShiftMask;
+        eekboard->modifiers ^= ShiftMask;
         eek_keyboard_get_keysym_index (keyboard, &group, &level);
         eek_keyboard_set_keysym_index (keyboard, group,
                                        (eekboard->modifiers & Mod5Mask) ? 2 :
@@ -475,7 +442,7 @@ on_key_pressed (EekKeyboard *keyboard,
                                        0);
         break;
     case XK_ISO_Level3_Shift:
-        eekboard->modifiers |= Mod5Mask;
+        eekboard->modifiers ^= Mod5Mask;
         eek_keyboard_get_keysym_index (keyboard, &group, &level);
         eek_keyboard_set_keysym_index (keyboard, group,
                                        (eekboard->modifiers & Mod5Mask) ? 2 :
@@ -484,11 +451,11 @@ on_key_pressed (EekKeyboard *keyboard,
         break;
     case XK_Control_L:
     case XK_Control_R:
-        eekboard->modifiers |= ControlMask;
+        eekboard->modifiers ^= ControlMask;
         break;
     case XK_Alt_L:
     case XK_Alt_R:
-        eekboard->modifiers |= Mod1Mask;
+        eekboard->modifiers ^= Mod1Mask;
         break;
     default:
         fakekey_press_keysym (eekboard->fakekey, keysym, eekboard->modifiers);
@@ -1059,109 +1026,28 @@ create_menus (Eekboard      *eekboard,
 }
 
 static GtkWidget *
-create_widget_gtk (Eekboard *eekboard,
-                   gint      initial_width,
-                   gint      initial_height)
-{
-    EekBounds bounds;
-
-    bounds.x = bounds.y = 0;
-    bounds.width = initial_width;
-    bounds.height = initial_height;
-
-    eekboard->keyboard = eek_gtk_keyboard_new ();
-    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
-    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    eekboard->on_key_pressed_id =
-        g_signal_connect (eekboard->keyboard, "key-pressed",
-                          G_CALLBACK(on_key_pressed), eekboard);
-    eekboard->on_key_released_id =
-        g_signal_connect (eekboard->keyboard, "key-released",
-                          G_CALLBACK(on_key_released), eekboard);
-
-    eekboard->widget =
-        eek_gtk_keyboard_get_widget (EEK_GTK_KEYBOARD (eekboard->keyboard));
-    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    eekboard->width = bounds.width;
-    eekboard->height = bounds.height;
-    return eekboard->widget;
-}
-
-#if HAVE_CLUTTER_GTK
-#if NEED_SWAP_EVENT_WORKAROUND
-static GdkFilterReturn
-gtk_clutter_filter_func (GdkXEvent *native_event,
-                         GdkEvent  *event,
-                         gpointer   user_data)
-{
-  XEvent *xevent = native_event;
-
-  clutter_x11_handle_event (xevent);
-
-  return GDK_FILTER_CONTINUE;
-}
-
-static void
-on_gtk_clutter_embed_realize (GtkWidget *widget, gpointer user_data)
-{
-    gdk_window_add_filter (NULL, gtk_clutter_filter_func, widget);
-}
-#endif
-
-static GtkWidget *
-create_widget_clutter (Eekboard *eekboard,
-                       gint      initial_width,
-                       gint      initial_height)
-{
-    ClutterActor *stage, *actor;
-    ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
-    EekBounds bounds;
-
-    bounds.x = bounds.y = 0;
-    bounds.width = initial_width;
-    bounds.height = initial_height;
-
-    eekboard->keyboard = eek_clutter_keyboard_new ();
-    eek_keyboard_set_layout (eekboard->keyboard, eekboard->layout);
-    eek_element_set_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    eekboard->on_key_pressed_id =
-        g_signal_connect (eekboard->keyboard, "key-pressed",
-                          G_CALLBACK(on_key_pressed), eekboard);
-    eekboard->on_key_released_id =
-        g_signal_connect (eekboard->keyboard, "key-released",
-                          G_CALLBACK(on_key_released), eekboard);
-
-    eekboard->widget = gtk_clutter_embed_new ();
-#if NEED_SWAP_EVENT_WORKAROUND
-    if (eekboard->need_swap_event_workaround)
-        g_signal_connect (eekboard->widget, "realize",
-                          G_CALLBACK(on_gtk_clutter_embed_realize), NULL);
-#endif
-    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(eekboard->widget));
-    clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
-    clutter_stage_set_user_resizable (CLUTTER_STAGE (stage), TRUE);
-
-    actor = eek_clutter_keyboard_get_actor
-        (EEK_CLUTTER_KEYBOARD(eekboard->keyboard));
-    clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
-    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
-    clutter_actor_set_size (stage, bounds.width, bounds.height);
-    eekboard->width = bounds.width;
-    eekboard->height = bounds.height;
-    return eekboard->widget;
-}
-
-static GtkWidget *
 create_widget (Eekboard *eekboard,
-               gint    initial_width,
-               gint    initial_height)
+               gint      initial_width,
+               gint      initial_height)
 {
-    if (eekboard->use_clutter)
-        return create_widget_clutter (eekboard, initial_width, initial_height);
-    else
-        return create_widget_gtk (eekboard, initial_width, initial_height);
+    EekBounds bounds;
+
+    eekboard->keyboard = eek_keyboard_new (eekboard->layout,
+                                           initial_width,
+                                           initial_height);
+    eekboard->on_key_pressed_id =
+        g_signal_connect (eekboard->keyboard, "key-pressed",
+                          G_CALLBACK(on_key_pressed), eekboard);
+    eekboard->on_key_released_id =
+        g_signal_connect (eekboard->keyboard, "key-released",
+                          G_CALLBACK(on_key_released), eekboard);
+
+    eekboard->widget = eek_gtk_keyboard_new (eekboard->keyboard);
+    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    eekboard->width = bounds.width;
+    eekboard->height = bounds.height;
+    return eekboard->widget;
 }
-#endif
 
 static void
 parse_layouts (XklConfigRec *rec, const gchar *_layouts)
@@ -1220,15 +1106,11 @@ on_xkl_state_changed (XklEngine           *xklengine,
 }
 
 Eekboard *
-eekboard_new (gboolean use_clutter,
-              gboolean need_swap_event_workaround,
-              gboolean accessibility_enabled)
+eekboard_new (gboolean accessibility_enabled)
 {
     Eekboard *eekboard;
 
     eekboard = g_slice_new0 (Eekboard);
-    eekboard->use_clutter = use_clutter;
-    eekboard->need_swap_event_workaround = need_swap_event_workaround;
     eekboard->accessibility_enabled = accessibility_enabled;
     eekboard->active_config = -1;
     eekboard->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
@@ -1508,9 +1390,6 @@ GMarkupParser config_parser = {
 int
 main (int argc, char *argv[])
 {
-    const gchar *env;
-    gboolean use_clutter = USE_CLUTTER;
-    gboolean need_swap_event_workaround = FALSE;
     gboolean accessibility_enabled = FALSE;
     Eekboard *eekboard;
     GtkWidget *widget, *vbox, *menubar, *window, *combo = NULL;
@@ -1547,44 +1426,12 @@ main (int argc, char *argv[])
             g_warning("AT-SPI initialization failed");
     }
 
-    env = g_getenv ("EEKBOARD_DISABLE_CLUTTER");
-    if (env && g_strcmp0 (env, "1") == 0)
-        use_clutter = FALSE;
-
-#if HAVE_CLUTTER_GTK
-    if (opt_toolkit) {
-        if (g_strcmp0 (opt_toolkit, "clutter") == 0)
-            use_clutter = TRUE;
-        else if (g_strcmp0 (opt_toolkit, "gtk") == 0)
-            use_clutter = FALSE;
-        else {
-            g_print ("Invalid toolkit \"%s\"\n", opt_toolkit);
-            exit (0);
-        }
-    }
-
-    if (use_clutter &&
-        gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
-        g_warning ("Can't init Clutter-Gtk...fallback to GTK");
-        use_clutter = FALSE;
-    }
-#ifdef NEED_SWAP_EVENT_WORKAROUND
-    if (use_clutter &&
-        clutter_feature_available (CLUTTER_FEATURE_SWAP_EVENTS)) {
-        g_warning ("Enabling GLX_INTEL_swap_event workaround for Clutter-Gtk");
-        need_swap_event_workaround = TRUE;
-    }
-#endif
-#endif
-
-    if (!use_clutter && !gtk_init_check (&argc, &argv)) {
+    if (!gtk_init_check (&argc, &argv)) {
         g_warning ("Can't init GTK");
         exit (1);
     }
 
-    eekboard = eekboard_new (use_clutter,
-                             need_swap_event_workaround,
-                             accessibility_enabled);
+    eekboard = eekboard_new (accessibility_enabled);
     if (opt_list_models) {
         xkl_config_registry_foreach_model (eekboard->registry,
                                            print_item,

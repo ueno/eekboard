@@ -325,6 +325,7 @@ eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
                                                 g_direct_equal,
                                                 NULL,
                                                 outline_free);
+
     create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
 }
 

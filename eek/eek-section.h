@@ -107,9 +107,6 @@ EekKey *eek_section_create_key           (EekSection     *section,
 
 EekKey *eek_section_find_key_by_keycode  (EekSection     *section,
                                           guint           keycode);
-EekKey *eek_section_find_key_by_position (EekSection     *section,
-                                          gdouble         x,
-                                          gdouble         y);
 
 G_END_DECLS
 #endif  /* EEK_SECTION_H */

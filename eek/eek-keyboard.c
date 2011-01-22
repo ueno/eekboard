@@ -63,7 +63,6 @@ struct _EekKeyboardPrivate
     gint group;
     gint level;
     EekLayout *layout;
-    gboolean is_realized;
 };
 
 struct _SetKeysymIndexCallbackData {
@@ -161,44 +160,6 @@ eek_keyboard_real_create_section (EekKeyboard *self)
     return section;
 }
 
-static void
-on_group_changed (EekLayout *layout,
-                  gint       new_group,
-                  gpointer   user_data)
-{
-    EekKeyboard *keyboard = user_data;
-    gint group, level;
-
-    eek_keyboard_get_keysym_index (keyboard, &group, &level);
-    eek_keyboard_set_keysym_index (keyboard, new_group, level);
-}
-
-static void
-eek_keyboard_real_set_layout (EekKeyboard *self,
-                              EekLayout   *layout)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-
-    g_return_if_fail (EEK_IS_LAYOUT(layout));
-    priv->layout = layout;
-    g_object_ref_sink (priv->layout);
-    g_signal_connect (priv->layout, "group-changed",
-                      G_CALLBACK(on_group_changed), self);
-}
-
-static void
-eek_keyboard_real_realize (EekKeyboard *self)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-
-    g_return_if_fail (priv->layout);
-    g_return_if_fail (!priv->is_realized);
-    EEK_LAYOUT_GET_IFACE(priv->layout)->apply (priv->layout, self);
-    /* apply the initial group setting */
-    on_group_changed (priv->layout, eek_layout_get_group (priv->layout), self);
-    priv->is_realized = TRUE;
-}
-
 struct _FindKeyByKeycodeCallbackData {
     EekKey *key;
     guint keycode;
@@ -229,18 +190,6 @@ eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
                             &data))
         return data.key;
     return NULL;
-}
-
-static void
-eek_keyboard_dispose (GObject *object)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
-
-    if (priv->layout) {
-        g_object_unref (priv->layout);
-        priv->layout = NULL;
-    }
-    G_OBJECT_CLASS(eek_keyboard_parent_class)->dispose (object);
 }
 
 static void
@@ -300,6 +249,14 @@ eek_keyboard_get_property (GObject    *object,
 }
 
 static void
+eek_keyboard_real_keysym_index_changed (EekKeyboard *self,
+                                        gint         group,
+                                        gint         level)
+{
+    /* g_debug ("keysym-index-changed"); */
+}
+
+static void
 eek_keyboard_class_init (EekKeyboardClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
@@ -311,13 +268,12 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     klass->set_keysym_index = eek_keyboard_real_set_keysym_index;
     klass->get_keysym_index = eek_keyboard_real_get_keysym_index;
     klass->create_section = eek_keyboard_real_create_section;
-    klass->set_layout = eek_keyboard_real_set_layout;
-    klass->realize = eek_keyboard_real_realize;
     klass->find_key_by_keycode = eek_keyboard_real_find_key_by_keycode;
+
+    klass->keysym_index_changed = eek_keyboard_real_keysym_index_changed;
 
     gobject_class->get_property = eek_keyboard_get_property;
     gobject_class->set_property = eek_keyboard_set_property;
-    gobject_class->dispose = eek_keyboard_dispose;
 
     /**
      * EekKeyboard:group:
@@ -399,8 +355,8 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     signals[KEYSYM_INDEX_CHANGED] =
         g_signal_new ("keysym-index-changed",
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, keysym_index_changed),
                       NULL,
                       NULL,
                       _eek_marshal_VOID__INT_INT,
@@ -418,7 +374,6 @@ eek_keyboard_init (EekKeyboard *self)
     priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
     priv->group = priv->level = 0;
     priv->layout = NULL;
-    priv->is_realized = FALSE;
 }
 
 /**
@@ -475,29 +430,6 @@ eek_keyboard_create_section (EekKeyboard *keyboard)
 }
 
 /**
- * eek_keyboard_set_layout:
- * @keyboard: an #EekKeyboard
- * @layout: an #EekLayout
- *
- * Set the layout of @keyboard to @layout.  This actually turns
- * @keyboard to be ready to be drawn on the screen.
- */
-void
-eek_keyboard_set_layout (EekKeyboard *keyboard,
-                         EekLayout   *layout)
-{
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    EEK_KEYBOARD_GET_CLASS(keyboard)->set_layout (keyboard, layout);
-}
-
-void
-eek_keyboard_realize (EekKeyboard *keyboard)
-{
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    EEK_KEYBOARD_GET_CLASS(keyboard)->realize (keyboard);
-}
-
-/**
  * eek_keyboard_find_key_by_keycode:
  * @keyboard: an #EekKeyboard
  * @keycode: a keycode
@@ -514,65 +446,21 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                                                   keycode);
 }
 
-struct _FindKeyByPositionCallbackData {
-    gdouble x;
-    gdouble y;
-    EekKey *key;
-};
-typedef struct _FindKeyByPositionCallbackData FindKeyByPositionCallbackData;
-
-static gboolean
-section_includes_point (EekSection *section, EekPoint *point)
+EekKeyboard *
+eek_keyboard_new (EekLayout   *layout,
+                  gint preferred_width,
+                  gint preferred_height)
 {
-    gint angle;
-    EekBounds bounds;
-    EekPoint rotated;
-
-    eek_element_get_bounds (EEK_ELEMENT(section), &bounds);
-    rotated.x = point->x - bounds.x;
-    rotated.y = point->y - bounds.y;
-    angle = eek_section_get_angle (EEK_SECTION(section));
-    eek_point_rotate (&rotated, -angle);
-
-    if (0 <= rotated.x && 0 <= rotated.y &&
-        rotated.x <= bounds.width &&
-        rotated.y <= bounds.height)
-        return TRUE;
-    return FALSE;
-}
-
-static void
-find_key_by_position_section_callback (EekElement *element,
-                                       gpointer user_data)
-{
-    FindKeyByPositionCallbackData *data = user_data;
-    EekPoint point;
-
-    if (!data->key) {
-        point.x = data->x;
-        point.y = data->y;
-        if (section_includes_point (EEK_SECTION(element), &point))
-            data->key = eek_section_find_key_by_position (EEK_SECTION(element),
-                                                          point.x,
-                                                          point.y);
-    }
-}
-
-EekKey *
-eek_keyboard_find_key_by_position (EekKeyboard *keyboard,
-                                   gdouble      x,
-                                   gdouble      y)
-{
-    FindKeyByPositionCallbackData data;
+    EekKeyboard *keyboard = g_object_new (EEK_TYPE_KEYBOARD, NULL);
     EekBounds bounds;
 
-    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
-    data.x = x - bounds.x;
-    data.y = y - bounds.y;
-    data.key = NULL;
-    /* eek_container_find() cannot be used here since sections may overlap. */
-    eek_container_foreach_child (EEK_CONTAINER(keyboard),
-                                 find_key_by_position_section_callback,
-                                 &data);
-    return data.key;
+    g_return_val_if_fail (EEK_IS_LAYOUT (layout), NULL);
+
+    bounds.x = bounds.y = 0.0;
+    bounds.width = preferred_width;
+    bounds.height = preferred_height;
+    eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
+    eek_layout_apply (layout, keyboard);
+
+    return keyboard;
 }
