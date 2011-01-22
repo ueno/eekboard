@@ -85,22 +85,22 @@ struct _EekKeyboardClass
     gpointer pdummy[23];
 };
 
-GType        eek_keyboard_get_type             (void) G_GNUC_CONST;
+GType        eek_keyboard_get_type            (void) G_GNUC_CONST;
 
-EekKeyboard *eek_keyboard_new                  (EekLayout   *layout,
-                                                gint preferred_width,
-                                                gint preferred_height);
-void         eek_keyboard_set_keysym_index     (EekKeyboard *keyboard,
-                                                gint         group,
-                                                gint         level);
-void         eek_keyboard_get_keysym_index     (EekKeyboard *keyboard,
-                                                gint        *group,
-                                                gint        *level);
+EekKeyboard *eek_keyboard_new                 (EekLayout   *layout,
+                                               gint         preferred_width,
+                                               gint         preferred_height);
+void         eek_keyboard_set_keysym_index    (EekKeyboard *keyboard,
+                                               gint         group,
+                                               gint         level);
+void         eek_keyboard_get_keysym_index    (EekKeyboard *keyboard,
+                                               gint        *group,
+                                               gint        *level);
 
-EekSection  *eek_keyboard_create_section       (EekKeyboard *keyboard);
+EekSection  *eek_keyboard_create_section      (EekKeyboard *keyboard);
 
-EekKey      *eek_keyboard_find_key_by_keycode  (EekKeyboard *keyboard,
-                                                guint        keycode);
+EekKey      *eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
+                                               guint        keycode);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

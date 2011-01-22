@@ -711,6 +711,12 @@ eek_key_get_keysym_index (EekKey *key,
     EEK_KEY_GET_CLASS(key)->get_keysym_index (key, group, level);
 }
 
+/**
+ * eek_key_is_pressed:
+ * @key: an #EekKey
+ *
+ * Return %TRUE if key is marked as pressed.
+ */
 gboolean
 eek_key_is_pressed (EekKey *key)
 {
