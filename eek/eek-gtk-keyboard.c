@@ -64,6 +64,8 @@ static void       on_keysym_index_changed (EekKeyboard *keyboard,
                                            gint         group,
                                            gint         level,
                                            gpointer     user_data);
+static void       render_pressed_key      (GtkWidget   *widget,
+                                           EekKey      *key);
 
 static void
 eek_gtk_keyboard_real_realize (GtkWidget      *self)
@@ -112,6 +114,10 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
     }
 
     eek_renderer_render_keyboard (priv->renderer, cr);
+
+    /* redraw dragged key */
+    if (priv->dragged_key)
+        render_pressed_key (self, priv->dragged_key);
 
 #if GTK_CHECK_VERSION (2, 91, 2)
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->draw (self, cr);
@@ -289,18 +295,12 @@ magnify_bounds (EekBounds *bounds, EekBounds *large_bounds, gdouble scale)
 }
 
 static void
-on_key_pressed (EekKeyboard *keyboard,
-                EekKey      *key,
-                gpointer     user_data)
+render_pressed_key (GtkWidget *widget,
+                    EekKey    *key)
 {
-    GtkWidget *widget = user_data;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
-    cairo_t *cr;
     EekBounds bounds, large_bounds;
-
-    /* renderer may have not been set yet if the widget is a popup */
-    if (!priv->renderer)
-        return;
+    cairo_t *cr;
 
     cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
 
@@ -310,6 +310,21 @@ on_key_pressed (EekKeyboard *keyboard,
     cairo_translate (cr, large_bounds.x, large_bounds.y);
     eek_renderer_render_key (priv->renderer, cr, key, 1.5);
     cairo_destroy (cr);
+}
+
+static void
+on_key_pressed (EekKeyboard *keyboard,
+                EekKey      *key,
+                gpointer     user_data)
+{
+    GtkWidget *widget = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+
+    /* renderer may have not been set yet if the widget is a popup */
+    if (!priv->renderer)
+        return;
+
+    render_pressed_key (widget, key);
 }
 
 static void
@@ -347,18 +362,6 @@ on_keysym_index_changed (EekKeyboard *keyboard,
                          gpointer     user_data)
 {
     GtkWidget *widget = user_data;
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
-    cairo_t *cr;
 
-    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
-    g_signal_emit_by_name (widget, "draw", cr);
-    cairo_destroy (cr);
-
-    /* redraw dragged key */
-    if (priv->dragged_key) {
-        guint keysym;
-
-        keysym = eek_key_get_keysym (priv->dragged_key);
-        on_key_pressed (keyboard, priv->dragged_key, NULL);
-    }
+    gtk_widget_queue_draw (widget);
 }
