@@ -98,10 +98,15 @@ struct _EekKeyClass
     void        (* get_keysym_index) (EekKey     *self,
                                       gint       *group,
                                       gint       *level);
+    gboolean    (* is_pressed)       (EekKey     *self);
 
     /* signals */
     void        (* pressed)          (EekKey     *key);
     void        (* released)         (EekKey     *key);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[23];
 };
 
 GType       eek_key_get_type         (void) G_GNUC_CONST;
@@ -136,6 +141,7 @@ void        eek_key_set_keysym_index (EekKey     *key,
 void        eek_key_get_keysym_index (EekKey     *key,
                                       gint       *group,
                                       gint       *level);
+gboolean    eek_key_is_pressed       (EekKey     *key);
 
 G_END_DECLS
 #endif  /* EEK_KEY_H */

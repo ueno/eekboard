@@ -72,6 +72,7 @@ struct _EekKeyPrivate
     EekOutline *outline;
     gint group;
     gint level;
+    gboolean is_pressed;
 };
 
 static void
@@ -210,8 +211,8 @@ eek_key_real_set_keysym_index (EekKey *self,
 
 static void
 eek_key_real_get_keysym_index (EekKey *self,
-                                      gint   *group,
-                                      gint   *level)
+                               gint   *group,
+                               gint   *level)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
 
@@ -223,19 +224,32 @@ eek_key_real_get_keysym_index (EekKey *self,
         *level = priv->level;
 }
 
-static void
-eek_key_real_pressed (EekKey *key)
+static gboolean
+eek_key_real_is_pressed (EekKey *self)
 {
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+    return priv->is_pressed;
+}
+
+static void
+eek_key_real_pressed (EekKey *self)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    priv->is_pressed = TRUE;
 #if DEBUG
-    g_debug ("pressed %X", eek_key_get_keycode (key));
+    g_debug ("pressed %X", eek_key_get_keycode (self));
 #endif
 }
 
 static void
-eek_key_real_released (EekKey *key)
+eek_key_real_released (EekKey *self)
 {
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    priv->is_pressed = FALSE;
 #if DEBUG
-    g_debug ("released %X", eek_key_get_keycode (key));
+    g_debug ("released %X", eek_key_get_keycode (self));
 #endif
 }
 
@@ -367,6 +381,7 @@ eek_key_class_init (EekKeyClass *klass)
     klass->get_outline = eek_key_real_get_outline;
     klass->set_keysym_index = eek_key_real_set_keysym_index;
     klass->get_keysym_index = eek_key_real_get_keysym_index;
+    klass->is_pressed = eek_key_real_is_pressed;
 
     gobject_class->set_property = eek_key_set_property;
     gobject_class->get_property = eek_key_get_property;
@@ -694,4 +709,11 @@ eek_key_get_keysym_index (EekKey *key,
 {
     g_return_if_fail (EEK_IS_KEY(key));
     EEK_KEY_GET_CLASS(key)->get_keysym_index (key, group, level);
+}
+
+gboolean
+eek_key_is_pressed (EekKey *key)
+{
+    g_assert (EEK_IS_KEY(key));
+    return EEK_KEY_GET_CLASS(key)->is_pressed (key);
 }
