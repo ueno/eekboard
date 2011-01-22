@@ -230,34 +230,3 @@ eek_container_find (EekContainer  *container,
                                                      func,
                                                      user_data);
 }
-
-static gint
-compare_element_by_position (EekElement *element, gpointer user_data)
-{
-    EekBounds bounds;
-    EekPoint *point = user_data;
-
-    eek_element_get_bounds (element, &bounds);
-    if (bounds.x <= point->x && bounds.y <= point->y &&
-        point->x <= (bounds.x + bounds.width) &&
-        point->y <= (bounds.y + bounds.height))
-        return 0;
-    return -1;
-}
-
-EekElement *
-eek_container_find_by_position (EekContainer *container,
-                                gdouble       x,
-                                gdouble       y)
-{
-    EekBounds bounds;
-    EekPoint point;
-
-    g_return_val_if_fail (EEK_IS_CONTAINER(container), NULL);
-    eek_element_get_bounds (EEK_ELEMENT(container), &bounds);
-    point.x = x - bounds.x;
-    point.y = y - bounds.y;
-    return eek_container_find (container,
-                               compare_element_by_position,
-                               &point);
-}

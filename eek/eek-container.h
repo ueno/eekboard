@@ -57,42 +57,38 @@ struct _EekContainerClass
     /*< private >*/
     EekElementClass parent_class;
 
-    void        (* add_child)        (EekContainer  *self,
-                                      EekElement    *element);
+    void        (* add_child)      (EekContainer      *self,
+                                    EekElement        *element);
 
-    void        (* remove_child)     (EekContainer  *self,
-                                      EekElement    *element);
+    void        (* remove_child)   (EekContainer      *self,
+                                    EekElement        *element);
 
     /*< public >*/
-    void        (* foreach_child)    (EekContainer  *self,
-                                      EekCallback    callback,
-                                      gpointer       user_data);
-    EekElement *(* find)             (EekContainer  *self,
-                                      EekCompareFunc func,
-                                      gpointer       user_data);
+    void        (* foreach_child)  (EekContainer      *self,
+                                    EekCallback        callback,
+                                    gpointer           user_data);
+    EekElement *(* find)           (EekContainer      *self,
+                                    EekCompareFunc     func,
+                                    gpointer           data);
 
     /* signals */
-    void        (* child_added)      (EekContainer  *self,
-                                      EekElement    *element);
-    void        (* child_removed)    (EekContainer  *self,
-                                      EekElement    *element);
-
+    void        (* child_added)    (EekContainer      *self,
+                                    EekElement        *element);
+    void        (* child_removed)  (EekContainer      *self,
+                                    EekElement        *element);
     /*< private >*/
     /* padding */
     gpointer pdummy[24];
 };
 
-GType       eek_container_get_type         (void) G_GNUC_CONST;
+GType       eek_container_get_type       (void) G_GNUC_CONST;
 
-void        eek_container_foreach_child    (EekContainer  *container,
-                                            EekCallback    callback,
-                                            gpointer       user_data);
-EekElement *eek_container_find             (EekContainer  *container,
-                                            EekCompareFunc func,
-                                            gpointer       user_data);
-EekElement *eek_container_find_by_position (EekContainer  *container,
-                                            gdouble        x,
-                                            gdouble        y);
+void        eek_container_foreach_child  (EekContainer      *container,
+                                          EekCallback        callback,
+                                          gpointer           user_data);
+EekElement *eek_container_find           (EekContainer      *container,
+                                          EekCompareFunc     func,
+                                          gpointer           data);
 
 G_END_DECLS
 #endif  /* EEK_CONTAINER_H */
