@@ -20,7 +20,7 @@ AC_PREREQ(2.63)
 dnl AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_INIT([eekboard], [0.0.7], [ueno@unixuser.org])
+AC_INIT([eekboard], [0.90.0], [ueno@unixuser.org])
 
 dnl Init automake
 AM_INIT_AUTOMAKE
@@ -57,22 +57,18 @@ AC_MSG_RESULT([$with_gtk])
 case "$with_gtk" in
   2.0) GTK_API_VERSION=2.0
        GTK_REQUIRED=2.14.0
-       EEK_API_VERSION=0.1
+       EEK_API_VERSION=0.90
        EEK_API_MAJOR_VERSION=0
-       EEK_API_MINOR_VERSION=1
-       EEK_API_PC_VERSION=0.1
+       EEK_API_MINOR_VERSION=90
+       EEK_API_PC_VERSION=0.90
        EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
        ;;
   3.0) GTK_API_VERSION=3.0
        GTK_REQUIRED=2.91.0
-#       EEK_API_VERSION=0.90
-#       EEK_API_MAJOR_VERSION=0
-#       EEK_API_MINOR_VERSION=90
-#       EEK_API_PC_VERSION=0.90
-       EEK_API_VERSION=0.1
+       EEK_API_VERSION=0.90
        EEK_API_MAJOR_VERSION=0
-       EEK_API_MINOR_VERSION=1
-       EEK_API_PC_VERSION=0.1
+       EEK_API_MINOR_VERSION=90
+       EEK_API_PC_VERSION=0.90
        EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
        ;;
 esac
@@ -168,7 +164,8 @@ if test x$enable_clutter = xyes; then
   AC_DEFINE_UNQUOTED([NEED_SWAP_EVENT_WORKAROUND], $need_swap_event_workaround,
     [Define if GLX_INTEL_swap_event work around is needed])
 fi
-AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
+dnl AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
+AM_CONDITIONAL(HAVE_CLUTTER, [false])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 

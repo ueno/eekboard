@@ -33,6 +33,7 @@ gtk-doc.make
 eek/eek-special-keysym-labels.h
 eek/eek-unicode-keysym-labels.h
 eek/eek-keyname-keysym-labels.h
+eek/eek-marshallers.[ch]
 eek/*.pc
 eek/*.gir
 eek/*.typelib
