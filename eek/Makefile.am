@@ -167,10 +167,13 @@ eek-marshallers.c: eek-marshallers.list eek-marshallers.h
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =				\
 	eek-$(EEK_API_VERSION).pc		\
-	eek-clutter-$(EEK_API_VERSION).pc	\
 	eek-gtk-$(EEK_API_VERSION).pc		\
 	eek-xkb-$(EEK_API_VERSION).pc		\
 	eek-xkl-$(EEK_API_VERSION).pc
+
+if HAVE_CLUTTER
+pkgconfig_DATA += eek-clutter-$(EEK_API_VERSION).pc
+endif
 
 CLEANFILES =
 
