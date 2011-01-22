@@ -115,7 +115,11 @@ create_keyboard_surface (EekRenderer *renderer)
     cairo_translate (data.cr, bounds.x * priv->scale, bounds.y * priv->scale);
 
     /* blank background */
-    cairo_set_source_rgba (data.cr, 0, 0, 0, 0);
+    cairo_set_source_rgba (data.cr,
+                           priv->background->red,
+                           priv->background->green,
+                           priv->background->blue,
+                           priv->background->alpha);
     cairo_rectangle (data.cr,
                      0.0,
                      0.0,

@@ -85,7 +85,6 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     GtkAllocation allocation;
-    EekColor background;
 
     gtk_widget_get_allocation (self, &allocation);
 
@@ -111,20 +110,6 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
             (priv->renderer,
              color_from_gdk_color (&style->bg[state]));
     }
-
-    /* blank background */
-    eek_renderer_get_background (priv->renderer, &background);
-    cairo_set_source_rgba (cr,
-                           background.red,
-                           background.green,
-                           background.blue,
-                           background.alpha);
-    cairo_rectangle (cr,
-                     0.0,
-                     0.0,
-                     allocation.width,
-                     allocation.height);
-    cairo_fill (cr);
 
     eek_renderer_render_keyboard (priv->renderer, cr);
 
@@ -336,8 +321,6 @@ on_key_released (EekKeyboard *keyboard,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
     cairo_t *cr;
     EekBounds bounds, large_bounds;
-    EekColor background;
-    cairo_path_t *cp;
 
     /* renderer may have not been set yet if the widget is a popup */
     if (!priv->renderer)
@@ -346,25 +329,14 @@ on_key_released (EekKeyboard *keyboard,
     cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
 
     eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
-    magnify_bounds (&bounds, &large_bounds, 1.5);
+    magnify_bounds (&bounds, &large_bounds, 2.0);
     cairo_rectangle (cr,
                      large_bounds.x,
                      large_bounds.y,
                      large_bounds.width,
                      large_bounds.height);
-    cp = cairo_copy_path (cr);
     cairo_clip (cr);
-
-    eek_renderer_get_background (priv->renderer, &background);
-    cairo_set_source_rgba (cr,
-                           background.red,
-                           background.green,
-                           background.blue,
-                           background.alpha);
-    cairo_append_path (cr, cp);
-    cairo_fill (cr);
     eek_renderer_render_keyboard (priv->renderer, cr);
-    cairo_path_destroy (cp);
     cairo_destroy (cr);
 }
 
