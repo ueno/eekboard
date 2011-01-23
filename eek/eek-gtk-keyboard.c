@@ -20,7 +20,7 @@
 
 /**
  * SECTION:eek-gtk-keyboard
- * @short_description: #EekKeyboard that can be converted into a #GtkWidget
+ * @short_description: a #GtkWidget displaying #EekKeyboard
  */
 #include <string.h>
 
@@ -119,10 +119,6 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
     if (priv->dragged_key)
         render_pressed_key (self, priv->dragged_key);
 
-#if GTK_CHECK_VERSION (2, 91, 2)
-    GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->draw (self, cr);
-#endif  /* GTK_CHECK_VERSION (2, 91, 2) */
-
     return FALSE;
 }
 
@@ -206,6 +202,12 @@ eek_gtk_keyboard_dispose (GObject *object)
         g_object_unref (priv->renderer);
         priv->renderer = NULL;
     }
+
+    if (priv->keyboard && g_object_is_floating (priv->keyboard)) {
+        g_object_unref (priv->keyboard);
+        priv->keyboard = NULL;
+    }
+        
     G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->dispose (object);
 }
 
@@ -246,6 +248,7 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
 
 /**
  * eek_gtk_keyboard_new:
+ * @keyboard: an #EekKeyboard
  *
  * Create a new #EekGtkKeyboard.
  */
