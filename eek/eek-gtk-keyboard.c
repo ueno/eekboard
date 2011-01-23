@@ -98,9 +98,9 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         pcontext = gtk_widget_get_pango_context (self);
         priv->renderer = eek_renderer_new (priv->keyboard, pcontext);
 
-        eek_renderer_set_preferred_size (priv->renderer,
-                                         allocation.width,
-                                         allocation.height);
+        eek_renderer_set_allocation_size (priv->renderer,
+                                          allocation.width,
+                                          allocation.height);
 
         style = gtk_widget_get_style (self);
         state = gtk_widget_get_state (self);
@@ -145,9 +145,9 @@ eek_gtk_keyboard_real_size_allocate (GtkWidget     *self,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
 
     if (priv->renderer)
-        eek_renderer_set_preferred_size (priv->renderer,
-                                         allocation->width,
-                                         allocation->height);
+        eek_renderer_set_allocation_size (priv->renderer,
+                                          allocation->width,
+                                          allocation->height);
 
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->
         size_allocate (self, allocation);
