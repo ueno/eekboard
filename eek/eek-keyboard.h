@@ -52,10 +52,9 @@ struct _EekKeyboard
  * @get_keysym_index: virtual function for getting group and level of
  * the entire keyboard
  * @create_section: virtual function for creating a section
- * @set_layout: virtual function for setting layout engine
  * @find_key_by_keycode: virtual function for finding a key in the
  * keyboard by keycode
- * @realize: virtual function for applying a layout to the keyboard
+ * @keysym_index_changed: class handler for #EekKeyboard::keysym-index-changed signal
  */
 struct _EekKeyboardClass
 {
@@ -88,8 +87,8 @@ struct _EekKeyboardClass
 GType        eek_keyboard_get_type            (void) G_GNUC_CONST;
 
 EekKeyboard *eek_keyboard_new                 (EekLayout   *layout,
-                                               gint         preferred_width,
-                                               gint         preferred_height);
+                                               gint         initial_width,
+                                               gint         initial_height);
 void         eek_keyboard_set_keysym_index    (EekKeyboard *keyboard,
                                                gint         group,
                                                gint         level);

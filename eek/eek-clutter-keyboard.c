@@ -155,7 +155,8 @@ create_section (EekElement *element, gpointer user_data)
  * eek_clutter_keyboard_new:
  * @keyboard: an #EekKeyboard
  *
- * Create a new #EekClutterKeyboard.
+ * Create a new #ClutterActor displaying @keyboard.
+ * Returns: a #ClutterActor
  */
 ClutterActor *
 eek_clutter_keyboard_new (EekKeyboard *keyboard)

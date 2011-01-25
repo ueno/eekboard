@@ -250,7 +250,8 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
  * eek_gtk_keyboard_new:
  * @keyboard: an #EekKeyboard
  *
- * Create a new #EekGtkKeyboard.
+ * Create a new #GtkWidget displaying @keyboard.
+ * Returns: a #GtkWidget
  */
 GtkWidget *
 eek_gtk_keyboard_new (EekKeyboard *keyboard)

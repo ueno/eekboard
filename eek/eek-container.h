@@ -88,7 +88,7 @@ void        eek_container_foreach_child  (EekContainer      *container,
                                           gpointer           user_data);
 EekElement *eek_container_find           (EekContainer      *container,
                                           EekCompareFunc     func,
-                                          gpointer           data);
+                                          gpointer           user_data);
 
 G_END_DECLS
 #endif  /* EEK_CONTAINER_H */

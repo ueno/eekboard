@@ -2,13 +2,11 @@
 <FILE>eek-keyboard</FILE>
 <TITLE>EekKeyboard</TITLE>
 EekKeyboardClass
-EekKeyboardPrivate
 EekKeyboard
+eek_keyboard_new
 eek_keyboard_set_keysym_index
 eek_keyboard_get_keysym_index
 eek_keyboard_create_section
-eek_keyboard_set_layout
-eek_keyboard_realize
 eek_keyboard_find_key_by_keycode
 <SUBSECTION Standard>
 EEK_KEYBOARD
@@ -40,9 +38,7 @@ EEK_LAYOUT_GET_IFACE
 <TITLE>EekGtkKeyboard</TITLE>
 EekGtkKeyboard
 EekGtkKeyboardClass
-EekGtkKeyboardPrivate
 eek_gtk_keyboard_new
-eek_gtk_keyboard_get_widget
 <SUBSECTION Standard>
 EEK_GTK_KEYBOARD
 EEK_IS_GTK_KEYBOARD
@@ -57,7 +53,6 @@ EEK_GTK_KEYBOARD_GET_CLASS
 <FILE>eek-section</FILE>
 <TITLE>EekSection</TITLE>
 EekSectionClass
-EekSectionPrivate
 EekSection
 eek_section_set_angle
 eek_section_get_angle
@@ -80,13 +75,11 @@ EEK_SECTION_GET_CLASS
 <FILE>eek-container</FILE>
 <TITLE>EekContainer</TITLE>
 EekContainerClass
-EekContainerPrivate
 EekCallback
 EekCompareFunc
 EekContainer
 eek_container_foreach_child
 eek_container_find
-eek_container_find_by_position
 <SUBSECTION Standard>
 EEK_CONTAINER
 EEK_IS_CONTAINER
@@ -102,9 +95,7 @@ EEK_CONTAINER_GET_CLASS
 <TITLE>EekClutterKeyboard</TITLE>
 EekClutterKeyboard
 EekClutterKeyboardClass
-EekClutterKeyboardPrivate
 eek_clutter_keyboard_new
-eek_clutter_keyboard_get_actor
 <SUBSECTION Standard>
 EEK_CLUTTER_KEYBOARD
 EEK_IS_CLUTTER_KEYBOARD
@@ -120,7 +111,6 @@ EEK_CLUTTER_KEYBOARD_GET_CLASS
 <TITLE>EekXklLayout</TITLE>
 EekXklLayout
 EekXklLayoutClass
-EekXklLayoutPrivate
 eek_xkl_layout_new
 eek_xkl_layout_set_config
 eek_xkl_layout_set_config_full
@@ -150,7 +140,6 @@ EEK_XKL_LAYOUT_GET_CLASS
 <TITLE>EekXkbLayout</TITLE>
 EekXkbLayout
 EekXkbLayoutClass
-EekXkbLayoutPrivate
 eek_xkb_layout_new
 eek_xkb_layout_set_names
 eek_xkb_layout_set_names_full
@@ -174,7 +163,6 @@ EEK_XKB_LAYOUT_GET_CLASS
 <FILE>eek-key</FILE>
 <TITLE>EekKey</TITLE>
 EekKeyClass
-EekKeyPrivate
 EekKey
 eek_key_set_keycode
 eek_key_get_keycode
@@ -201,7 +189,6 @@ EEK_KEY_GET_CLASS
 <FILE>eek-element</FILE>
 <TITLE>EekElement</TITLE>
 EekElementClass
-EekElementPrivate
 EekElement
 eek_element_set_parent
 eek_element_get_parent

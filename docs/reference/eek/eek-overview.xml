@@ -25,20 +25,21 @@
     #ClutterActor:</para>
     <informalexample>
       <programlisting>
-EekKeyboard *keyboard;
 EekLayout *layout;
+EekKeyboard *keyboard;
+ClutterActor *actor;
 
-/* Create a keyboard layout using libxklavier configuration. */
+/* Create a layout engine based on libxklavier configuration. */
 layout = eek_xkl_layout_new ();
 
-/* Create a keyboard implemented as ClutterActor. */
-keyboard = eek_clutter_keyboard_new ();
+/* Create a keyboard from the given layout. */
+keyboard = eek_keyboard_new (layout, initial_width, initial_height);
 
-/* Apply the layout to the keyboard. */
-eek_keyboard_set_layout (keyboard, layout);
+/* Create a ClutterActor. */
+actor = eek_clutter_keyboard_new (eekboard->keyboard);
 
-clutter_group_add (CLUTTER_GROUP(stage),
-                   eek_clutter_keyboard_get_actor (EEK_CLUTTER_KEYBOARD(keyboard)));
+/* Add the actor to a stage. */
+clutter_group_add (CLUTTER_GROUP(stage), actor);
       </programlisting>
     </informalexample>
 

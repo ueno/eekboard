@@ -448,15 +448,15 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
 /**
  * eek_keyboard_new:
  * @layout: an #EekLayout
- * @preferred_width: default width of returned keyboard
- * @preferred_height: default height of returned keyboard
+ * @initial_width: default width of returned keyboard
+ * @initial_height: default height of returned keyboard
  *
  * Create a new #EekKeyboard instance based on @layout.
  */
 EekKeyboard *
 eek_keyboard_new (EekLayout *layout,
-                  gint       preferred_width,
-                  gint       preferred_height)
+                  gint       initial_width,
+                  gint       initial_height)
 {
     EekKeyboard *keyboard = g_object_new (EEK_TYPE_KEYBOARD, NULL);
     EekBounds bounds;
@@ -464,8 +464,8 @@ eek_keyboard_new (EekLayout *layout,
     g_return_val_if_fail (EEK_IS_LAYOUT (layout), NULL);
 
     bounds.x = bounds.y = 0.0;
-    bounds.width = preferred_width;
-    bounds.height = preferred_height;
+    bounds.width = initial_width;
+    bounds.height = initial_height;
     eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
     eek_layout_apply (layout, keyboard);
 

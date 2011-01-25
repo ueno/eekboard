@@ -61,6 +61,7 @@ struct _EekKey
  * @get_keysym_index: virtual function for getting group and level of the key
  * @pressed: class handler for #EekKey::pressed signal
  * @released: class handler for #EekKey::released signal
+ * @is_pressed: virtual function for getting whether the key is pressed
  */
 struct _EekKeyClass
 {
