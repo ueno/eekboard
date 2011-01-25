@@ -233,7 +233,7 @@ render_key_outline (EekRenderer *renderer,
     cairo_pattern_destroy (pat);
 
     /* paint the border */
-    cairo_set_line_width (cr, priv->border_width * priv->scale);
+    cairo_set_line_width (cr, priv->border_width);
     cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 
     cairo_set_source_rgba
@@ -296,13 +296,13 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     g_free (label);
 
     pango_layout_get_extents (layout, NULL, &extents);
+    g_object_unref (layout);
 
     sx = sy = 1.0;
     if (extents.width > bounds.width * PANGO_SCALE)
         sx = bounds.width * PANGO_SCALE / extents.width;
     if (extents.height > bounds.height * PANGO_SCALE)
         sy = bounds.height * PANGO_SCALE / extents.height;
-    g_object_unref (layout);
 
     size *= MIN(sx, sy);
     if (size < data->size &&
@@ -326,7 +326,7 @@ calculate_font_size (EekRenderer *renderer)
     PangoFontDescription *base_font;
 
     base_font = pango_context_get_font_description (priv->pcontext);
-    data.size = pango_font_description_get_size (base_font);
+    data.size = G_MAXDOUBLE;
     data.renderer = renderer;
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
                                  calculate_font_size_section_callback,

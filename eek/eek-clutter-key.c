@@ -80,7 +80,7 @@ on_released (EekKey *key, gpointer user_data)
 }
 
 static void
-eek_clutter_key_real_realize (ClutterActor *self)
+set_position (ClutterActor *self)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
     EekBounds bounds;
@@ -88,11 +88,15 @@ eek_clutter_key_real_realize (ClutterActor *self)
 
     eek_element_get_bounds (EEK_ELEMENT(priv->key), &bounds);
     scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+    clutter_actor_set_position (self, bounds.x * scale, bounds.y * scale);
+}
 
-    clutter_actor_set_position (self,
-                                bounds.x * scale,
-                                bounds.y * scale);
+static void
+eek_clutter_key_real_realize (ClutterActor *self)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
 
+    set_position (self);
     clutter_actor_set_reactive (self, TRUE);
 
     g_signal_connect (priv->key, "pressed",
@@ -106,6 +110,7 @@ eek_clutter_key_real_paint (ClutterActor *self)
 {
     EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
 
+    set_position (self);
     eek_clutter_renderer_render_key (priv->renderer, self, priv->key);
 }
 

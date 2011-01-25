@@ -60,26 +60,41 @@ create_key (EekElement *element, gpointer user_data)
 }
 
 static void
-eek_clutter_section_real_realize (ClutterActor *self)
+set_position (ClutterActor *self)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
-    CreateKeyCallbackData data;
     EekBounds bounds;
     gdouble scale;
 
     eek_element_get_bounds (EEK_ELEMENT(priv->section), &bounds);
     scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
     clutter_actor_set_position (self, bounds.x * scale, bounds.y * scale);
+}
+
+static void
+eek_clutter_section_real_realize (ClutterActor *self)
+{
+    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+    CreateKeyCallbackData data;
+
     clutter_actor_set_rotation (self,
                                 CLUTTER_Z_AXIS,
                                 eek_section_get_angle (priv->section),
                                 0.0f, 0.0f, 0.0f);
-
+    set_position (self);
     data.actor = self;
     data.renderer = priv->renderer;
     eek_container_foreach_child (EEK_CONTAINER(priv->section),
                                  create_key,
                                  &data);
+}
+
+static void
+eek_clutter_section_real_paint (ClutterActor *self)
+{
+    set_position (self);
+    CLUTTER_ACTOR_CLASS (eek_clutter_section_parent_class)->
+        paint (self);
 }
 
 static void
@@ -112,15 +127,6 @@ eek_clutter_section_real_get_preferred_height (ClutterActor *self,
     eek_element_get_bounds (EEK_ELEMENT(priv->section), &bounds);
     *min_height_p = 0.0f;
     *natural_height_p = bounds.height * scale;
-}
-
-static void
-eek_clutter_section_real_allocate (ClutterActor          *self,
-                                   const ClutterActorBox *box,
-                                   ClutterAllocationFlags flags)
-{
-    CLUTTER_ACTOR_CLASS (eek_clutter_section_parent_class)->
-        allocate (self, box, flags);
 }
 
 static void
@@ -177,11 +183,12 @@ eek_clutter_section_class_init (EekClutterSectionClass *klass)
 
     actor_class->realize =
         eek_clutter_section_real_realize;
+    actor_class->paint =
+        eek_clutter_section_real_paint;
     actor_class->get_preferred_width =
         eek_clutter_section_real_get_preferred_width;
     actor_class->get_preferred_height =
         eek_clutter_section_real_get_preferred_height;
-    actor_class->allocate = eek_clutter_section_real_allocate;
 
     gobject_class->set_property = eek_clutter_section_set_property;
     gobject_class->dispose = eek_clutter_section_dispose;

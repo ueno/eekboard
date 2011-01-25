@@ -1046,7 +1046,9 @@ on_allocation_changed (ClutterActor          *stage,
     eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
     scale = MIN((box->x2 - box->x1) / bounds.width,
                 (box->y2 - box->y1) / bounds.height);
-    clutter_actor_set_scale (eekboard->actor, scale, scale);
+    clutter_actor_set_size (eekboard->actor,
+                            bounds.width * scale,
+                            bounds.height * scale);
 }
 #endif
 
