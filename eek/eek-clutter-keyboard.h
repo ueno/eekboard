@@ -20,7 +20,7 @@
 #ifndef EEK_CLUTTER_KEYBOARD_H
 #define EEK_CLUTTER_KEYBOARD_H 1
 
-#include "eek-clutter-section.h"
+#include <clutter/clutter.h>
 #include "eek-keyboard.h"
 
 G_BEGIN_DECLS
@@ -38,7 +38,7 @@ typedef struct _EekClutterKeyboardPrivate EekClutterKeyboardPrivate;
 struct _EekClutterKeyboard
 {
     /*< private >*/
-    EekKeyboard parent;
+    ClutterGroup parent;
 
     EekClutterKeyboardPrivate *priv;
 };
@@ -46,7 +46,7 @@ struct _EekClutterKeyboard
 struct _EekClutterKeyboardClass
 {
     /*< private >*/
-    EekKeyboardClass parent_class;
+    ClutterGroupClass parent_class;
 
     /*< private >*/
     /* padding */
@@ -54,8 +54,7 @@ struct _EekClutterKeyboardClass
 };
 
 GType         eek_clutter_keyboard_get_type  (void) G_GNUC_CONST;
-EekKeyboard  *eek_clutter_keyboard_new       (void);
-ClutterActor *eek_clutter_keyboard_get_actor (EekClutterKeyboard *keyboard);
+ClutterActor *eek_clutter_keyboard_new       (EekKeyboard *keyboard);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEYBOARD_H */

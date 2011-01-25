@@ -20,9 +20,9 @@
 #ifndef EEK_CLUTTER_SECTION_H
 #define EEK_CLUTTER_SECTION_H 1
 
-#include "eek-clutter-drawing-context.h"
-#include "eek-clutter-key.h"
+#include <clutter/clutter.h>
 #include "eek-section.h"
+#include "eek-clutter-renderer.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_SECTION (eek_clutter_section_get_type())
@@ -39,7 +39,7 @@ typedef struct _EekClutterSectionPrivate EekClutterSectionPrivate;
 struct _EekClutterSection
 {
     /*< private >*/
-    EekSection parent;
+    ClutterGroup parent;
 
     EekClutterSectionPrivate *priv;
 };
@@ -47,16 +47,16 @@ struct _EekClutterSection
 struct _EekClutterSectionClass
 {
     /*< private >*/
-    EekSectionClass parent_class;
+    ClutterGroupClass parent_class;
 
     /*< private >*/
     /* padding */
     gpointer pdummy[24];
 };
 
-GType         eek_clutter_section_get_type  (void) G_GNUC_CONST;
-EekSection *  eek_clutter_section_new       (EekClutterDrawingContext *context);
-ClutterActor *eek_clutter_section_get_actor (EekClutterSection        *section);
+GType         eek_clutter_section_get_type (void) G_GNUC_CONST;
+ClutterActor *eek_clutter_section_new      (EekSection         *section,
+                                            EekClutterRenderer *renderer);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_SECTION_H */

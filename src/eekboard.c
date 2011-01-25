@@ -36,6 +36,11 @@
 #include "eek/eek-gtk.h"
 #include "eek/eek-xkl.h"
 
+#if HAVE_CLUTTER_GTK
+#include <clutter-gtk/clutter-gtk.h>
+#include "eek/eek-clutter.h"
+#endif
+
 #define CSW 640
 #define CSH 480
 
@@ -79,7 +84,9 @@ struct _Eekboard {
     XklConfigRegistry *registry;
     GtkUIManager *ui_manager;
     gulong on_key_pressed_id, on_key_released_id;
-
+#if HAVE_CLUTTER_GTK
+    ClutterActor *actor;
+#endif
     guint countries_merge_id;
     GtkActionGroup *countries_action_group;
 
@@ -1025,11 +1032,33 @@ create_menus (Eekboard      *eekboard,
                                         -1);
 }
 
+#if HAVE_CLUTTER_GTK
+static void
+on_allocation_changed (ClutterActor          *stage,
+                       ClutterActorBox       *box,
+                       ClutterAllocationFlags flags,
+                       gpointer               user_data)
+{
+    Eekboard *eekboard = user_data;
+    EekBounds bounds;
+    gfloat scale;
+
+    eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+    scale = MIN((box->x2 - box->x1) / bounds.width,
+                (box->y2 - box->y1) / bounds.height);
+    clutter_actor_set_scale (eekboard->actor, scale, scale);
+}
+#endif
+
 static GtkWidget *
 create_widget (Eekboard *eekboard,
                gint      initial_width,
                gint      initial_height)
 {
+#if HAVE_CLUTTER_GTK
+    ClutterActor *stage;
+    ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
+#endif
     EekBounds bounds;
 
     eekboard->keyboard = eek_keyboard_new (eekboard->layout,
@@ -1042,8 +1071,27 @@ create_widget (Eekboard *eekboard,
         g_signal_connect (eekboard->keyboard, "key-released",
                           G_CALLBACK(on_key_released), eekboard);
 
-    eekboard->widget = eek_gtk_keyboard_new (eekboard->keyboard);
     eek_element_get_bounds (EEK_ELEMENT(eekboard->keyboard), &bounds);
+
+#if HAVE_CLUTTER_GTK
+    eekboard->widget = gtk_clutter_embed_new ();
+    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(eekboard->widget));
+    eekboard->actor = eek_clutter_keyboard_new (eekboard->keyboard);
+    clutter_container_add_actor (CLUTTER_CONTAINER(stage), eekboard->actor);
+
+    clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
+    clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
+    clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
+                                    bounds.width / 3,
+                                    bounds.height / 3);
+    g_signal_connect (stage,
+                      "allocation-changed",
+                      G_CALLBACK(on_allocation_changed),
+                      eekboard);
+#else
+    eekboard->widget = eek_gtk_keyboard_new (eekboard->keyboard);
+#endif
+
     eekboard->width = bounds.width;
     eekboard->height = bounds.height;
     return eekboard->widget;
@@ -1397,6 +1445,8 @@ main (int argc, char *argv[])
     GConfClient *gconfc;
     GError *error;
 
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+
     context = g_option_context_new ("eekboard");
     g_option_context_add_main_entries (context, options, NULL);
     g_option_context_parse (context, &argc, &argv, NULL);
@@ -1426,10 +1476,17 @@ main (int argc, char *argv[])
             g_warning("AT-SPI initialization failed");
     }
 
+#if HAVE_CLUTTER_GTK
+    if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        g_warning ("Can't init GTK with Clutter");
+        exit (1);
+    }
+#else
     if (!gtk_init_check (&argc, &argv)) {
         g_warning ("Can't init GTK");
         exit (1);
     }
+#endif
 
     eekboard = eekboard_new (accessibility_enabled);
     if (opt_list_models) {
@@ -1622,8 +1679,6 @@ main (int argc, char *argv[])
              SPI_KEYLISTENER_NOSYNC))
             g_warning ("failed to register keystroke listener");
     }
-
-    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
     if (combo)
         gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);

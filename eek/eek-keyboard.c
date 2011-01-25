@@ -193,14 +193,13 @@ eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
 }
 
 static void
-eek_keyboard_set_property (GObject    *object,
-                           guint       prop_id,
-                           const GValue     *value,
-                           GParamSpec *pspec)
+eek_keyboard_set_property (GObject      *object,
+                           guint         prop_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
     gint group, level;
 
-    g_return_if_fail (EEK_IS_KEYBOARD(object));
     switch (prop_id) {
     case PROP_GROUP:
         eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);

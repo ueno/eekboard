@@ -88,12 +88,14 @@ libeek_clutter_public_headers =			\
 
 libeek_clutter_private_headers =		\
 	$(srcdir)/eek-clutter-section.h		\
-	$(srcdir)/eek-clutter-key.h
+	$(srcdir)/eek-clutter-key.h		\
+	$(srcdir)/eek-clutter-renderer.h
 
 libeek_clutter_sources =			\
 	$(srcdir)/eek-clutter-keyboard.c	\
 	$(srcdir)/eek-clutter-section.c		\
-	$(srcdir)/eek-clutter-key.c
+	$(srcdir)/eek-clutter-key.c		\
+	$(srcdir)/eek-clutter-renderer.c
 
 libeek_clutter_la_SOURCES = $(libeek_clutter_sources)
 libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)

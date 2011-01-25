@@ -23,106 +23,58 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-clutter-section.h"
+#include "eek-clutter-key.h"
 
-G_DEFINE_TYPE (EekClutterSection, eek_clutter_section, EEK_TYPE_SECTION);
+G_DEFINE_TYPE (EekClutterSection, eek_clutter_section, CLUTTER_TYPE_GROUP);
 
 #define EEK_CLUTTER_SECTION_GET_PRIVATE(obj)                           \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_CLUTTER_SECTION, EekClutterSectionPrivate))
 
 struct _EekClutterSectionPrivate
 {
-    EekClutterDrawingContext *context;
-    ClutterActor *actor;
+    EekSection *section;
+    EekClutterRenderer *renderer;
 };
 
 static void
-eek_clutter_section_real_set_name (EekElement  *self,
-                                   const gchar *name)
+eek_clutter_section_real_get_preferred_width (ClutterActor *self,
+                                              float         for_height,
+                                              float        *min_width_p,
+                                              float        *natural_width_p)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+    EekBounds bounds;
+    gdouble scale;
 
-    EEK_ELEMENT_CLASS (eek_clutter_section_parent_class)->
-        set_name (self, name);
-
-    if (priv->actor)
-        clutter_actor_set_name (priv->actor, name);
+    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+    eek_element_get_bounds (EEK_ELEMENT(priv->section), &bounds);
+    *min_width_p = 0.0f;
+    *natural_width_p = bounds.width * scale;
 }
 
 static void
-eek_clutter_section_real_set_bounds (EekElement *self,
-                                     EekBounds  *bounds)
+eek_clutter_section_real_get_preferred_height (ClutterActor *self,
+                                               float         for_width,
+                                               float        *min_height_p,
+                                               float        *natural_height_p)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
+    EekBounds bounds;
+    gdouble scale;
 
-    EEK_ELEMENT_CLASS (eek_clutter_section_parent_class)->
-        set_bounds (self, bounds);
-
-    if (priv->actor) {
-        clutter_actor_set_position (priv->actor, bounds->x, bounds->y);
-        clutter_actor_set_size (priv->actor, bounds->width, bounds->height);
-    }
+    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+    eek_element_get_bounds (EEK_ELEMENT(priv->section), &bounds);
+    *min_height_p = 0.0f;
+    *natural_height_p = bounds.height * scale;
 }
 
 static void
-eek_clutter_section_real_set_angle (EekSection *self,
-                                    gint angle)
+eek_clutter_section_real_allocate (ClutterActor          *self,
+                                   const ClutterActorBox *box,
+                                   ClutterAllocationFlags flags)
 {
-    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
-
-    EEK_SECTION_CLASS (eek_clutter_section_parent_class)->
-        set_angle (self, angle);
-
-    g_return_if_fail (priv->actor);
-
-    clutter_actor_set_rotation (priv->actor,
-                                CLUTTER_Z_AXIS,
-                                eek_section_get_angle (self),
-                                0, 0, 0);
-}
-
-static void
-pressed_event (EekKey *key, gpointer user_data)
-{
-    g_signal_emit_by_name (user_data, "key-pressed", key);
-}
-
-static void
-released_event (EekKey *key, gpointer user_data)
-{
-    g_signal_emit_by_name (user_data, "key-released", key);
-}
-
-static EekKey *
-eek_clutter_section_real_create_key (EekSection  *self,
-                                     gint         column,
-                                     gint         row)
-{
-    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(self);
-    EekKey *key;
-    gint num_columns, num_rows;
-    EekOrientation orientation;
-    ClutterActor *actor;
-
-    num_rows = eek_section_get_n_rows (self);
-    g_return_val_if_fail (0 <= row && row < num_rows, NULL);
-    eek_section_get_row (self, row, &num_columns, &orientation);
-    g_return_val_if_fail (column < num_columns, NULL);
-
-    key = eek_clutter_key_new (priv->context, column, row);
-    g_return_val_if_fail (key, NULL);
-    
-    g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
-    g_signal_connect (key, "released", G_CALLBACK(released_event), self);
-
-    EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
-                                              EEK_ELEMENT(key));
-
-    actor = eek_clutter_section_get_actor (EEK_CLUTTER_SECTION(self));
-    clutter_container_add_actor
-        (CLUTTER_CONTAINER(actor),
-         eek_clutter_key_get_actor (EEK_CLUTTER_KEY(key)));
-
-    return key;
+    CLUTTER_ACTOR_CLASS (eek_clutter_section_parent_class)->
+        allocate (self, box, flags);
 }
 
 static void
@@ -130,30 +82,32 @@ eek_clutter_section_dispose (GObject *object)
 {
     EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(object);
 
-    if (priv->context) {
-        g_object_unref (priv->context);
-        priv->context = NULL;
+    if (priv->renderer) {
+        g_object_unref (priv->renderer);
+        priv->renderer = NULL;
     }
-    if (priv->actor) {
-        g_object_unref (priv->actor);
-        priv->actor = NULL;
+
+    if (priv->section && g_object_is_floating (priv->section)) {
+        g_object_unref (priv->section);
+        priv->section = NULL;
     }
+
     G_OBJECT_CLASS (eek_clutter_section_parent_class)->dispose (object);
 }
 
 static void
 eek_clutter_section_class_init (EekClutterSectionClass *klass)
 {
+    ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-    EekElementClass *element_class = EEK_ELEMENT_CLASS (klass);
-    EekSectionClass *section_class = EEK_SECTION_CLASS (klass);
 
     g_type_class_add_private (gobject_class, sizeof (EekClutterSectionPrivate));
 
-    section_class->set_angle = eek_clutter_section_real_set_angle;
-    section_class->create_key = eek_clutter_section_real_create_key;
-    element_class->set_name = eek_clutter_section_real_set_name;
-    element_class->set_bounds = eek_clutter_section_real_set_bounds;
+    actor_class->get_preferred_width =
+        eek_clutter_section_real_get_preferred_width;
+    actor_class->get_preferred_height =
+        eek_clutter_section_real_get_preferred_height;
+    actor_class->allocate = eek_clutter_section_real_allocate;
     gobject_class->dispose = eek_clutter_section_dispose;
 }
 
@@ -162,29 +116,54 @@ eek_clutter_section_init (EekClutterSection *self)
 {
     EekClutterSectionPrivate *priv;
     priv = self->priv = EEK_CLUTTER_SECTION_GET_PRIVATE (self);
-    priv->actor = NULL;
+    priv->section = NULL;
+    priv->renderer = NULL;
+}
+
+struct _CreateKeyCallbackData {
+    ClutterActor *actor;
+    EekClutterRenderer *renderer;
+};
+typedef struct _CreateKeyCallbackData CreateKeyCallbackData;
+
+static void
+create_key (EekElement *element, gpointer user_data)
+{
+    CreateKeyCallbackData *data = user_data;
+    ClutterActor *key;
+
+    key = eek_clutter_key_new (EEK_KEY(element), data->renderer);
+    clutter_container_add_actor (CLUTTER_CONTAINER(data->actor), key);
 }
 
 ClutterActor *
-eek_clutter_section_get_actor (EekClutterSection *section)
+eek_clutter_section_new (EekSection         *section,
+                         EekClutterRenderer *renderer)
 {
-    EekClutterSectionPrivate *priv = EEK_CLUTTER_SECTION_GET_PRIVATE(section);
-    if (!priv->actor) {
-        priv->actor = clutter_group_new ();
-        g_object_ref_sink (priv->actor);
-    }
-    return priv->actor;
-}
+    ClutterActor *actor;
+    EekClutterSectionPrivate *priv;
+    CreateKeyCallbackData data;
+    EekBounds bounds;
+    gdouble scale;
 
-EekSection *
-eek_clutter_section_new (EekClutterDrawingContext *context)
-{
-    EekClutterSection *section;
+    actor = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
+    priv = EEK_CLUTTER_SECTION_GET_PRIVATE(actor);
+    priv->section = g_object_ref_sink (section);
+    priv->renderer = g_object_ref (renderer);
 
-    g_return_val_if_fail (context, NULL);
-    section = g_object_new (EEK_TYPE_CLUTTER_SECTION, NULL);
-    section->priv->context = context;
-    g_object_ref_sink (G_OBJECT(section->priv->context));
+    eek_element_get_bounds (EEK_ELEMENT(section), &bounds);
+    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+    clutter_actor_set_position (actor, bounds.x * scale, bounds.y * scale);
+    clutter_actor_set_rotation (actor,
+                                CLUTTER_Z_AXIS,
+                                eek_section_get_angle (section),
+                                0.0f, 0.0f, 0.0f);
 
-    return EEK_SECTION(section);
+    data.actor = actor;
+    data.renderer = priv->renderer;
+    eek_container_foreach_child (EEK_CONTAINER(priv->section),
+                                 create_key,
+                                 &data);
+
+    return actor;
 }

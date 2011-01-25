@@ -21,8 +21,8 @@
 #define EEK_CLUTTER_KEY_H 1
 
 #include <clutter/clutter.h>
-#include "eek-clutter-drawing-context.h"
 #include "eek-key.h"
+#include "eek-clutter-renderer.h"
 
 G_BEGIN_DECLS
 #define EEK_TYPE_CLUTTER_KEY (eek_clutter_key_get_type())
@@ -39,7 +39,7 @@ typedef struct _EekClutterKeyPrivate EekClutterKeyPrivate;
 struct _EekClutterKey
 {
     /*< private >*/
-    EekKey parent;
+    ClutterActor parent;
 
     /*< private >*/
     EekClutterKeyPrivate *priv;
@@ -48,18 +48,16 @@ struct _EekClutterKey
 struct _EekClutterKeyClass
 {
     /*< private >*/
-    EekKeyClass parent_class;
+    ClutterActorClass parent_class;
 
     /*< private >*/
     /* padding */
     gpointer pdummy[24];
 };
 
-GType         eek_clutter_key_get_type  (void) G_GNUC_CONST;
-EekKey *      eek_clutter_key_new       (EekClutterDrawingContext *context,
-                                         gint                      column,
-                                         gint                      row);
-ClutterActor *eek_clutter_key_get_actor (EekClutterKey            *key);
+GType         eek_clutter_key_get_type (void) G_GNUC_CONST;
+ClutterActor *eek_clutter_key_new      (EekKey      *key,
+                                        EekClutterRenderer *renderer);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEY_H */

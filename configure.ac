@@ -147,7 +147,7 @@ AC_MSG_CHECKING([whether you enable Clutter])
 AC_ARG_ENABLE(clutter,
               AS_HELP_STRING([--enable-clutter=no/yes],
                              [Enable Clutter user interface default=yes]),,
-              enable_clutter=yes)
+              enable_clutter=no)
 AC_MSG_RESULT($enable_clutter)
 
 if test x$enable_clutter = xyes; then
@@ -164,8 +164,7 @@ if test x$enable_clutter = xyes; then
   AC_DEFINE_UNQUOTED([NEED_SWAP_EVENT_WORKAROUND], $need_swap_event_workaround,
     [Define if GLX_INTEL_swap_event work around is needed])
 fi
-dnl AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
-AM_CONDITIONAL(HAVE_CLUTTER, [false])
+AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
