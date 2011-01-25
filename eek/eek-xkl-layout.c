@@ -38,12 +38,7 @@
 
 #define noKBDRAW_DEBUG
 
-static void eek_layout_iface_init (EekLayoutIface *iface);
-static EekLayoutIface *parent_layout_iface;
-
-G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT,
-                         G_IMPLEMENT_INTERFACE(EEK_TYPE_LAYOUT,
-                                               eek_layout_iface_init));
+G_DEFINE_TYPE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT);
 
 #define EEK_XKL_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKL_LAYOUT, EekXklLayoutPrivate))
@@ -91,15 +86,6 @@ eek_xkl_layout_real_get_group (EekLayout *self)
 }
 
 static void
-eek_layout_iface_init (EekLayoutIface *iface)
-{
-    parent_layout_iface = g_type_interface_peek_parent (iface);
-    if (!parent_layout_iface)
-        parent_layout_iface = g_type_default_interface_peek (EEK_TYPE_LAYOUT);
-    iface->get_group = eek_xkl_layout_real_get_group;
-}
-
-static void
 eek_xkl_layout_dispose (GObject *object)
 {
     EekXklLayoutPrivate *priv = EEK_XKL_LAYOUT_GET_PRIVATE (object);
@@ -108,10 +94,12 @@ eek_xkl_layout_dispose (GObject *object)
         g_object_unref (priv->config);
         priv->config = NULL;
     }
+
     if (priv->engine) {
         g_object_unref (priv->engine);
         priv->engine = NULL;
     }
+
     G_OBJECT_CLASS (eek_xkl_layout_parent_class)->dispose (object);
 }
 
@@ -186,10 +174,13 @@ eek_xkl_layout_get_property (GObject    *object,
 static void
 eek_xkl_layout_class_init (EekXklLayoutClass *klass)
 {
+    EekLayoutClass *layout_class = EEK_LAYOUT_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class, sizeof (EekXklLayoutPrivate));
+
+    layout_class->get_group = eek_xkl_layout_real_get_group;
 
     gobject_class->dispose = eek_xkl_layout_dispose;
     gobject_class->set_property = eek_xkl_layout_set_property;

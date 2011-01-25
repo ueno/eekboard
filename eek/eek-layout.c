@@ -20,9 +20,9 @@
 
 /**
  * SECTION:eek-layout
- * @short_description: Base interface of a layout engine
+ * @short_description: Base class of a layout engine
  *
- * The #EekLayout class is a base interface of layout engine which
+ * The #EekLayout class is a base class of layout engine which
  * arranges keyboard elements.
  */
 
@@ -41,66 +41,53 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
+G_DEFINE_TYPE (EekLayout, eek_layout, G_TYPE_OBJECT);
+
 static void
-eek_layout_base_init (gpointer gobject_class)
+eek_layout_class_init (EekLayoutClass *klass)
 {
-    static gboolean is_initialized = FALSE;
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-    if (!is_initialized) {
-        /**
-         * EekLayout::group-changed:
-         * @layout: an #EekLayout that received the signal
-         * @group: group index
-         *
-         * The ::group-changed signal is emitted each time group
-         * configuration of @layout changed.
-         */
-        signals[GROUP_CHANGED] =
-            g_signal_new ("group-changed",
-                          G_TYPE_FROM_INTERFACE(gobject_class),
-                          G_SIGNAL_RUN_FIRST,
-                          G_STRUCT_OFFSET(EekLayoutIface, group_changed),
-                          NULL,
-                          NULL,
-                          g_cclosure_marshal_VOID__INT,
-                          G_TYPE_NONE, 1,
-                          G_TYPE_INT);
+    /**
+     * EekLayout::group-changed:
+     * @layout: an #EekLayout that received the signal
+     * @group: group index
+     *
+     * The ::group-changed signal is emitted each time group
+     * configuration of @layout changed.
+     */
+    signals[GROUP_CHANGED] =
+        g_signal_new ("group-changed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET(EekLayoutClass, group_changed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__INT,
+                      G_TYPE_NONE, 1,
+                      G_TYPE_INT);
 
-        /**
-         * EekLayout::changed:
-         * @layout: an #EekLayout that received the signal
-         *
-         * The ::changed signal is emitted each time @layout changed
-         * and re-layout of #EekKeyboard is needed.
-         */
-        signals[CHANGED] =
-            g_signal_new ("changed",
-                          G_TYPE_FROM_INTERFACE(gobject_class),
-                          G_SIGNAL_RUN_FIRST,
-                          G_STRUCT_OFFSET(EekLayoutIface, changed),
-                          NULL,
-                          NULL,
-                          g_cclosure_marshal_VOID__VOID,
-                          G_TYPE_NONE, 0);
-        is_initialized = TRUE;
-    }
+    /**
+     * EekLayout::changed:
+     * @layout: an #EekLayout that received the signal
+     *
+     * The ::changed signal is emitted each time @layout changed
+     * and re-layout of #EekKeyboard is needed.
+     */
+    signals[CHANGED] =
+        g_signal_new ("changed",
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET(EekLayoutClass, changed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
 }
 
-GType
-eek_layout_get_type (void)
+void
+eek_layout_init (EekLayout *self)
 {
-    static GType iface_type = 0;
-    if (iface_type == 0) {
-        static const GTypeInfo info = {
-            sizeof (EekLayoutIface),
-            eek_layout_base_init,
-            NULL,
-        };
-        iface_type = g_type_register_static (G_TYPE_INTERFACE,
-                                             "EekLayout",
-                                             &info, 0);
-    }
-    return iface_type;
 }
 
 /**
@@ -115,8 +102,9 @@ eek_layout_apply (EekLayout *layout, EekKeyboard *keyboard)
 {
     g_return_if_fail (EEK_IS_LAYOUT(layout));
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    g_return_if_fail (EEK_LAYOUT_GET_CLASS(layout)->apply);
 
-    return EEK_LAYOUT_GET_IFACE(layout)->apply (layout, keyboard);
+    return EEK_LAYOUT_GET_CLASS(layout)->apply (layout, keyboard);
 }
 
 /**
@@ -130,6 +118,8 @@ eek_layout_apply (EekLayout *layout, EekKeyboard *keyboard)
 gint
 eek_layout_get_group (EekLayout *layout)
 {
-    g_return_val_if_fail (EEK_IS_LAYOUT(layout), -1);
-    return EEK_LAYOUT_GET_IFACE(layout)->get_group (layout);
+    g_assert (EEK_IS_LAYOUT(layout));
+    g_assert (EEK_LAYOUT_GET_CLASS(layout)->get_group);
+
+    return EEK_LAYOUT_GET_CLASS(layout)->get_group (layout);
 }

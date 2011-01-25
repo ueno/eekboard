@@ -28,24 +28,32 @@ G_BEGIN_DECLS
 
 #define EEK_TYPE_LAYOUT (eek_layout_get_type())
 #define EEK_LAYOUT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_LAYOUT, EekLayout))
+#define EEK_LAYOUT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_LAYOUT, EekLayoutClass))
 #define EEK_IS_LAYOUT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_LAYOUT))
-#define EEK_LAYOUT_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), EEK_TYPE_LAYOUT, EekLayoutIface))
+#define EEK_IS_LAYOUT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_LAYOUT))
+#define EEK_LAYOUT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_LAYOUT, EekLayoutClass))
 
-typedef struct _EekLayoutIface EekLayoutIface;
+typedef struct _EekLayoutClass EekLayoutClass;
 typedef struct _EekLayout EekLayout;
 
+struct _EekLayout
+{
+    /*< private >*/
+    GObject parent;
+};
+
 /**
- * EekLayoutIface:
+ * EekLayoutClass:
  * @apply: virtual function for applying the layout to a keyboard
  * @get_group: virtual function for getting the current group setting
  * of the layout
  * @group_changed: class handler for #EekLayout::group-changed signal
  * @changed: class handler for #EekLayout::changed signal
  */
-struct _EekLayoutIface
+struct _EekLayoutClass
 {
     /*< private >*/
-    GTypeInterface parent_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
     void (* apply)         (EekLayout   *self,

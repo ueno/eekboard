@@ -45,11 +45,7 @@
 
 #define noKBDRAW_DEBUG
 
-static void eek_layout_iface_init (EekLayoutIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (EekXkbLayout, eek_xkb_layout, G_TYPE_INITIALLY_UNOWNED,
-                         G_IMPLEMENT_INTERFACE (EEK_TYPE_LAYOUT,
-                                                eek_layout_iface_init));
+G_DEFINE_TYPE (EekXkbLayout, eek_xkb_layout, EEK_TYPE_LAYOUT);
 
 #define EEK_XKB_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKB_LAYOUT, EekXkbLayoutPrivate))
@@ -314,19 +310,19 @@ outline_free (gpointer data)
 }
 
 static void
-eek_xkb_layout_real_apply (EekLayout *layout, EekKeyboard *keyboard)
+eek_xkb_layout_real_apply (EekLayout *self, EekKeyboard *keyboard)
 {
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
+    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
 
-    g_return_if_fail (priv);
     if (priv->outline_hash)
         g_hash_table_unref (priv->outline_hash);
+
     priv->outline_hash = g_hash_table_new_full (g_direct_hash,
                                                 g_direct_equal,
                                                 NULL,
                                                 outline_free);
 
-    create_keyboard (EEK_XKB_LAYOUT(layout), keyboard);
+    create_keyboard (EEK_XKB_LAYOUT(self), keyboard);
 }
 
 static gint
@@ -428,19 +424,16 @@ eek_xkb_layout_real_get_group (EekLayout *self)
 }
 
 static void
-eek_layout_iface_init (EekLayoutIface *iface)
-{
-    iface->apply = eek_xkb_layout_real_apply;
-    iface->get_group = eek_xkb_layout_real_get_group;
-}
-
-static void
 eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 {
+    EekLayoutClass *layout_class = EEK_LAYOUT_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
+
+    layout_class->apply = eek_xkb_layout_real_apply;
+    layout_class->get_group = eek_xkb_layout_real_get_group;
 
     gobject_class->finalize = eek_xkb_layout_finalize;
     gobject_class->set_property = eek_xkb_layout_set_property;
