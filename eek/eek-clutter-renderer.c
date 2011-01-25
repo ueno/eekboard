@@ -202,7 +202,8 @@ eek_clutter_renderer_new (EekKeyboard        *keyboard,
 
     renderer = g_object_new (EEK_TYPE_CLUTTER_RENDERER,
                              "keyboard", keyboard,
-                             "pango-context", pcontext);
+                             "pango-context", pcontext,
+                             NULL);
 
     return renderer;
 }
