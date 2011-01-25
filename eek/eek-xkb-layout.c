@@ -309,10 +309,20 @@ outline_free (gpointer data)
     g_boxed_free (EEK_TYPE_OUTLINE, outline);
 }
 
-static void
-eek_xkb_layout_real_apply (EekLayout *self, EekKeyboard *keyboard)
+static EekKeyboard *
+eek_xkb_layout_real_create_keyboard (EekLayout *self,
+                                     gdouble    initial_width,
+                                     gdouble    initial_height)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
+    EekBounds bounds;
+    EekKeyboard *keyboard;
+
+    keyboard = g_object_new (EEK_TYPE_KEYBOARD, "layout", self, NULL);
+    bounds.x = bounds.y = 0.0;
+    bounds.width = initial_width;
+    bounds.height = initial_height;
+    eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
 
     if (priv->outline_hash)
         g_hash_table_unref (priv->outline_hash);
@@ -323,6 +333,8 @@ eek_xkb_layout_real_apply (EekLayout *self, EekKeyboard *keyboard)
                                                 outline_free);
 
     create_keyboard (EEK_XKB_LAYOUT(self), keyboard);
+
+    return keyboard;
 }
 
 static gint
@@ -432,7 +444,7 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
 
-    layout_class->apply = eek_xkb_layout_real_apply;
+    layout_class->create_keyboard = eek_xkb_layout_real_create_keyboard;
     layout_class->get_group = eek_xkb_layout_real_get_group;
 
     gobject_class->finalize = eek_xkb_layout_finalize;

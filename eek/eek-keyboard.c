@@ -40,6 +40,7 @@ enum {
     PROP_0,
     PROP_GROUP,
     PROP_LEVEL,
+    PROP_LAYOUT,
     PROP_LAST
 };
 
@@ -198,6 +199,7 @@ eek_keyboard_set_property (GObject      *object,
                            const GValue *value,
                            GParamSpec   *pspec)
 {
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
     gint group, level;
 
     switch (prop_id) {
@@ -213,6 +215,10 @@ eek_keyboard_set_property (GObject      *object,
                                        group,
                                        g_value_get_int (value));
         break;
+    case PROP_LAYOUT:
+        priv->layout = g_value_get_object (value);
+        g_object_ref (priv->layout);
+        break;
     default:
         g_object_set_property (object,
                                g_param_spec_get_name (pspec),
@@ -227,9 +233,9 @@ eek_keyboard_get_property (GObject    *object,
                            GValue     *value,
                            GParamSpec *pspec)
 {
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
     gint group, level;
 
-    g_return_if_fail (EEK_IS_KEYBOARD(object));
     switch (prop_id) {
     case PROP_GROUP:
         eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
@@ -238,6 +244,9 @@ eek_keyboard_get_property (GObject    *object,
     case PROP_LEVEL:
         eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &level, &level);
         g_value_set_int (value, level);
+        break;
+    case PROP_LAYOUT:
+        g_value_set_object (value, priv->layout);
         break;
     default:
         g_object_get_property (object,
@@ -300,6 +309,20 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                               G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class,
                                      PROP_LEVEL,
+                                     pspec);
+
+    /**
+     * EekKeyboard:layout:
+     *
+     * The layout used to create this #EekKeyboard.
+     */
+    pspec = g_param_spec_object ("layout",
+                                 "Layout",
+                                 "Layout used to create the keyboard",
+                                 EEK_TYPE_LAYOUT,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_LAYOUT,
                                      pspec);
 
     /**
@@ -440,34 +463,30 @@ EekKey *
 eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                   guint        keycode)
 {
-    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
-    return EEK_KEYBOARD_GET_CLASS(keyboard)->find_key_by_keycode (keyboard,
-                                                                  keycode);
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    return EEK_KEYBOARD_GET_CLASS(keyboard)->
+        find_key_by_keycode (keyboard, keycode);
 }
 
-/**
- * eek_keyboard_new:
- * @layout: an #EekLayout
- * @initial_width: default width of returned keyboard
- * @initial_height: default height of returned keyboard
- *
- * Create a new #EekKeyboard instance based on @layout.
- */
-EekKeyboard *
-eek_keyboard_new (EekLayout *layout,
-                  gint       initial_width,
-                  gint       initial_height)
+EekLayout *
+eek_keyboard_get_layout (EekKeyboard *keyboard)
 {
-    EekKeyboard *keyboard = g_object_new (EEK_TYPE_KEYBOARD, NULL);
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+    return priv->layout;
+}
+
+void
+eek_keyboard_get_size (EekKeyboard *keyboard,
+                       gdouble     *width,
+                       gdouble     *height)
+{
     EekBounds bounds;
 
-    g_return_val_if_fail (EEK_IS_LAYOUT (layout), NULL);
-
-    bounds.x = bounds.y = 0.0;
-    bounds.width = initial_width;
-    bounds.height = initial_height;
-    eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
-    eek_layout_apply (layout, keyboard);
-
-    return keyboard;
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
+    *width = bounds.width;
+    *height = bounds.height;
 }

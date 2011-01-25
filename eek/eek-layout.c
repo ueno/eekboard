@@ -91,20 +91,24 @@ eek_layout_init (EekLayout *self)
 }
 
 /**
- * eek_layout_apply:
+ * eek_keyboard_new:
  * @layout: an #EekLayout
- * @keyboard: an #EekKeyboard
+ * @initial_width: initial width of the keyboard
+ * @initial_height: initial height of the keyboard
  *
- * Relayout @keyboard with the @layout.
+ * Create a new #EekKeyboard based on @layout.
  */
-void
-eek_layout_apply (EekLayout *layout, EekKeyboard *keyboard)
+EekKeyboard *
+eek_keyboard_new (EekLayout *layout,
+                  gint       initial_width,
+                  gint       initial_height)
 {
-    g_return_if_fail (EEK_IS_LAYOUT(layout));
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    g_return_if_fail (EEK_LAYOUT_GET_CLASS(layout)->apply);
+    g_assert (EEK_IS_LAYOUT(layout));
+    g_assert (EEK_LAYOUT_GET_CLASS(layout)->create_keyboard);
 
-    return EEK_LAYOUT_GET_CLASS(layout)->apply (layout, keyboard);
+    return EEK_LAYOUT_GET_CLASS(layout)->create_keyboard (layout,
+                                                          initial_width,
+                                                          initial_height);
 }
 
 /**

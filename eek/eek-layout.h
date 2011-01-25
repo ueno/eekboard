@@ -56,24 +56,26 @@ struct _EekLayoutClass
     GObjectClass parent_class;
 
     /*< public >*/
-    void (* apply)         (EekLayout   *self,
-                            EekKeyboard *keyboard);
-    gint (* get_group)     (EekLayout   *self);
+    EekKeyboard* (* create_keyboard) (EekLayout *self,
+                                      gdouble    initial_width,
+                                      gdouble    initial_height);
+    gint         (* get_group)       (EekLayout *self);
 
     /* signals */
-    void (* group_changed) (EekLayout   *self,
-                            gint         group);
-    void (* changed)       (EekLayout   *self);
+    void         (* group_changed)   (EekLayout *self,
+                                      gint       group);
+    void         (* changed)         (EekLayout *self);
 
     /*< private >*/
     /* padding */
     gpointer pdummy[24];
 };
 
-GType eek_layout_get_type  (void) G_GNUC_CONST;
-void  eek_layout_apply     (EekLayout   *layout,
-                            EekKeyboard *keyboard);
-gint  eek_layout_get_group (EekLayout   *layout);
+GType        eek_layout_get_type  (void) G_GNUC_CONST;
+EekKeyboard *eek_layout_new       (EekLayout *layout,
+                                   gdouble    initial_width,
+                                   gdouble    initial_height);
+gint         eek_layout_get_group (EekLayout *layout);
 
 G_END_DECLS
 #endif  /* EEK_LAYOUT_H */
