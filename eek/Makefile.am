@@ -27,7 +27,6 @@ lib_LTLIBRARIES += libeek-clutter.la
 endif
 
 libeek_public_headers =				\
-	$(srcdir)/eek-keysym.h			\
 	$(srcdir)/eek-layout.h			\
 	$(srcdir)/eek-element.h			\
 	$(srcdir)/eek-container.h		\
