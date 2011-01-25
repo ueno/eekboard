@@ -200,20 +200,13 @@ eek_keyboard_set_property (GObject      *object,
                            GParamSpec   *pspec)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
-    gint group, level;
 
     switch (prop_id) {
     case PROP_GROUP:
-        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
-        eek_keyboard_set_keysym_index (EEK_KEYBOARD(object),
-                                       g_value_get_int (value),
-                                       level);
+        eek_keyboard_set_group (EEK_KEYBOARD(object), g_value_get_int (value));
         break;
     case PROP_LEVEL:
-        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
-        eek_keyboard_set_keysym_index (EEK_KEYBOARD(object),
-                                       group,
-                                       g_value_get_int (value));
+        eek_keyboard_set_level (EEK_KEYBOARD(object), g_value_get_int (value));
         break;
     case PROP_LAYOUT:
         priv->layout = g_value_get_object (value);
@@ -234,16 +227,15 @@ eek_keyboard_get_property (GObject    *object,
                            GParamSpec *pspec)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
-    gint group, level;
 
     switch (prop_id) {
     case PROP_GROUP:
-        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &group, &level);
-        g_value_set_int (value, group);
+        g_value_set_int (value,
+                         eek_keyboard_get_group (EEK_KEYBOARD(object)));
         break;
     case PROP_LEVEL:
-        eek_keyboard_get_keysym_index (EEK_KEYBOARD(object), &level, &level);
-        g_value_set_int (value, level);
+        g_value_set_int (value,
+                         eek_keyboard_get_level (EEK_KEYBOARD(object)));
         break;
     case PROP_LAYOUT:
         g_value_set_object (value, priv->layout);
@@ -432,6 +424,64 @@ eek_keyboard_get_keysym_index (EekKeyboard *keyboard,
 {
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
     EEK_KEYBOARD_GET_CLASS(keyboard)->get_keysym_index (keyboard, group, level);
+}
+
+/**
+ * eek_keyboard_set_group:
+ * @keyboard: an #EekKeyboard
+ * @group: group index of @keyboard
+ *
+ * Set the group index of symbol matrix of @keyboard.
+ */
+void
+eek_keyboard_set_group (EekKeyboard *keyboard,
+                        gint         group)
+{
+    gint level = eek_keyboard_get_level (keyboard);
+    eek_keyboard_set_keysym_index (keyboard, group, level);
+}
+
+/**
+ * eek_keyboard_set_level:
+ * @keyboard: an #EekKeyboard
+ * @level: level index of @keyboard
+ *
+ * Set the level index of symbol matrix of @keyboard.
+ */
+void
+eek_keyboard_set_level (EekKeyboard *keyboard,
+                        gint         level)
+{
+    gint group = eek_keyboard_get_group (keyboard);
+    eek_keyboard_set_keysym_index (keyboard, group, level);
+}
+
+/**
+ * eek_keyboard_get_group:
+ * @keyboard: an #EekKeyboard
+ *
+ * Return the group index of @keyboard.
+ */
+gint
+eek_keyboard_get_group (EekKeyboard *keyboard)
+{
+    gint group;
+    eek_keyboard_get_keysym_index (keyboard, &group, NULL);
+    return group;
+}
+
+/**
+ * eek_keyboard_get_level:
+ * @keyboard: an #EekKeyboard
+ *
+ * Return the level index of @keyboard.
+ */
+gint
+eek_keyboard_get_level (EekKeyboard *keyboard)
+{
+    gint level;
+    eek_keyboard_get_keysym_index (keyboard, NULL, &level);
+    return level;
 }
 
 /**

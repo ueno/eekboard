@@ -100,6 +100,13 @@ void         eek_keyboard_get_keysym_index    (EekKeyboard *keyboard,
                                                gint        *group,
                                                gint        *level);
 
+void         eek_keyboard_set_group           (EekKeyboard *keyboard,
+                                               gint         group);
+void         eek_keyboard_set_level           (EekKeyboard *keyboard,
+                                               gint         level);
+gint         eek_keyboard_get_group           (EekKeyboard *keyboard);
+gint         eek_keyboard_get_level           (EekKeyboard *keyboard);
+
 EekSection  *eek_keyboard_create_section      (EekKeyboard *keyboard);
 
 EekKey      *eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
