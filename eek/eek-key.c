@@ -35,6 +35,8 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 #include "eek-key.h"
+#include "eek-section.h"
+#include "eek-keyboard.h"
 #include "eek-keysym.h"
 
 enum {
@@ -44,8 +46,6 @@ enum {
     PROP_COLUMN,
     PROP_ROW,
     PROP_OUTLINE,
-    PROP_GROUP,
-    PROP_LEVEL,
     PROP_LAST
 };
 
@@ -70,8 +70,6 @@ struct _EekKeyPrivate
     gint column;
     gint row;
     EekOutline *outline;
-    gint group;
-    gint level;
     gboolean is_pressed;
 };
 
@@ -140,18 +138,6 @@ eek_key_real_get_keysyms (EekKey *self,
     }
 }
 
-static guint
-eek_key_real_get_keysym (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
-
-    if (num_keysyms == 0)
-        return EEK_INVALID_KEYSYM;
-    return priv->keysyms.data[priv->group * priv->keysyms.num_levels +
-                              priv->level];
-}
-
 static void
 eek_key_real_set_index (EekKey *self,
                         gint    column,
@@ -190,38 +176,6 @@ eek_key_real_get_outline (EekKey *self)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
     return priv->outline;
-}
-
-static void
-eek_key_real_set_keysym_index (EekKey *self,
-                               gint    group,
-                               gint    level)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-
-    g_return_if_fail (0 <= group);
-    if (group >= priv->keysyms.num_groups)
-        group = 0;
-    g_return_if_fail (0 <= level);
-    if (level >= priv->keysyms.num_levels)
-        level = 0;
-    priv->group = group;
-    priv->level = level;
-}
-
-static void
-eek_key_real_get_keysym_index (EekKey *self,
-                               gint   *group,
-                               gint   *level)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-
-    g_return_if_fail (group);
-    g_return_if_fail (level);
-    if (group)
-        *group = priv->group;
-    if (level)
-        *level = priv->level;
 }
 
 static gboolean
@@ -271,7 +225,6 @@ eek_key_set_property (GObject      *object,
 {
     EekKeysymMatrix *matrix;
     gint column, row;
-    gint group, level;
 
     g_return_if_fail (EEK_IS_KEY(object));
     switch (prop_id) {
@@ -295,16 +248,6 @@ eek_key_set_property (GObject      *object,
         break;
     case PROP_OUTLINE:
         eek_key_set_outline (EEK_KEY(object), g_value_get_pointer (value));
-        break;
-    case PROP_GROUP:
-        eek_key_get_keysym_index (EEK_KEY(object), &group, &level);
-        eek_key_set_keysym_index (EEK_KEY(object), g_value_get_int (value),
-                                  level);
-        break;
-    case PROP_LEVEL:
-        eek_key_get_keysym_index (EEK_KEY(object), &group, &level);
-        eek_key_set_keysym_index (EEK_KEY(object), group,
-                                  g_value_get_int (value));
         break;
     default:
         g_object_set_property (object,
@@ -345,14 +288,6 @@ eek_key_get_property (GObject    *object,
     case PROP_OUTLINE:
         g_value_set_pointer (value, eek_key_get_outline (EEK_KEY(object)));
         break;
-    case PROP_GROUP:
-        eek_key_get_keysym_index (EEK_KEY(object), &group, &level);
-        g_value_set_int (value, group);
-        break;
-    case PROP_LEVEL:
-        eek_key_get_keysym_index (EEK_KEY(object), &group, &level);
-        g_value_set_int (value, level);
-        break;
     default:
         g_object_get_property (object,
                                g_param_spec_get_name (pspec),
@@ -374,13 +309,10 @@ eek_key_class_init (EekKeyClass *klass)
     klass->set_keycode = eek_key_real_set_keycode;
     klass->set_keysyms = eek_key_real_set_keysyms;
     klass->get_keysyms = eek_key_real_get_keysyms;
-    klass->get_keysym = eek_key_real_get_keysym;
     klass->set_index = eek_key_real_set_index;
     klass->get_index = eek_key_real_get_index;
     klass->set_outline = eek_key_real_set_outline;
     klass->get_outline = eek_key_real_get_outline;
-    klass->set_keysym_index = eek_key_real_set_keysym_index;
-    klass->get_keysym_index = eek_key_real_get_keysym_index;
     klass->is_pressed = eek_key_real_is_pressed;
 
     gobject_class->set_property = eek_key_set_property;
@@ -454,30 +386,6 @@ eek_key_class_init (EekKeyClass *klass)
     g_object_class_install_property (gobject_class, PROP_OUTLINE, pspec);
 
     /**
-     * EekKey:group:
-     *
-     * The column index of #EekKey in the symbol matrix #EekKey:keysyms.
-     */
-    pspec = g_param_spec_int ("group",
-                              "Group",
-                              "Current group of the key",
-                              0, 64, 0,
-                              G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_GROUP, pspec);
-
-    /**
-     * EekKey:level:
-     *
-     * The row index of #EekKey in the symbol matrix #EekKey:keysyms.
-     */
-    pspec = g_param_spec_int ("level",
-                              "Level",
-                              "Current level of the key",
-                              0, 3, 0,
-                              G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_LEVEL, pspec);
-
-    /**
      * EekKey::pressed:
      * @key: an #EekKey
      *
@@ -522,7 +430,6 @@ eek_key_init (EekKey *self)
     memset (&priv->keysyms, 0, sizeof priv->keysyms);
     priv->column = priv->row = 0;
     priv->outline = NULL;
-    priv->group = priv->level = 0;
 }
 
 /**
@@ -606,8 +513,50 @@ eek_key_get_keysyms (EekKey *key,
 guint
 eek_key_get_keysym (EekKey *key)
 {
-    g_return_val_if_fail (EEK_IS_KEY(key), EEK_INVALID_KEYSYM);
-    return EEK_KEY_GET_CLASS(key)->get_keysym (key);
+    gint group, level;
+    EekElement *parent;
+
+    g_return_val_if_fail (EEK_IS_KEY (key), EEK_INVALID_KEYSYM);
+
+    parent = eek_element_get_parent (EEK_ELEMENT(key));
+    g_return_val_if_fail (EEK_IS_SECTION(parent), EEK_INVALID_KEYSYM);
+
+    parent = eek_element_get_parent (parent);
+    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), EEK_INVALID_KEYSYM);
+
+    eek_keyboard_get_keysym_index (EEK_KEYBOARD(parent), &group, &level);
+
+    return eek_key_get_keysym_at_index (key, group, level);
+}
+
+/**
+ * eek_key_get_keysym_at_index:
+ * @key: an #EekKey
+ * @group: group index of the keysym matrix
+ * @level: level index of the keysym matrix
+ *
+ * Get the symbol at (@group, @level) in the keysym matrix of @key.
+ * Returns: a symbol or %EEK_INVALID_KEYSYM on failure
+ */
+guint
+eek_key_get_keysym_at_index (EekKey *key,
+                             gint    group,
+                             gint    level)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(key);
+    gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
+    gint g, l;
+    EekElement *parent;
+
+    if (num_keysyms == 0)
+        return EEK_INVALID_KEYSYM;
+
+    if (group >= priv->keysyms.num_groups)
+        return EEK_INVALID_KEYSYM;
+    if (level >= priv->keysyms.num_levels)
+        return EEK_INVALID_KEYSYM;
+
+    return priv->keysyms.data[group * priv->keysyms.num_levels + level];
 }
 
 /**
@@ -673,42 +622,6 @@ eek_key_get_outline (EekKey *key)
 {
     g_return_val_if_fail (EEK_IS_KEY (key), NULL);
     return EEK_KEY_GET_CLASS(key)->get_outline (key);
-}
-
-/**
- * eek_key_set_keysym_index:
- * @key: an #EekKey
- * @group: group (row) index of @key
- * @level: level (column) index of @key
- *
- * Set the current group and/or level index of @key in its symbol
- * matrix to @group and @level.
- */
-void
-eek_key_set_keysym_index (EekKey *key,
-                          gint    group,
-                          gint    level)
-{
-    g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_keysym_index (key, group, level);
-}
-
-/**
- * eek_key_get_keysym_index:
- * @key: an #EekKey
- * @group: pointer where group (row) index of @key will be stored
- * @level: pointer where level (column) index of @key will be stored
- *
- * Get the current group and/or level index of @key in its symbol
- * matrix.
- */
-void
-eek_key_get_keysym_index (EekKey *key,
-                          gint   *group,
-                          gint   *level)
-{
-    g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->get_keysym_index (key, group, level);
 }
 
 /**

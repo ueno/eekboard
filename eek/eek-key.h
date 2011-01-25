@@ -57,8 +57,6 @@ struct _EekKey
  * section
  * @set_outline: virtual function for setting outline shape of the key
  * @get_outline: virtual function for getting outline shape of the key
- * @set_keysym_index: virtual function for setting group and level of the key
- * @get_keysym_index: virtual function for getting group and level of the key
  * @pressed: class handler for #EekKey::pressed signal
  * @released: class handler for #EekKey::released signal
  * @is_pressed: virtual function for getting whether the key is pressed
@@ -80,7 +78,6 @@ struct _EekKeyClass
                                       guint     **keysyms,
                                       gint       *num_groups,
                                       gint       *num_levels);
-    guint       (* get_keysym)       (EekKey     *self);
 
     void        (* set_index)        (EekKey     *self,
                                       gint        column,
@@ -93,12 +90,6 @@ struct _EekKeyClass
                                       EekOutline *outline);
     EekOutline *(* get_outline)      (EekKey     *self);
 
-    void        (* set_keysym_index) (EekKey     *self,
-                                      gint        group,
-                                      gint        level);
-    void        (* get_keysym_index) (EekKey     *self,
-                                      gint       *group,
-                                      gint       *level);
     gboolean    (* is_pressed)       (EekKey     *self);
 
     /* signals */
@@ -110,39 +101,36 @@ struct _EekKeyClass
     gpointer pdummy[23];
 };
 
-GType       eek_key_get_type         (void) G_GNUC_CONST;
+GType       eek_key_get_type            (void) G_GNUC_CONST;
 
-void        eek_key_set_keycode      (EekKey     *key,
-                                      guint       keycode);
-guint       eek_key_get_keycode      (EekKey     *key);
-void        eek_key_set_keysyms      (EekKey     *key,
-                                      guint      *keysyms,
-                                      gint        num_groups,
-                                      gint        num_levels);
-void        eek_key_get_keysyms      (EekKey     *key,
-                                      guint     **keysyms,
-                                      gint       *num_groups,
-                                      gint       *num_levels);
-guint       eek_key_get_keysym       (EekKey     *key);
+void        eek_key_set_keycode         (EekKey     *key,
+                                         guint       keycode);
+guint       eek_key_get_keycode         (EekKey     *key);
+void        eek_key_set_keysyms         (EekKey     *key,
+                                         guint      *keysyms,
+                                         gint        num_groups,
+                                         gint        num_levels);
+void        eek_key_get_keysyms         (EekKey     *key,
+                                         guint     **keysyms,
+                                         gint       *num_groups,
+                                         gint       *num_levels);
+guint       eek_key_get_keysym          (EekKey     *key);
+guint       eek_key_get_keysym_at_index (EekKey     *key,
+                                         gint        group,
+                                         gint        level);
 
-void        eek_key_set_index        (EekKey     *key,
-                                      gint        column,
-                                      gint        row);
-void        eek_key_get_index        (EekKey     *key,
-                                      gint       *column,
-                                      gint       *row);
+void        eek_key_set_index           (EekKey     *key,
+                                         gint        column,
+                                         gint        row);
+void        eek_key_get_index           (EekKey     *key,
+                                         gint       *column,
+                                         gint       *row);
 
-void        eek_key_set_outline      (EekKey     *key,
-                                      EekOutline *outline);
-EekOutline *eek_key_get_outline      (EekKey     *key);
+void        eek_key_set_outline         (EekKey     *key,
+                                         EekOutline *outline);
+EekOutline *eek_key_get_outline         (EekKey     *key);
 
-void        eek_key_set_keysym_index (EekKey     *key,
-                                      gint        group,
-                                      gint        level);
-void        eek_key_get_keysym_index (EekKey     *key,
-                                      gint       *group,
-                                      gint       *level);
-gboolean    eek_key_is_pressed       (EekKey     *key);
+gboolean    eek_key_is_pressed          (EekKey     *key);
 
 G_END_DECLS
 #endif  /* EEK_KEY_H */

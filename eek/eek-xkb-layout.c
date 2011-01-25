@@ -209,7 +209,6 @@ create_key (EekXkbLayout *layout,
     eek_key_set_keysyms (key, keysyms, num_groups, num_levels);
     if (keysyms)
         g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
-    eek_key_set_keysym_index (key, 0, 0);
     eek_key_set_outline (key, outline);
 }
 

@@ -66,48 +66,16 @@ struct _EekKeyboardPrivate
     EekLayout *layout;
 };
 
-struct _SetKeysymIndexCallbackData {
-    gint group;
-    gint level;
-};
-typedef struct _SetKeysymIndexCallbackData SetKeysymIndexCallbackData;
-
-static void
-set_keysym_index_for_key (EekElement *element,
-                          gpointer    user_data)
-{
-    SetKeysymIndexCallbackData *data;
-
-    g_return_if_fail (EEK_IS_KEY(element));
-
-    data = user_data;
-    eek_key_set_keysym_index (EEK_KEY(element), data->group, data->level);
-}
-
-static void
-set_keysym_index_for_section (EekElement *element,
-                              gpointer user_data)
-{
-    eek_container_foreach_child (EEK_CONTAINER(element),
-                                 set_keysym_index_for_key,
-                                 user_data);
-}
-
 static void
 eek_keyboard_real_set_keysym_index (EekKeyboard *self,
                                     gint         group,
                                     gint         level)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    SetKeysymIndexCallbackData data;
 
     if (priv->group != group || priv->level != level) {
-        data.group = priv->group = group;
-        data.level = priv->level = level;
-
-        eek_container_foreach_child (EEK_CONTAINER(self),
-                                     set_keysym_index_for_section,
-                                     &data);
+        priv->group = group;
+        priv->level = level;
 
         g_signal_emit_by_name (self, "keysym-index-changed", group, level);
     }
