@@ -35,6 +35,12 @@
 #include "eek-key.h"
 #include "eek-keysym.h"
 
+enum {
+    PROP_0,
+    PROP_KEYBOARD,
+    PROP_LAST
+};
+
 G_DEFINE_TYPE (EekGtkKeyboard, eek_gtk_keyboard, GTK_TYPE_DRAWING_AREA);
 
 #define EEK_GTK_KEYBOARD_GET_PRIVATE(obj)                                  \
@@ -194,6 +200,42 @@ eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
 }
 
 static void
+eek_gtk_keyboard_set_keyboard (EekGtkKeyboard *self,
+                               EekKeyboard    *keyboard)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+    priv->keyboard = g_object_ref_sink (keyboard);
+
+    g_signal_connect (priv->keyboard, "key-pressed",
+                      G_CALLBACK(on_key_pressed), self);
+    g_signal_connect (priv->keyboard, "key-released",
+                      G_CALLBACK(on_key_released), self);
+    g_signal_connect (priv->keyboard, "keysym-index-changed",
+                      G_CALLBACK(on_keysym_index_changed), self);
+}
+
+static void
+eek_gtk_keyboard_set_property (GObject      *object,
+                               guint         prop_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
+{
+    EekKeyboard *keyboard;
+
+    switch (prop_id) {
+    case PROP_KEYBOARD:
+        keyboard = g_value_get_object (value);
+        eek_gtk_keyboard_set_keyboard (EEK_GTK_KEYBOARD(object), keyboard);
+        break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
 eek_gtk_keyboard_dispose (GObject *object)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(object);
@@ -216,6 +258,7 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
 {
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekGtkKeyboardPrivate));
@@ -232,7 +275,17 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
     widget_class->button_release_event =
         eek_gtk_keyboard_real_button_release_event;
 
+    gobject_class->set_property = eek_gtk_keyboard_set_property;
     gobject_class->dispose = eek_gtk_keyboard_dispose;
+
+    pspec = g_param_spec_object ("keyboard",
+                                 "Keyboard",
+                                 "Keyboard",
+                                 EEK_TYPE_KEYBOARD,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEYBOARD,
+                                     pspec);
 }
 
 static void
@@ -256,21 +309,7 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
 GtkWidget *
 eek_gtk_keyboard_new (EekKeyboard *keyboard)
 {
-    GtkWidget *widget;
-    EekGtkKeyboardPrivate *priv;
-
-    widget = g_object_new (EEK_TYPE_GTK_KEYBOARD, NULL);
-    priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
-    priv->keyboard = g_object_ref_sink (keyboard);
-
-    g_signal_connect (priv->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), widget);
-    g_signal_connect (priv->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), widget);
-    g_signal_connect (priv->keyboard, "keysym-index-changed",
-                      G_CALLBACK(on_keysym_index_changed), widget);
-
-    return widget;
+    return g_object_new (EEK_TYPE_GTK_KEYBOARD, "keyboard", keyboard, NULL);
 }
 
 static EekColor *
