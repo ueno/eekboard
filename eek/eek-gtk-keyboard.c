@@ -311,7 +311,7 @@ render_pressed_key (GtkWidget *widget,
     magnify_bounds (&bounds, &large_bounds, 1.5);
 
     cairo_translate (cr, large_bounds.x, large_bounds.y);
-    eek_renderer_render_key (priv->renderer, cr, key, 1.5);
+    eek_renderer_render_key (priv->renderer, cr, key, 1.5, TRUE);
     cairo_destroy (cr);
 }
 

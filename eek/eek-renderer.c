@@ -4,6 +4,13 @@
 #include "eek-section.h"
 #include "eek-renderer.h"
 
+enum {
+    PROP_0,
+    PROP_KEYBOARD,
+    PROP_PCONTEXT,
+    PROP_LAST
+};
+
 G_DEFINE_TYPE (EekRenderer, eek_renderer, G_TYPE_OBJECT);
 
 #define EEK_RENDERER_GET_PRIVATE(obj)                                  \
@@ -34,15 +41,23 @@ struct {
 };
 
 /* eek-keyboard-drawing.c */
-extern void _eek_rounded_polygon          (cairo_t     *cr,
-                                           gdouble      radius,
-                                           EekPoint    *points,
-                                           gint         num_points);
+extern void _eek_rounded_polygon               (cairo_t     *cr,
+                                                gdouble      radius,
+                                                EekPoint    *points,
+                                                gint         num_points);
 
-static void invalidate (EekRenderer *renderer);
-static void render_key (EekRenderer *self,
-                        cairo_t     *cr,
-                        EekKey      *key);
+static void eek_renderer_real_render_key_label (EekRenderer *self,
+                                                PangoLayout *layout,
+                                                EekKey      *key);
+
+static void invalidate                         (EekRenderer *renderer);
+static void render_key                         (EekRenderer *self,
+                                                cairo_t     *cr,
+                                                EekKey      *key);
+static void on_keysym_index_changed            (EekKeyboard *keyboard,
+                                                gint         group,
+                                                gint         level,
+                                                gpointer     user_data);
 
 struct _CreateKeyboardSurfaceCallbackData {
     cairo_t *cr;
@@ -296,70 +311,6 @@ calculate_font_size (EekRenderer *renderer)
 }
 
 static void
-render_key_label (EekRenderer *renderer,
-                  cairo_t     *cr,
-                  EekKey      *key)
-{
-    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    guint keysym;
-    EekKeysymCategory category;
-    gchar *label;
-    PangoLayout *layout;
-    PangoRectangle extents = { 0, };
-    EekBounds bounds;
-    PangoFontDescription *font;
-    gdouble size, scale;
-    gint i;
-
-    keysym = eek_key_get_keysym (key);
-    if (keysym == EEK_INVALID_KEYSYM)
-        return;
-
-    category = eek_keysym_get_category (keysym);
-    if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
-        return;
-
-    label = eek_keysym_to_string (keysym);
-    if (!label)
-        return;
-
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    scale = MIN((bounds.width - priv->border_width) / bounds.width,
-                (bounds.height - priv->border_width) / bounds.height);
-
-    layout = pango_cairo_create_layout (cr);
-    font = pango_font_description_copy (priv->font);
-    size = pango_font_description_get_size (font);
-    for (i = 0; i < G_N_ELEMENTS(keysym_category_scale_factors); i++)
-        if (keysym_category_scale_factors[i].category == category) {
-            size *= keysym_category_scale_factors[i].scale;
-            break;
-        }
-    pango_font_description_set_size (font, size * priv->scale * scale);
-    pango_layout_set_font_description (layout, font);
-    pango_layout_set_text (layout, label, -1);
-    g_free (label);
-    pango_layout_set_width (layout,
-                            PANGO_SCALE * bounds.width * priv->scale * scale);
-    pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);
-    pango_layout_get_extents (layout, NULL, &extents);
-
-    cairo_save (cr);
-    cairo_move_to
-        (cr,
-         (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
-         (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
-    cairo_set_source_rgba (cr,
-                           priv->foreground->red,
-                           priv->foreground->green,
-                           priv->foreground->blue,
-                           priv->foreground->alpha);
-    pango_cairo_show_layout (cr, layout);
-    cairo_restore (cr);
-    g_object_unref (layout);
-}
-
-static void
 render_key (EekRenderer *self,
             cairo_t     *cr,
             EekKey      *key)
@@ -368,7 +319,10 @@ render_key (EekRenderer *self,
     EekOutline *outline;
     cairo_surface_t *outline_surface;
     EekBounds bounds;
+    PangoLayout *layout;
+    PangoRectangle extents = { 0, };
 
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     outline = eek_key_get_outline (key);
 
     outline_surface = g_hash_table_lookup (priv->outline_surface_cache,
@@ -376,7 +330,6 @@ render_key (EekRenderer *self,
     if (!outline_surface) {
         cairo_t *cr;
 
-        eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
         outline_surface =
             cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
                                         bounds.width * priv->scale,
@@ -400,27 +353,34 @@ render_key (EekRenderer *self,
                              outline_surface);
     }
 
-    if (!priv->font) {
-        PangoFontDescription *base_font;
-        gdouble size;
-
-        size = calculate_font_size (self);
-        base_font = pango_context_get_font_description (priv->pcontext);
-        priv->font = pango_font_description_copy (base_font);
-        pango_font_description_set_size (priv->font, size);
-    }
-
     cairo_set_source_surface (cr, outline_surface, 0.0, 0.0);
     cairo_paint (cr);
 
-    render_key_label (self, cr, key);
+    layout = pango_cairo_create_layout (cr);
+    eek_renderer_real_render_key_label (self, layout, key);
+    pango_layout_get_extents (layout, NULL, &extents);
+
+    cairo_save (cr);
+    cairo_move_to
+        (cr,
+         (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
+         (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
+    cairo_set_source_rgba (cr,
+                           priv->foreground->red,
+                           priv->foreground->green,
+                           priv->foreground->blue,
+                           priv->foreground->alpha);
+    pango_cairo_show_layout (cr, layout);
+    cairo_restore (cr);
+    g_object_unref (layout);
 }
 
 static void
-eek_renderer_real_render_key (EekRenderer *self,
-                              cairo_t     *cr,
-                              EekKey      *key,
-                              gdouble      scale)
+prepare_render_key (EekRenderer *self,
+                    cairo_t     *cr,
+                    EekKey      *key,
+                    gdouble      scale,
+                    gboolean     rotate)
 {
     EekElement *section;
     EekBounds bounds, rotated_bounds;
@@ -433,28 +393,95 @@ eek_renderer_real_render_key (EekRenderer *self,
     section = eek_element_get_parent (EEK_ELEMENT(key));
     angle = eek_section_get_angle (EEK_SECTION(section));
 
-    cairo_save (cr);
     cairo_scale (cr, scale, scale);
-#if DEBUG
-    cairo_set_source_rgba (cr, 1.0, 0.0, 0.0, 1.0);
-    cairo_rectangle (cr, 0, 0,
-                     rotated_bounds.width, rotated_bounds.height);
-    cairo_stroke (cr);
-    cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
-#endif  /* DEBUG */
-    s = sin (angle * G_PI / 180);
-    if (s < 0)
-        cairo_translate (cr, 0, - bounds.width * s);
-    else
-        cairo_translate (cr, bounds.height * s, 0);
-    cairo_rotate (cr, angle * G_PI / 180);
-#if DEBUG
-    cairo_rectangle (cr,
-                     0,
-                     0,
-                     bounds.width, bounds.height);
-    cairo_stroke (cr);
-#endif  /* DEBUG */
+    if (rotate) {
+        s = sin (angle * G_PI / 180);
+        if (s < 0)
+            cairo_translate (cr, 0, - bounds.width * s);
+        else
+            cairo_translate (cr, bounds.height * s, 0);
+        cairo_rotate (cr, angle * G_PI / 180);
+    }
+}
+
+static void
+eek_renderer_real_render_key_label (EekRenderer *self,
+                                    PangoLayout *layout,
+                                    EekKey      *key)
+{
+    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
+    guint keysym;
+    EekKeysymCategory category;
+    gchar *label;
+    EekBounds bounds;
+    PangoFontDescription *font;
+    gdouble size, scale;
+    gint i;
+
+    keysym = eek_key_get_keysym (key);
+    if (keysym == EEK_INVALID_KEYSYM)
+        return;
+
+    category = eek_keysym_get_category (keysym);
+    if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
+        return;
+
+    label = eek_keysym_to_string (keysym);
+    if (!label)
+        return;
+
+    if (!priv->font) {
+        PangoFontDescription *base_font;
+        gdouble size;
+
+        size = calculate_font_size (self);
+        base_font = pango_context_get_font_description (priv->pcontext);
+        priv->font = pango_font_description_copy (base_font);
+        pango_font_description_set_size (priv->font, size);
+    }
+
+    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    scale = MIN((bounds.width - priv->border_width) / bounds.width,
+                (bounds.height - priv->border_width) / bounds.height);
+
+    font = pango_font_description_copy (priv->font);
+    size = pango_font_description_get_size (font);
+    for (i = 0; i < G_N_ELEMENTS(keysym_category_scale_factors); i++)
+        if (keysym_category_scale_factors[i].category == category) {
+            size *= keysym_category_scale_factors[i].scale;
+            break;
+        }
+    pango_font_description_set_size (font, size * priv->scale * scale);
+    pango_layout_set_font_description (layout, font);
+    pango_layout_set_text (layout, label, -1);
+    g_free (label);
+    pango_layout_set_width (layout,
+                            PANGO_SCALE * bounds.width * priv->scale * scale);
+    pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);
+}
+
+static void
+eek_renderer_real_render_key_outline (EekRenderer *self,
+                                      cairo_t     *cr,
+                                      EekKey      *key,
+                                      gdouble      scale,
+                                      gboolean     rotate)
+{
+    cairo_save (cr);
+    prepare_render_key (self, cr, key, scale, rotate);
+    render_key_outline (self, cr, key);
+    cairo_restore (cr);
+}
+
+static void
+eek_renderer_real_render_key (EekRenderer *self,
+                              cairo_t     *cr,
+                              EekKey      *key,
+                              gdouble      scale,
+                              gboolean     rotate)
+{
+    cairo_save (cr);
+    prepare_render_key (self, cr, key, scale, rotate);
     render_key (self, cr, key);
     cairo_restore (cr);
 }
@@ -470,6 +497,29 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
 
     cairo_set_source_surface (cr, priv->keyboard_surface, 0.0, 0.0);
     cairo_paint (cr);
+}
+
+static void
+eek_renderer_set_property (GObject      *object,
+                           guint         prop_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
+{
+    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
+
+    switch (prop_id) {
+    case PROP_KEYBOARD:
+        priv->keyboard = g_value_get_object (value);
+        g_object_ref_sink (priv->keyboard);
+        g_signal_connect (priv->keyboard, "keysym-index-changed",
+                          G_CALLBACK(on_keysym_index_changed),
+                          object);
+        break;
+    case PROP_PCONTEXT:
+        priv->pcontext = g_value_get_object (value);
+        g_object_ref (priv->pcontext);
+        break;
+    }
 }
 
 static void
@@ -506,15 +556,37 @@ static void
 eek_renderer_class_init (EekRendererClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec        *pspec;
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekRendererPrivate));
 
+    klass->render_key_label = eek_renderer_real_render_key_label;
+    klass->render_key_outline = eek_renderer_real_render_key_outline;
     klass->render_key = eek_renderer_real_render_key;
     klass->render_keyboard = eek_renderer_real_render_keyboard;
 
+    gobject_class->set_property = eek_renderer_set_property;
     gobject_class->dispose = eek_renderer_dispose;
     gobject_class->finalize = eek_renderer_finalize;
+
+    pspec = g_param_spec_object ("keyboard",
+                                 "Keyboard",
+                                 "Keyboard",
+                                 EEK_TYPE_KEYBOARD,
+                                 G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEYBOARD,
+                                     pspec);
+
+    pspec = g_param_spec_object ("pango-context",
+                                 "Pango Context",
+                                 "Pango Context",
+                                 PANGO_TYPE_CONTEXT,
+                                 G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_PCONTEXT,
+                                     pspec);
 }
 
 static void
@@ -573,16 +645,11 @@ eek_renderer_new (EekKeyboard  *keyboard,
                   PangoContext *pcontext)
 {
     EekRenderer *renderer;
-    EekRendererPrivate *priv;
 
-    renderer = g_object_new (EEK_TYPE_RENDERER, NULL);
-    priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    priv->keyboard = g_object_ref_sink (keyboard);
-    priv->pcontext = g_object_ref (pcontext);
-
-    g_signal_connect (keyboard, "keysym-index-changed",
-                      G_CALLBACK(on_keysym_index_changed),
-                      renderer);
+    renderer = g_object_new (EEK_TYPE_RENDERER,
+                             "keyboard", keyboard,
+                             "pango-context", pcontext,
+                             NULL);
 
     return renderer;
 }
@@ -609,6 +676,25 @@ eek_renderer_set_allocation_size (EekRenderer *renderer,
         priv->scale = scale;
         invalidate (renderer);
     }
+}
+
+void
+eek_renderer_get_size (EekRenderer *renderer,
+                       gdouble     *width,
+                       gdouble     *height)
+{
+    EekRendererPrivate *priv;
+    EekBounds bounds;
+
+    g_return_if_fail (EEK_IS_RENDERER(renderer));
+
+    priv = EEK_RENDERER_GET_PRIVATE(renderer);
+
+    eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
+    if (width)
+        *width = bounds.width * priv->scale;
+    if (height)
+        *height = bounds.height * priv->scale;
 }
 
 void
@@ -692,16 +778,61 @@ eek_renderer_get_scale (EekRenderer *renderer)
     return priv->scale;
 }
 
+PangoLayout *
+eek_renderer_create_pango_layout (EekRenderer  *renderer)
+{
+    EekRendererPrivate *priv;
+
+    g_assert (EEK_IS_RENDERER(renderer));
+
+    priv = EEK_RENDERER_GET_PRIVATE(renderer);
+
+    return pango_layout_new (priv->pcontext);
+}
+
+void
+eek_renderer_render_key_label (EekRenderer *renderer,
+                               PangoLayout *layout,
+                               EekKey      *key)
+{
+    g_return_if_fail (EEK_IS_RENDERER(renderer));
+    g_return_if_fail (EEK_IS_KEY(key));
+
+    EEK_RENDERER_GET_CLASS(renderer)->
+        render_key_label (renderer, layout, key);
+}
+
+void
+eek_renderer_render_key_outline (EekRenderer *renderer,
+                                 cairo_t     *cr,
+                                 EekKey      *key,
+                                 gdouble      scale,
+                                 gboolean     rotate)
+{
+    g_return_if_fail (EEK_IS_RENDERER(renderer));
+    g_return_if_fail (EEK_IS_KEY(key));
+    g_return_if_fail (scale >= 0.0);
+
+    EEK_RENDERER_GET_CLASS(renderer)->render_key_outline (renderer,
+                                                          cr,
+                                                          key,
+                                                          scale,
+                                                          rotate);
+}
+
 void
 eek_renderer_render_key (EekRenderer *renderer,
                          cairo_t     *cr,
                          EekKey      *key,
-                         gdouble      scale)
+                         gdouble      scale,
+                         gboolean     rotate)
 {
     g_return_if_fail (EEK_IS_RENDERER(renderer));
+    g_return_if_fail (EEK_IS_KEY(key));
     g_return_if_fail (scale >= 0.0);
 
-    EEK_RENDERER_GET_CLASS(renderer)->render_key (renderer, cr, key, scale);
+    EEK_RENDERER_GET_CLASS(renderer)->
+        render_key (renderer, cr, key, scale, rotate);
 }
 
 void

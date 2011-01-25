@@ -29,13 +29,24 @@ struct _EekRendererClass
 {
     GObjectClass parent_class;
 
-    void (* render_key)      (EekRenderer *self,
-                              cairo_t     *cr,
-                              EekKey      *key,
-                              gdouble      scale);
+    void (* render_key_label)   (EekRenderer *self,
+                                 PangoLayout *layout,
+                                 EekKey      *key);
 
-    void (* render_keyboard) (EekRenderer *self,
-                              cairo_t     *cr);
+    void (* render_key_outline) (EekRenderer *self,
+                                 cairo_t     *cr,
+                                 EekKey      *key,
+                                 gdouble      scale,
+                                 gboolean     rotate);
+
+    void (* render_key)         (EekRenderer *self,
+                                 cairo_t     *cr,
+                                 EekKey      *key,
+                                 gdouble      scale,
+                                 gboolean     rotate);
+
+    void (* render_keyboard)    (EekRenderer *self,
+                                 cairo_t     *cr);
 
     /*< private >*/
     /* padding */
@@ -55,12 +66,25 @@ void         eek_renderer_get_key_bounds       (EekRenderer  *renderer,
                                                 EekKey       *key,
                                                 EekBounds    *bounds,
                                                 gboolean      rotate);
+
 gdouble      eek_renderer_get_scale            (EekRenderer  *renderer);
+
+PangoLayout *eek_renderer_create_pango_layout  (EekRenderer  *renderer);
+void         eek_renderer_render_key_label     (EekRenderer  *renderer,
+                                                PangoLayout  *layout,
+                                                EekKey       *key);
+
+void         eek_renderer_render_key_outline   (EekRenderer  *renderer,
+                                                cairo_t      *cr,
+                                                EekKey       *key,
+                                                gdouble       scale,
+                                                gboolean      rotate);
 
 void         eek_renderer_render_key           (EekRenderer  *renderer,
                                                 cairo_t      *cr,
                                                 EekKey       *key,
-                                                gdouble       scale);
+                                                gdouble       scale,
+                                                gboolean      rotate);
 
 void         eek_renderer_render_keyboard      (EekRenderer  *renderer,
                                                 cairo_t      *cr);
