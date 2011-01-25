@@ -87,8 +87,8 @@ struct _EekKeyboardClass
 GType        eek_keyboard_get_type            (void) G_GNUC_CONST;
 
 EekKeyboard *eek_keyboard_new                 (EekLayout   *layout,
-                                               gint         initial_width,
-                                               gint         initial_height);
+                                               gdouble      initial_width,
+                                               gdouble      initial_height);
 EekLayout   *eek_keyboard_get_layout          (EekKeyboard *keyboard);
 void         eek_keyboard_get_size            (EekKeyboard *keyboard,
                                                gdouble     *width,

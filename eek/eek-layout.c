@@ -100,8 +100,8 @@ eek_layout_init (EekLayout *self)
  */
 EekKeyboard *
 eek_keyboard_new (EekLayout *layout,
-                  gint       initial_width,
-                  gint       initial_height)
+                  gdouble    initial_width,
+                  gdouble    initial_height)
 {
     g_assert (EEK_IS_LAYOUT(layout));
     g_assert (EEK_LAYOUT_GET_CLASS(layout)->create_keyboard);
