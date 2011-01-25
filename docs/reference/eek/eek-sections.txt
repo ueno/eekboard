@@ -4,8 +4,14 @@
 EekKeyboardClass
 EekKeyboard
 eek_keyboard_new
+eek_keyboard_get_layout
 eek_keyboard_set_keysym_index
 eek_keyboard_get_keysym_index
+eek_keyboard_get_group
+eek_keyboard_get_level
+eek_keyboard_set_group
+eek_keyboard_set_level
+eek_keyboard_get_size
 eek_keyboard_create_section
 eek_keyboard_find_key_by_keycode
 <SUBSECTION Standard>
@@ -175,6 +181,7 @@ eek_key_set_outline
 eek_key_get_outline
 eek_key_set_keysym_index
 eek_key_get_keysym_index
+eek_key_is_pressed
 <SUBSECTION Standard>
 EEK_KEY
 EEK_IS_KEY
