@@ -24,6 +24,13 @@
 
 #include "eek-clutter-key.h"
 
+enum {
+    PROP_0,
+    PROP_KEY,
+    PROP_RENDERER,
+    PROP_LAST
+};
+
 G_DEFINE_TYPE (EekClutterKey, eek_clutter_key, CLUTTER_TYPE_ACTOR);
 
 #define EEK_CLUTTER_KEY_GET_PRIVATE(obj)                                  \
@@ -36,21 +43,62 @@ struct _EekClutterKeyPrivate
 };
 
 static void
-eek_clutter_key_dispose (GObject *object)
+on_pressed (EekKey *key, gpointer user_data)
 {
-    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
+    ClutterActor *actor = user_data, *parent;
 
-    if (priv->renderer) {
-        g_object_unref (priv->renderer);
-        priv->renderer = NULL;
-    }
+    parent = clutter_actor_get_parent (actor);
+    clutter_actor_raise_top (parent);
+    clutter_actor_raise_top (actor);
+    clutter_actor_set_scale_with_gravity (actor,
+                                          1.0,
+                                          1.0,
+                                          CLUTTER_GRAVITY_CENTER);
 
-    if (priv->key && g_object_is_floating (priv->key)) {
-        g_object_unref (priv->key);
-        priv->key = NULL;
-    }
+    clutter_actor_animate (actor, CLUTTER_EASE_IN_SINE, 150,
+                           "scale-x", 1.5,
+                           "scale-y", 1.5,
+                           NULL);
+}
 
-    G_OBJECT_CLASS (eek_clutter_key_parent_class)->dispose (object);
+static void
+on_released (EekKey *key, gpointer user_data)
+{
+    ClutterActor *actor = user_data, *parent;
+
+    parent = clutter_actor_get_parent (actor);
+    clutter_actor_raise_top (parent);
+    clutter_actor_raise_top (actor);
+    clutter_actor_set_scale_with_gravity (actor,
+                                          1.5,
+                                          1.5,
+                                          CLUTTER_GRAVITY_CENTER);
+    clutter_actor_animate (actor, CLUTTER_EASE_OUT_SINE, 150,
+                           "scale-x", 1.0,
+                           "scale-y", 1.0,
+                           NULL);
+}
+
+static void
+eek_clutter_key_real_realize (ClutterActor *self)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(self);
+    EekBounds bounds;
+    gdouble scale;
+
+    eek_element_get_bounds (EEK_ELEMENT(priv->key), &bounds);
+    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+
+    clutter_actor_set_position (self,
+                                bounds.x * scale,
+                                bounds.y * scale);
+
+    clutter_actor_set_reactive (self, TRUE);
+
+    g_signal_connect (priv->key, "pressed",
+                      G_CALLBACK(on_pressed), self);
+    g_signal_connect (priv->key, "released",
+                      G_CALLBACK(on_released), self);
 }
 
 static void
@@ -137,14 +185,59 @@ eek_clutter_key_real_leave_event (ClutterActor         *self,
 }
 
 static void
+eek_clutter_key_set_property (GObject      *object,
+                                  guint         prop_id,
+                                  const GValue *value,
+                                  GParamSpec   *pspec)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
+
+    switch (prop_id) {
+    case PROP_KEY:
+        priv->key = g_value_get_object (value);
+        g_object_ref_sink (priv->key);
+        break;
+    case PROP_RENDERER:
+        priv->renderer = g_value_get_object (value);
+        g_object_ref (priv->renderer);
+        break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
+eek_clutter_key_dispose (GObject *object)
+{
+    EekClutterKeyPrivate *priv = EEK_CLUTTER_KEY_GET_PRIVATE(object);
+
+    if (priv->renderer) {
+        g_object_unref (priv->renderer);
+        priv->renderer = NULL;
+    }
+
+    if (priv->key && g_object_is_floating (priv->key)) {
+        g_object_unref (priv->key);
+        priv->key = NULL;
+    }
+
+    G_OBJECT_CLASS (eek_clutter_key_parent_class)->dispose (object);
+}
+
+static void
 eek_clutter_key_class_init (EekClutterKeyClass *klass)
 {
     ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterKeyPrivate));
 
+    actor_class->realize = eek_clutter_key_real_realize;
     actor_class->paint = eek_clutter_key_real_paint;
     actor_class->get_preferred_width =
         eek_clutter_key_real_get_preferred_width;
@@ -160,7 +253,26 @@ eek_clutter_key_class_init (EekClutterKeyClass *klass)
     actor_class->leave_event =
         eek_clutter_key_real_leave_event;
 
+    gobject_class->set_property = eek_clutter_key_set_property;
     gobject_class->dispose = eek_clutter_key_dispose;
+
+    pspec = g_param_spec_object ("key",
+                                 "Key",
+                                 "Key",
+                                 EEK_TYPE_KEY,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEY,
+                                     pspec);
+
+    pspec = g_param_spec_object ("renderer",
+                                 "Renderer",
+                                 "Renderer",
+                                 EEK_TYPE_RENDERER,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_RENDERER,
+                                     pspec);
 }
 
 static void
@@ -172,69 +284,11 @@ eek_clutter_key_init (EekClutterKey *self)
     priv->renderer = NULL;
 }
 
-static void
-on_pressed (EekKey *key, gpointer user_data)
-{
-    ClutterActor *actor = user_data, *parent;
-
-    parent = clutter_actor_get_parent (actor);
-    clutter_actor_raise_top (parent);
-    clutter_actor_raise_top (actor);
-    clutter_actor_set_scale_with_gravity (actor,
-                                          1.0,
-                                          1.0,
-                                          CLUTTER_GRAVITY_CENTER);
-
-    clutter_actor_animate (actor, CLUTTER_EASE_IN_SINE, 150,
-                           "scale-x", 1.5,
-                           "scale-y", 1.5,
-                           NULL);
-}
-
-static void
-on_released (EekKey *key, gpointer user_data)
-{
-    ClutterActor *actor = user_data, *parent;
-
-    parent = clutter_actor_get_parent (actor);
-    clutter_actor_raise_top (parent);
-    clutter_actor_raise_top (actor);
-    clutter_actor_set_scale_with_gravity (actor,
-                                          1.5,
-                                          1.5,
-                                          CLUTTER_GRAVITY_CENTER);
-    clutter_actor_animate (actor, CLUTTER_EASE_OUT_SINE, 150,
-                           "scale-x", 1.0,
-                           "scale-y", 1.0,
-                           NULL);
-}
-
 ClutterActor *
 eek_clutter_key_new (EekKey *key, EekClutterRenderer *renderer)
 {
-    ClutterActor *actor;
-    EekClutterKeyPrivate *priv;
-    EekBounds bounds;
-    gdouble scale;
-
-    actor = g_object_new (EEK_TYPE_CLUTTER_KEY, NULL);
-    priv = EEK_CLUTTER_KEY_GET_PRIVATE(actor);
-    priv->key = g_object_ref_sink (key);
-    priv->renderer = g_object_ref (renderer);
-
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
-
-    clutter_actor_set_position (actor,
-                                bounds.x * scale,
-                                bounds.y * scale);
-
-    clutter_actor_set_reactive (actor, TRUE);
-
-    g_signal_connect (priv->key, "pressed",
-                      G_CALLBACK(on_pressed), actor);
-    g_signal_connect (priv->key, "released",
-                      G_CALLBACK(on_released), actor);
-
-    return actor;
+    return g_object_new (EEK_TYPE_CLUTTER_KEY,
+                         "key", key,
+                         "renderer", renderer,
+                         NULL);
 }

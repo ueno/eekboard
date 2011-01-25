@@ -34,6 +34,12 @@
 #include "eek-clutter-renderer.h"
 #include "eek-keyboard.h"
 
+enum {
+    PROP_0,
+    PROP_KEYBOARD,
+    PROP_LAST
+};
+
 G_DEFINE_TYPE (EekClutterKeyboard, eek_clutter_keyboard, CLUTTER_TYPE_GROUP);
 
 #define EEK_CLUTTER_KEYBOARD_GET_PRIVATE(obj)                                  \
@@ -44,6 +50,45 @@ struct _EekClutterKeyboardPrivate
     EekKeyboard *keyboard;
     EekClutterRenderer *renderer;
 };
+
+struct _CreateSectionCallbackData {
+    ClutterActor *actor;
+    EekClutterRenderer *renderer;
+};
+typedef struct _CreateSectionCallbackData CreateSectionCallbackData;
+
+static void
+create_section (EekElement *element, gpointer user_data)
+{
+    CreateSectionCallbackData *data = user_data;
+    ClutterActor *section;
+    
+    section = eek_clutter_section_new (EEK_SECTION(element), data->renderer);
+    clutter_container_add_actor (CLUTTER_CONTAINER(data->actor), section);
+}
+
+static void
+eek_clutter_keyboard_real_realize (ClutterActor *self)
+{
+    EekClutterKeyboardPrivate *priv;
+    CreateSectionCallbackData data;
+    EekBounds bounds;
+    gdouble scale;
+
+    priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
+
+    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
+    clutter_actor_set_position (CLUTTER_ACTOR(self),
+                                bounds.x * scale,
+                                bounds.y * scale);
+
+    data.actor = CLUTTER_ACTOR(self);
+    data.renderer = priv->renderer;
+
+    eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
+                                 create_section,
+                                 &data);
+}
 
 static void
 eek_clutter_keyboard_real_get_preferred_width (ClutterActor *self,
@@ -90,6 +135,49 @@ eek_clutter_keyboard_real_allocate (ClutterActor          *self,
 }
 
 static void
+create_renderer (EekClutterKeyboard *self)
+{
+    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
+    PangoContext *pcontext;
+    PangoFontDescription *font;
+    EekBounds bounds;
+
+    pcontext = clutter_actor_get_pango_context (CLUTTER_ACTOR(self));
+    font = pango_font_description_from_string ("Sans 48px");
+    pango_context_set_font_description (pcontext, font);
+    pango_font_description_free (font);
+
+    priv->renderer = eek_clutter_renderer_new (priv->keyboard, pcontext);
+
+    eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
+    eek_renderer_set_allocation_size (EEK_RENDERER(priv->renderer),
+                                      bounds.width,
+                                      bounds.height);
+}
+
+static void
+eek_clutter_keyboard_set_property (GObject      *object,
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
+{
+    EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
+
+    switch (prop_id) {
+    case PROP_KEYBOARD:
+        priv->keyboard = g_value_get_object (value);
+        g_object_ref_sink (priv->keyboard);
+        create_renderer (EEK_CLUTTER_KEYBOARD(object));
+        break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
 eek_clutter_keyboard_dispose (GObject *object)
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(object);
@@ -112,17 +200,30 @@ eek_clutter_keyboard_class_init (EekClutterKeyboardClass *klass)
 {
     ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec *pspec;
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterKeyboardPrivate));
 
+    actor_class->realize =
+        eek_clutter_keyboard_real_realize;
     actor_class->get_preferred_width =
         eek_clutter_keyboard_real_get_preferred_width;
     actor_class->get_preferred_height =
         eek_clutter_keyboard_real_get_preferred_height;
     actor_class->allocate = eek_clutter_keyboard_real_allocate;
 
+    gobject_class->set_property = eek_clutter_keyboard_set_property;
     gobject_class->dispose = eek_clutter_keyboard_dispose;
+
+    pspec = g_param_spec_object ("keyboard",
+                                 "Keyboard",
+                                 "Keyboard",
+                                 EEK_TYPE_KEYBOARD,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEYBOARD,
+                                     pspec);
 }
 
 static void
@@ -135,22 +236,6 @@ eek_clutter_keyboard_init (EekClutterKeyboard *self)
     priv->renderer = NULL;
 }
 
-struct _CreateSectionCallbackData {
-    ClutterActor *actor;
-    EekClutterRenderer *renderer;
-};
-typedef struct _CreateSectionCallbackData CreateSectionCallbackData;
-
-static void
-create_section (EekElement *element, gpointer user_data)
-{
-    CreateSectionCallbackData *data = user_data;
-    ClutterActor *section;
-    
-    section = eek_clutter_section_new (EEK_SECTION(element), data->renderer);
-    clutter_container_add_actor (CLUTTER_CONTAINER(data->actor), section);
-}
-
 /**
  * eek_clutter_keyboard_new:
  * @keyboard: an #EekKeyboard
@@ -161,38 +246,5 @@ create_section (EekElement *element, gpointer user_data)
 ClutterActor *
 eek_clutter_keyboard_new (EekKeyboard *keyboard)
 {
-    ClutterActor *actor;
-    EekClutterKeyboardPrivate *priv;
-    PangoContext *pcontext;
-    CreateSectionCallbackData data;
-    EekBounds bounds;
-    gdouble scale;
-    PangoFontDescription *font;
-
-    actor = g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, NULL);
-    priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(actor);
-    priv->keyboard = g_object_ref_sink (keyboard);
-
-    pcontext = clutter_actor_get_pango_context (actor);
-    font = pango_font_description_from_string ("Sans 48px");
-    pango_context_set_font_description (pcontext, font);
-    pango_font_description_free (font);
-
-    priv->renderer = eek_clutter_renderer_new (priv->keyboard, pcontext);
-
-    eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
-    eek_renderer_set_allocation_size (EEK_RENDERER(priv->renderer),
-                                      bounds.width,
-                                      bounds.height);
-    scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
-    clutter_actor_set_position (actor, bounds.x * scale, bounds.y * scale);
-
-    data.actor = actor;
-    data.renderer = priv->renderer;
-
-    eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
-                                 create_section,
-                                 &data);
-
-    return actor;
+    return g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, "keyboard", keyboard, NULL);
 }
