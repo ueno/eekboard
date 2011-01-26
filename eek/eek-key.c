@@ -265,7 +265,6 @@ eek_key_get_property (GObject    *object,
 {
     EekKeysymMatrix matrix;
     gint column, row;
-    gint group, level;
 
     g_return_if_fail (EEK_IS_KEY(object));
     switch (prop_id) {
@@ -545,8 +544,6 @@ eek_key_get_keysym_at_index (EekKey *key,
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(key);
     gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
-    gint g, l;
-    EekElement *parent;
 
     if (num_keysyms == 0)
         return EEK_INVALID_KEYSYM;
