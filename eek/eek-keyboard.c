@@ -34,6 +34,7 @@
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
+#include "eek-keysym.h"
 #include "eek-marshallers.h"
 
 enum {
@@ -41,6 +42,7 @@ enum {
     PROP_GROUP,
     PROP_LEVEL,
     PROP_LAYOUT,
+    PROP_MODIFIER_BEHAVIOR,
     PROP_LAST
 };
 
@@ -64,6 +66,8 @@ struct _EekKeyboardPrivate
     gint group;
     gint level;
     EekLayout *layout;
+    EekModifierBehavior modifier_behavior;
+    EekModifierType modifiers;
 };
 
 static void
@@ -180,6 +184,10 @@ eek_keyboard_set_property (GObject      *object,
         priv->layout = g_value_get_object (value);
         g_object_ref (priv->layout);
         break;
+    case PROP_MODIFIER_BEHAVIOR:
+        eek_keyboard_set_modifier_behavior (EEK_KEYBOARD(object),
+                                            g_value_get_int (value));
+        break;
     default:
         g_object_set_property (object,
                                g_param_spec_get_name (pspec),
@@ -208,6 +216,10 @@ eek_keyboard_get_property (GObject    *object,
     case PROP_LAYOUT:
         g_value_set_object (value, priv->layout);
         break;
+    case PROP_MODIFIER_BEHAVIOR:
+        g_value_set_int (value,
+                         eek_keyboard_get_modifier_behavior (EEK_KEYBOARD(object)));
+        break;
     default:
         g_object_get_property (object,
                                g_param_spec_get_name (pspec),
@@ -225,6 +237,60 @@ eek_keyboard_real_keysym_index_changed (EekKeyboard *self,
 }
 
 static void
+set_level_from_modifiers (EekKeyboard *self)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    guint level = 0;
+
+    if (priv->modifiers & EEK_MOD5_MASK)
+        level |= 2;
+    if (priv->modifiers & EEK_SHIFT_MASK)
+        level |= 1;
+    eek_keyboard_set_level (self, level);
+}
+
+static void
+eek_keyboard_real_key_pressed (EekKeyboard *self,
+                               EekKey      *key)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    guint keysym;
+    EekModifierType modifier;
+
+    if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LATCH)
+        priv->modifiers = 0;
+
+    keysym = eek_key_get_keysym_at_index (key, priv->group, priv->level);
+    modifier = eek_keysym_to_modifier (keysym);
+        
+    if (modifier != 0) {
+        if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE ||
+            priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LATCH)
+            priv->modifiers |= modifier;
+        else if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LOCK)
+            priv->modifiers ^= modifier;
+    }
+    set_level_from_modifiers (self);
+}
+
+static void
+eek_keyboard_real_key_released (EekKeyboard *self,
+                               EekKey      *key)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    guint keysym;
+    EekModifierType modifier;
+
+    keysym = eek_key_get_keysym_at_index (key, priv->group, priv->level);
+    modifier = eek_keysym_to_modifier (keysym);
+    if (modifier != 0) {
+        if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE)
+            priv->modifiers &= ~modifier;
+    }
+    set_level_from_modifiers (self);
+}
+
+static void
 eek_keyboard_class_init (EekKeyboardClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
@@ -238,6 +304,9 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     klass->create_section = eek_keyboard_real_create_section;
     klass->find_key_by_keycode = eek_keyboard_real_find_key_by_keycode;
 
+    /* signals */
+    klass->key_pressed = eek_keyboard_real_key_pressed;
+    klass->key_released = eek_keyboard_real_key_released;
     klass->keysym_index_changed = eek_keyboard_real_keysym_index_changed;
 
     gobject_class->get_property = eek_keyboard_get_property;
@@ -286,6 +355,20 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                                      pspec);
 
     /**
+     * EekKeyboard:modifier-behavior:
+     *
+     * The modifier handling mode of #EekKeyboard.
+     */
+    pspec = g_param_spec_int ("modifier-behavior",
+                              "Modifier behavior",
+                              "Modifier handling mode of the keyboard",
+                              0, G_MAXINT, EEK_MODIFIER_BEHAVIOR_NONE,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_MODIFIER_BEHAVIOR,
+                                     pspec);
+
+    /**
      * EekKeyboard::key-pressed:
      * @keyboard: an #EekKeyboard
      * @key: an #EekKey
@@ -296,8 +379,8 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, key_pressed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__OBJECT,
@@ -316,8 +399,8 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     signals[KEY_RELEASED] =
         g_signal_new ("key-released",
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, key_released),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__OBJECT,
@@ -356,6 +439,8 @@ eek_keyboard_init (EekKeyboard *self)
     priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
     priv->group = priv->level = 0;
     priv->layout = NULL;
+    priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
+    priv->modifiers = 0;
 }
 
 /**
@@ -507,4 +592,38 @@ eek_keyboard_get_size (EekKeyboard *keyboard,
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     *width = bounds.width;
     *height = bounds.height;
+}
+
+void
+eek_keyboard_set_modifier_behavior (EekKeyboard        *keyboard,
+                                    EekModifierBehavior modifier_behavior)
+{
+    EekKeyboardPrivate *priv;
+
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    priv->modifier_behavior = modifier_behavior;
+}
+
+EekModifierBehavior
+eek_keyboard_get_modifier_behavior (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->modifier_behavior;
+}
+
+EekModifierType
+eek_keyboard_get_modifiers (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->modifiers;
 }

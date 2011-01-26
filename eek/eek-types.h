@@ -46,6 +46,22 @@ typedef enum {
     EEK_ORIENTATION_INVALID = -1
 } EekOrientation;
 
+/**
+ * EekModifierBehavior:
+ * @EEK_MODIFIER_BEHAVIOR_NONE: do nothing when a modifier key is pressed
+ * @EEK_MODIFIER_BEHAVIOR_LOCK: toggle the modifier status each time a
+ * modifier key are pressed
+ * @EEK_MODIFIER_BEHAVIOR_LATCH: enable the modifier when a modifier
+ * key is pressed and keep it enabled until any key is pressed.
+ *
+ * Modifier handling mode.
+ */
+typedef enum {
+    EEK_MODIFIER_BEHAVIOR_NONE,
+    EEK_MODIFIER_BEHAVIOR_LOCK,
+    EEK_MODIFIER_BEHAVIOR_LATCH
+} EekModifierBehavior;
+    
 typedef struct _EekElement EekElement;
 typedef struct _EekContainer EekContainer;
 typedef struct _EekKey EekKey;

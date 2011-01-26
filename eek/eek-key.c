@@ -502,6 +502,20 @@ eek_key_get_keysyms (EekKey *key,
     EEK_KEY_GET_CLASS(key)->get_keysyms (key, keysyms, num_groups, num_levels);
 }
 
+static EekKeyboard *
+get_keyboard (EekKey *key)
+{
+    EekElement *parent;
+
+    parent = eek_element_get_parent (EEK_ELEMENT(key));
+    g_return_val_if_fail (EEK_IS_SECTION(parent), NULL);
+
+    parent = eek_element_get_parent (parent);
+    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), NULL);
+
+    return EEK_KEYBOARD(parent);
+}
+
 /**
  * eek_key_get_keysym:
  * @key: an #EekKey
@@ -513,17 +527,14 @@ guint
 eek_key_get_keysym (EekKey *key)
 {
     gint group, level;
-    EekElement *parent;
+    EekKeyboard *keyboard;
 
     g_return_val_if_fail (EEK_IS_KEY (key), EEK_INVALID_KEYSYM);
 
-    parent = eek_element_get_parent (EEK_ELEMENT(key));
-    g_return_val_if_fail (EEK_IS_SECTION(parent), EEK_INVALID_KEYSYM);
+    keyboard = get_keyboard (key);
+    g_return_val_if_fail (keyboard, EEK_INVALID_KEYSYM);
 
-    parent = eek_element_get_parent (parent);
-    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), EEK_INVALID_KEYSYM);
-
-    eek_keyboard_get_keysym_index (EEK_KEYBOARD(parent), &group, &level);
+    eek_keyboard_get_keysym_index (keyboard, &group, &level);
 
     return eek_key_get_keysym_at_index (key, group, level);
 }

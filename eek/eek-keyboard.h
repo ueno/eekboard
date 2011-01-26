@@ -24,6 +24,7 @@
 #include "eek-container.h"
 #include "eek-types.h"
 #include "eek-layout.h"
+#include "eek-keysym.h"
 
 G_BEGIN_DECLS
 
@@ -75,6 +76,10 @@ struct _EekKeyboardClass
                                           guint        keycode);
 
     /* signals */
+    void        (* key_pressed)          (EekKeyboard *self,
+                                          EekKey      *key);
+    void        (* key_released)         (EekKeyboard *self,
+                                          EekKey      *key);
     void        (* keysym_index_changed) (EekKeyboard *self,
                                           gint         group,
                                           gint         level);
@@ -84,33 +89,52 @@ struct _EekKeyboardClass
     gpointer pdummy[23];
 };
 
-GType        eek_keyboard_get_type            (void) G_GNUC_CONST;
+GType               eek_keyboard_get_type
+                                     (void) G_GNUC_CONST;
 
-EekKeyboard *eek_keyboard_new                 (EekLayout   *layout,
-                                               gdouble      initial_width,
-                                               gdouble      initial_height);
-EekLayout   *eek_keyboard_get_layout          (EekKeyboard *keyboard);
-void         eek_keyboard_get_size            (EekKeyboard *keyboard,
-                                               gdouble     *width,
-                                               gdouble     *height);
-void         eek_keyboard_set_keysym_index    (EekKeyboard *keyboard,
-                                               gint         group,
-                                               gint         level);
-void         eek_keyboard_get_keysym_index    (EekKeyboard *keyboard,
-                                               gint        *group,
-                                               gint        *level);
+EekKeyboard        *eek_keyboard_new (EekLayout          *layout,
+                                      gdouble             initial_width,
+                                      gdouble             initial_height);
+EekLayout          *eek_keyboard_get_layout
+                                     (EekKeyboard        *keyboard);
+void                eek_keyboard_get_size
+                                     (EekKeyboard        *keyboard,
+                                      gdouble            *width,
+                                      gdouble            *height);
+void                eek_keyboard_set_keysym_index
+                                     (EekKeyboard        *keyboard,
+                                      gint                group,
+                                      gint                level);
+void                eek_keyboard_get_keysym_index
+                                     (EekKeyboard        *keyboard,
+                                      gint               *group,
+                                      gint               *level);
 
-void         eek_keyboard_set_group           (EekKeyboard *keyboard,
-                                               gint         group);
-void         eek_keyboard_set_level           (EekKeyboard *keyboard,
-                                               gint         level);
-gint         eek_keyboard_get_group           (EekKeyboard *keyboard);
-gint         eek_keyboard_get_level           (EekKeyboard *keyboard);
+void                eek_keyboard_set_group
+                                     (EekKeyboard        *keyboard,
+                                      gint                group);
+void                eek_keyboard_set_level
+                                     (EekKeyboard        *keyboard,
+                                      gint                level);
+gint                eek_keyboard_get_group
+                                     (EekKeyboard        *keyboard);
+gint                eek_keyboard_get_level
+                                     (EekKeyboard        *keyboard);
 
-EekSection  *eek_keyboard_create_section      (EekKeyboard *keyboard);
+void                eek_keyboard_set_modifier_behavior
+                                     (EekKeyboard        *keyboard,
+                                      EekModifierBehavior modifier_behavior);
+EekModifierBehavior eek_keyboard_get_modifier_behavior
+                                     (EekKeyboard        *keyboard);
+EekModifierType     eek_keyboard_get_modifiers
+                                     (EekKeyboard        *keyboard);
 
-EekKey      *eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
-                                               guint        keycode);
+EekSection         *eek_keyboard_create_section
+                                     (EekKeyboard        *keyboard);
+
+EekKey             *eek_keyboard_find_key_by_keycode
+                                     (EekKeyboard        *keyboard,
+                                      guint               keycode);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

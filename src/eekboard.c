@@ -104,7 +104,6 @@ struct _Eekboard {
 
     EekKeyboard *keyboard;
     EekLayout *layout;          /* FIXME: eek_keyboard_get_layout() */
-    guint modifiers;
 };
 typedef struct _Eekboard Eekboard;
 
@@ -432,44 +431,17 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer user_data)
 {
     Eekboard *eekboard = user_data;
-    gint group, level;
     guint keysym;
 
     keysym = eek_key_get_keysym (key);
-    EEKBOARD_NOTE("%s %X", eek_keysym_to_string (keysym), eekboard->modifiers);
+    EEKBOARD_NOTE("%s %X",
+                  eek_keysym_to_string (keysym),
+                  eek_keyboard_get_modifiers (keyboard));
 
-    switch (keysym) {
-    case XK_Shift_L:
-    case XK_Shift_R:
-        eekboard->modifiers ^= ShiftMask;
-        eek_keyboard_get_keysym_index (keyboard, &group, &level);
-        eek_keyboard_set_keysym_index (keyboard, group,
-                                       (eekboard->modifiers & Mod5Mask) ? 2 :
-                                       (eekboard->modifiers & ShiftMask) ? 1 :
-                                       0);
-        break;
-    case XK_ISO_Level3_Shift:
-        eekboard->modifiers ^= Mod5Mask;
-        eek_keyboard_get_keysym_index (keyboard, &group, &level);
-        eek_keyboard_set_keysym_index (keyboard, group,
-                                       (eekboard->modifiers & Mod5Mask) ? 2 :
-                                       (eekboard->modifiers & ShiftMask) ? 1 :
-                                       0);
-        break;
-    case XK_Control_L:
-    case XK_Control_R:
-        eekboard->modifiers ^= ControlMask;
-        break;
-    case XK_Alt_L:
-    case XK_Alt_R:
-        eekboard->modifiers ^= Mod1Mask;
-        break;
-    default:
-        fakekey_press_keysym (eekboard->fakekey, keysym, eekboard->modifiers);
-        eekboard->modifiers = 0;
-        eek_keyboard_get_keysym_index (keyboard, &group, &level);
-        eek_keyboard_set_keysym_index (keyboard, group, 0);
-    }
+    if (!eek_keysym_is_modifier (keysym))
+        fakekey_press_keysym (eekboard->fakekey,
+                              keysym,
+                              eek_keyboard_get_modifiers (keyboard));
 }
 
 static void
@@ -1066,6 +1038,8 @@ create_widget (Eekboard *eekboard,
     eekboard->keyboard = eek_keyboard_new (eekboard->layout,
                                            initial_width,
                                            initial_height);
+    eek_keyboard_set_modifier_behavior (eekboard->keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
     eekboard->on_key_pressed_id =
         g_signal_connect (eekboard->keyboard, "key-pressed",
                           G_CALLBACK(on_key_pressed), eekboard);

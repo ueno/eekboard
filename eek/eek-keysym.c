@@ -169,3 +169,33 @@ eek_keysym_get_category (guint keysym)
         return category;
     return EEK_KEYSYM_CATEGORY_UNKNOWN;
 }
+
+EekModifierType
+eek_keysym_to_modifier (guint keysym)
+{
+    switch (keysym) {
+    case EEK_KEY_Shift_L:
+    case EEK_KEY_Shift_R:
+    case EEK_KEY_Caps_Lock:
+    case EEK_KEY_Shift_Lock:
+        return EEK_SHIFT_MASK;
+    case EEK_KEY_ISO_Level3_Shift:
+        return EEK_MOD5_MASK;
+    case EEK_KEY_Control_L:
+    case EEK_KEY_Control_R:
+        return EEK_CONTROL_MASK;
+    case EEK_KEY_Alt_L:
+    case EEK_KEY_Alt_R:
+        return EEK_MOD1_MASK;
+    case EEK_KEY_Meta_L:
+    case EEK_KEY_Meta_R:
+        return EEK_META_MASK;
+    case EEK_KEY_Super_L:
+    case EEK_KEY_Super_R:
+        return EEK_SUPER_MASK;
+    case EEK_KEY_Hyper_L:
+    case EEK_KEY_Hyper_R:
+        return EEK_HYPER_MASK;
+    }
+    return 0;
+}
