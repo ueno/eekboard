@@ -79,7 +79,7 @@ output_key_callback (EekElement *element, gpointer user_data)
     if (outline) {
         for (i = 0;
              i < data->outline_array->len &&
-                 g_array_index (data->outline_array, gpointer, i) == outline;
+                 g_array_index (data->outline_array, gpointer, i) != outline;
              i++)
             ;
         if (i == data->outline_array->len)
