@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-INCLUDES = -I$(top_srcdir) $(GOBJECT2_CFLAGS) $(GTK_CFLAGS) $(XKB_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(GIO2_CFLAGS) $(GTK_CFLAGS) $(XKB_CFLAGS)
 
 TESTS = eek-simple-test eek-xkb-test
 noinst_PROGRAMS = $(TESTS)

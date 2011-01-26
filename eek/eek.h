@@ -25,5 +25,6 @@
 #include "eek-key.h"
 #include "eek-layout.h"
 #include "eek-keysym.h"
+#include "eek-xml.h"
 
 #endif  /* EEK_H */

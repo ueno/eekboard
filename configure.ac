@@ -87,8 +87,8 @@ AM_CONDITIONAL([HAVE_GTK_3],[test "$with_gtk" = "3.0"])
 AM_PATH_GLIB_2_0
 PKG_CHECK_MODULES([GLIB2], [glib-2.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
-PKG_CHECK_MODULES([GOBJECT2], [gobject-2.0], ,
-  [AC_MSG_ERROR([GObject2 not found])])
+PKG_CHECK_MODULES([GIO2], [gio-2.0], ,
+  [AC_MSG_ERROR([Gio2 not found])])
 PKG_CHECK_MODULES([PANGOCAIRO], [pangocairo], ,
   [AC_MSG_ERROR([PangoCairo not found])])
 PKG_CHECK_MODULES([GTK], [

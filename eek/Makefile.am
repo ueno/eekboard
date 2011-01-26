@@ -35,7 +35,16 @@ libeek_public_headers =				\
 	$(srcdir)/eek-key.h			\
 	$(srcdir)/eek-types.h			\
 	$(srcdir)/eek-keysym.h			\
+	$(srcdir)/eek-xml.h			\
 	$(srcdir)/eek.h
+
+libeek_private_headers =			\
+	$(srcdir)/eek-renderer.h		\
+	$(srcdir)/eek-xml-layout.h		\
+	$(srcdir)/eek-special-keysym-labels.h	\
+	$(srcdir)/eek-unicode-keysym-labels.h	\
+	$(srcdir)/eek-keyname-keysym-labels.h	\
+	$(srcdir)/eek-marshallers.h
 
 libeek_sources =				\
 	$(srcdir)/eek-layout.c			\
@@ -46,6 +55,8 @@ libeek_sources =				\
 	$(srcdir)/eek-key.c			\
 	$(srcdir)/eek-types.c			\
 	$(srcdir)/eek-keysym.c			\
+	$(srcdir)/eek-xml.c			\
+	$(srcdir)/eek-xml-layout.c		\
 	$(srcdir)/eek-renderer.c		\
 	$(srcdir)/eek-keyboard-drawing.c
 
@@ -62,13 +73,6 @@ libeek_marshallers_sources =			\
 	$(srcdir)/eek-marshallers.c		\
 	$(srcdir)/eek-marshallers.h
 
-libeek_private_headers =			\
-	$(srcdir)/eek-renderer.h		\
-	$(srcdir)/eek-special-keysym-labels.h	\
-	$(srcdir)/eek-unicode-keysym-labels.h	\
-	$(srcdir)/eek-keyname-keysym-labels.h	\
-	$(srcdir)/eek-marshallers.h
-
 BUILT_SOURCES =					\
 	$(libeek_keysym_sources)		\
 	$(libeek_marshallers_sources)
@@ -77,8 +81,8 @@ libeek_la_SOURCES =				\
 	$(libeek_sources)			\
 	$(srcdir)/eek-marshallers.c
 
-libeek_la_CFLAGS = $(GOBJECT2_CFLAGS) $(PANGOCAIRO_CFLAGS)
-libeek_la_LIBADD = $(GOBJECT2_LIBS) $(PANGOCAIRO_LIBS) -lm
+libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS)
+libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) -lm
 
 if HAVE_CLUTTER
 libeek_clutter_public_headers =			\
@@ -198,7 +202,7 @@ if HAVE_INTROSPECTION
 
 Eek@EEK_LIBRARY_SUFFIX@.gir: libeek.la
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
-Eek@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GLib-2.0 GObject-2.0
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GLib-2.0 GObject-2.0 Gio-2.0
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek.la
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_sources) $(libeek_public_headers)

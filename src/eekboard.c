@@ -209,6 +209,7 @@ static gboolean opt_version = FALSE;
 static gboolean opt_popup = FALSE;
 static gchar *opt_config = NULL;
 static gboolean opt_fullscreen = FALSE;
+static gboolean opt_xml = FALSE;
 
 static const GOptionEntry options[] = {
     {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -229,6 +230,8 @@ static const GOptionEntry options[] = {
      N_("Start in fullscreen mode")},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
      N_("Specify configuration file")},
+    {"xml", '\0', 0, G_OPTION_ARG_NONE, &opt_xml,
+     N_("Dump the keyboard in XML")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
      N_("Display version")},
     {NULL}
@@ -1024,6 +1027,22 @@ on_allocation_changed (ClutterActor          *stage,
 }
 #endif
 
+static EekKeyboard *
+create_keyboard (Eekboard *eekboard,
+                 gint      initial_width,
+                 gint      initial_height)
+{
+    EekKeyboard *keyboard;
+
+    keyboard = eek_keyboard_new (eekboard->layout,
+                                 initial_width,
+                                 initial_height);
+    eek_keyboard_set_modifier_behavior (keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
+
+    return keyboard;
+}
+
 static GtkWidget *
 create_widget (Eekboard *eekboard,
                gint      initial_width,
@@ -1035,11 +1054,9 @@ create_widget (Eekboard *eekboard,
 #endif
     EekBounds bounds;
 
-    eekboard->keyboard = eek_keyboard_new (eekboard->layout,
-                                           initial_width,
-                                           initial_height);
-    eek_keyboard_set_modifier_behavior (eekboard->keyboard,
-                                        EEK_MODIFIER_BEHAVIOR_LATCH);
+    eekboard->keyboard = create_keyboard (eekboard,
+                                          initial_width,
+                                          initial_height);
     eekboard->on_key_pressed_id =
         g_signal_connect (eekboard->keyboard, "key-pressed",
                           G_CALLBACK(on_key_pressed), eekboard);
@@ -1174,6 +1191,18 @@ eekboard_new (gboolean accessibility_enabled)
         options = g_strsplit (opt_options, ",", -1);
         eek_xkl_layout_set_options (EEK_XKL_LAYOUT(eekboard->layout), options);
         g_strfreev (options);
+    }
+    if (opt_xml) {
+        EekKeyboard *keyboard;
+        GString *output;
+
+        output = g_string_sized_new (BUFSIZ);
+        keyboard = create_keyboard (eekboard, CSW, CSH);
+        eek_keyboard_output (keyboard, output, 0);
+        fwrite (output->str, output->len, 1, stdout);
+        g_string_free (output, TRUE);
+        
+        exit (0);
     }
     g_signal_connect (eekboard->layout, "changed",
                       G_CALLBACK(on_changed), eekboard);

@@ -20,7 +20,7 @@ if ENABLE_EEKBOARD
 bin_PROGRAMS = eekboard
 eekboard_CFLAGS = \
 	-I$(top_srcdir) \
-	$(GOBJECT2_CFLAGS) \
+	$(GIO2_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(GCONF2_CFLAGS) \
 	$(XKB_CFLAGS) \
@@ -33,7 +33,7 @@ eekboard_LDFLAGS = \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(top_builddir)/eek/libeek-gtk.la \
-	$(GOBJECT2_LIBS) \
+	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
 	$(GCONF2_LIBS) \
 	$(XKB_LIBS) \

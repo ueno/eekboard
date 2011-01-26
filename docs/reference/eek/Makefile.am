@@ -102,12 +102,12 @@ expand_content_files=eek-overview.xml
 # signals and properties.
 # e.g. GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
-GTKDOC_CFLAGS = $(GOBJECT2_CFLAGS)
+GTKDOC_CFLAGS = $(GIO2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
 	$(top_srcdir)/eek/libeek-gtk.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
 	$(top_srcdir)/eek/libeek-xkl.la \
-	$(GOBJECT2_LIBS) \
+	$(GIO2_LIBS) \
 	$(XKB_LIBS)
 
 if HAVE_CLUTTER
