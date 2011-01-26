@@ -136,7 +136,6 @@ eek_element_set_property (GObject      *object,
                           const GValue *value,
                           GParamSpec   *pspec)
 {
-    g_return_if_fail (EEK_IS_ELEMENT(object));
     switch (prop_id) {
     case PROP_NAME:
         eek_element_set_name (EEK_ELEMENT(object),
@@ -160,7 +159,6 @@ eek_element_get_property (GObject    *object,
 {
     EekBounds  bounds;
 
-    g_return_if_fail (EEK_IS_ELEMENT(object));
     switch (prop_id) {
     case PROP_NAME:
         g_value_set_string (value, eek_element_get_name (EEK_ELEMENT(object)));

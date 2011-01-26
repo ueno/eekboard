@@ -226,7 +226,6 @@ eek_key_set_property (GObject      *object,
     EekKeysymMatrix *matrix;
     gint column, row;
 
-    g_return_if_fail (EEK_IS_KEY(object));
     switch (prop_id) {
     case PROP_KEYCODE:
         eek_key_set_keycode (EEK_KEY(object), g_value_get_uint (value));
