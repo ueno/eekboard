@@ -12,6 +12,9 @@ eek_keyboard_get_level
 eek_keyboard_set_group
 eek_keyboard_set_level
 eek_keyboard_get_size
+eek_keyboard_get_modifier_behavior
+eek_keyboard_set_modifier_behavior
+eek_keyboard_get_modifiers
 eek_keyboard_create_section
 eek_keyboard_find_key_by_keycode
 <SUBSECTION Standard>
@@ -27,9 +30,8 @@ EEK_KEYBOARD_GET_CLASS
 <SECTION>
 <FILE>eek-layout</FILE>
 <TITLE>EekLayout</TITLE>
-EekLayoutIface
+EekLayoutClass
 EekLayout
-eek_layout_apply
 eek_layout_get_group
 <SUBSECTION Standard>
 EEK_LAYOUT
@@ -175,12 +177,11 @@ eek_key_get_keycode
 eek_key_set_keysyms
 eek_key_get_keysyms
 eek_key_get_keysym
+eek_key_get_keysym_at_index
 eek_key_set_index
 eek_key_get_index
 eek_key_set_outline
 eek_key_get_outline
-eek_key_set_keysym_index
-eek_key_get_keysym_index
 eek_key_is_pressed
 <SUBSECTION Standard>
 EEK_KEY
@@ -216,6 +217,7 @@ EEK_ELEMENT_GET_CLASS
 
 <SECTION>
 <FILE>eek-types</FILE>
+<TITLE>Basic Types</TITLE>
 EekOrientation
 EekKeysymMatrix
 EEK_TYPE_KEYSYM_MATRIX
@@ -223,6 +225,7 @@ eek_keysym_matrix_get_type
 EekPoint
 EEK_TYPE_POINT
 eek_point_get_type
+eek_point_rotate
 EekBounds
 EEK_TYPE_BOUNDS
 eek_bounds_get_type
@@ -230,13 +233,22 @@ eek_bounds_long_side
 EekOutline
 EEK_TYPE_OUTLINE
 eek_outline_get_type
+EekColor
+EEK_TYPE_COLOR
+eek_color_get_type
+eek_color_new
 </SECTION>
 
 <SECTION>
 <FILE>eek-keysym</FILE>
+<TITLE>Keysym Utility</TITLE>
 EEK_INVALID_KEYSYM
 EEK_INVALID_KEYCODE
 EekKeysymCategory
 eek_keysym_to_string
 eek_keysym_get_category
+eek_keysym_is_modifier
+eek_keysym_to_modifier
+EekModifierBehavior
+EekModifierType
 </SECTION>

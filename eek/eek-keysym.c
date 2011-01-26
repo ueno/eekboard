@@ -170,6 +170,12 @@ eek_keysym_get_category (guint keysym)
     return EEK_KEYSYM_CATEGORY_UNKNOWN;
 }
 
+/**
+ * eek_keysym_to_modifier:
+ * @keysym: keysym ID
+ *
+ * Return a modifier mask which @keysym affects.
+ */
 EekModifierType
 eek_keysym_to_modifier (guint keysym)
 {

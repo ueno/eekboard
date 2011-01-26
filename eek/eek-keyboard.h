@@ -55,6 +55,8 @@ struct _EekKeyboard
  * @create_section: virtual function for creating a section
  * @find_key_by_keycode: virtual function for finding a key in the
  * keyboard by keycode
+ * @key_pressed: class handler for #EekKeyboard::key-pressed signal
+ * @key_released: class handler for #EekKeyboard::key-released signal
  * @keysym_index_changed: class handler for #EekKeyboard::keysym-index-changed signal
  */
 struct _EekKeyboardClass

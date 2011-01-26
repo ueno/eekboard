@@ -44,7 +44,7 @@ struct _EekLayout
 
 /**
  * EekLayoutClass:
- * @apply: virtual function for applying the layout to a keyboard
+ * @create_keyboard: virtual function for creating a keyboard
  * @get_group: virtual function for getting the current group setting
  * of the layout
  * @group_changed: class handler for #EekLayout::group-changed signal

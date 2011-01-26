@@ -104,6 +104,14 @@ typedef enum
 #define EEK_KEY_Hyper_R 0xffee
 
 EekModifierType eek_keysym_to_modifier (guint keysym);
+
+/**
+ * eek_keysym_is_modifier:
+ * @keysym: keysym ID
+ *
+ * Check if @keysym is a modifier key.
+ * Returns: %TRUE if @keysym is a modifier.
+ */
 #define eek_keysym_is_modifier(keysym) (eek_keysym_to_modifier ((keysym)) != 0)
 
 #endif  /* EEK_KEYSYM_H */

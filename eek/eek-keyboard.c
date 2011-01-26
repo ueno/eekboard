@@ -571,6 +571,13 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
         find_key_by_keycode (keyboard, keycode);
 }
 
+/**
+ * eek_keyboard_get_layout:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get the layout used to create @keyboard.
+ * Returns: an #EekLayout
+ */
 EekLayout *
 eek_keyboard_get_layout (EekKeyboard *keyboard)
 {
@@ -581,6 +588,14 @@ eek_keyboard_get_layout (EekKeyboard *keyboard)
     return priv->layout;
 }
 
+/**
+ * eek_keyboard_get_size:
+ * @keyboard: an #EekKeyboard
+ * @width: width of @keyboard
+ * @height: height of @keyboard
+ *
+ * Get the size of @keyboard.
+ */
 void
 eek_keyboard_get_size (EekKeyboard *keyboard,
                        gdouble     *width,
@@ -594,6 +609,13 @@ eek_keyboard_get_size (EekKeyboard *keyboard,
     *height = bounds.height;
 }
 
+/**
+ * eek_keyboard_set_modifier_behavior:
+ * @keyboard: an #EekKeyboard
+ * @modifier_behavior: modifier behavior of @keyboard
+ *
+ * Set the modifier handling mode of @keyboard.
+ */
 void
 eek_keyboard_set_modifier_behavior (EekKeyboard        *keyboard,
                                     EekModifierBehavior modifier_behavior)
@@ -606,6 +628,13 @@ eek_keyboard_set_modifier_behavior (EekKeyboard        *keyboard,
     priv->modifier_behavior = modifier_behavior;
 }
 
+/**
+ * eek_keyboard_get_modifier_behavior:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get the modifier handling mode of @keyboard.
+ * Returns: #EekModifierBehavior
+ */
 EekModifierBehavior
 eek_keyboard_get_modifier_behavior (EekKeyboard *keyboard)
 {
@@ -617,6 +646,13 @@ eek_keyboard_get_modifier_behavior (EekKeyboard *keyboard)
     return priv->modifier_behavior;
 }
 
+/**
+ * eek_keyboard_get_modifiers:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get the current modifier status of @keyboard.
+ * Returns: #EekModifierType
+ */
 EekModifierType
 eek_keyboard_get_modifiers (EekKeyboard *keyboard)
 {
