@@ -1,6 +1,6 @@
 # Japanese translations for eekboard package
 # eekboard パッケージに対する英訳.
-# Copyright (C) 2010 Daiki Ueno <ueno@unixuser.org>
+# Copyright (C) 2010-2011 Daiki Ueno <ueno@unixuser.org>
 # This file is distributed under the same license as the eekboard package.
 # Daiki Ueno <ueno@unixuser.org>, 2010.
 #
