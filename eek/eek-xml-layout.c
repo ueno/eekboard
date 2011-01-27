@@ -4,6 +4,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -12,6 +13,7 @@
 #include "eek-xml-layout.h"
 #include "eek-keyboard.h"
 #include "eek-section.h"
+#include "eek-key.h"
 
 enum {
     PROP_0,
@@ -27,6 +29,7 @@ G_DEFINE_TYPE (EekXmlLayout, eek_xml_layout, EEK_TYPE_LAYOUT);
 struct _EekXmlLayoutPrivate
 {
     GInputStream *source;
+    GHashTable *outline_hash;
 };
 
 #define BUFSIZE	8192
@@ -35,43 +38,57 @@ struct _ParseCallbackData {
     GSList *element_stack;
     GString *text;
     EekLayout *layout;
+
     EekKeyboard *keyboard;
     EekSection *section;
     EekKey *key;
+    gint num_columns;
+    EekOrientation orientation;
+    GSList *points;
+    guint keycode;
+    GSList *keysyms;
+    gint groups, levels;
+    EekOutline outline;
+    gchar *oref;
+    GHashTable *key_oref_hash;
+    GHashTable *oref_outline_hash;
 };
 typedef struct _ParseCallbackData ParseCallbackData;
 
 static const gchar *valid_path_list[] = {
     "keyboard",
-    "keyboard/bounds",
-    "keyboard/section",
-    "keyboard/outline",
-    "section/bounds",
-    "section/angle",
-    "section/key",
-    "bounds/key",
-    "outline/key",
-    "keysyms/key",
-    "keycode/key",
-    "index/key",
-    "groups/keysyms",
-    "levels/keysyms",
-    "keysym/keysyms",
+    "bounds/keyboard",
+    "section/keyboard",
+    "outline/keyboard",
+    "bounds/section/keyboard",
+    "angle/section/keyboard",
+    "row/section/keyboard",
+    "columns/row/section/keyboard",
+    "orientation/row/section/keyboard",
+    "key/section/keyboard",
+    "bounds/key/section/keyboard",
+    "outline-ref/key/section/keyboard",
+    "keysyms/key/section/keyboard",
+    "keycode/key/section/keyboard",
+    "index/key/section/keyboard",
+    "groups/keysyms/key/section/keyboard",
+    "levels/keysyms/key/section/keyboard",
+    "keysym/keysyms/key/section/keyboard",
     "point/outline/keyboard"
 };
 
 static gchar *
-join_element_names (GSList *element_names)
+strjoin_slist (GSList *slist, const gchar *delimiter)
 {
     GString *string = g_string_sized_new (64);
 
-    if (element_names == NULL)
+    if (slist == NULL)
         return g_strdup ("");
     else
-        for (; element_names; element_names = g_slist_next (element_names)) {
-            g_string_append (string, element_names->data);
-            if (g_slist_next (element_names))
-                g_string_append (string, "/");
+        for (; slist; slist = g_slist_next (slist)) {
+            g_string_append (string, slist->data);
+            if (g_slist_next (slist))
+                g_string_append (string, delimiter);
         }
     return g_string_free (string, FALSE);
 }
@@ -86,7 +103,7 @@ validate (const gchar  *element_name,
     GSList *head;
 
     head = g_slist_prepend (element_stack, element_name);
-    element_path = join_element_names (head);
+    element_path = strjoin_slist (head, "/");
     g_slist_free1 (head);
 
     for (i = 0; i < G_N_ELEMENTS(valid_path_list); i++) {
@@ -120,8 +137,8 @@ start_element_callback (GMarkupParseContext *pcontext,
     ParseCallbackData *data = user_data;
     const gchar **names = attribute_names;
     const gchar **values = attribute_values;
-    gint column = -1, row = -1;
-    gchar *name = NULL;
+    gint column = -1, row = -1, groups = -1, levels = -1;
+    gchar *name = NULL, *id = NULL;
 
     validate (element_name, data->element_stack, error);
     if (error && *error)
@@ -134,6 +151,12 @@ start_element_callback (GMarkupParseContext *pcontext,
             row = strtol (*values, NULL, 10);
         else if (g_strcmp0 (*names, "name") == 0)
             name = g_strdup (*values);
+        else if (g_strcmp0 (*names, "id") == 0)
+            id = g_strdup (*values);
+        else if (g_strcmp0 (*names, "groups") == 0)
+            groups = strtol (*values, NULL, 10);
+        else if (g_strcmp0 (*names, "levels") == 0)
+            levels = strtol (*values, NULL, 10);
         names++;
         values++;
     }
@@ -144,19 +167,41 @@ start_element_callback (GMarkupParseContext *pcontext,
                                        NULL);
         if (name)
             eek_element_set_name (EEK_ELEMENT(data->keyboard), name);
-    } else if (g_strcmp0 (element_name, "section") == 0) {
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "section") == 0) {
         data->section = eek_keyboard_create_section (data->keyboard);
         if (name)
             eek_element_set_name (EEK_ELEMENT(data->section), name);
-    } else if (g_strcmp0 (element_name, "key") == 0) {
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "key") == 0) {
         data->key = eek_section_create_key (data->section, column, row);
         if (name)
             eek_element_set_name (EEK_ELEMENT(data->key), name);
+        goto out;
     }
+
+    if (g_strcmp0 (element_name, "keysyms") == 0) {
+        data->groups = groups;
+        data->levels = levels;
+        data->keysyms = NULL;
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "outline") == 0) {
+        data->oref = g_strdup (id);
+        goto out;
+    }
+ out:
     g_free (name);
+    g_free (id);
 
     data->element_stack = g_slist_prepend (data->element_stack,
                                            g_strdup (element_name));
+    data->text->len = 0;
 }
 
 static void
@@ -167,10 +212,161 @@ end_element_callback (GMarkupParseContext *pcontext,
 {
     ParseCallbackData *data = user_data;
     GSList *head = data->element_stack;
+    gchar *text, **strv;
+    gint i;
 
     g_free (head->data);
     data->element_stack = g_slist_next (data->element_stack);
     g_slist_free1 (head);
+
+    text = g_strndup (data->text->str, data->text->len);
+
+    if (g_strcmp0 (element_name, "section") == 0) {
+        data->section = NULL;
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "key") == 0) {
+        data->key = NULL;
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "keysyms") == 0) {
+        gint num_keysyms = data->groups * data->levels;
+        guint *keysyms = g_slice_alloc0 (sizeof(guint) * num_keysyms);
+
+        head = data->keysyms = g_slist_reverse (data->keysyms);
+        for (i = 0; i < num_keysyms; i++) {
+            if (head) {
+                keysyms[i] = (guint)head->data;
+                head = g_slist_next (head);
+            } else
+                keysyms[i] = EEK_INVALID_KEYSYM;
+        }
+
+        eek_key_set_keysyms (data->key, keysyms, data->groups, data->levels);
+        g_slice_free1 (sizeof(guint) * num_keysyms, keysyms);
+        g_slist_free (data->keysyms);
+        data->keysyms = NULL;
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "outline") == 0) {
+        EekOutline *outline = g_slice_new (EekOutline);
+        
+        outline->num_points = g_slist_length (data->points);
+        outline->points = g_slice_alloc0 (sizeof (EekPoint) *
+                                          outline->num_points);
+        for (head = data->points = g_slist_reverse (data->points), i = 0;
+             head;
+             head = g_slist_next (head), i++) {
+            memcpy (&outline->points[i], head->data, sizeof (EekPoint));
+            g_slice_free1 (sizeof (EekPoint), head->data);
+        }
+        g_slist_free (data->points);
+        data->points = NULL;
+
+        g_hash_table_insert (data->oref_outline_hash,
+                             g_strdup (data->oref),
+                             outline);
+        g_free (data->oref);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "point") == 0) {
+        EekPoint *point;
+
+        strv = g_strsplit (text, ",", -1);
+
+        if (g_strv_length (strv) != 2) {
+            g_set_error (error,
+                         G_MARKUP_ERROR,
+                         G_MARKUP_ERROR_UNKNOWN_ELEMENT,
+                         "invalid format for %s \"%s\"",
+                         element_name,
+                         text);
+            goto out;
+        }
+            
+        point = g_slice_new (EekPoint);
+        point->x = g_strtod (strv[0], NULL);
+        point->y = g_strtod (strv[1], NULL);
+
+        g_strfreev (strv);
+
+        data->points = g_slist_prepend (data->points, point);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "bounds") == 0) {
+        EekBounds bounds;
+
+        strv = g_strsplit (text, ",", -1);
+
+        if (g_strv_length (strv) != 4) {
+            g_set_error (error,
+                         G_MARKUP_ERROR,
+                         G_MARKUP_ERROR_UNKNOWN_ELEMENT,
+                         "invalid format for %s \"%s\"",
+                         element_name,
+                         text);
+            goto out;
+        }
+            
+        bounds.x = g_strtod (strv[0], NULL);
+        bounds.y = g_strtod (strv[1], NULL);
+        bounds.width = g_strtod (strv[2], NULL);
+        bounds.height = g_strtod (strv[3], NULL);
+
+        g_strfreev (strv);
+
+        if (g_strcmp0 (data->element_stack->data, "keyboard") == 0)
+            eek_element_set_bounds (EEK_ELEMENT(data->keyboard), &bounds);
+        else if (g_strcmp0 (data->element_stack->data, "section") == 0)
+            eek_element_set_bounds (EEK_ELEMENT(data->section), &bounds);
+        else if (g_strcmp0 (data->element_stack->data, "key") == 0)
+            eek_element_set_bounds (EEK_ELEMENT(data->key), &bounds);
+
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "columns") == 0) {
+        data->num_columns = strtol (text, NULL, 10);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "orientation") == 0) {
+        data->orientation = strtol (text, NULL, 10);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "row") == 0) {
+        eek_section_add_row (data->section,
+                             data->num_columns,
+                             data->orientation);
+        data->num_columns = 0;
+        data->orientation = EEK_ORIENTATION_HORIZONTAL;
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "keycode") == 0) {
+        eek_key_set_keycode (data->key, strtoul (text, NULL, 10));
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "keysym") == 0) {
+        guint keysym = strtoul (text, NULL, 10);
+        data->keysyms = g_slist_prepend (data->keysyms, (gpointer)keysym);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "outline-ref") == 0) {
+        g_hash_table_insert (data->key_oref_hash, data->key, g_strdup (text));
+        goto out;
+    }
+
+ out:
+    g_free (text);
 }
 
 static void
@@ -180,6 +376,8 @@ text_callback (GMarkupParseContext *pcontext,
                gpointer             user_data,
                GError             **error)
 {
+    ParseCallbackData *data = user_data;
+    g_string_append_len (data->text, text, text_len);
 }
 
 static const GMarkupParser parser = {
@@ -189,6 +387,42 @@ static const GMarkupParser parser = {
     0,
     0
 };
+
+static void
+outline_free (gpointer data)
+{
+    EekOutline *outline = data;
+    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
+    g_boxed_free (EEK_TYPE_OUTLINE, outline);
+}
+
+static void scale_bounds_callback (EekElement *element,
+                                   gpointer    user_data);
+
+static void
+scale_bounds (EekElement *element,
+              gdouble     scale)
+{
+    EekBounds bounds;
+
+    eek_element_get_bounds (element, &bounds);
+    bounds.x *= scale;
+    bounds.y *= scale;
+    bounds.width *= scale;
+    bounds.height *= scale;
+
+    if (EEK_IS_CONTAINER(element))
+        eek_container_foreach_child (EEK_CONTAINER(element),
+                                     scale_bounds_callback,
+                                     &scale);
+}
+
+static void
+scale_bounds_callback (EekElement *element,
+                       gpointer    user_data)
+{
+    scale_bounds (element, *(gdouble *)user_data);
+}
 
 static EekKeyboard *
 eek_xml_layout_real_create_keyboard (EekLayout *self,
@@ -200,12 +434,25 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     GError *error;
     gchar buffer[BUFSIZE];
     ParseCallbackData data;
+    EekBounds bounds;
+    gdouble scale;
+    GHashTableIter iter;
+    gpointer k, v;
 
     g_return_val_if_fail (priv->source, NULL);
 
-    data.element_stack = NULL;
+    memset (&data, 0, sizeof data);
+    data.layout = self;
     data.text = g_string_sized_new (BUFSIZE);
-    data.keyboard = NULL;
+    data.key_oref_hash = g_hash_table_new_full (g_direct_hash,
+                                                g_direct_equal,
+                                                NULL,
+                                                g_free);
+    data.oref_outline_hash = g_hash_table_new_full (g_str_hash,
+                                                    g_str_equal,
+                                                    g_free,
+                                                    outline_free);
+
     pcontext = g_markup_parse_context_new (&parser, 0, &data, NULL);
     while (1) {
         gssize nread;
@@ -221,11 +468,50 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
         if (!g_markup_parse_context_parse (pcontext, buffer, nread, &error))
             break;
     }
+    if (error)
+        g_warning ("%s", error->message);
 
     error = NULL;
     g_markup_parse_context_end_parse (pcontext, &error);
+    if (error)
+        g_warning ("%s", error->message);
+
     g_markup_parse_context_free (pcontext);
+
+    if (!data.keyboard)
+        goto out;
+
+    eek_element_get_bounds (EEK_ELEMENT(data.keyboard), &bounds);
+    scale = initial_width < initial_height ? bounds.width / initial_width : 
+        bounds.height / initial_height;
+
+    g_hash_table_iter_init (&iter, data.key_oref_hash);
+    while (g_hash_table_iter_next (&iter, &k, &v)) {
+        EekOutline *outline = g_hash_table_lookup (data.oref_outline_hash, v);
+        g_assert (outline);
+        eek_key_set_outline (EEK_KEY(k), outline);
+    }
+
+#if 0
+    g_hash_table_iter_init (&iter, data.oref_outline_hash);
+    while (g_hash_table_iter_next (&iter, &k, &v)) {
+        EekOutline *outline = v;
+        gint i;
+
+        for (i = 0; i < outline->num_points; i++) {
+            outline->points[i].x *= scale;
+            outline->points[i].y *= scale;
+        }
+    }
+
+    scale_bounds (EEK_ELEMENT(data.keyboard), scale);
+#endif
+
+ out:
     g_string_free (data.text, TRUE);
+    if (data.key_oref_hash)
+        g_hash_table_destroy (data.key_oref_hash);
+    priv->outline_hash = data.oref_outline_hash;
 
     return data.keyboard;
 }
@@ -277,6 +563,18 @@ eek_xml_layout_dispose (GObject *object)
         g_object_unref (priv->source);
         priv->source = NULL;
     }
+    G_OBJECT_CLASS (eek_xml_layout_parent_class)->dispose (object);
+}
+
+static void
+eek_xml_layout_finalize (GObject *object)
+{
+    EekXmlLayoutPrivate *priv = EEK_XML_LAYOUT_GET_PRIVATE (object);
+
+    if (priv->outline_hash)
+        g_hash_table_unref (priv->outline_hash);
+
+    G_OBJECT_CLASS (eek_xml_layout_parent_class)->finalize (object);
 }
 
 static void
@@ -293,6 +591,7 @@ eek_xml_layout_class_init (EekXmlLayoutClass *klass)
     gobject_class->set_property = eek_xml_layout_set_property;
     gobject_class->get_property = eek_xml_layout_get_property;
     gobject_class->dispose = eek_xml_layout_dispose;
+    gobject_class->finalize = eek_xml_layout_finalize;
 
     pspec = g_param_spec_object ("source",
 				 "Source",

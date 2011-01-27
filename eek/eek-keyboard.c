@@ -291,6 +291,19 @@ eek_keyboard_real_key_released (EekKeyboard *self,
 }
 
 static void
+eek_keyboard_dispose (GObject *object)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
+
+    if (priv->layout) {
+        g_object_unref (priv->layout);
+        priv->layout = NULL;
+    }
+
+    G_OBJECT_CLASS (eek_keyboard_parent_class)->dispose (object);
+}
+
+static void
 eek_keyboard_class_init (EekKeyboardClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
@@ -311,6 +324,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
 
     gobject_class->get_property = eek_keyboard_get_property;
     gobject_class->set_property = eek_keyboard_set_property;
+    gobject_class->dispose = eek_keyboard_dispose;
 
     /**
      * EekKeyboard:group:

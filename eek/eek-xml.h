@@ -7,7 +7,7 @@
 
 G_BEGIN_DECLS
 
-void eek_keyboard_print (EekKeyboard *keyboard, gint indent);
+void eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent);
 
 G_END_DECLS
 #endif  /* EEK_XML_H */

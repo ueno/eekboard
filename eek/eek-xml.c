@@ -18,7 +18,7 @@
         }                                       \
     }
 
-G_INLINE_FUNC void
+void
 g_string_markup_printf (GString *output, const gchar *format, ...)
 {
     gchar *escaped_text;
@@ -56,7 +56,7 @@ output_key_callback (EekElement *element, gpointer user_data)
     OutputCallbackData *data = user_data;
     EekBounds bounds;
     EekOutline *outline;
-    gint i, num_groups, num_levels;
+    gint i, num_groups, num_levels, num_keysyms;
     guint *keysyms;
     gint column, row;
 
@@ -86,7 +86,7 @@ output_key_callback (EekElement *element, gpointer user_data)
             g_array_append_val (data->outline_array, outline);
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output,
-                                "<outline>outline%d</outline>\n",
+                                "<outline-ref>outline%d</outline-ref>\n",
                                 i);
     }
 
@@ -94,9 +94,11 @@ output_key_callback (EekElement *element, gpointer user_data)
     g_string_markup_printf (data->output, "<keycode>%u</keycode>\n",
                             eek_key_get_keycode (EEK_KEY(element)));
 
-    keysyms = NULL;
-    eek_key_get_keysyms (EEK_KEY(element), &keysyms, &num_groups, &num_levels);
-    if (keysyms) {
+    eek_key_get_keysyms (EEK_KEY(element), NULL, &num_groups, &num_levels);
+    num_keysyms = num_groups * num_levels;
+    if (num_keysyms > 0) {
+        keysyms = g_slice_alloc (num_keysyms * sizeof(guint));
+        eek_key_get_keysyms (EEK_KEY(element), &keysyms, NULL, NULL);
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output,
                                 "<keysyms groups=\"%d\" levels=\"%d\">\n",
@@ -118,6 +120,7 @@ output_key_callback (EekElement *element, gpointer user_data)
         }
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output, "</keysyms>\n");
+        g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
     }
 
     g_string_append_indent (data->output, data->indent);
@@ -129,7 +132,7 @@ output_section_callback (EekElement *element, gpointer user_data)
 {
     OutputCallbackData *data = user_data;
     EekBounds bounds;
-    gint angle;
+    gint angle, n_rows, i;
 
     g_string_append_indent (data->output, data->indent);
     if (eek_element_get_name (element))
@@ -145,6 +148,27 @@ output_section_callback (EekElement *element, gpointer user_data)
     angle = eek_section_get_angle (EEK_SECTION(element));
     g_string_append_indent (data->output, data->indent + 1);
     g_string_markup_printf (data->output, "<angle>%d</angle>\n", angle);
+
+    n_rows = eek_section_get_n_rows (EEK_SECTION(element));
+    for (i = 0; i < n_rows; i++) {
+        gint num_columns;
+        EekOrientation orientation;
+
+        eek_section_get_row (EEK_SECTION(element),
+                             i,
+                             &num_columns,
+                             &orientation);
+        g_string_append_indent (data->output, data->indent + 1);
+        g_string_markup_printf (data->output, "<row>\n");
+        g_string_append_indent (data->output, data->indent + 2);
+        g_string_markup_printf (data->output, "<columns>%d</columns>\n",
+                                num_columns);
+        g_string_append_indent (data->output, data->indent + 2);
+        g_string_markup_printf (data->output, "<orientation>%d</orientation>\n",
+                                orientation);
+        g_string_append_indent (data->output, data->indent + 1);
+        g_string_markup_printf (data->output, "</row>\n");
+    }
     
     data->indent++;
     eek_container_foreach_child (EEK_CONTAINER(element),
@@ -200,7 +224,7 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
         g_string_append_indent (output, indent + 1);
         g_string_markup_printf (output, "</outline>\n");
     }
-    g_array_free (data.outline_array, FALSE);
+    g_array_free (data.outline_array, TRUE);
 
     g_string_append_indent (output, indent);
     g_string_markup_printf (output, "</keyboard>\n");

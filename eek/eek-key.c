@@ -133,7 +133,6 @@ eek_key_real_get_keysyms (EekKey *self,
     if (num_levels)
         *num_levels = priv->keysyms.num_levels;
     if (keysyms && num_keysyms > 0) {
-        *keysyms = g_slice_alloc (num_keysyms * sizeof(guint));
         memcpy (*keysyms, priv->keysyms.data, num_keysyms * sizeof(guint));
     }
 }
