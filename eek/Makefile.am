@@ -41,9 +41,9 @@ libeek_public_headers =				\
 libeek_private_headers =			\
 	$(srcdir)/eek-renderer.h		\
 	$(srcdir)/eek-xml-layout.h		\
-	$(srcdir)/eek-special-keysym-labels.h	\
-	$(srcdir)/eek-unicode-keysym-labels.h	\
-	$(srcdir)/eek-keyname-keysym-labels.h	\
+	$(srcdir)/eek-special-keysym-entries.h	\
+	$(srcdir)/eek-unicode-keysym-entries.h	\
+	$(srcdir)/eek-keyname-keysym-entries.h	\
 	$(srcdir)/eek-marshallers.h
 
 libeek_sources =				\
@@ -61,9 +61,9 @@ libeek_sources =				\
 	$(srcdir)/eek-keyboard-drawing.c
 
 libeek_keysym_sources =				\
-	$(srcdir)/eek-special-keysym-labels.h	\
-	$(srcdir)/eek-unicode-keysym-labels.h	\
-	$(srcdir)/eek-keyname-keysym-labels.h
+	$(srcdir)/eek-special-keysym-entries.h	\
+	$(srcdir)/eek-unicode-keysym-entries.h	\
+	$(srcdir)/eek-keyname-keysym-entries.h
 
 libeek_enumtypes_sources =			\
 	$(srcdir)/eek-enumtypes.c		\
@@ -152,12 +152,12 @@ noinst_HEADERS =				\
 	$(libeek_xkb_private_headers)		\
 	$(libeek_xkl_private_headers)
 
-eek-special-keysym-labels.h: special-keysym-labels.txt
-	$(PYTHON) ./gen-keysym-labels.py special_keysym_labels < $< > $@
-eek-unicode-keysym-labels.h: unicode-keysym-labels.txt
-	$(PYTHON) ./gen-keysym-labels.py unicode_keysym_labels < $< > $@
-eek-keyname-keysym-labels.h: keyname-keysym-labels.txt
-	$(PYTHON) ./gen-keysym-labels.py keyname_keysym_labels < $< > $@
+eek-special-keysym-entries.h: special-keysym-entries.txt
+	$(PYTHON) ./gen-keysym-entries.py special_keysym_entries < $< > $@
+eek-unicode-keysym-entries.h: unicode-keysym-entries.txt
+	$(PYTHON) ./gen-keysym-entries.py unicode_keysym_entries < $< > $@
+eek-keyname-keysym-entries.h: keyname-keysym-entries.txt
+	$(PYTHON) ./gen-keysym-entries.py keyname_keysym_entries < $< > $@
 
 # gen marshal
 eek-marshallers.h: eek-marshallers.list
@@ -187,10 +187,10 @@ DISTCLEANFILES =				\
 	$(pkgconfig_DATA)
 
 EXTRA_DIST =					\
-	gen-keysym-labels.py			\
-	special-keysym-labels.txt		\
-	unicode-keysym-labels.txt		\
-	keyname-keysym-labels.txt		\
+	gen-keysym-entries.py			\
+	special-keysym-entries.txt		\
+	unicode-keysym-entries.txt		\
+	keyname-keysym-entries.txt		\
 	eek-marshallers.list
 
 -include $(INTROSPECTION_MAKEFILE)

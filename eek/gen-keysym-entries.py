@@ -32,7 +32,7 @@ for line in sys.stdin:
     if match:
         table[int(match.group(1), 16)] = (match.group(2), match.group(3))
 
-sys.stdout.write("static const struct eek_keysym_label %s[] = {\n" %
+sys.stdout.write("static const EekKeysymEntry %s[] = {\n" %
                  sys.argv[1])
 
 for index, (keysym, (l, c)) in enumerate([(keysym, table[keysym])

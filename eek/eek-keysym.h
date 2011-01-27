@@ -56,6 +56,10 @@ typedef enum {
 } EekKeysymCategory;
 
 gchar *eek_keysym_to_string (guint keysym);
+
+gchar *eek_xkeysym_to_string (guint xkeysym);
+guint eek_xkeysym_from_string (gchar *string);
+
 EekKeysymCategory eek_keysym_get_category (guint keysym);
 
 typedef enum

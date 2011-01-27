@@ -86,12 +86,12 @@ static const gchar *valid_path_list[] = {
     "key/section/keyboard",
     "bounds/key/section/keyboard",
     "outline-ref/key/section/keyboard",
-    "keysyms/key/section/keyboard",
-    "keycode/key/section/keyboard",
+    "symbols/key/section/keyboard",
+    "groups/symbols/key/section/keyboard",
+    "levels/symbols/key/section/keyboard",
+    "xkeysym/symbols/key/section/keyboard",
+    "invalid/symbols/key/section/keyboard",
     "index/key/section/keyboard",
-    "groups/keysyms/key/section/keyboard",
-    "levels/keysyms/key/section/keyboard",
-    "keysym/keysyms/key/section/keyboard",
     "point/outline/keyboard"
 };
 
@@ -204,7 +204,7 @@ start_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysyms") == 0) {
+    if (g_strcmp0 (element_name, "symbols") == 0) {
         data->groups = groups;
         data->levels = levels;
         data->keysyms = NULL;
@@ -252,15 +252,15 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysyms") == 0) {
+    if (g_strcmp0 (element_name, "symbols") == 0) {
         gint num_keysyms = data->groups * data->levels;
         guint *keysyms = g_slice_alloc0 (sizeof(guint) * num_keysyms);
 
         head = data->keysyms = g_slist_reverse (data->keysyms);
         for (i = 0; i < num_keysyms; i++) {
-            if (head) {
-                keysyms[i] = *(guint *)head->data;
-                g_slice_free (guint, head->data);
+            if (head && head->data) {
+                keysyms[i] = eek_xkeysym_from_string (head->data);
+                g_free (head->data);
                 head = g_slist_next (head);
             } else
                 keysyms[i] = EEK_INVALID_KEYSYM;
@@ -376,11 +376,13 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysym") == 0) {
-        guint *keysym = g_slice_new(guint);
+    if (g_strcmp0 (element_name, "xkeysym") == 0) {
+        data->keysyms = g_slist_prepend (data->keysyms, g_strdup (text));
+        goto out;
+    }
 
-        *keysym = strtoul (text, NULL, 10);
-        data->keysyms = g_slist_prepend (data->keysyms, keysym);
+    if (g_strcmp0 (element_name, "invalid") == 0) {
+        data->keysyms = g_slist_prepend (data->keysyms, NULL);
         goto out;
     }
 

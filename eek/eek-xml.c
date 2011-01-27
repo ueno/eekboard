@@ -108,10 +108,6 @@ output_key_callback (EekElement *element, gpointer user_data)
                                 i);
     }
 
-    g_string_append_indent (data->output, data->indent + 1);
-    g_string_markup_printf (data->output, "<keycode>%u</keycode>\n",
-                            eek_key_get_keycode (EEK_KEY(element)));
-
     eek_key_get_keysyms (EEK_KEY(element), NULL, &num_groups, &num_levels);
     num_keysyms = num_groups * num_levels;
     if (num_keysyms > 0) {
@@ -119,25 +115,28 @@ output_key_callback (EekElement *element, gpointer user_data)
         eek_key_get_keysyms (EEK_KEY(element), &keysyms, NULL, NULL);
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output,
-                                "<keysyms groups=\"%d\" levels=\"%d\">\n",
+                                "<symbols groups=\"%d\" levels=\"%d\">\n",
                                 num_groups, num_levels);
 
         for (i = 0; i < num_groups * num_levels; i++) {
             g_string_append_indent (data->output, data->indent + 2);
             if (keysyms[i] != EEK_INVALID_KEYSYM) {
-                gchar *name = eek_keysym_to_string (keysyms[i]);
+                gchar *name = eek_xkeysym_to_string (keysyms[i]);
 
-                g_string_markup_printf (data->output,
-                                        "<keysym name=\"%s\">%u</keysym>\n",
-                                        name, keysyms[i]);
-                g_free (name);
+                if (name) {
+                    g_string_markup_printf (data->output,
+                                            "<xkeysym>%s</xkeysym>\n",
+                                            name);
+                    g_free (name);
+                } else
+                    g_string_markup_printf (data->output,
+                                            "<invalid/>\n");
             } else
                 g_string_markup_printf (data->output,
-                                        "<keysym>%u</keysym>\n",
-                                        keysyms[i]);
+                                        "<invalid/>\n");
         }
         g_string_append_indent (data->output, data->indent + 1);
-        g_string_markup_printf (data->output, "</keysyms>\n");
+        g_string_markup_printf (data->output, "</symbols>\n");
         g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
     }
 
