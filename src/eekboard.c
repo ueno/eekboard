@@ -206,7 +206,7 @@ static gboolean opt_version = FALSE;
 static gboolean opt_popup = FALSE;
 static gchar *opt_config = NULL;
 static gboolean opt_fullscreen = FALSE;
-static gboolean opt_xml = FALSE;
+static gchar *opt_xml = NULL;
 
 static const GOptionEntry options[] = {
     {"model", 'M', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -227,7 +227,7 @@ static const GOptionEntry options[] = {
      N_("Start in fullscreen mode")},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &opt_config,
      N_("Specify configuration file")},
-    {"xml", '\0', 0, G_OPTION_ARG_NONE, &opt_xml,
+    {"xml", '\0', 0, G_OPTION_ARG_STRING, &opt_xml,
      N_("Dump the keyboard in XML")},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &opt_version,
      N_("Display version")},
@@ -1152,28 +1152,53 @@ eekboard_new (gboolean accessibility_enabled)
         return NULL;
     }
 
-    layout = eek_xkl_layout_new ();
+    if (opt_xml) {
+        GFile *file;
+        GFileInputStream *input;
+        GError *error;
+
+        file = g_file_new_for_path (opt_xml);
+
+        error = NULL;
+        input = g_file_read (file, NULL, &error);
+        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
+        g_object_unref (input);
+    } else
+        layout = eek_xkl_layout_new ();
+
     if (!layout) {
         g_slice_free (Eekboard, eekboard);
         g_warning ("Can't create layout");
         return NULL;
     }
 
-    if (opt_model)
-        eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
-    if (opt_layouts) {
-        XklConfigRec *rec = xkl_config_rec_new ();
+    if (!opt_xml) {
+        if (opt_model)
+            eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
+        if (opt_layouts) {
+            XklConfigRec *rec = xkl_config_rec_new ();
 
-        parse_layouts (rec, opt_layouts);
-        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
-        eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
-        g_object_unref (rec);
-    }
-    if (opt_options) {
-        gchar **options;
-        options = g_strsplit (opt_options, ",", -1);
-        eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
-        g_strfreev (options);
+            parse_layouts (rec, opt_layouts);
+            eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
+            eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
+            g_object_unref (rec);
+        }
+        if (opt_options) {
+            gchar **options;
+            options = g_strsplit (opt_options, ",", -1);
+            eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
+            g_strfreev (options);
+        }
+
+        eekboard->engine = xkl_engine_get_instance (eekboard->display);
+        eekboard->registry =
+            xkl_config_registry_get_instance (eekboard->engine);
+        xkl_config_registry_load (eekboard->registry, FALSE);
+        g_signal_connect (eekboard->engine, "X-config-changed",
+                          G_CALLBACK(on_xkl_config_changed), eekboard);
+        g_signal_connect (eekboard->engine, "X-state-changed",
+                          G_CALLBACK(on_xkl_state_changed), eekboard);
+        xkl_engine_start_listen (eekboard->engine, XKLL_TRACK_KEYBOARD_STATE);
     }
 
     eekboard->keyboard = eek_keyboard_new (layout, CSW, CSH);
@@ -1181,21 +1206,15 @@ eekboard_new (gboolean accessibility_enabled)
                                         EEK_MODIFIER_BEHAVIOR_LATCH);
 
     eekboard->ui_manager = gtk_ui_manager_new ();
-    eekboard->engine = xkl_engine_get_instance (eekboard->display);
-    eekboard->registry = xkl_config_registry_get_instance (eekboard->engine);
-    xkl_config_registry_load (eekboard->registry, FALSE);
-    g_signal_connect (eekboard->engine, "X-config-changed",
-                      G_CALLBACK(on_xkl_config_changed), eekboard);
-    g_signal_connect (eekboard->engine, "X-state-changed",
-                      G_CALLBACK(on_xkl_state_changed), eekboard);
 
-    gdk_window_add_filter (NULL,
-                           (GdkFilterFunc)filter_xkl_event,
-                           eekboard);
-    gdk_window_add_filter (gdk_get_default_root_window (),
-                           (GdkFilterFunc) filter_xkl_event,
-                           eekboard);
-    xkl_engine_start_listen (eekboard->engine, XKLL_TRACK_KEYBOARD_STATE);
+    if (eekboard->engine) {
+        gdk_window_add_filter (NULL,
+                               (GdkFilterFunc) filter_xkl_event,
+                               eekboard);
+        gdk_window_add_filter (gdk_get_default_root_window (),
+                               (GdkFilterFunc) filter_xkl_event,
+                               eekboard);
+    }
 
     return eekboard;
 }
