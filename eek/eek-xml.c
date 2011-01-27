@@ -190,7 +190,10 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
     g_assert (EEK_IS_KEYBOARD(keyboard));
  
     g_string_append_indent (output, indent);
-    g_string_markup_printf (output, "<?xml version=\"1.0\"?>\n<keyboard>\n");
+    g_string_markup_printf (output, "<?xml version=\"1.0\"?>\n"
+                            "<keyboard version=\""
+                            EEK_XML_SCHEMA_VERSION
+                            "\">\n");
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     g_string_append_indent (output, indent + 1);

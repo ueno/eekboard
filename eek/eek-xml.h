@@ -7,6 +7,8 @@
 
 G_BEGIN_DECLS
 
+#define EEK_XML_SCHEMA_VERSION "0.90"
+
 void eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent);
 
 G_END_DECLS
