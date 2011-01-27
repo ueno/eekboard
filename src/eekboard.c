@@ -79,7 +79,6 @@ struct _Eekboard {
     GConfClient *gconfc;
     Accessible *acc;
     GtkWidget *widget, *window, *combo;
-    gint width, height;
     XklEngine *engine;
     XklConfigRegistry *registry;
     GtkUIManager *ui_manager;
@@ -103,7 +102,6 @@ struct _Eekboard {
     GtkActionGroup *options_action_group;
 
     EekKeyboard *keyboard;
-    EekLayout *layout;          /* FIXME: eek_keyboard_get_layout() */
 };
 typedef struct _Eekboard Eekboard;
 
@@ -126,24 +124,23 @@ struct _LayoutVariant {
 };
 typedef struct _LayoutVariant LayoutVariant;
 
-static void       on_countries_menu (GtkAction       *action,
-                                     GtkWidget       *widget);
-static void       on_languages_menu (GtkAction       *action,
-                                     GtkWidget       *widget);
-static void       on_models_menu    (GtkAction       *action,
-                                     GtkWidget       *window);
-static void       on_layouts_menu   (GtkAction       *action,
-                                     GtkWidget       *window);
-static void       on_options_menu   (GtkAction       *action,
-                                     GtkWidget       *window);
-static void       on_about          (GtkAction       *action,
-                                     GtkWidget       *window);
-static void       on_quit_from_menu (GtkAction *      action,
-                                     GtkWidget       *window);
-static void       eekboard_free     (Eekboard        *eekboard);
-static GtkWidget *create_widget     (Eekboard        *eekboard,
-                                     gint             initial_width,
-                                     gint             initial_height);
+static void on_countries_menu (GtkAction  *action,
+                               GtkWidget  *widget);
+static void on_languages_menu (GtkAction  *action,
+                               GtkWidget  *widget);
+static void on_models_menu    (GtkAction  *action,
+                               GtkWidget  *window);
+static void on_layouts_menu   (GtkAction  *action,
+                               GtkWidget  *window);
+static void on_options_menu   (GtkAction  *action,
+                               GtkWidget  *window);
+static void on_about          (GtkAction  *action,
+                               GtkWidget  *window);
+static void on_quit_from_menu (GtkAction * action,
+                               GtkWidget  *window);
+static void eekboard_free     (Eekboard   *eekboard);
+static void create_widget     (Eekboard   *eekboard);
+static void update_widget     (Eekboard   *eekboard);
 
 static const char ui_description[] =
     "<ui>"
@@ -458,11 +455,12 @@ on_key_released (EekKeyboard *keyboard,
 
 static void
 on_config_activate (GtkAction *action,
-             gpointer   user_data)
+                    gpointer   user_data)
 {
     SetConfigCallbackData *data = user_data;
-    eek_xkl_layout_set_config (EEK_XKL_LAYOUT(data->eekboard->layout),
-                               data->config);
+    EekLayout *layout = eek_keyboard_get_layout (data->eekboard->keyboard);
+    if (eek_xkl_layout_set_config (EEK_XKL_LAYOUT(layout), data->config))
+        update_widget (data->eekboard);
 }
 
 static void
@@ -470,29 +468,41 @@ on_option_toggled (GtkToggleAction *action,
                    gpointer         user_data)
 {
     SetConfigCallbackData *data = user_data;
-    if (gtk_toggle_action_get_active (action))
-        eek_xkl_layout_enable_option (EEK_XKL_LAYOUT(data->eekboard->layout),
-                                      data->config->options[0]);
-    else
-        eek_xkl_layout_disable_option (EEK_XKL_LAYOUT(data->eekboard->layout),
-                                       data->config->options[0]);
+    EekLayout *layout = eek_keyboard_get_layout (data->eekboard->keyboard);
+
+    if (gtk_toggle_action_get_active (action)) {
+        if (eek_xkl_layout_enable_option (EEK_XKL_LAYOUT(layout),
+                                          data->config->options[0]))
+            update_widget (data->eekboard);
+    } else {
+        if (eek_xkl_layout_disable_option (EEK_XKL_LAYOUT(layout),
+                                           data->config->options[0]))
+            update_widget (data->eekboard);
+    }
 }
 
 static void
-on_changed (EekLayout *layout, gpointer user_data)
+update_widget (Eekboard *eekboard)
 {
-    Eekboard *eekboard = user_data;
-    GtkWidget *vbox, *widget;
+    GtkWidget *vbox;
     GtkAllocation allocation;
+    EekLayout *layout;
+    EekKeyboard *keyboard;
 
     gtk_widget_get_allocation (GTK_WIDGET (eekboard->widget), &allocation);
     vbox = gtk_widget_get_parent (eekboard->widget);
     /* gtk_widget_destroy() seems not usable for GtkClutterEmbed */
     gtk_container_remove (GTK_CONTAINER(vbox), eekboard->widget);
 
+    layout = eek_keyboard_get_layout (eekboard->keyboard);
+    keyboard = eek_keyboard_new (layout, allocation.width, allocation.height);
+    eek_keyboard_set_modifier_behavior (keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
     g_object_unref (eekboard->keyboard);
-    widget = create_widget (eekboard, allocation.width, allocation.height);
-    gtk_container_add (GTK_CONTAINER(vbox), widget);
+    eekboard->keyboard = keyboard;
+
+    create_widget (eekboard);
+    gtk_container_add (GTK_CONTAINER(vbox), eekboard->widget);
     gtk_widget_show_all (vbox);
 }
 
@@ -1027,26 +1037,8 @@ on_allocation_changed (ClutterActor          *stage,
 }
 #endif
 
-static EekKeyboard *
-create_keyboard (Eekboard *eekboard,
-                 gint      initial_width,
-                 gint      initial_height)
-{
-    EekKeyboard *keyboard;
-
-    keyboard = eek_keyboard_new (eekboard->layout,
-                                 initial_width,
-                                 initial_height);
-    eek_keyboard_set_modifier_behavior (keyboard,
-                                        EEK_MODIFIER_BEHAVIOR_LATCH);
-
-    return keyboard;
-}
-
-static GtkWidget *
-create_widget (Eekboard *eekboard,
-               gint      initial_width,
-               gint      initial_height)
+static void
+create_widget (Eekboard *eekboard)
 {
 #if HAVE_CLUTTER_GTK
     ClutterActor *stage;
@@ -1054,9 +1046,6 @@ create_widget (Eekboard *eekboard,
 #endif
     EekBounds bounds;
 
-    eekboard->keyboard = create_keyboard (eekboard,
-                                          initial_width,
-                                          initial_height);
     eekboard->on_key_pressed_id =
         g_signal_connect (eekboard->keyboard, "key-pressed",
                           G_CALLBACK(on_key_pressed), eekboard);
@@ -1085,9 +1074,7 @@ create_widget (Eekboard *eekboard,
     eekboard->widget = eek_gtk_keyboard_new (eekboard->keyboard);
 #endif
 
-    eekboard->width = bounds.width;
-    eekboard->height = bounds.height;
-    return eekboard->widget;
+    gtk_widget_set_size_request (eekboard->widget, bounds.width, bounds.height);
 }
 
 static void
@@ -1140,16 +1127,13 @@ on_xkl_state_changed (XklEngine           *xklengine,
                       gboolean             restore,
                       gpointer             user_data)
 {
-    Eekboard *eekboard = user_data;
-
-    if (type == GROUP_CHANGED)
-        g_signal_emit_by_name (eekboard->layout, "group_changed", value);
 }
 
 Eekboard *
 eekboard_new (gboolean accessibility_enabled)
 {
     Eekboard *eekboard;
+    EekLayout *layout;
 
     eekboard = g_slice_new0 (Eekboard);
     eekboard->accessibility_enabled = accessibility_enabled;
@@ -1168,44 +1152,33 @@ eekboard_new (gboolean accessibility_enabled)
         return NULL;
     }
 
-    eekboard->layout = eek_xkl_layout_new ();
-    if (!eekboard->layout) {
+    layout = eek_xkl_layout_new ();
+    if (!layout) {
         g_slice_free (Eekboard, eekboard);
         g_warning ("Can't create layout");
         return NULL;
     }
+
     if (opt_model)
-        eek_xkl_layout_set_model (EEK_XKL_LAYOUT(eekboard->layout), opt_model);
+        eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
     if (opt_layouts) {
         XklConfigRec *rec = xkl_config_rec_new ();
 
         parse_layouts (rec, opt_layouts);
-        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(eekboard->layout),
-                                    rec->layouts);
-        eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(eekboard->layout),
-                                     rec->variants);
+        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
+        eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
         g_object_unref (rec);
     }
     if (opt_options) {
         gchar **options;
         options = g_strsplit (opt_options, ",", -1);
-        eek_xkl_layout_set_options (EEK_XKL_LAYOUT(eekboard->layout), options);
+        eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
         g_strfreev (options);
     }
-    if (opt_xml) {
-        EekKeyboard *keyboard;
-        GString *output;
 
-        output = g_string_sized_new (BUFSIZ);
-        keyboard = create_keyboard (eekboard, CSW, CSH);
-        eek_keyboard_output (keyboard, output, 0);
-        fwrite (output->str, output->len, 1, stdout);
-        g_string_free (output, TRUE);
-        
-        exit (0);
-    }
-    g_signal_connect (eekboard->layout, "changed",
-                      G_CALLBACK(on_changed), eekboard);
+    eekboard->keyboard = eek_keyboard_new (layout, CSW, CSH);
+    eek_keyboard_set_modifier_behavior (eekboard->keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
 
     eekboard->ui_manager = gtk_ui_manager_new ();
     eekboard->engine = xkl_engine_get_instance (eekboard->display);
@@ -1230,12 +1203,8 @@ eekboard_new (gboolean accessibility_enabled)
 static void
 eekboard_free (Eekboard *eekboard)
 {
-    if (eekboard->layout)
-        g_object_unref (eekboard->layout);
-#if 0
     if (eekboard->keyboard)
         g_object_unref (eekboard->keyboard);
-#endif
     if (eekboard->registry)
         g_object_unref (eekboard->registry);
     if (eekboard->engine)
@@ -1333,33 +1302,34 @@ on_layout_changed (GtkComboBox *combo,
 
     if (eekboard->active_config != active) {
         XklConfigRec *config, *config_base = eekboard->config[active]->rec;
+        EekLayout *layout;
 
+        layout = eek_keyboard_get_layout (eekboard->keyboard);
         config = xkl_config_rec_new ();
         if (config_base->model)
             config->model = g_strdup (config_base->model);
         else
-            config->model =
-                eek_xkl_layout_get_model (EEK_XKL_LAYOUT(eekboard->layout));
+            config->model = eek_xkl_layout_get_model (EEK_XKL_LAYOUT(layout));
 
         if (config_base->layouts)
             config->layouts = g_strdupv (config_base->layouts);
         else
             config->layouts =
-                eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(eekboard->layout));
+                eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(layout));
 
         if (config_base->variants)
             config->variants = g_strdupv (config_base->variants);
         else
             config->variants =
-                eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(eekboard->layout));
+                eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(layout));
 
         if (config_base->options)
             config->options = g_strdupv (config_base->options);
         else
             config->options =
-                eek_xkl_layout_get_options (EEK_XKL_LAYOUT(eekboard->layout));
+                eek_xkl_layout_get_options (EEK_XKL_LAYOUT(layout));
 
-        eek_xkl_layout_set_config (EEK_XKL_LAYOUT(eekboard->layout), config);
+        eek_xkl_layout_set_config (EEK_XKL_LAYOUT(layout), config);
         g_object_unref (config);
 
         eekboard->active_config = active;
@@ -1445,7 +1415,7 @@ main (int argc, char *argv[])
 {
     gboolean accessibility_enabled = FALSE;
     Eekboard *eekboard;
-    GtkWidget *widget, *vbox, *menubar, *window, *combo = NULL;
+    GtkWidget *vbox, *menubar, *window, *combo = NULL;
     GOptionContext *context;
     GConfClient *gconfc;
     GError *error;
@@ -1585,7 +1555,8 @@ main (int argc, char *argv[])
     vbox = gtk_vbox_new (FALSE, 0);
 
     g_object_set_data (G_OBJECT(window), "eekboard", eekboard);
-    widget = create_widget (eekboard, CSW, CSH);
+
+    create_widget (eekboard);
 
     if (!opt_popup) {
         create_menus (eekboard, window);
@@ -1618,12 +1589,11 @@ main (int argc, char *argv[])
                           eekboard);
     }
 
-    gtk_container_add (GTK_CONTAINER(vbox), widget);
+    gtk_container_add (GTK_CONTAINER(vbox), eekboard->widget);
     gtk_container_add (GTK_CONTAINER(window), vbox);
   
-    gtk_widget_set_size_request (widget, eekboard->width, eekboard->height);
     gtk_widget_show_all (window);
-    gtk_widget_set_size_request (widget, -1, -1);
+    gtk_widget_set_size_request (eekboard->widget, -1, -1);
 
     notify_init ("eekboard");
     eekboard->window = window;

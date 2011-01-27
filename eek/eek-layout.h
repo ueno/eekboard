@@ -45,10 +45,6 @@ struct _EekLayout
 /**
  * EekLayoutClass:
  * @create_keyboard: virtual function for creating a keyboard
- * @get_group: virtual function for getting the current group setting
- * of the layout
- * @group_changed: class handler for #EekLayout::group-changed signal
- * @changed: class handler for #EekLayout::changed signal
  */
 struct _EekLayoutClass
 {
@@ -59,12 +55,6 @@ struct _EekLayoutClass
     EekKeyboard* (* create_keyboard) (EekLayout *self,
                                       gdouble    initial_width,
                                       gdouble    initial_height);
-    gint         (* get_group)       (EekLayout *self);
-
-    /* signals */
-    void         (* group_changed)   (EekLayout *self,
-                                      gint       group);
-    void         (* changed)         (EekLayout *self);
 
     /*< private >*/
     /* padding */
@@ -75,7 +65,6 @@ GType        eek_layout_get_type  (void) G_GNUC_CONST;
 EekKeyboard *eek_layout_new       (EekLayout *layout,
                                    gdouble    initial_width,
                                    gdouble    initial_height);
-gint         eek_layout_get_group (EekLayout *layout);
 
 G_END_DECLS
 #endif  /* EEK_LAYOUT_H */

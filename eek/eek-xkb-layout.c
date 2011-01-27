@@ -336,19 +336,6 @@ eek_xkb_layout_real_create_keyboard (EekLayout *self,
     return keyboard;
 }
 
-static gint
-compare_component_name (gchar *name0, gchar *name1)
-{
-    if (name0 && name1)
-        return g_strcmp0 (name0, name1);
-    else if (!name0 && name1)
-        return -1;
-    else if (name0 && !name1)
-        return 1;
-    else
-        return 0;
-}
-
 static void
 eek_xkb_layout_finalize (GObject *object)
 {
@@ -423,17 +410,6 @@ eek_xkb_layout_get_property (GObject    *object,
         }
 }
 
-static gint
-eek_xkb_layout_real_get_group (EekLayout *self)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
-    XkbStateRec state;
-
-    g_return_val_if_fail (XkbGetState (priv->display, XkbUseCoreKbd, &state),
-                          -1);
-    return state.group;
-}
-
 static void
 eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 {
@@ -444,7 +420,6 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
     g_type_class_add_private (gobject_class, sizeof (EekXkbLayoutPrivate));
 
     layout_class->create_keyboard = eek_xkb_layout_real_create_keyboard;
-    layout_class->get_group = eek_xkb_layout_real_get_group;
 
     gobject_class->finalize = eek_xkb_layout_finalize;
     gobject_class->set_property = eek_xkb_layout_set_property;
@@ -578,42 +553,38 @@ eek_xkb_layout_new (void)
  * @names: XKB component names
  *
  * Set the XKB component names to @layout.
- * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
+ * Returns: %TRUE if any of the component names changed, %FALSE otherwise
  */
 gboolean
 eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    gboolean is_changed;
+    gboolean retval;
 
     g_return_val_if_fail (priv, FALSE);
 
-    /* keycodes */
-    if (compare_component_name (names->keycodes, priv->names.keycodes) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.keycodes);
-    priv->names.keycodes = g_strdup (names->keycodes);
+    if (g_strcmp0 (names->keycodes, priv->names.keycodes)) {
+        g_free (priv->names.keycodes);
+        priv->names.keycodes = g_strdup (names->keycodes);
+        retval = TRUE;
+    }
 
-    /* geometry */
-    if (compare_component_name (names->geometry, priv->names.geometry) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.geometry);
-    priv->names.geometry = g_strdup (names->geometry);
+    if (g_strcmp0 (names->geometry, priv->names.geometry)) {
+        g_free (priv->names.geometry);
+        priv->names.geometry = g_strdup (names->geometry);
+        retval = TRUE;
+    }
 
-    /* symbols */
-    if (compare_component_name (names->symbols, priv->names.symbols) != 0)
-        is_changed = TRUE;
-    g_free (priv->names.symbols);
-    priv->names.symbols = g_strdup (names->symbols);
+    if (g_strcmp0 (names->symbols, priv->names.symbols)) {
+        g_free (priv->names.symbols);
+        priv->names.symbols = g_strdup (names->symbols);
+        retval = TRUE;
+    }
 
     get_keyboard (layout);
-    if (!priv->xkb)
-        return FALSE;
+    g_assert (priv->xkb);
 
-    if (is_changed)
-        g_signal_emit_by_name (layout, "changed");
-
-    return TRUE;
+    return retval;
 }
 
 /**
