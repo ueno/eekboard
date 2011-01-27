@@ -32,7 +32,6 @@ EEK_KEYBOARD_GET_CLASS
 <TITLE>EekLayout</TITLE>
 EekLayoutClass
 EekLayout
-eek_layout_get_group
 <SUBSECTION Standard>
 EEK_LAYOUT
 EEK_IS_LAYOUT
@@ -141,6 +140,22 @@ eek_xkl_layout_get_type
 EEK_XKL_LAYOUT_CLASS
 EEK_IS_XKL_LAYOUT_CLASS
 EEK_XKL_LAYOUT_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>eek-xml-layout</FILE>
+<TITLE>EekXmlLayout</TITLE>
+eek_xml_layout_get_source
+eek_xml_layout_new
+eek_xml_layout_set_source
+<SUBSECTION Standard>
+EEK_XML_LAYOUT
+EEK_IS_XML_LAYOUT
+EEK_TYPE_XML_LAYOUT
+eek_xml_layout_get_type
+EEK_XML_LAYOUT_CLASS
+EEK_IS_XML_LAYOUT_CLASS
+EEK_XML_LAYOUT_GET_CLASS
 </SECTION>
 
 <SECTION>

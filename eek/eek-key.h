@@ -50,7 +50,6 @@ struct _EekKey
  * @get_keycode: virtual function for getting keycode of the key
  * @set_keysyms: virtual function for setting symbol matrix of the key
  * @get_keysyms: virtual function for getting symbol matrix of the key
- * @get_keysym: virtual function for getting the current symbol of the key
  * @set_index: virtual function for setting position of the key in the
  * section
  * @get_index: virtual function for getting position of the key in the
