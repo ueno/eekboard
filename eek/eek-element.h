@@ -37,7 +37,7 @@ typedef struct _EekElementPrivate EekElementPrivate;
 struct _EekElement
 {
     /*< private >*/
-    GInitiallyUnowned parent;
+    GObject parent;
 
     EekElementPrivate *priv;
 };
@@ -45,7 +45,7 @@ struct _EekElement
 struct _EekElementClass
 {
     /*< private >*/
-    GInitiallyUnownedClass parent_class;
+    GObjectClass parent_class;
     void                  (* set_parent) (EekElement  *self,
                                           EekElement  *parent);
     EekElement           *(* get_parent) (EekElement  *self);

@@ -204,7 +204,7 @@ eek_gtk_keyboard_set_keyboard (EekGtkKeyboard *self,
                                EekKeyboard    *keyboard)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
-    priv->keyboard = g_object_ref_sink (keyboard);
+    priv->keyboard = g_object_ref (keyboard);
 
     g_signal_connect (priv->keyboard, "key-pressed",
                       G_CALLBACK(on_key_pressed), self);
@@ -245,7 +245,7 @@ eek_gtk_keyboard_dispose (GObject *object)
         priv->renderer = NULL;
     }
 
-    if (priv->keyboard && g_object_is_floating (priv->keyboard)) {
+    if (priv->keyboard) {
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }

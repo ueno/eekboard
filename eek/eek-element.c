@@ -42,7 +42,7 @@ enum {
     PROP_LAST
 };
 
-G_DEFINE_ABSTRACT_TYPE (EekElement, eek_element, G_TYPE_INITIALLY_UNOWNED);
+G_DEFINE_ABSTRACT_TYPE (EekElement, eek_element, G_TYPE_OBJECT);
 
 #define EEK_ELEMENT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_ELEMENT, EekElementPrivate))
@@ -68,7 +68,7 @@ eek_element_real_set_parent (EekElement *self,
         priv->parent = NULL;
     } else {
         g_return_if_fail (!priv->parent);
-        g_object_ref_sink (self);
+        g_object_ref (self);
         priv->parent = parent;
     }
 }

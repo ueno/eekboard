@@ -534,7 +534,8 @@ eek_renderer_set_property (GObject      *object,
     switch (prop_id) {
     case PROP_KEYBOARD:
         priv->keyboard = g_value_get_object (value);
-        g_object_ref_sink (priv->keyboard);
+        g_object_ref (priv->keyboard);
+
         g_signal_connect (priv->keyboard, "keysym-index-changed",
                           G_CALLBACK(on_keysym_index_changed),
                           object);
@@ -552,8 +553,7 @@ eek_renderer_dispose (GObject *object)
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
 
     if (priv->keyboard) {
-        if (g_object_is_floating (priv->keyboard))
-            g_object_unref (priv->keyboard);
+        g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }
     if (priv->pcontext) {

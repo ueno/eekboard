@@ -140,7 +140,7 @@ eek_clutter_section_set_property (GObject      *object,
     switch (prop_id) {
     case PROP_SECTION:
         priv->section = g_value_get_object (value);
-        g_object_ref_sink (priv->section);
+        g_object_ref (priv->section);
         break;
     case PROP_RENDERER:
         priv->renderer = g_value_get_object (value);
@@ -164,7 +164,7 @@ eek_clutter_section_dispose (GObject *object)
         priv->renderer = NULL;
     }
 
-    if (priv->section && g_object_is_floating (priv->section)) {
+    if (priv->section) {
         g_object_unref (priv->section);
         priv->section = NULL;
     }

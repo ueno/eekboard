@@ -58,7 +58,7 @@ eek_container_real_add_child (EekContainer *self,
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
 
     g_return_if_fail (EEK_IS_ELEMENT(child));
-    g_object_ref_sink (child);
+    g_object_ref (child);
 
     priv->children = g_slist_prepend (priv->children, child);
     eek_element_set_parent (child, EEK_ELEMENT(self));

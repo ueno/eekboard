@@ -200,7 +200,7 @@ eek_clutter_key_set_property (GObject      *object,
     switch (prop_id) {
     case PROP_KEY:
         priv->key = g_value_get_object (value);
-        g_object_ref_sink (priv->key);
+        g_object_ref (priv->key);
         break;
     case PROP_RENDERER:
         priv->renderer = g_value_get_object (value);
@@ -224,7 +224,7 @@ eek_clutter_key_dispose (GObject *object)
         priv->renderer = NULL;
     }
 
-    if (priv->key && g_object_is_floating (priv->key)) {
+    if (priv->key) {
         g_object_unref (priv->key);
         priv->key = NULL;
     }

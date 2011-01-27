@@ -166,7 +166,7 @@ eek_clutter_keyboard_set_property (GObject      *object,
     switch (prop_id) {
     case PROP_KEYBOARD:
         priv->keyboard = g_value_get_object (value);
-        g_object_ref_sink (priv->keyboard);
+        g_object_ref (priv->keyboard);
         create_renderer (EEK_CLUTTER_KEYBOARD(object));
         break;
     default:
@@ -187,7 +187,7 @@ eek_clutter_keyboard_dispose (GObject *object)
         priv->renderer = NULL;
     }
 
-    if (priv->keyboard && g_object_is_floating (priv->keyboard)) {
+    if (priv->keyboard) {
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }
