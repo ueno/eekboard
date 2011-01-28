@@ -45,7 +45,7 @@ libeek_private_headers =			\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
 	$(srcdir)/eek-xkeysym-keysym-entries.h	\
-	$(srcdir)/eek-marshallers.h
+	$(srcdir)/eek-marshalers.h
 
 libeek_sources =				\
 	$(srcdir)/eek-layout.c			\
@@ -71,17 +71,17 @@ libeek_enumtypes_sources =			\
 	$(srcdir)/eek-enumtypes.c		\
 	$(srcdir)/eek-enumtypes.h
 
-libeek_marshallers_sources =			\
-	$(srcdir)/eek-marshallers.c		\
-	$(srcdir)/eek-marshallers.h
+libeek_marshalers_sources =			\
+	$(srcdir)/eek-marshalers.c		\
+	$(srcdir)/eek-marshalers.h
 
 BUILT_SOURCES =					\
 	$(libeek_keysym_sources)		\
-	$(libeek_marshallers_sources)
+	$(libeek_marshalers_sources)
 
 libeek_la_SOURCES =				\
 	$(libeek_sources)			\
-	$(srcdir)/eek-marshallers.c
+	$(srcdir)/eek-marshalers.c
 
 libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS)
 libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) -lm
@@ -162,13 +162,13 @@ eek-xkeysym-keysym-entries.h: xkeysym-keysym-entries.txt
 	$(PYTHON) ./gen-keysym-entries.py xkeysym_keysym_entries < $< > $@
 
 # gen marshal
-eek-marshallers.h: eek-marshallers.list
-	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshallers.list --header --internal > $@.tmp && \
+eek-marshalers.h: eek-marshalers.list
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshalers.list --header --internal > $@.tmp && \
 	mv $@.tmp $@
 
-eek-marshallers.c: eek-marshallers.list eek-marshallers.h
-	$(AM_V_GEN) (echo "#include \"eek-marshallers.h\""; \
-	$(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshallers.list --body --internal) > $@.tmp && \
+eek-marshalers.c: eek-marshalers.list eek-marshalers.h
+	$(AM_V_GEN) (echo "#include \"eek-marshalers.h\""; \
+	$(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshalers.list --body --internal) > $@.tmp && \
 	mv $@.tmp $@
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -193,7 +193,7 @@ EXTRA_DIST =					\
 	special-keysym-entries.txt		\
 	unicode-keysym-entries.txt		\
 	xkeysym-keysym-entries.txt		\
-	eek-marshallers.list
+	eek-marshalers.list
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =

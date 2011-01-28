@@ -35,7 +35,7 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-symbol.h"
-#include "eek-marshallers.h"
+#include "eek-marshalers.h"
 
 enum {
     PROP_0,
