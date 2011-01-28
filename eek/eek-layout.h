@@ -62,9 +62,6 @@ struct _EekLayoutClass
 };
 
 GType        eek_layout_get_type  (void) G_GNUC_CONST;
-EekKeyboard *eek_layout_new       (EekLayout *layout,
-                                   gdouble    initial_width,
-                                   gdouble    initial_height);
 
 G_END_DECLS
 #endif  /* EEK_LAYOUT_H */
