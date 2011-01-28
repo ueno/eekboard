@@ -128,6 +128,7 @@ eek_element_finalize (GObject *object)
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(object);
 
     g_free (priv->name);
+    G_OBJECT_CLASS (eek_element_parent_class)->finalize (object);
 }
 
 static void

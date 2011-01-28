@@ -167,8 +167,9 @@ static void
 eek_symbol_finalize (GObject *object)
 {
     EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(object);
-    if (priv->name)
-        g_free (priv->name);
+
+    g_free (priv->name);
+    G_OBJECT_CLASS (eek_symbol_parent_class)->finalize (object);
 }
 
 static void
