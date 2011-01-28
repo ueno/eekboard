@@ -442,7 +442,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     gdouble size, scale;
     gint i;
 
-    symbol = eek_key_get_symbol (key);
+    symbol = eek_key_get_symbol_with_fallback (key, -1, 0);
     if (!symbol)
         return;
 

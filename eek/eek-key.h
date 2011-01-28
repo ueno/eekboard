@@ -104,9 +104,15 @@ void             eek_key_set_symbol_matrix   (EekKey          *key,
                                               EekSymbolMatrix *matrix);
 EekSymbolMatrix *eek_key_get_symbol_matrix   (EekKey          *key);
 EekSymbol       *eek_key_get_symbol          (EekKey          *key);
+EekSymbol *      eek_key_get_symbol_with_fallback
+                                             (EekKey          *key,
+                                              gint             fallback_group,
+                                              gint             fallback_level);
 EekSymbol       *eek_key_get_symbol_at_index (EekKey          *key,
                                               gint             group,
-                                              gint             level);
+                                              gint             level,
+                                              gint             fallback_group,
+                                              gint             fallback_level);
 
 void             eek_key_set_index           (EekKey          *key,
                                               gint             column,

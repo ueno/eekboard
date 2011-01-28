@@ -399,7 +399,10 @@ a11y_keystroke_listener (const AccessibleKeystroke *stroke,
 
     /* XXX: Ignore modifier keys since there is no way to receive
        SPI_KEY_RELEASED event for them. */
-    symbol = eek_key_get_symbol (key);
+    symbol = eek_key_get_symbol_with_fallback (key, -1, 0);
+    if (!symbol)
+        return FALSE;
+
     for (i = 0; i < G_N_ELEMENTS(ignored_keysyms); i++)
         if (EEK_IS_KEYSYM(symbol) &&
             eek_keysym_get_xkeysym (EEK_KEYSYM(symbol)) == ignored_keysyms[i])
@@ -434,7 +437,10 @@ on_key_pressed (EekKeyboard *keyboard,
     Eekboard *eekboard = user_data;
     EekSymbol *symbol;
 
-    symbol = eek_key_get_symbol (key);
+    symbol = eek_key_get_symbol_with_fallback (key, -1, 0);
+    if (!symbol)
+        return;
+
     EEKBOARD_NOTE("%s %X",
                   eek_symbol_get_name (symbol),
                   eek_keyboard_get_modifiers (keyboard));

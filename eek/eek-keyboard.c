@@ -258,20 +258,25 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
     EekSymbol *symbol;
     EekModifierType modifier;
 
-    if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LATCH)
-        priv->modifiers = 0;
-
-    symbol = eek_key_get_symbol_at_index (key, priv->group, priv->level);
+    symbol = eek_key_get_symbol_at_index (key,
+                                          priv->group,
+                                          priv->level,
+                                          -1,
+                                          0);
     if (!symbol)
         return;
 
     modifier = eek_symbol_get_modifier_mask (symbol);
-    if (modifier != 0) {
-        if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE ||
-            priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LATCH)
-            priv->modifiers |= modifier;
-        else if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_LOCK)
-            priv->modifiers ^= modifier;
+    switch (priv->modifier_behavior) {
+    case EEK_MODIFIER_BEHAVIOR_NONE:
+        priv->modifiers |= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LOCK:
+        priv->modifiers ^= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LATCH:
+        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+        break;
     }
     set_level_from_modifiers (self);
 }
@@ -284,7 +289,11 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     EekSymbol *symbol;
     EekModifierType modifier;
 
-    symbol = eek_key_get_symbol_at_index (key, priv->group, priv->level);
+    symbol = eek_key_get_symbol_at_index (key,
+                                          priv->group,
+                                          priv->level,
+                                          -1,
+                                          0);
     if (!symbol)
         return;
 

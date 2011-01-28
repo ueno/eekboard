@@ -470,6 +470,23 @@ get_keyboard (EekKey *key)
 EekSymbol *
 eek_key_get_symbol (EekKey *key)
 {
+    return eek_key_get_symbol_with_fallback (key, -1, -1);
+}
+
+/**
+ * eek_key_get_symbol_with_fallback:
+ * @key: an #EekKey
+ * @fallback_group: fallback group index
+ * @fallback_level: fallback level index
+ *
+ * Get the current symbol of @key.
+ * Returns: an #EekSymbol or %NULL on failure
+ */
+EekSymbol *
+eek_key_get_symbol_with_fallback (EekKey *key,
+                                  gint    fallback_group,
+                                  gint    fallback_level)
+{
     gint group, level;
     EekKeyboard *keyboard;
 
@@ -479,8 +496,11 @@ eek_key_get_symbol (EekKey *key)
     g_return_val_if_fail (keyboard, NULL);
 
     eek_keyboard_get_symbol_index (keyboard, &group, &level);
-
-    return eek_key_get_symbol_at_index (key, group, level);
+    return eek_key_get_symbol_at_index (key,
+                                        group,
+                                        level,
+                                        fallback_group,
+                                        fallback_level);
 }
 
 /**
@@ -488,6 +508,8 @@ eek_key_get_symbol (EekKey *key)
  * @key: an #EekKey
  * @group: group index of the symbol matrix
  * @level: level index of the symbol matrix
+ * @fallback_group: fallback group index
+ * @fallback_level: fallback level index
  *
  * Get the symbol at (@group, @level) in the symbol matrix of @key.
  * Returns: an #EekSymbol or %NULL on failure
@@ -495,10 +517,15 @@ eek_key_get_symbol (EekKey *key)
 EekSymbol *
 eek_key_get_symbol_at_index (EekKey *key,
                              gint    group,
-                             gint    level)
+                             gint    level,
+                             gint    fallback_group,
+                             gint    fallback_level)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(key);
     gint num_symbols;
+
+    g_return_val_if_fail (group >= 0, NULL);
+    g_return_val_if_fail (level >= 0, NULL);
 
     if (!priv->symbol_matrix)
         return NULL;
@@ -508,13 +535,20 @@ eek_key_get_symbol_at_index (EekKey *key,
     if (num_symbols == 0)
         return NULL;
 
-    if (group >= priv->symbol_matrix->num_groups)
-        return NULL;
-    if (level >= priv->symbol_matrix->num_levels)
-        return NULL;
+    if (group >= priv->symbol_matrix->num_groups) {
+        if (fallback_group < 0)
+            return NULL;
+        group = fallback_group;
+    }
+
+    if (level >= priv->symbol_matrix->num_levels) {
+        if (fallback_level < 0)
+            return NULL;
+        level = fallback_level;
+    }
 
     return priv->symbol_matrix->data[group * priv->symbol_matrix->num_levels +
-                                    level];
+                                     level];
 }
 
 /**
