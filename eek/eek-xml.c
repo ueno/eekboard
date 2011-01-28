@@ -78,17 +78,20 @@ output_key_callback (EekElement *element, gpointer user_data)
     gint i, num_symbols;
     EekSymbolMatrix *matrix;
     gint column, row;
+    guint keycode = eek_key_get_keycode (EEK_KEY(element));
 
     eek_key_get_index (EEK_KEY(element), &column, &row);
     g_string_append_indent (data->output, data->indent);
     if (eek_element_get_name (element))
         g_string_markup_printf (data->output,
-                                "<key column=\"%d\" row=\"%d\" name=\"%s\">\n",
-                                column, row, eek_element_get_name (element));
+                                "<key id=\"key%u\" column=\"%d\" row=\"%d\" "
+                                "name=\"%s\">\n",
+                                keycode, column, row,
+                                eek_element_get_name (element));
     else
         g_string_markup_printf (data->output,
-                                "<key column=\"%d\" row=\"%d\">\n",
-                                column, row);
+                                "<key id=\"key%d\" column=\"%d\" row=\"%d\">\n",
+                                keycode, column, row);
 
     eek_element_get_bounds (element, &bounds);
     g_string_append_indent (data->output, data->indent + 1);

@@ -64,7 +64,6 @@ struct _ParseCallbackData {
     gint num_columns;
     EekOrientation orientation;
     GSList *points;
-    guint keycode;
     GSList *symbols;
     gint groups, levels;
     EekOutline outline;
@@ -205,6 +204,8 @@ start_element_callback (GMarkupParseContext *pcontext,
         data->key = eek_section_create_key (data->section, column, row);
         if (name)
             eek_element_set_name (EEK_ELEMENT(data->key), name);
+        if (id && g_str_has_prefix (id, "key"))
+            eek_key_set_keycode (data->key, strtoul (id + 3, NULL, 10));
         goto out;
     }
 
@@ -269,10 +270,11 @@ end_element_callback (GMarkupParseContext *pcontext,
             } else
                 matrix->data[i] = NULL;
         }
-
-        eek_key_set_symbol_matrix (data->key, matrix);
         g_slist_free (data->symbols);
         data->symbols = NULL;
+
+        eek_key_set_symbol_matrix (data->key, matrix);
+        eek_symbol_matrix_free (matrix);
         goto out;
     }
 
@@ -374,15 +376,11 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keycode") == 0) {
-        eek_key_set_keycode (data->key, strtoul (text, NULL, 10));
-        goto out;
-    }
-
     if (g_strcmp0 (element_name, "keysym") == 0) {
-        data->symbols =
-            g_slist_prepend (data->symbols,
-                             eek_keysym_new_from_name (g_strdup (text)));
+        gchar *name = g_strdup (text);
+        data->symbols = g_slist_prepend (data->symbols,
+                                         eek_keysym_new_from_name (name));
+        g_free (name);
         goto out;
     }
 
