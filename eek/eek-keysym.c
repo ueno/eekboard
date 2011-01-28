@@ -20,27 +20,57 @@
 
 /**
  * SECTION:eek-keysym
- * @short_description: Keysym conversion utilities
+ * @short_description: an #EekSymbol represents an X keysym
  */
 
-#include <glib.h>
+#include <string.h>
 #include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
 #include "eek-keysym.h"
 
-struct _EekKeysymEntry {
-    guint keysym;
-    const gchar *label;
-    EekKeysymCategory category;
+/* modifier keys */
+#define EEK_KEYSYM_Shift_L 0xffe1
+#define EEK_KEYSYM_Shift_R 0xffe2
+#define EEK_KEYSYM_ISO_Level3_Shift 0xfe03
+#define EEK_KEYSYM_Caps_Lock 0xffe5
+#define EEK_KEYSYM_Shift_Lock 0xffe6
+#define EEK_KEYSYM_Control_L 0xffe3
+#define EEK_KEYSYM_Control_R 0xffe4
+#define EEK_KEYSYM_Alt_L 0xffe9
+#define EEK_KEYSYM_Alt_R 0xffea
+#define EEK_KEYSYM_Meta_L 0xffe7
+#define EEK_KEYSYM_Meta_R 0xffe8
+#define EEK_KEYSYM_Super_L 0xffeb
+#define EEK_KEYSYM_Super_R 0xffec
+#define EEK_KEYSYM_Hyper_L 0xffed
+#define EEK_KEYSYM_Hyper_R 0xffee
+
+struct _EekKeysymPrivate {
+    guint xkeysym;
+    const gchar *name;
+    EekSymbolCategory category;
 };
-typedef struct _EekKeysymEntry EekKeysymEntry;
+
+typedef EekKeysymPrivate EekKeysymEntry;
 
 #include "eek-special-keysym-entries.h"
 #include "eek-unicode-keysym-entries.h"
-#include "eek-keyname-keysym-entries.h"
+#include "eek-xkeysym-keysym-entries.h"
+
+static const EekKeysymEntry invalid_keysym_entry = {
+    EEK_INVALID_KEYSYM,
+    "\0",
+    EEK_SYMBOL_CATEGORY_UNKNOWN,
+};
+
+G_DEFINE_TYPE (EekKeysym, eek_keysym, EEK_TYPE_SYMBOL);
+
+#define EEK_KEYSYM_GET_PRIVATE(obj)                                  \
+    (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_KEYSYM, EekKeysymPrivate))
 
 static gchar *
 unichar_to_utf8 (gunichar uc)
@@ -58,202 +88,179 @@ unichar_to_utf8 (gunichar uc)
 }
 
 static int
-keysym_entry_compare_keysym (const void *key0, const void *key1)
+keysym_entry_compare_by_xkeysym (const void *key0, const void *key1)
 {
     const EekKeysymEntry *entry0 = key0, *entry1 = key1;
-    return (gint)entry0->keysym - (gint)entry1->keysym;
+    return (gint)entry0->xkeysym - (gint)entry1->xkeysym;
 }
 
-static gboolean
-find_keysym (guint              keysym,
-             gchar            **label,
-             EekKeysymCategory *category)
+static EekKeysymEntry *
+find_keysym_entry_by_xkeysym (guint xkeysym,
+                              const EekKeysymEntry *entries,
+                              gint num_entries)
 {
-    EekKeysymEntry bsearch_key, *bsearch_val;
+    EekKeysymEntry key;
+
+    key.xkeysym = xkeysym;
+    return bsearch (&key, entries, num_entries, sizeof (EekKeysymEntry),
+                   keysym_entry_compare_by_xkeysym);
+}
+
+static G_CONST_RETURN gchar *
+eek_keysym_real_get_name (EekSymbol *self)
+{
+    EekKeysymPrivate *priv = EEK_KEYSYM_GET_PRIVATE(self);
+    return priv->name;
+}
+
+static gchar *
+eek_keysym_real_get_label (EekSymbol *self)
+{
+    EekKeysymPrivate *priv = EEK_KEYSYM_GET_PRIVATE(self);
+    EekKeysymEntry *entry;
 
     /* First, search special keysyms. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           special_keysym_entries,
-                           G_N_ELEMENTS(special_keysym_entries),
-                           sizeof (EekKeysymEntry),
-                           keysym_entry_compare_keysym);
-    if (bsearch_val) {
-        if (label)
-            *label = g_strdup (bsearch_val->label);
-        if (category)
-            *category = bsearch_val->category;
-        return TRUE;
-    }
+    entry = find_keysym_entry_by_xkeysym (priv->xkeysym,
+                                          special_keysym_entries,
+                                          G_N_ELEMENTS(special_keysym_entries));
+    if (entry)
+        return g_strdup (entry->name);
   
     /* Check for Latin-1 characters (1:1 mapping) */
-    if ((keysym >= 0x0020 && keysym <= 0x007e) ||
-        (keysym >= 0x00a0 && keysym <= 0x00ff)) {
-        if (label)
-            *label = unichar_to_utf8 (keysym);
-        if (category)
-            *category = EEK_KEYSYM_CATEGORY_LETTER;
-        return TRUE;
-    }
+    if ((priv->xkeysym >= 0x0020 && priv->xkeysym <= 0x007e) ||
+        (priv->xkeysym >= 0x00a0 && priv->xkeysym <= 0x00ff))
+        return unichar_to_utf8 (priv->xkeysym);
 
     /* Also check for directly encoded 24-bit UCS characters:
      */
-    if ((keysym & 0xff000000) == 0x01000000) {
-        if (label)
-            *label = unichar_to_utf8 (keysym & 0x00ffffff);
-        if (category)
-            *category = EEK_KEYSYM_CATEGORY_LETTER;
-        return TRUE;
-    }
+    if ((priv->xkeysym & 0xff000000) == 0x01000000)
+        return unichar_to_utf8 (priv->xkeysym & 0x00ffffff);
 
     /* Search known unicode keysyms. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           unicode_keysym_entries,
-                           G_N_ELEMENTS(unicode_keysym_entries),
-                           sizeof (EekKeysymEntry),
-                           keysym_entry_compare_keysym);
-    if (bsearch_val) {
-        if (label)
-            *label = g_strdup (bsearch_val->label);
-        if (category)
-            *category = bsearch_val->category;
-        return TRUE;
-    }
+    entry = find_keysym_entry_by_xkeysym (priv->xkeysym,
+                                          unicode_keysym_entries,
+                                          G_N_ELEMENTS(unicode_keysym_entries));
+    if (entry)
+        return g_strdup (entry->name);
 
-    /* Finally, search keynames. */
-    bsearch_key.keysym = keysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           keyname_keysym_entries,
-                           G_N_ELEMENTS(keyname_keysym_entries),
-                           sizeof (EekKeysymEntry),
-                           keysym_entry_compare_keysym);
-    if (bsearch_val) {
-        if (label)
-            *label = g_strdup (bsearch_val->label);
-        if (category)
-            *category = bsearch_val->category;
-        return TRUE;
-    }
-
-    return FALSE;
+    return g_strdup (eek_symbol_get_name (self));
 }
 
-/**
- * eek_keysym_to_string:
- * @keysym: keysym ID
- *
- * Return a string representation of @keysym.
- */
-gchar *
-eek_keysym_to_string (guint keysym)
+EekSymbolCategory
+eek_keysym_real_get_category (EekSymbol *self)
 {
-    gchar *label;
-
-    if (find_keysym (keysym, &label, NULL))
-        return label;
-    return g_strdup ("");
+    EekKeysymPrivate *priv = EEK_KEYSYM_GET_PRIVATE(self);
+    return priv->category;
 }
 
-gchar *
-eek_xkeysym_to_string (guint xkeysym)
-{
-    EekKeysymEntry bsearch_key, *bsearch_val;
-
-    bsearch_key.keysym = xkeysym;
-    bsearch_val = bsearch (&bsearch_key,
-                           keyname_keysym_entries,
-                           G_N_ELEMENTS(keyname_keysym_entries),
-                           sizeof (EekKeysymEntry),
-                           keysym_entry_compare_keysym);
-    if (bsearch_val)
-        return g_strdup (bsearch_val->label);
-    return NULL;
-}
-
-static GHashTable *xkeysym_hash = NULL;
-
-static void
-xkeysym_free (gpointer xkeysym)
-{
-    g_slice_free (guint, xkeysym);
-}
-
-guint
-eek_xkeysym_from_string (gchar *string)
-{
-    guint *xkeysym;
-
-    if (!xkeysym_hash) {
-        gint i;
-
-        xkeysym_hash = g_hash_table_new_full (g_str_hash,
-                                              g_str_equal,
-                                              g_free,
-                                              xkeysym_free);
-        for (i = 0; i < G_N_ELEMENTS(keyname_keysym_entries); i++) {
-            xkeysym = g_slice_new (guint);
-            *xkeysym = keyname_keysym_entries[i].keysym;
-            g_hash_table_insert (xkeysym_hash,
-                                 g_strdup (keyname_keysym_entries[i].label),
-                                 xkeysym);
-        }
-    }
-
-    xkeysym = g_hash_table_lookup (xkeysym_hash, string);
-    if (xkeysym)
-        return *xkeysym;
-    return EEK_INVALID_KEYSYM;
-}
-
-/**
- * eek_keysym_get_category:
- * @keysym: keysym ID
- *
- * Return a string representation of @keysym.
- */
-EekKeysymCategory
-eek_keysym_get_category (guint keysym)
-{
-    EekKeysymCategory category;
-
-    if (find_keysym (keysym, NULL, &category))
-        return category;
-    return EEK_KEYSYM_CATEGORY_UNKNOWN;
-}
-
-/**
- * eek_keysym_to_modifier:
- * @keysym: keysym ID
- *
- * Return a modifier mask which @keysym affects.
- */
 EekModifierType
-eek_keysym_to_modifier (guint keysym)
+eek_keysym_real_get_modifier_mask (EekSymbol *self)
 {
-    switch (keysym) {
-    case EEK_KEY_Shift_L:
-    case EEK_KEY_Shift_R:
-    case EEK_KEY_Caps_Lock:
-    case EEK_KEY_Shift_Lock:
+    EekKeysymPrivate *priv = EEK_KEYSYM_GET_PRIVATE(self);
+
+    switch (priv->xkeysym) {
+    case EEK_KEYSYM_Shift_L:
+    case EEK_KEYSYM_Shift_R:
+    case EEK_KEYSYM_Caps_Lock:
+    case EEK_KEYSYM_Shift_Lock:
         return EEK_SHIFT_MASK;
-    case EEK_KEY_ISO_Level3_Shift:
+    case EEK_KEYSYM_ISO_Level3_Shift:
         return EEK_MOD5_MASK;
-    case EEK_KEY_Control_L:
-    case EEK_KEY_Control_R:
+    case EEK_KEYSYM_Control_L:
+    case EEK_KEYSYM_Control_R:
         return EEK_CONTROL_MASK;
-    case EEK_KEY_Alt_L:
-    case EEK_KEY_Alt_R:
+    case EEK_KEYSYM_Alt_L:
+    case EEK_KEYSYM_Alt_R:
         return EEK_MOD1_MASK;
-    case EEK_KEY_Meta_L:
-    case EEK_KEY_Meta_R:
+    case EEK_KEYSYM_Meta_L:
+    case EEK_KEYSYM_Meta_R:
         return EEK_META_MASK;
-    case EEK_KEY_Super_L:
-    case EEK_KEY_Super_R:
+    case EEK_KEYSYM_Super_L:
+    case EEK_KEYSYM_Super_R:
         return EEK_SUPER_MASK;
-    case EEK_KEY_Hyper_L:
-    case EEK_KEY_Hyper_R:
+    case EEK_KEYSYM_Hyper_L:
+    case EEK_KEYSYM_Hyper_R:
         return EEK_HYPER_MASK;
     }
     return 0;
+}
+
+static void
+eek_keysym_class_init (EekKeysymClass *klass)
+{
+    EekSymbolClass *symbol_class = EEK_SYMBOL_CLASS (klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+    g_type_class_add_private (gobject_class, sizeof (EekKeysymPrivate));
+
+    symbol_class->get_name = eek_keysym_real_get_name;
+    symbol_class->get_label = eek_keysym_real_get_label;
+    symbol_class->get_category = eek_keysym_real_get_category;
+    symbol_class->get_modifier_mask = eek_keysym_real_get_modifier_mask;
+}
+
+static void
+eek_keysym_init (EekKeysym *self)
+{
+    EekKeysymPrivate *priv;
+
+    priv = self->priv = EEK_KEYSYM_GET_PRIVATE(self);
+    memcpy (priv, &invalid_keysym_entry, sizeof (EekKeysymEntry));
+}
+
+EekKeysym *
+eek_keysym_new (guint xkeysym)
+{
+    EekKeysym *keysym;
+    EekKeysymPrivate *priv;
+    EekKeysymEntry *entry;
+
+    keysym = g_object_new (EEK_TYPE_KEYSYM, NULL);
+    priv = EEK_KEYSYM_GET_PRIVATE(keysym);
+
+    entry = find_keysym_entry_by_xkeysym (xkeysym,
+                                          xkeysym_keysym_entries,
+                                          G_N_ELEMENTS(xkeysym_keysym_entries));
+    if (entry)
+        memcpy (priv, entry, sizeof (EekKeysymEntry));
+    else {
+        // g_warning ("can't find keysym entry %u", xkeysym);
+        memcpy (priv, &invalid_keysym_entry, sizeof (EekKeysymEntry));
+        priv->xkeysym = xkeysym;
+    }
+    return keysym;
+}
+
+EekKeysym *
+eek_keysym_new_from_name (const gchar *name)
+{
+    EekKeysym *keysym;
+    EekKeysymPrivate *priv;
+    gint i;
+
+    for (i = 0;
+         i < G_N_ELEMENTS(xkeysym_keysym_entries) &&
+             g_strcmp0 (xkeysym_keysym_entries[i].name, name) != 0; i++)
+        ;
+
+    keysym = g_object_new (EEK_TYPE_KEYSYM, NULL);
+    priv = EEK_KEYSYM_GET_PRIVATE(keysym);
+
+    if (i < G_N_ELEMENTS(xkeysym_keysym_entries))
+        memcpy (priv, &xkeysym_keysym_entries[i], sizeof (EekKeysymEntry));
+    else {
+        // g_warning ("can't find keysym entry for %s", name);
+        memcpy (priv, &invalid_keysym_entry, sizeof (EekKeysymEntry));
+    }
+    return keysym;
+}
+
+guint
+eek_keysym_get_xkeysym (EekKeysym *keysym)
+{
+    EekKeysymPrivate *priv;
+
+    g_assert (EEK_IS_KEYSYM(keysym));
+    priv = EEK_KEYSYM_GET_PRIVATE(keysym);
+    return priv->xkeysym;
 }

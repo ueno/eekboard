@@ -58,10 +58,10 @@ struct _EekRendererPrivate
 struct {
     gint category;
     gdouble scale;
-} keysym_category_scale_factors[EEK_KEYSYM_CATEGORY_LAST] = {
-    { EEK_KEYSYM_CATEGORY_LETTER, 1.0 },
-    { EEK_KEYSYM_CATEGORY_FUNCTION, 0.5 },
-    { EEK_KEYSYM_CATEGORY_KEYNAME, 0.5 }
+} symbol_category_scale_factors[EEK_SYMBOL_CATEGORY_LAST] = {
+    { EEK_SYMBOL_CATEGORY_LETTER, 1.0 },
+    { EEK_SYMBOL_CATEGORY_FUNCTION, 0.5 },
+    { EEK_SYMBOL_CATEGORY_KEYNAME, 0.5 }
 };
 
 /* eek-keyboard-drawing.c */
@@ -78,7 +78,7 @@ static void invalidate                         (EekRenderer *renderer);
 static void render_key                         (EekRenderer *self,
                                                 cairo_t     *cr,
                                                 EekKey      *key);
-static void on_keysym_index_changed            (EekKeyboard *keyboard,
+static void on_symbol_index_changed            (EekKeyboard *keyboard,
                                                 gint         group,
                                                 gint         level,
                                                 gpointer     user_data);
@@ -269,16 +269,16 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     PangoRectangle extents = { 0, };
     PangoLayout *layout;
     gdouble size;
-    guint keysym;
+    EekSymbol *symbol;
     EekBounds bounds;
     gchar *label;
 
-    keysym = eek_key_get_keysym (EEK_KEY(element));
-    if (keysym == EEK_INVALID_KEYSYM ||
-        eek_keysym_get_category (keysym) != EEK_KEYSYM_CATEGORY_LETTER)
+    symbol = eek_key_get_symbol (EEK_KEY(element));
+    if (!symbol ||
+        eek_symbol_get_category (symbol) != EEK_SYMBOL_CATEGORY_LETTER)
         return;
 
-    label = eek_keysym_to_string (keysym);
+    label = eek_symbol_get_label (symbol);
     if (!label)
         return;
 
@@ -434,23 +434,23 @@ eek_renderer_real_render_key_label (EekRenderer *self,
                                     EekKey      *key)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
-    guint keysym;
-    EekKeysymCategory category;
+    EekSymbol *symbol;
+    EekSymbolCategory category;
     gchar *label;
     EekBounds bounds;
     PangoFontDescription *font;
     gdouble size, scale;
     gint i;
 
-    keysym = eek_key_get_keysym (key);
-    if (keysym == EEK_INVALID_KEYSYM)
+    symbol = eek_key_get_symbol (key);
+    if (!symbol)
         return;
 
-    category = eek_keysym_get_category (keysym);
-    if (category == EEK_KEYSYM_CATEGORY_UNKNOWN)
+    category = eek_symbol_get_category (symbol);
+    if (category == EEK_SYMBOL_CATEGORY_UNKNOWN)
         return;
 
-    label = eek_keysym_to_string (keysym);
+    label = eek_symbol_get_label (symbol);
     if (!label)
         return;
 
@@ -470,9 +470,9 @@ eek_renderer_real_render_key_label (EekRenderer *self,
 
     font = pango_font_description_copy (priv->font);
     size = pango_font_description_get_size (font);
-    for (i = 0; i < G_N_ELEMENTS(keysym_category_scale_factors); i++)
-        if (keysym_category_scale_factors[i].category == category) {
-            size *= keysym_category_scale_factors[i].scale;
+    for (i = 0; i < G_N_ELEMENTS(symbol_category_scale_factors); i++)
+        if (symbol_category_scale_factors[i].category == category) {
+            size *= symbol_category_scale_factors[i].scale;
             break;
         }
     pango_font_description_set_size (font, size * priv->scale * scale);
@@ -536,8 +536,8 @@ eek_renderer_set_property (GObject      *object,
         priv->keyboard = g_value_get_object (value);
         g_object_ref (priv->keyboard);
 
-        g_signal_connect (priv->keyboard, "keysym-index-changed",
-                          G_CALLBACK(on_keysym_index_changed),
+        g_signal_connect (priv->keyboard, "symbol-index-changed",
+                          G_CALLBACK(on_symbol_index_changed),
                           object);
         break;
     case PROP_PCONTEXT:
@@ -655,7 +655,7 @@ invalidate (EekRenderer *renderer)
 }
 
 static void
-on_keysym_index_changed (EekKeyboard *keyboard,
+on_symbol_index_changed (EekKeyboard *keyboard,
                          gint         group,
                          gint         level,
                          gpointer     user_data)

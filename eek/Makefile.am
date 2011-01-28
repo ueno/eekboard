@@ -33,8 +33,9 @@ libeek_public_headers =				\
 	$(srcdir)/eek-keyboard.h		\
 	$(srcdir)/eek-section.h			\
 	$(srcdir)/eek-key.h			\
-	$(srcdir)/eek-types.h			\
+	$(srcdir)/eek-symbol.h			\
 	$(srcdir)/eek-keysym.h			\
+	$(srcdir)/eek-types.h			\
 	$(srcdir)/eek-xml.h			\
 	$(srcdir)/eek.h
 
@@ -43,7 +44,7 @@ libeek_private_headers =			\
 	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
-	$(srcdir)/eek-keyname-keysym-entries.h	\
+	$(srcdir)/eek-xkeysym-keysym-entries.h	\
 	$(srcdir)/eek-marshallers.h
 
 libeek_sources =				\
@@ -53,8 +54,9 @@ libeek_sources =				\
 	$(srcdir)/eek-keyboard.c		\
 	$(srcdir)/eek-section.c			\
 	$(srcdir)/eek-key.c			\
-	$(srcdir)/eek-types.c			\
+	$(srcdir)/eek-symbol.c			\
 	$(srcdir)/eek-keysym.c			\
+	$(srcdir)/eek-types.c			\
 	$(srcdir)/eek-xml.c			\
 	$(srcdir)/eek-xml-layout.c		\
 	$(srcdir)/eek-renderer.c		\
@@ -63,7 +65,7 @@ libeek_sources =				\
 libeek_keysym_sources =				\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
-	$(srcdir)/eek-keyname-keysym-entries.h
+	$(srcdir)/eek-xkeysym-keysym-entries.h
 
 libeek_enumtypes_sources =			\
 	$(srcdir)/eek-enumtypes.c		\
@@ -156,8 +158,8 @@ eek-special-keysym-entries.h: special-keysym-entries.txt
 	$(PYTHON) ./gen-keysym-entries.py special_keysym_entries < $< > $@
 eek-unicode-keysym-entries.h: unicode-keysym-entries.txt
 	$(PYTHON) ./gen-keysym-entries.py unicode_keysym_entries < $< > $@
-eek-keyname-keysym-entries.h: keyname-keysym-entries.txt
-	$(PYTHON) ./gen-keysym-entries.py keyname_keysym_entries < $< > $@
+eek-xkeysym-keysym-entries.h: xkeysym-keysym-entries.txt
+	$(PYTHON) ./gen-keysym-entries.py xkeysym_keysym_entries < $< > $@
 
 # gen marshal
 eek-marshallers.h: eek-marshallers.list
@@ -190,7 +192,7 @@ EXTRA_DIST =					\
 	gen-keysym-entries.py			\
 	special-keysym-entries.txt		\
 	unicode-keysym-entries.txt		\
-	keyname-keysym-entries.txt		\
+	xkeysym-keysym-entries.txt		\
 	eek-marshallers.list
 
 -include $(INTROSPECTION_MAKEFILE)

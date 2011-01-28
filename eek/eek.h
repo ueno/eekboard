@@ -24,6 +24,7 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-layout.h"
+#include "eek-symbol.h"
 #include "eek-keysym.h"
 #include "eek-xml.h"
 

@@ -123,11 +123,11 @@ create_key (EekXkbLayout *layout,
     EekXkbLayoutPrivate *priv = layout->priv;
     EekKey *key;
     EekBounds bounds;
-    guint *keysyms = NULL;
+    EekSymbolMatrix *matrix = NULL;
     gchar name[XkbKeyNameLength + 1];
     EekOutline *outline;
     KeyCode keycode;
-    gint num_groups, num_levels, num_keysyms;
+    gint num_groups, num_levels, num_symbols;
 
     xkbgeometry = priv->xkb->geom;
     xkbshape = &xkbgeometry->shapes[xkbkey->shape_ndx];
@@ -193,12 +193,13 @@ create_key (EekXkbLayout *layout,
 
         num_groups = XkbKeyNumGroups (priv->xkb, keycode);
         num_levels = XkbKeyGroupsWidth (priv->xkb, keycode);
-        num_keysyms = num_groups * num_levels;
-        keysyms = g_slice_alloc0 (num_keysyms * sizeof(guint));
+        num_symbols = num_groups * num_levels;
+        matrix = eek_symbol_matrix_new (num_groups, num_levels);
         for (i = 0; i < num_groups; i++)
             for (j = 0; j < num_levels; j++) {
                 keysym = XkbKeySymEntry (priv->xkb, keycode, j, i);
-                keysyms[i * num_levels + j] = keysym;
+                matrix->data[i * num_levels + j] =
+                    EEK_SYMBOL(eek_keysym_new (keysym));
             }
     }
 
@@ -206,9 +207,8 @@ create_key (EekXkbLayout *layout,
     eek_element_set_name (EEK_ELEMENT(key), name);
     eek_element_set_bounds (EEK_ELEMENT(key), &bounds);
     eek_key_set_keycode (key, keycode);
-    eek_key_set_keysyms (key, keysyms, num_groups, num_levels);
-    if (keysyms)
-        g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
+    eek_key_set_symbol_matrix (key, matrix);
+    eek_symbol_matrix_free (matrix);
     eek_key_set_outline (key, outline);
 }
 

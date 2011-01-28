@@ -24,7 +24,6 @@
 #include "eek-container.h"
 #include "eek-types.h"
 #include "eek-layout.h"
-#include "eek-keysym.h"
 
 G_BEGIN_DECLS
 
@@ -65,10 +64,10 @@ struct _EekKeyboardClass
     EekContainerClass parent_class;
 
     /*< public >*/
-    void        (* set_keysym_index)     (EekKeyboard *self,
+    void        (* set_symbol_index)     (EekKeyboard *self,
                                           gint         group,
                                           gint         level);
-    void        (* get_keysym_index)     (EekKeyboard *self,
+    void        (* get_symbol_index)     (EekKeyboard *self,
                                           gint        *group,
                                           gint        *level);
 
@@ -82,7 +81,7 @@ struct _EekKeyboardClass
                                           EekKey      *key);
     void        (* key_released)         (EekKeyboard *self,
                                           EekKey      *key);
-    void        (* keysym_index_changed) (EekKeyboard *self,
+    void        (* symbol_index_changed) (EekKeyboard *self,
                                           gint         group,
                                           gint         level);
 
@@ -103,11 +102,11 @@ void                eek_keyboard_get_size
                                      (EekKeyboard        *keyboard,
                                       gdouble            *width,
                                       gdouble            *height);
-void                eek_keyboard_set_keysym_index
+void                eek_keyboard_set_symbol_index
                                      (EekKeyboard        *keyboard,
                                       gint                group,
                                       gint                level);
-void                eek_keyboard_get_keysym_index
+void                eek_keyboard_get_symbol_index
                                      (EekKeyboard        *keyboard,
                                       gint               *group,
                                       gint               *level);

@@ -37,12 +37,12 @@
 #include "eek-key.h"
 #include "eek-section.h"
 #include "eek-keyboard.h"
-#include "eek-keysym.h"
+#include "eek-symbol.h"
 
 enum {
     PROP_0,
     PROP_KEYCODE,
-    PROP_KEYSYMS,
+    PROP_SYMBOL_MATRIX,
     PROP_COLUMN,
     PROP_ROW,
     PROP_OUTLINE,
@@ -66,7 +66,7 @@ G_DEFINE_TYPE (EekKey, eek_key, EEK_TYPE_ELEMENT);
 struct _EekKeyPrivate
 {
     guint keycode;
-    EekKeysymMatrix keysyms;
+    EekSymbolMatrix *symbol_matrix;
     gint column;
     gint row;
     EekOutline *outline;
@@ -88,53 +88,19 @@ eek_key_real_get_keycode (EekKey *self)
 }
 
 static void
-eek_key_real_set_keysyms (EekKey *self,
-                          guint  *keysyms,
-                          gint    num_groups,
-                          gint    num_levels)
+eek_key_real_set_symbol_matrix (EekKey          *self,
+                                EekSymbolMatrix *matrix)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    gint num_keysyms = num_groups * num_levels;
-    
-    if (num_keysyms > 0) {
-        priv->keysyms.data =
-            g_slice_alloc (num_keysyms * sizeof(guint));
-        memcpy (priv->keysyms.data, keysyms,
-                num_keysyms * sizeof(guint));
-    }
-    priv->keysyms.num_groups = num_groups;
-    priv->keysyms.num_levels = num_levels;
-
-#if DEBUG
-    {
-        const gchar *name;
-        gint i;
-
-        name = eek_element_get_name (EEK_ELEMENT(self));
-        fprintf (stderr, "%s: ", name);
-        for (i = 0; i < priv->keysyms.num_groups * priv->keysyms.num_levels; i++)
-            fprintf (stderr, "\"%s\" ", eek_keysym_to_string (priv->keysyms.data[i]));
-        fprintf (stderr, "\n");
-    }
-#endif
+    eek_symbol_matrix_free (priv->symbol_matrix);
+    priv->symbol_matrix = eek_symbol_matrix_copy (matrix);
 }
 
-static void
-eek_key_real_get_keysyms (EekKey *self,
-                          guint **keysyms,
-                          gint   *num_groups,
-                          gint   *num_levels)
+static EekSymbolMatrix *
+eek_key_real_get_symbol_matrix (EekKey *self)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
-
-    if (num_groups)
-        *num_groups = priv->keysyms.num_groups;
-    if (num_levels)
-        *num_levels = priv->keysyms.num_levels;
-    if (keysyms && num_keysyms > 0) {
-        memcpy (*keysyms, priv->keysyms.data, num_keysyms * sizeof(guint));
-    }
+    return priv->symbol_matrix;
 }
 
 static void
@@ -210,9 +176,7 @@ static void
 eek_key_finalize (GObject *object)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(object);
-    gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
-
-    g_slice_free1 (num_keysyms * sizeof (guint), priv->keysyms.data);
+    eek_symbol_matrix_free (priv->symbol_matrix);
     G_OBJECT_CLASS (eek_key_parent_class)->finalize (object);
 }
 
@@ -222,19 +186,16 @@ eek_key_set_property (GObject      *object,
                       const GValue *value,
                       GParamSpec   *pspec)
 {
-    EekKeysymMatrix *matrix;
+    EekSymbolMatrix *matrix;
     gint column, row;
 
     switch (prop_id) {
     case PROP_KEYCODE:
         eek_key_set_keycode (EEK_KEY(object), g_value_get_uint (value));
         break;
-    case PROP_KEYSYMS:
+    case PROP_SYMBOL_MATRIX:
         matrix = g_value_get_boxed (value);
-        eek_key_set_keysyms (EEK_KEY(object),
-                             matrix->data,
-                             matrix->num_groups,
-                             matrix->num_levels);
+        eek_key_set_symbol_matrix (EEK_KEY(object), matrix);
         break;
     case PROP_COLUMN:
         eek_key_get_index (EEK_KEY(object), &column, &row);
@@ -261,7 +222,6 @@ eek_key_get_property (GObject    *object,
                       GValue     *value,
                       GParamSpec *pspec)
 {
-    EekKeysymMatrix matrix;
     gint column, row;
 
     g_return_if_fail (EEK_IS_KEY(object));
@@ -269,10 +229,9 @@ eek_key_get_property (GObject    *object,
     case PROP_KEYCODE:
         g_value_set_uint (value, eek_key_get_keycode (EEK_KEY(object)));
         break;
-    case PROP_KEYSYMS:
-        eek_key_get_keysyms (EEK_KEY(object), &matrix.data, &matrix.num_groups,
-                             &matrix.num_levels);
-        g_value_set_boxed (value, &matrix);
+    case PROP_SYMBOL_MATRIX:
+        g_value_set_boxed (value,
+                           eek_key_get_symbol_matrix (EEK_KEY(object)));
         break;
     case PROP_COLUMN:
         eek_key_get_index (EEK_KEY(object), &column, &row);
@@ -304,8 +263,8 @@ eek_key_class_init (EekKeyClass *klass)
 
     klass->get_keycode = eek_key_real_get_keycode;
     klass->set_keycode = eek_key_real_set_keycode;
-    klass->set_keysyms = eek_key_real_set_keysyms;
-    klass->get_keysyms = eek_key_real_get_keysyms;
+    klass->set_symbol_matrix = eek_key_real_set_symbol_matrix;
+    klass->get_symbol_matrix = eek_key_real_get_symbol_matrix;
     klass->set_index = eek_key_real_set_index;
     klass->get_index = eek_key_real_get_index;
     klass->set_outline = eek_key_real_set_outline;
@@ -333,16 +292,16 @@ eek_key_class_init (EekKeyClass *klass)
     g_object_class_install_property (gobject_class, PROP_KEYCODE, pspec);
 
     /**
-     * EekKey:keysyms:
+     * EekKey:symbol-matrix:
      *
      * The symbol matrix of #EekKey.
      */
-    pspec = g_param_spec_boxed ("keysyms",
-                                "Keysyms",
+    pspec = g_param_spec_boxed ("symbol-matrix",
+                                "Symbol matrix",
                                 "Symbol matrix of the key",
-                                EEK_TYPE_KEYSYM_MATRIX,
+                                EEK_TYPE_SYMBOL_MATRIX,
                                 G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_KEYSYMS, pspec);
+    g_object_class_install_property (gobject_class, PROP_SYMBOL_MATRIX, pspec);
 
     /**
      * EekKey:column:
@@ -375,7 +334,7 @@ eek_key_class_init (EekKeyClass *klass)
      */
     /* Use pointer instead of boxed to avoid copy, since we can
        assume that only a few outline shapes are used in a whole
-       keyboard (unlike keysyms and bounds). */
+       keyboard (unlike symbol matrix and bounds). */
     pspec = g_param_spec_pointer ("outline",
                                   "Outline",
                                   "Pointer to outline shape of the key",
@@ -424,7 +383,7 @@ eek_key_init (EekKey *self)
 
     priv = self->priv = EEK_KEY_GET_PRIVATE(self);
     priv->keycode = 0;
-    memset (&priv->keysyms, 0, sizeof priv->keysyms);
+    priv->symbol_matrix = eek_symbol_matrix_new (0, 0);
     priv->column = priv->row = 0;
     priv->outline = NULL;
 }
@@ -459,45 +418,32 @@ eek_key_get_keycode (EekKey *key)
 }
 
 /**
- * eek_key_set_keysyms:
+ * eek_key_set_symbol_matrix:
  * @key: an #EekKey
- * @keysyms: symbol matrix of @key
- * @num_groups: number of groups (rows) of @keysyms
- * @num_levels: number of levels (columns) of @keysyms
+ * @matrix: an #EekSymbolMatrix
  *
- * Set the symbol matrix of @key to @keysyms.  The length of @keysyms
- * is @num_groups * @num_levels.
+ * Set the symbol matrix @matrix to @key.
  */
 void
-eek_key_set_keysyms (EekKey *key,
-                     guint  *keysyms,
-                     gint    num_groups,
-                     gint    num_levels)
+eek_key_set_symbol_matrix (EekKey          *key,
+                           EekSymbolMatrix *matrix)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_keysyms (key, keysyms, num_groups, num_levels);
+    EEK_KEY_GET_CLASS(key)->set_symbol_matrix (key, matrix);
 }
 
 /**
- * eek_key_get_keysyms:
+ * eek_key_get_symbol_matrix:
  * @key: an #EekKey
- * @keysyms: pointer where symbol matrix of @key will be stored
- * @num_groups: pointer where the number of groups (rows) of @keysyms
- * will be stored
- * @num_levels: pointer where the number of levels (columns) of
- * @keysyms will be stored
  *
- * Get the symbol matrix of @key.  If either @keysyms, @num_groups, or
- * @num_levels are NULL, this function does not try to get the value.
+ * Get the symbol matrix of @key.
+ * Returns: #EekSymbolMatrix or %NULL
  */
-void
-eek_key_get_keysyms (EekKey *key,
-                     guint **keysyms,
-                     gint   *num_groups,
-                     gint   *num_levels)
+EekSymbolMatrix *
+eek_key_get_symbol_matrix (EekKey *key)
 {
-    g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->get_keysyms (key, keysyms, num_groups, num_levels);
+    g_return_val_if_fail (EEK_IS_KEY(key), NULL);
+    return EEK_KEY_GET_CLASS(key)->get_symbol_matrix (key);
 }
 
 static EekKeyboard *
@@ -515,54 +461,60 @@ get_keyboard (EekKey *key)
 }
 
 /**
- * eek_key_get_keysym:
+ * eek_key_get_symbol:
  * @key: an #EekKey
  *
  * Get the current symbol of @key.
- * Returns: a symbol or %EEK_INVALID_KEYSYM on failure
+ * Returns: an #EekSymbol or %NULL on failure
  */
-guint
-eek_key_get_keysym (EekKey *key)
+EekSymbol *
+eek_key_get_symbol (EekKey *key)
 {
     gint group, level;
     EekKeyboard *keyboard;
 
-    g_return_val_if_fail (EEK_IS_KEY (key), EEK_INVALID_KEYSYM);
+    g_return_val_if_fail (EEK_IS_KEY (key), NULL);
 
     keyboard = get_keyboard (key);
-    g_return_val_if_fail (keyboard, EEK_INVALID_KEYSYM);
+    g_return_val_if_fail (keyboard, NULL);
 
-    eek_keyboard_get_keysym_index (keyboard, &group, &level);
+    eek_keyboard_get_symbol_index (keyboard, &group, &level);
 
-    return eek_key_get_keysym_at_index (key, group, level);
+    return eek_key_get_symbol_at_index (key, group, level);
 }
 
 /**
- * eek_key_get_keysym_at_index:
+ * eek_key_get_symbol_at_index:
  * @key: an #EekKey
- * @group: group index of the keysym matrix
- * @level: level index of the keysym matrix
+ * @group: group index of the symbol matrix
+ * @level: level index of the symbol matrix
  *
- * Get the symbol at (@group, @level) in the keysym matrix of @key.
- * Returns: a symbol or %EEK_INVALID_KEYSYM on failure
+ * Get the symbol at (@group, @level) in the symbol matrix of @key.
+ * Returns: an #EekSymbol or %NULL on failure
  */
-guint
-eek_key_get_keysym_at_index (EekKey *key,
+EekSymbol *
+eek_key_get_symbol_at_index (EekKey *key,
                              gint    group,
                              gint    level)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(key);
-    gint num_keysyms = priv->keysyms.num_groups * priv->keysyms.num_levels;
+    gint num_symbols;
 
-    if (num_keysyms == 0)
-        return EEK_INVALID_KEYSYM;
+    if (!priv->symbol_matrix)
+        return NULL;
 
-    if (group >= priv->keysyms.num_groups)
-        return EEK_INVALID_KEYSYM;
-    if (level >= priv->keysyms.num_levels)
-        return EEK_INVALID_KEYSYM;
+    num_symbols = priv->symbol_matrix->num_groups *
+        priv->symbol_matrix->num_levels;
+    if (num_symbols == 0)
+        return NULL;
 
-    return priv->keysyms.data[group * priv->keysyms.num_levels + level];
+    if (group >= priv->symbol_matrix->num_groups)
+        return NULL;
+    if (level >= priv->symbol_matrix->num_levels)
+        return NULL;
+
+    return priv->symbol_matrix->data[group * priv->symbol_matrix->num_levels +
+                                    level];
 }
 
 /**

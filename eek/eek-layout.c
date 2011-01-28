@@ -38,6 +38,7 @@ G_DEFINE_TYPE (EekLayout, eek_layout, G_TYPE_OBJECT);
 static void
 eek_layout_class_init (EekLayoutClass *klass)
 {
+    klass->create_keyboard = NULL;
 }
 
 void

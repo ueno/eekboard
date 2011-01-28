@@ -33,7 +33,7 @@
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
-#include "eek-keysym.h"
+#include "eek-symbol.h"
 
 enum {
     PROP_0,
@@ -66,7 +66,7 @@ static void       on_key_pressed          (EekKeyboard *keyboard,
 static void       on_key_released         (EekKeyboard *keyboard,
                                            EekKey      *key,
                                            gpointer     user_data);
-static void       on_keysym_index_changed (EekKeyboard *keyboard,
+static void       on_symbol_index_changed (EekKeyboard *keyboard,
                                            gint         group,
                                            gint         level,
                                            gpointer     user_data);
@@ -210,8 +210,8 @@ eek_gtk_keyboard_set_keyboard (EekGtkKeyboard *self,
                       G_CALLBACK(on_key_pressed), self);
     g_signal_connect (priv->keyboard, "key-released",
                       G_CALLBACK(on_key_released), self);
-    g_signal_connect (priv->keyboard, "keysym-index-changed",
-                      G_CALLBACK(on_keysym_index_changed), self);
+    g_signal_connect (priv->keyboard, "symbol-index-changed",
+                      G_CALLBACK(on_symbol_index_changed), self);
 }
 
 static void
@@ -399,7 +399,7 @@ on_key_released (EekKeyboard *keyboard,
 }
 
 static void
-on_keysym_index_changed (EekKeyboard *keyboard,
+on_symbol_index_changed (EekKeyboard *keyboard,
                          gint         group,
                          gint         level,
                          gpointer     user_data)

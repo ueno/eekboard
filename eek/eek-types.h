@@ -24,7 +24,7 @@
 
 G_BEGIN_DECLS
 
-#define EEK_TYPE_KEYSYM_MATRIX (eek_keysym_matrix_get_type ())
+#define EEK_TYPE_SYMBOL_MATRIX (eek_symbol_matrix_get_type ())
 #define EEK_TYPE_POINT (eek_point_get_type ())
 #define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
 #define EEK_TYPE_OUTLINE (eek_outline_get_type ())
@@ -61,35 +61,78 @@ typedef enum {
     EEK_MODIFIER_BEHAVIOR_LOCK,
     EEK_MODIFIER_BEHAVIOR_LATCH
 } EekModifierBehavior;
+
+typedef enum
+{
+  EEK_SHIFT_MASK    = 1 << 0,
+  EEK_LOCK_MASK	    = 1 << 1,
+  EEK_CONTROL_MASK  = 1 << 2,
+  EEK_MOD1_MASK	    = 1 << 3,
+  EEK_MOD2_MASK	    = 1 << 4,
+  EEK_MOD3_MASK	    = 1 << 5,
+  EEK_MOD4_MASK	    = 1 << 6,
+  EEK_MOD5_MASK	    = 1 << 7,
+  EEK_BUTTON1_MASK  = 1 << 8,
+  EEK_BUTTON2_MASK  = 1 << 9,
+  EEK_BUTTON3_MASK  = 1 << 10,
+  EEK_BUTTON4_MASK  = 1 << 11,
+  EEK_BUTTON5_MASK  = 1 << 12,
+
+  /* The next few modifiers are used by XKB, so we skip to the end.
+   * Bits 15 - 25 are currently unused. Bit 29 is used internally.
+   */
+  
+  EEK_SUPER_MASK    = 1 << 26,
+  EEK_HYPER_MASK    = 1 << 27,
+  EEK_META_MASK     = 1 << 28,
+  
+  EEK_RELEASE_MASK  = 1 << 30,
+
+  EEK_MODIFIER_MASK = 0x5c001fff
+} EekModifierType;
+
+/**
+ * EEK_INVALID_KEYCODE:
+ *
+ * Pseudo keycode used for error reporting.
+ */
+#define EEK_INVALID_KEYCODE ((guint)(-1))
     
 typedef struct _EekElement EekElement;
 typedef struct _EekContainer EekContainer;
 typedef struct _EekKey EekKey;
 typedef struct _EekSection EekSection;
 typedef struct _EekKeyboard EekKeyboard;
+typedef struct _EekSymbol EekSymbol;
+typedef struct _EekKeysym EekKeysym;
 
-typedef struct _EekKeysymMatrix EekKeysymMatrix;
+typedef struct _EekSymbolMatrix EekSymbolMatrix;
 typedef struct _EekPoint EekPoint;
 typedef struct _EekBounds EekBounds;
 typedef struct _EekOutline EekOutline;
 typedef struct _EekColor EekColor;
 
 /**
- * EekKeysymMatrix:
- * @data: array of keysyms
+ * EekSymbolMatrix:
+ * @data: array of symbols
  * @num_groups: the number of groups (rows)
  * @num_levels: the number of levels (columns)
  *
  * Symbol matrix of a key.
  */
-struct _EekKeysymMatrix
+struct _EekSymbolMatrix
 {
-    guint *data;
+    EekSymbol **data;
     gint num_groups;
     gint num_levels;
 };
 
-GType eek_keysym_matrix_get_type (void) G_GNUC_CONST;
+GType             eek_symbol_matrix_get_type
+                                         (void) G_GNUC_CONST;
+EekSymbolMatrix * eek_symbol_matrix_new  (gint                   num_groups,
+                                          gint                   num_levels);
+EekSymbolMatrix  *eek_symbol_matrix_copy (const EekSymbolMatrix *matrix);
+void              eek_symbol_matrix_free (EekSymbolMatrix       *matrix);
 
 /**
  * EekPoint:

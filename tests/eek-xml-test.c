@@ -41,7 +41,7 @@ test_output_parse (void)
     eek_keyboard_output (keyboard, output, 0);
     g_object_unref (keyboard);
 
-#if 1
+#if 0
     fwrite (output->str, sizeof(gchar), output->len, stdout);
 #endif
 

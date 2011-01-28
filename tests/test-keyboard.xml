@@ -28,78 +28,78 @@
             <bounds>54.000000,104.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Delete</xkeysym>
-                <xkeysym>KP_Decimal</xkeysym>
+                <keysym>KP_Delete</keysym>
+                <keysym>KP_Decimal</keysym>
             </symbols>
         </key>
         <key column="0" row="4" name="KP0">
             <bounds>2.000000,104.000000,50.000000,24.000000</bounds>
             <outline-ref>outline1</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Insert</xkeysym>
-                <xkeysym>KP_0</xkeysym>
+                <keysym>KP_Insert</keysym>
+                <keysym>KP_0</keysym>
             </symbols>
         </key>
         <key column="3" row="3" name="KPEN">
             <bounds>80.000000,78.000000,24.000000,50.000000</bounds>
             <outline-ref>outline2</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>KP_Enter</xkeysym>
+                <keysym>KP_Enter</keysym>
             </symbols>
         </key>
         <key column="2" row="3" name="KP3">
             <bounds>54.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Next</xkeysym>
-                <xkeysym>KP_3</xkeysym>
+                <keysym>KP_Next</keysym>
+                <keysym>KP_3</keysym>
             </symbols>
         </key>
         <key column="1" row="3" name="KP2">
             <bounds>28.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Down</xkeysym>
-                <xkeysym>KP_2</xkeysym>
+                <keysym>KP_Down</keysym>
+                <keysym>KP_2</keysym>
             </symbols>
         </key>
         <key column="0" row="3" name="KP1">
             <bounds>2.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_End</xkeysym>
-                <xkeysym>KP_1</xkeysym>
+                <keysym>KP_End</keysym>
+                <keysym>KP_1</keysym>
             </symbols>
         </key>
         <key column="2" row="2" name="KP6">
             <bounds>54.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Right</xkeysym>
-                <xkeysym>KP_6</xkeysym>
+                <keysym>KP_Right</keysym>
+                <keysym>KP_6</keysym>
             </symbols>
         </key>
         <key column="1" row="2" name="KP5">
             <bounds>28.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Begin</xkeysym>
-                <xkeysym>KP_5</xkeysym>
+                <keysym>KP_Begin</keysym>
+                <keysym>KP_5</keysym>
             </symbols>
         </key>
         <key column="0" row="2" name="KP4">
             <bounds>2.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Left</xkeysym>
-                <xkeysym>KP_4</xkeysym>
+                <keysym>KP_Left</keysym>
+                <keysym>KP_4</keysym>
             </symbols>
         </key>
         <key column="3" row="1" name="KPAD">
             <bounds>80.000000,27.000000,24.000000,50.000000</bounds>
             <outline-ref>outline2</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Add</xkeysym>
+                <keysym>KP_Add</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -107,31 +107,31 @@
             <bounds>54.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Prior</xkeysym>
-                <xkeysym>KP_9</xkeysym>
+                <keysym>KP_Prior</keysym>
+                <keysym>KP_9</keysym>
             </symbols>
         </key>
         <key column="1" row="1" name="KP8">
             <bounds>28.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Up</xkeysym>
-                <xkeysym>KP_8</xkeysym>
+                <keysym>KP_Up</keysym>
+                <keysym>KP_8</keysym>
             </symbols>
         </key>
         <key column="0" row="1" name="KP7">
             <bounds>2.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Home</xkeysym>
-                <xkeysym>KP_7</xkeysym>
+                <keysym>KP_Home</keysym>
+                <keysym>KP_7</keysym>
             </symbols>
         </key>
         <key column="3" row="0" name="KPSU">
             <bounds>80.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Subtract</xkeysym>
+                <keysym>KP_Subtract</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -139,7 +139,7 @@
             <bounds>54.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Multiply</xkeysym>
+                <keysym>KP_Multiply</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -147,7 +147,7 @@
             <bounds>28.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>KP_Divide</xkeysym>
+                <keysym>KP_Divide</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -155,8 +155,8 @@
             <bounds>2.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Num_Lock</xkeysym>
-                <xkeysym>Pointer_EnableKeys</xkeysym>
+                <keysym>Num_Lock</keysym>
+                <keysym>Pointer_EnableKeys</keysym>
             </symbols>
         </key>
     </section>
@@ -183,70 +183,70 @@
             <bounds>54.000000,104.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Right</xkeysym>
+                <keysym>Right</keysym>
             </symbols>
         </key>
         <key column="1" row="3" name="DOWN">
             <bounds>28.000000,104.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Down</xkeysym>
+                <keysym>Down</keysym>
             </symbols>
         </key>
         <key column="0" row="3" name="LEFT">
             <bounds>2.000000,104.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Left</xkeysym>
+                <keysym>Left</keysym>
             </symbols>
         </key>
         <key column="0" row="2" name="UP">
             <bounds>28.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Up</xkeysym>
+                <keysym>Up</keysym>
             </symbols>
         </key>
         <key column="2" row="1" name="PGDN">
             <bounds>54.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Next</xkeysym>
+                <keysym>Next</keysym>
             </symbols>
         </key>
         <key column="1" row="1" name="END">
             <bounds>28.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>End</xkeysym>
+                <keysym>End</keysym>
             </symbols>
         </key>
         <key column="0" row="1" name="DELE">
             <bounds>2.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Delete</xkeysym>
+                <keysym>Delete</keysym>
             </symbols>
         </key>
         <key column="2" row="0" name="PGUP">
             <bounds>54.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Prior</xkeysym>
+                <keysym>Prior</keysym>
             </symbols>
         </key>
         <key column="1" row="0" name="HOME">
             <bounds>28.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Home</xkeysym>
+                <keysym>Home</keysym>
             </symbols>
         </key>
         <key column="0" row="0" name="INS">
             <bounds>2.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Insert</xkeysym>
+                <keysym>Insert</keysym>
             </symbols>
         </key>
     </section>
@@ -277,32 +277,32 @@
             <bounds>359.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Control_R</xkeysym>
+                <keysym>Control_R</keysym>
             </symbols>
         </key>
         <key column="6" row="4" name="MENU">
             <bounds>326.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Menu</xkeysym>
+                <keysym>Menu</keysym>
             </symbols>
         </key>
         <key column="5" row="4" name="RWIN">
             <bounds>294.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Super_R</xkeysym>
+                <keysym>Super_R</keysym>
             </symbols>
         </key>
         <key column="4" row="4" name="RALT">
             <bounds>261.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>Alt_R</xkeysym>
-                <xkeysym>Meta_R</xkeysym>
-                <xkeysym>Alt_R</xkeysym>
-                <xkeysym>Meta_R</xkeysym>
-                <xkeysym>ISO_Level3_Shift</xkeysym>
+                <keysym>Alt_R</keysym>
+                <keysym>Meta_R</keysym>
+                <keysym>Alt_R</keysym>
+                <keysym>Meta_R</keysym>
+                <keysym>ISO_Level3_Shift</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -310,466 +310,466 @@
             <bounds>106.000000,104.000000,153.000000,24.000000</bounds>
             <outline-ref>outline4</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>space</xkeysym>
+                <keysym>space</keysym>
             </symbols>
         </key>
         <key column="2" row="4" name="LALT">
             <bounds>73.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Alt_L</xkeysym>
-                <xkeysym>Meta_L</xkeysym>
+                <keysym>Alt_L</keysym>
+                <keysym>Meta_L</keysym>
             </symbols>
         </key>
         <key column="1" row="4" name="LWIN">
             <bounds>40.000000,104.000000,31.000000,24.000000</bounds>
             <outline-ref>outline3</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Super_L</xkeysym>
+                <keysym>Super_L</keysym>
             </symbols>
         </key>
         <key column="0" row="4" name="LCTL">
             <bounds>2.000000,104.000000,36.000000,24.000000</bounds>
             <outline-ref>outline5</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Control_L</xkeysym>
+                <keysym>Control_L</keysym>
             </symbols>
         </key>
         <key column="11" row="3" name="RTSH">
             <bounds>320.000000,78.000000,70.000000,24.000000</bounds>
             <outline-ref>outline6</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Shift_R</xkeysym>
+                <keysym>Shift_R</keysym>
             </symbols>
         </key>
         <key column="10" row="3" name="AB10">
             <bounds>294.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>slash</xkeysym>
-                <xkeysym>question</xkeysym>
+                <keysym>slash</keysym>
+                <keysym>question</keysym>
             </symbols>
         </key>
         <key column="9" row="3" name="AB09">
             <bounds>268.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>period</xkeysym>
-                <xkeysym>greater</xkeysym>
+                <keysym>period</keysym>
+                <keysym>greater</keysym>
             </symbols>
         </key>
         <key column="8" row="3" name="AB08">
             <bounds>242.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>comma</xkeysym>
-                <xkeysym>less</xkeysym>
+                <keysym>comma</keysym>
+                <keysym>less</keysym>
             </symbols>
         </key>
         <key column="7" row="3" name="AB07">
             <bounds>216.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>m</xkeysym>
-                <xkeysym>M</xkeysym>
+                <keysym>m</keysym>
+                <keysym>M</keysym>
             </symbols>
         </key>
         <key column="6" row="3" name="AB06">
             <bounds>190.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>n</xkeysym>
-                <xkeysym>N</xkeysym>
+                <keysym>n</keysym>
+                <keysym>N</keysym>
             </symbols>
         </key>
         <key column="5" row="3" name="AB05">
             <bounds>164.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>b</xkeysym>
-                <xkeysym>B</xkeysym>
+                <keysym>b</keysym>
+                <keysym>B</keysym>
             </symbols>
         </key>
         <key column="4" row="3" name="AB04">
             <bounds>138.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>v</xkeysym>
-                <xkeysym>V</xkeysym>
+                <keysym>v</keysym>
+                <keysym>V</keysym>
             </symbols>
         </key>
         <key column="3" row="3" name="AB03">
             <bounds>113.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>c</xkeysym>
-                <xkeysym>C</xkeysym>
+                <keysym>c</keysym>
+                <keysym>C</keysym>
             </symbols>
         </key>
         <key column="2" row="3" name="AB02">
             <bounds>87.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>x</xkeysym>
-                <xkeysym>X</xkeysym>
+                <keysym>x</keysym>
+                <keysym>X</keysym>
             </symbols>
         </key>
         <key column="1" row="3" name="AB01">
             <bounds>61.000000,78.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>z</xkeysym>
-                <xkeysym>Z</xkeysym>
+                <keysym>z</keysym>
+                <keysym>Z</keysym>
             </symbols>
         </key>
         <key column="0" row="3" name="LFSH">
             <bounds>2.000000,78.000000,57.000000,24.000000</bounds>
             <outline-ref>outline7</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Shift_L</xkeysym>
+                <keysym>Shift_L</keysym>
             </symbols>
         </key>
         <key column="12" row="2" name="RTRN">
             <bounds>333.000000,53.000000,57.000000,24.000000</bounds>
             <outline-ref>outline8</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Return</xkeysym>
+                <keysym>Return</keysym>
             </symbols>
         </key>
         <key column="11" row="2" name="AC11">
             <bounds>307.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>colon</xkeysym>
-                <xkeysym>asterisk</xkeysym>
-                <xkeysym>quoteright</xkeysym>
-                <xkeysym>quotedbl</xkeysym>
-                <xkeysym>quoteright</xkeysym>
-                <xkeysym>quotedbl</xkeysym>
+                <keysym>colon</keysym>
+                <keysym>asterisk</keysym>
+                <keysym>quoteright</keysym>
+                <keysym>quotedbl</keysym>
+                <keysym>quoteright</keysym>
+                <keysym>quotedbl</keysym>
             </symbols>
         </key>
         <key column="10" row="2" name="AC10">
             <bounds>281.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>semicolon</xkeysym>
-                <xkeysym>plus</xkeysym>
-                <xkeysym>semicolon</xkeysym>
-                <xkeysym>colon</xkeysym>
-                <xkeysym>semicolon</xkeysym>
-                <xkeysym>colon</xkeysym>
+                <keysym>semicolon</keysym>
+                <keysym>plus</keysym>
+                <keysym>semicolon</keysym>
+                <keysym>colon</keysym>
+                <keysym>semicolon</keysym>
+                <keysym>colon</keysym>
             </symbols>
         </key>
         <key column="9" row="2" name="AC09">
             <bounds>256.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>l</xkeysym>
-                <xkeysym>L</xkeysym>
+                <keysym>l</keysym>
+                <keysym>L</keysym>
             </symbols>
         </key>
         <key column="8" row="2" name="AC08">
             <bounds>230.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>k</xkeysym>
-                <xkeysym>K</xkeysym>
+                <keysym>k</keysym>
+                <keysym>K</keysym>
             </symbols>
         </key>
         <key column="7" row="2" name="AC07">
             <bounds>204.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>j</xkeysym>
-                <xkeysym>J</xkeysym>
+                <keysym>j</keysym>
+                <keysym>J</keysym>
             </symbols>
         </key>
         <key column="6" row="2" name="AC06">
             <bounds>178.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>h</xkeysym>
-                <xkeysym>H</xkeysym>
+                <keysym>h</keysym>
+                <keysym>H</keysym>
             </symbols>
         </key>
         <key column="5" row="2" name="AC05">
             <bounds>152.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>g</xkeysym>
-                <xkeysym>G</xkeysym>
+                <keysym>g</keysym>
+                <keysym>G</keysym>
             </symbols>
         </key>
         <key column="4" row="2" name="AC04">
             <bounds>126.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>f</xkeysym>
-                <xkeysym>F</xkeysym>
+                <keysym>f</keysym>
+                <keysym>F</keysym>
             </symbols>
         </key>
         <key column="3" row="2" name="AC03">
             <bounds>100.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>d</xkeysym>
-                <xkeysym>D</xkeysym>
+                <keysym>d</keysym>
+                <keysym>D</keysym>
             </symbols>
         </key>
         <key column="2" row="2" name="AC02">
             <bounds>74.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>s</xkeysym>
-                <xkeysym>S</xkeysym>
+                <keysym>s</keysym>
+                <keysym>S</keysym>
             </symbols>
         </key>
         <key column="1" row="2" name="AC01">
             <bounds>49.000000,53.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>a</xkeysym>
-                <xkeysym>A</xkeysym>
+                <keysym>a</keysym>
+                <keysym>A</keysym>
             </symbols>
         </key>
         <key column="0" row="2" name="CAPS">
             <bounds>2.000000,53.000000,44.000000,24.000000</bounds>
             <outline-ref>outline9</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Control_L</xkeysym>
-                <xkeysym>Control_L</xkeysym>
+                <keysym>Control_L</keysym>
+                <keysym>Control_L</keysym>
             </symbols>
         </key>
         <key column="13" row="1" name="BKSL">
             <bounds>352.000000,27.000000,38.000000,24.000000</bounds>
             <outline-ref>outline10</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>bracketright</xkeysym>
-                <xkeysym>braceright</xkeysym>
-                <xkeysym>backslash</xkeysym>
-                <xkeysym>bar</xkeysym>
-                <xkeysym>backslash</xkeysym>
-                <xkeysym>bar</xkeysym>
+                <keysym>bracketright</keysym>
+                <keysym>braceright</keysym>
+                <keysym>backslash</keysym>
+                <keysym>bar</keysym>
+                <keysym>backslash</keysym>
+                <keysym>bar</keysym>
             </symbols>
         </key>
         <key column="12" row="1" name="AD12">
             <bounds>326.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>bracketleft</xkeysym>
-                <xkeysym>braceleft</xkeysym>
-                <xkeysym>bracketright</xkeysym>
-                <xkeysym>braceright</xkeysym>
-                <xkeysym>bracketright</xkeysym>
-                <xkeysym>braceright</xkeysym>
+                <keysym>bracketleft</keysym>
+                <keysym>braceleft</keysym>
+                <keysym>bracketright</keysym>
+                <keysym>braceright</keysym>
+                <keysym>bracketright</keysym>
+                <keysym>braceright</keysym>
             </symbols>
         </key>
         <key column="11" row="1" name="AD11">
             <bounds>300.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>at</xkeysym>
-                <xkeysym>quoteleft</xkeysym>
-                <xkeysym>bracketleft</xkeysym>
-                <xkeysym>braceleft</xkeysym>
-                <xkeysym>bracketleft</xkeysym>
-                <xkeysym>braceleft</xkeysym>
+                <keysym>at</keysym>
+                <keysym>quoteleft</keysym>
+                <keysym>bracketleft</keysym>
+                <keysym>braceleft</keysym>
+                <keysym>bracketleft</keysym>
+                <keysym>braceleft</keysym>
             </symbols>
         </key>
         <key column="10" row="1" name="AD10">
             <bounds>275.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>p</xkeysym>
-                <xkeysym>P</xkeysym>
+                <keysym>p</keysym>
+                <keysym>P</keysym>
             </symbols>
         </key>
         <key column="9" row="1" name="AD09">
             <bounds>249.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>o</xkeysym>
-                <xkeysym>O</xkeysym>
+                <keysym>o</keysym>
+                <keysym>O</keysym>
             </symbols>
         </key>
         <key column="8" row="1" name="AD08">
             <bounds>223.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>i</xkeysym>
-                <xkeysym>I</xkeysym>
+                <keysym>i</keysym>
+                <keysym>I</keysym>
             </symbols>
         </key>
         <key column="7" row="1" name="AD07">
             <bounds>197.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>u</xkeysym>
-                <xkeysym>U</xkeysym>
+                <keysym>u</keysym>
+                <keysym>U</keysym>
             </symbols>
         </key>
         <key column="6" row="1" name="AD06">
             <bounds>171.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>y</xkeysym>
-                <xkeysym>Y</xkeysym>
+                <keysym>y</keysym>
+                <keysym>Y</keysym>
             </symbols>
         </key>
         <key column="5" row="1" name="AD05">
             <bounds>145.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>t</xkeysym>
-                <xkeysym>T</xkeysym>
+                <keysym>t</keysym>
+                <keysym>T</keysym>
             </symbols>
         </key>
         <key column="4" row="1" name="AD04">
             <bounds>119.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>r</xkeysym>
-                <xkeysym>R</xkeysym>
+                <keysym>r</keysym>
+                <keysym>R</keysym>
             </symbols>
         </key>
         <key column="3" row="1" name="AD03">
             <bounds>93.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>e</xkeysym>
-                <xkeysym>E</xkeysym>
+                <keysym>e</keysym>
+                <keysym>E</keysym>
             </symbols>
         </key>
         <key column="2" row="1" name="AD02">
             <bounds>68.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>w</xkeysym>
-                <xkeysym>W</xkeysym>
+                <keysym>w</keysym>
+                <keysym>W</keysym>
             </symbols>
         </key>
         <key column="1" row="1" name="AD01">
             <bounds>42.000000,27.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>q</xkeysym>
-                <xkeysym>Q</xkeysym>
+                <keysym>q</keysym>
+                <keysym>Q</keysym>
             </symbols>
         </key>
         <key column="0" row="1" name="TAB">
             <bounds>2.000000,27.000000,38.000000,24.000000</bounds>
             <outline-ref>outline11</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Tab</xkeysym>
-                <xkeysym>ISO_Left_Tab</xkeysym>
+                <keysym>Tab</keysym>
+                <keysym>ISO_Left_Tab</keysym>
             </symbols>
         </key>
         <key column="13" row="0" name="BKSP">
             <bounds>339.000000,1.000000,51.000000,24.000000</bounds>
             <outline-ref>outline12</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>BackSpace</xkeysym>
+                <keysym>BackSpace</keysym>
             </symbols>
         </key>
         <key column="12" row="0" name="AE12">
             <bounds>313.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>asciicircum</xkeysym>
-                <xkeysym>asciitilde</xkeysym>
-                <xkeysym>equal</xkeysym>
-                <xkeysym>plus</xkeysym>
-                <xkeysym>equal</xkeysym>
-                <xkeysym>plus</xkeysym>
+                <keysym>asciicircum</keysym>
+                <keysym>asciitilde</keysym>
+                <keysym>equal</keysym>
+                <keysym>plus</keysym>
+                <keysym>equal</keysym>
+                <keysym>plus</keysym>
             </symbols>
         </key>
         <key column="11" row="0" name="AE11">
             <bounds>287.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>minus</xkeysym>
-                <xkeysym>equal</xkeysym>
-                <xkeysym>minus</xkeysym>
-                <xkeysym>underscore</xkeysym>
-                <xkeysym>minus</xkeysym>
-                <xkeysym>underscore</xkeysym>
+                <keysym>minus</keysym>
+                <keysym>equal</keysym>
+                <keysym>minus</keysym>
+                <keysym>underscore</keysym>
+                <keysym>minus</keysym>
+                <keysym>underscore</keysym>
             </symbols>
         </key>
         <key column="10" row="0" name="AE10">
             <bounds>261.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>0</xkeysym>
-                <xkeysym>asciitilde</xkeysym>
-                <xkeysym>0</xkeysym>
-                <xkeysym>parenright</xkeysym>
-                <xkeysym>0</xkeysym>
-                <xkeysym>parenright</xkeysym>
+                <keysym>0</keysym>
+                <keysym>asciitilde</keysym>
+                <keysym>0</keysym>
+                <keysym>parenright</keysym>
+                <keysym>0</keysym>
+                <keysym>parenright</keysym>
             </symbols>
         </key>
         <key column="9" row="0" name="AE09">
             <bounds>235.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>9</xkeysym>
-                <xkeysym>parenright</xkeysym>
-                <xkeysym>9</xkeysym>
-                <xkeysym>parenleft</xkeysym>
-                <xkeysym>9</xkeysym>
-                <xkeysym>parenleft</xkeysym>
+                <keysym>9</keysym>
+                <keysym>parenright</keysym>
+                <keysym>9</keysym>
+                <keysym>parenleft</keysym>
+                <keysym>9</keysym>
+                <keysym>parenleft</keysym>
             </symbols>
         </key>
         <key column="8" row="0" name="AE08">
             <bounds>209.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>8</xkeysym>
-                <xkeysym>parenleft</xkeysym>
-                <xkeysym>8</xkeysym>
-                <xkeysym>asterisk</xkeysym>
-                <xkeysym>8</xkeysym>
-                <xkeysym>asterisk</xkeysym>
+                <keysym>8</keysym>
+                <keysym>parenleft</keysym>
+                <keysym>8</keysym>
+                <keysym>asterisk</keysym>
+                <keysym>8</keysym>
+                <keysym>asterisk</keysym>
             </symbols>
         </key>
         <key column="7" row="0" name="AE07">
             <bounds>183.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>7</xkeysym>
-                <xkeysym>quoteright</xkeysym>
-                <xkeysym>7</xkeysym>
-                <xkeysym>ampersand</xkeysym>
-                <xkeysym>7</xkeysym>
-                <xkeysym>ampersand</xkeysym>
+                <keysym>7</keysym>
+                <keysym>quoteright</keysym>
+                <keysym>7</keysym>
+                <keysym>ampersand</keysym>
+                <keysym>7</keysym>
+                <keysym>ampersand</keysym>
             </symbols>
         </key>
         <key column="6" row="0" name="AE06">
             <bounds>157.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>6</xkeysym>
-                <xkeysym>ampersand</xkeysym>
-                <xkeysym>6</xkeysym>
-                <xkeysym>asciicircum</xkeysym>
-                <xkeysym>6</xkeysym>
-                <xkeysym>asciicircum</xkeysym>
+                <keysym>6</keysym>
+                <keysym>ampersand</keysym>
+                <keysym>6</keysym>
+                <keysym>asciicircum</keysym>
+                <keysym>6</keysym>
+                <keysym>asciicircum</keysym>
             </symbols>
         </key>
         <key column="5" row="0" name="AE05">
             <bounds>132.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="4">
-                <xkeysym>5</xkeysym>
-                <xkeysym>percent</xkeysym>
+                <keysym>5</keysym>
+                <keysym>percent</keysym>
                 <invalid/>
                 <invalid/>
-                <xkeysym>5</xkeysym>
-                <xkeysym>percent</xkeysym>
+                <keysym>5</keysym>
+                <keysym>percent</keysym>
                 <invalid/>
                 <invalid/>
-                <xkeysym>5</xkeysym>
-                <xkeysym>percent</xkeysym>
-                <xkeysym>EuroSign</xkeysym>
+                <keysym>5</keysym>
+                <keysym>percent</keysym>
+                <keysym>EuroSign</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -777,48 +777,48 @@
             <bounds>106.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>4</xkeysym>
-                <xkeysym>dollar</xkeysym>
+                <keysym>4</keysym>
+                <keysym>dollar</keysym>
             </symbols>
         </key>
         <key column="3" row="0" name="AE03">
             <bounds>80.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>3</xkeysym>
-                <xkeysym>numbersign</xkeysym>
+                <keysym>3</keysym>
+                <keysym>numbersign</keysym>
             </symbols>
         </key>
         <key column="2" row="0" name="AE02">
             <bounds>54.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>2</xkeysym>
-                <xkeysym>quotedbl</xkeysym>
-                <xkeysym>2</xkeysym>
-                <xkeysym>at</xkeysym>
-                <xkeysym>2</xkeysym>
-                <xkeysym>at</xkeysym>
+                <keysym>2</keysym>
+                <keysym>quotedbl</keysym>
+                <keysym>2</keysym>
+                <keysym>at</keysym>
+                <keysym>2</keysym>
+                <keysym>at</keysym>
             </symbols>
         </key>
         <key column="1" row="0" name="AE01">
             <bounds>28.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>1</xkeysym>
-                <xkeysym>exclam</xkeysym>
+                <keysym>1</keysym>
+                <keysym>exclam</keysym>
             </symbols>
         </key>
         <key column="0" row="0" name="TLDE">
             <bounds>2.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="3" levels="2">
-                <xkeysym>Zenkaku_Hankaku</xkeysym>
-                <xkeysym>Kanji</xkeysym>
-                <xkeysym>quoteleft</xkeysym>
-                <xkeysym>asciitilde</xkeysym>
-                <xkeysym>quoteleft</xkeysym>
-                <xkeysym>asciitilde</xkeysym>
+                <keysym>Zenkaku_Hankaku</keysym>
+                <keysym>Kanji</keysym>
+                <keysym>quoteleft</keysym>
+                <keysym>asciitilde</keysym>
+                <keysym>quoteleft</keysym>
+                <keysym>asciitilde</keysym>
             </symbols>
         </key>
     </section>
@@ -833,30 +833,30 @@
             <bounds>453.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Pause</xkeysym>
-                <xkeysym>Break</xkeysym>
+                <keysym>Pause</keysym>
+                <keysym>Break</keysym>
             </symbols>
         </key>
         <key column="14" row="0" name="SCLK">
             <bounds>427.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Scroll_Lock</xkeysym>
+                <keysym>Scroll_Lock</keysym>
             </symbols>
         </key>
         <key column="13" row="0" name="PRSC">
             <bounds>401.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>Print</xkeysym>
-                <xkeysym>Execute</xkeysym>
+                <keysym>Print</keysym>
+                <keysym>Execute</keysym>
             </symbols>
         </key>
         <key column="12" row="0" name="FK12">
             <bounds>366.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F12</xkeysym>
+                <keysym>F12</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -864,7 +864,7 @@
             <bounds>340.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F11</xkeysym>
+                <keysym>F11</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -872,7 +872,7 @@
             <bounds>314.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F10</xkeysym>
+                <keysym>F10</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -880,7 +880,7 @@
             <bounds>288.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F9</xkeysym>
+                <keysym>F9</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -888,7 +888,7 @@
             <bounds>249.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F8</xkeysym>
+                <keysym>F8</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -896,7 +896,7 @@
             <bounds>223.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F7</xkeysym>
+                <keysym>F7</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -904,7 +904,7 @@
             <bounds>197.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F6</xkeysym>
+                <keysym>F6</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -912,7 +912,7 @@
             <bounds>171.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F5</xkeysym>
+                <keysym>F5</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -920,7 +920,7 @@
             <bounds>132.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F4</xkeysym>
+                <keysym>F4</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -928,7 +928,7 @@
             <bounds>106.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F3</xkeysym>
+                <keysym>F3</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -936,7 +936,7 @@
             <bounds>80.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F2</xkeysym>
+                <keysym>F2</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -944,7 +944,7 @@
             <bounds>54.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="2">
-                <xkeysym>F1</xkeysym>
+                <keysym>F1</keysym>
                 <invalid/>
             </symbols>
         </key>
@@ -952,7 +952,7 @@
             <bounds>2.000000,1.000000,24.000000,24.000000</bounds>
             <outline-ref>outline0</outline-ref>
             <symbols groups="1" levels="1">
-                <xkeysym>Escape</xkeysym>
+                <keysym>Escape</keysym>
             </symbols>
         </key>
     </section>

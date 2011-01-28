@@ -32,6 +32,7 @@
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
+#include "eek-keysym.h"
 
 enum {
     PROP_0,
@@ -64,7 +65,7 @@ struct _ParseCallbackData {
     EekOrientation orientation;
     GSList *points;
     guint keycode;
-    GSList *keysyms;
+    GSList *symbols;
     gint groups, levels;
     EekOutline outline;
     gchar *oref;
@@ -89,7 +90,10 @@ static const gchar *valid_path_list[] = {
     "symbols/key/section/keyboard",
     "groups/symbols/key/section/keyboard",
     "levels/symbols/key/section/keyboard",
-    "xkeysym/symbols/key/section/keyboard",
+    "keysym/symbols/key/section/keyboard",
+    "custom/symbols/key/section/keyboard",
+    "text/symbols/key/section/keyboard",
+    "icon/symbols/key/section/keyboard",
     "invalid/symbols/key/section/keyboard",
     "index/key/section/keyboard",
     "point/outline/keyboard"
@@ -207,7 +211,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     if (g_strcmp0 (element_name, "symbols") == 0) {
         data->groups = groups;
         data->levels = levels;
-        data->keysyms = NULL;
+        data->symbols = NULL;
         goto out;
     }
 
@@ -253,23 +257,22 @@ end_element_callback (GMarkupParseContext *pcontext,
     }
 
     if (g_strcmp0 (element_name, "symbols") == 0) {
-        gint num_keysyms = data->groups * data->levels;
-        guint *keysyms = g_slice_alloc0 (sizeof(guint) * num_keysyms);
+        gint num_symbols = data->groups * data->levels;
+        EekSymbolMatrix *matrix = eek_symbol_matrix_new (data->groups,
+                                                         data->levels);
 
-        head = data->keysyms = g_slist_reverse (data->keysyms);
-        for (i = 0; i < num_keysyms; i++) {
+        head = data->symbols = g_slist_reverse (data->symbols);
+        for (i = 0; i < num_symbols; i++) {
             if (head && head->data) {
-                keysyms[i] = eek_xkeysym_from_string (head->data);
-                g_free (head->data);
+                matrix->data[i] = head->data;
                 head = g_slist_next (head);
             } else
-                keysyms[i] = EEK_INVALID_KEYSYM;
+                matrix->data[i] = NULL;
         }
 
-        eek_key_set_keysyms (data->key, keysyms, data->groups, data->levels);
-        g_slice_free1 (sizeof(guint) * num_keysyms, keysyms);
-        g_slist_free (data->keysyms);
-        data->keysyms = NULL;
+        eek_key_set_symbol_matrix (data->key, matrix);
+        g_slist_free (data->symbols);
+        data->symbols = NULL;
         goto out;
     }
 
@@ -376,13 +379,15 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "xkeysym") == 0) {
-        data->keysyms = g_slist_prepend (data->keysyms, g_strdup (text));
+    if (g_strcmp0 (element_name, "keysym") == 0) {
+        data->symbols =
+            g_slist_prepend (data->symbols,
+                             eek_keysym_new_from_name (g_strdup (text)));
         goto out;
     }
 
     if (g_strcmp0 (element_name, "invalid") == 0) {
-        data->keysyms = g_slist_prepend (data->keysyms, NULL);
+        data->symbols = g_slist_prepend (data->symbols, NULL);
         goto out;
     }
 

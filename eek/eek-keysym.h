@@ -20,7 +20,9 @@
 #ifndef EEK_KEYSYM_H
 #define EEK_KEYSYM_H 1
 
-#include <glib-object.h>
+#include "eek-symbol.h"
+
+G_BEGIN_DECLS
 
 /**
  * EEK_INVALID_KEYSYM:
@@ -29,93 +31,34 @@
  */
 #define EEK_INVALID_KEYSYM ((guint)(-1))
 
-/**
- * EEK_INVALID_KEYCODE:
- *
- * Pseudo keycode used for error reporting.
- */
-#define EEK_INVALID_KEYCODE ((guint)(-1))
+#define EEK_TYPE_KEYSYM (eek_keysym_get_type())
+#define EEK_KEYSYM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_KEYSYM, EekKeysym))
+#define EEK_KEYSYM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_KEYSYM, EekKeysymClass))
+#define EEK_IS_KEYSYM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEK_TYPE_KEYSYM))
+#define EEK_IS_KEYSYM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEK_TYPE_KEYSYM))
+#define EEK_KEYSYM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEK_TYPE_KEYSYM, EekKeysymClass))
 
-/**
- * EekKeysymCategory:
- * @EEK_KEYSYM_CATEGORY_LETTER: the symbol represents an alphabet letter
- * @EEK_KEYSYM_CATEGORY_FUNCTION: the symbol represents a function
- * @EEK_KEYSYM_CATEGORY_KEYNAME: the symbol does not have meaning but
- * have a name
- * @EEK_KEYSYM_CATEGORY_UNKNOWN: used for error reporting
- *
- * Category of the key symbols.
- */
-typedef enum {
-    EEK_KEYSYM_CATEGORY_LETTER,
-    EEK_KEYSYM_CATEGORY_FUNCTION,
-    EEK_KEYSYM_CATEGORY_KEYNAME,
-    EEK_KEYSYM_CATEGORY_UNKNOWN,
+typedef struct _EekKeysymClass EekKeysymClass;
+typedef struct _EekKeysymPrivate EekKeysymPrivate;
+
+struct _EekKeysym {
     /*< private >*/
-    EEK_KEYSYM_CATEGORY_LAST = EEK_KEYSYM_CATEGORY_UNKNOWN
-} EekKeysymCategory;
+    EekSymbol parent;
 
-gchar *eek_keysym_to_string (guint keysym);
+    EekKeysymPrivate *priv;
+};
 
-gchar *eek_xkeysym_to_string (guint xkeysym);
-guint eek_xkeysym_from_string (gchar *string);
+struct _EekKeysymClass {
+    /*< private >*/
+    EekSymbolClass parent_class;
+};
 
-EekKeysymCategory eek_keysym_get_category (guint keysym);
+GType      eek_keysym_get_type      (void) G_GNUC_CONST;
+EekKeysym *eek_keysym_new           (guint        xkeysym);
+guint      eek_keysym_get_xkeysym   (EekKeysym   *keysym);
 
-typedef enum
-{
-  EEK_SHIFT_MASK    = 1 << 0,
-  EEK_LOCK_MASK	    = 1 << 1,
-  EEK_CONTROL_MASK  = 1 << 2,
-  EEK_MOD1_MASK	    = 1 << 3,
-  EEK_MOD2_MASK	    = 1 << 4,
-  EEK_MOD3_MASK	    = 1 << 5,
-  EEK_MOD4_MASK	    = 1 << 6,
-  EEK_MOD5_MASK	    = 1 << 7,
-  EEK_BUTTON1_MASK  = 1 << 8,
-  EEK_BUTTON2_MASK  = 1 << 9,
-  EEK_BUTTON3_MASK  = 1 << 10,
-  EEK_BUTTON4_MASK  = 1 << 11,
-  EEK_BUTTON5_MASK  = 1 << 12,
+EekKeysym *eek_keysym_new_from_name (const gchar *name);
 
-  /* The next few modifiers are used by XKB, so we skip to the end.
-   * Bits 15 - 25 are currently unused. Bit 29 is used internally.
-   */
-  
-  EEK_SUPER_MASK    = 1 << 26,
-  EEK_HYPER_MASK    = 1 << 27,
-  EEK_META_MASK     = 1 << 28,
-  
-  EEK_RELEASE_MASK  = 1 << 30,
-
-  EEK_MODIFIER_MASK = 0x5c001fff
-} EekModifierType;
-
-#define EEK_KEY_Shift_L 0xffe1
-#define EEK_KEY_Shift_R 0xffe2
-#define EEK_KEY_ISO_Level3_Shift 0xfe03
-#define EEK_KEY_Caps_Lock 0xffe5
-#define EEK_KEY_Shift_Lock 0xffe6
-#define EEK_KEY_Control_L 0xffe3
-#define EEK_KEY_Control_R 0xffe4
-#define EEK_KEY_Alt_L 0xffe9
-#define EEK_KEY_Alt_R 0xffea
-#define EEK_KEY_Meta_L 0xffe7
-#define EEK_KEY_Meta_R 0xffe8
-#define EEK_KEY_Super_L 0xffeb
-#define EEK_KEY_Super_R 0xffec
-#define EEK_KEY_Hyper_L 0xffed
-#define EEK_KEY_Hyper_R 0xffee
-
-EekModifierType eek_keysym_to_modifier (guint keysym);
-
-/**
- * eek_keysym_is_modifier:
- * @keysym: keysym ID
- *
- * Check if @keysym is a modifier key.
- * Returns: %TRUE if @keysym is a modifier.
- */
-#define eek_keysym_is_modifier(keysym) (eek_keysym_to_modifier ((keysym)) != 0)
+G_END_DECLS
 
 #endif  /* EEK_KEYSYM_H */

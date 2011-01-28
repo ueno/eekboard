@@ -382,7 +382,7 @@ a11y_keystroke_listener (const AccessibleKeystroke *stroke,
 {
     Eekboard *eekboard = user_data;
     EekKey *key;
-    guint keysym;
+    EekSymbol *symbol;
     guint ignored_keysyms[] = {XK_Shift_L,
                                XK_Shift_R,
                                XK_ISO_Level3_Shift,
@@ -399,10 +399,11 @@ a11y_keystroke_listener (const AccessibleKeystroke *stroke,
 
     /* XXX: Ignore modifier keys since there is no way to receive
        SPI_KEY_RELEASED event for them. */
-    keysym = eek_key_get_keysym (key);
-    for (i = 0; i < G_N_ELEMENTS(ignored_keysyms) &&
-             keysym != ignored_keysyms[i]; i++)
-        ;
+    symbol = eek_key_get_symbol (key);
+    for (i = 0; i < G_N_ELEMENTS(ignored_keysyms); i++)
+        if (EEK_IS_KEYSYM(symbol) &&
+            eek_keysym_get_xkeysym (EEK_KEYSYM(symbol)) == ignored_keysyms[i])
+            break;
     if (i != G_N_ELEMENTS(ignored_keysyms))
         return FALSE;
 
@@ -431,16 +432,17 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer user_data)
 {
     Eekboard *eekboard = user_data;
-    guint keysym;
+    EekSymbol *symbol;
 
-    keysym = eek_key_get_keysym (key);
+    symbol = eek_key_get_symbol (key);
     EEKBOARD_NOTE("%s %X",
-                  eek_keysym_to_string (keysym),
+                  eek_symbol_get_name (symbol),
                   eek_keyboard_get_modifiers (keyboard));
 
-    if (!eek_keysym_is_modifier (keysym))
+    if (!eek_symbol_is_modifier (symbol) &&
+        EEK_IS_KEYSYM(symbol))
         fakekey_press_keysym (eekboard->fakekey,
-                              keysym,
+                              eek_keysym_get_xkeysym (EEK_KEYSYM(symbol)),
                               eek_keyboard_get_modifiers (keyboard));
 }
 

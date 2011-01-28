@@ -27,6 +27,7 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-xml.h"
+#include "eek-keysym.h"
 
 #define g_string_append_indent(string, indent)  \
     {                                           \
@@ -74,8 +75,8 @@ output_key_callback (EekElement *element, gpointer user_data)
     OutputCallbackData *data = user_data;
     EekBounds bounds;
     EekOutline *outline;
-    gint i, num_groups, num_levels, num_keysyms;
-    guint *keysyms;
+    gint i, num_symbols;
+    EekSymbolMatrix *matrix;
     gint column, row;
 
     eek_key_get_index (EEK_KEY(element), &column, &row);
@@ -108,36 +109,27 @@ output_key_callback (EekElement *element, gpointer user_data)
                                 i);
     }
 
-    eek_key_get_keysyms (EEK_KEY(element), NULL, &num_groups, &num_levels);
-    num_keysyms = num_groups * num_levels;
-    if (num_keysyms > 0) {
-        keysyms = g_slice_alloc (num_keysyms * sizeof(guint));
-        eek_key_get_keysyms (EEK_KEY(element), &keysyms, NULL, NULL);
+    matrix = eek_key_get_symbol_matrix (EEK_KEY(element));
+    num_symbols = matrix->num_groups * matrix->num_levels;
+    if (num_symbols > 0) {
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output,
                                 "<symbols groups=\"%d\" levels=\"%d\">\n",
-                                num_groups, num_levels);
+                                matrix->num_groups, matrix->num_levels);
 
-        for (i = 0; i < num_groups * num_levels; i++) {
+        for (i = 0; i < num_symbols; i++) {
             g_string_append_indent (data->output, data->indent + 2);
-            if (keysyms[i] != EEK_INVALID_KEYSYM) {
-                gchar *name = eek_xkeysym_to_string (keysyms[i]);
-
-                if (name) {
-                    g_string_markup_printf (data->output,
-                                            "<xkeysym>%s</xkeysym>\n",
-                                            name);
-                    g_free (name);
-                } else
-                    g_string_markup_printf (data->output,
-                                            "<invalid/>\n");
-            } else
+            if (EEK_IS_KEYSYM(matrix->data[i]))
                 g_string_markup_printf (data->output,
-                                        "<invalid/>\n");
+                                        "<keysym>%s</keysym>\n",
+                                        eek_symbol_get_name (matrix->data[i]));
+            else
+                g_string_markup_printf (data->output,
+                                        "<symbol>%s</symbol>\n",
+                                        eek_symbol_get_name (matrix->data[i]));
         }
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output, "</symbols>\n");
-        g_slice_free1 (num_keysyms * sizeof(guint), keysyms);
     }
 
     g_string_append_indent (data->output, data->indent);
