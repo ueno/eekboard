@@ -5,8 +5,8 @@ EekKeyboardClass
 EekKeyboard
 eek_keyboard_new
 eek_keyboard_get_layout
-eek_keyboard_set_keysym_index
-eek_keyboard_get_keysym_index
+eek_keyboard_set_symbol_index
+eek_keyboard_get_symbol_index
 eek_keyboard_get_group
 eek_keyboard_get_level
 eek_keyboard_set_group
@@ -37,7 +37,8 @@ EEK_LAYOUT
 EEK_IS_LAYOUT
 EEK_TYPE_LAYOUT
 eek_layout_get_type
-EEK_LAYOUT_GET_IFACE
+EEK_LAYOUT_CLASS
+EEK_LAYOUT_GET_CLASS
 </SECTION>
 
 <SECTION>
@@ -189,10 +190,11 @@ EekKeyClass
 EekKey
 eek_key_set_keycode
 eek_key_get_keycode
-eek_key_set_keysyms
-eek_key_get_keysyms
-eek_key_get_keysym
-eek_key_get_keysym_at_index
+eek_key_set_symbol_matrix
+eek_key_get_symbol_matrix
+eek_key_get_symbol
+eek_key_get_symbol_at_index
+eek_key_get_symbol_with_fallback
 eek_key_set_index
 eek_key_get_index
 eek_key_set_outline
@@ -231,12 +233,43 @@ EEK_ELEMENT_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-symbol</FILE>
+<TITLE>EekSymbol</TITLE>
+EekSymbolClass
+EekSymbol
+eek_symbol_new
+eek_symbol_set_name
+eek_symbol_get_name
+eek_symbol_set_label
+eek_symbol_get_label
+eek_symbol_set_category
+eek_symbol_get_category
+eek_symbol_set_modifier_mask
+eek_symbol_get_modifier_mask
+eek_symbol_is_modifier
+<SUBSECTION Standard>
+EEK_SYMBOL
+EEK_IS_SYMBOL
+EEK_TYPE_SYMBOL
+eek_symbol_get_type
+EEK_SYMBOL_CLASS
+EEK_IS_SYMBOL_CLASS
+EEK_SYMBOL_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-types</FILE>
 <TITLE>Basic Types</TITLE>
 EekOrientation
-EekKeysymMatrix
-EEK_TYPE_KEYSYM_MATRIX
-eek_keysym_matrix_get_type
+EekModifierBehavior
+EekModifierType
+EekSymbolMatrix
+EekSymbolCategory
+EEK_TYPE_SYMBOL_MATRIX
+eek_symbol_matrix_copy
+eek_symbol_matrix_free
+eek_symbol_matrix_get_type
+eek_symbol_matrix_new
 EekPoint
 EEK_TYPE_POINT
 eek_point_get_type
@@ -256,14 +289,20 @@ eek_color_new
 
 <SECTION>
 <FILE>eek-keysym</FILE>
-<TITLE>Keysym Utility</TITLE>
+<TITLE>EekKeysym</TITLE>
+EekKeysymClass
+EekKeysym
 EEK_INVALID_KEYSYM
 EEK_INVALID_KEYCODE
-EekKeysymCategory
-eek_keysym_to_string
-eek_keysym_get_category
-eek_keysym_is_modifier
-eek_keysym_to_modifier
-EekModifierBehavior
-EekModifierType
+eek_keysym_get_xkeysym
+eek_keysym_new
+eek_keysym_new_from_name
+<SUBSECTION Standard>
+EEK_KEYSYM
+EEK_IS_KEYSYM
+EEK_TYPE_KEYSYM
+eek_keysym_get_type
+EEK_KEYSYM_CLASS
+EEK_IS_KEYSYM_CLASS
+EEK_KEYSYM_GET_CLASS
 </SECTION>

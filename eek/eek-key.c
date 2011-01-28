@@ -393,7 +393,9 @@ eek_key_init (EekKey *self)
  * @key: an #EekKey
  * @keycode: keycode
  *
- * Set keycode of @key to @keycode.
+ * Set the keycode of @key to @keycode.  The keycode values are
+ * identical to the X keycode name, if the keyboard is built with
+ * #EekXkbLayout or #EekXklLayout.
  */
 void
 eek_key_set_keycode (EekKey *key,
@@ -422,7 +424,7 @@ eek_key_get_keycode (EekKey *key)
  * @key: an #EekKey
  * @matrix: an #EekSymbolMatrix
  *
- * Set the symbol matrix @matrix to @key.
+ * Set the symbol matrix of @key to @matrix.
  */
 void
 eek_key_set_symbol_matrix (EekKey          *key,
