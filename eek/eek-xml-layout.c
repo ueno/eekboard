@@ -439,6 +439,7 @@ scale_bounds (EekElement *element,
     bounds.y *= scale;
     bounds.width *= scale;
     bounds.height *= scale;
+    eek_element_set_bounds (element, &bounds);
 
     if (EEK_IS_CONTAINER(element))
         eek_container_foreach_child (EEK_CONTAINER(element),
@@ -510,10 +511,6 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     if (!data.keyboard)
         goto out;
 
-    eek_element_get_bounds (EEK_ELEMENT(data.keyboard), &bounds);
-    scale = initial_width < initial_height ? bounds.width / initial_width : 
-        bounds.height / initial_height;
-
     g_hash_table_iter_init (&iter, data.key_oref_hash);
     while (g_hash_table_iter_next (&iter, &k, &v)) {
         EekOutline *outline = g_hash_table_lookup (data.oref_outline_hash, v);
@@ -521,7 +518,10 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
         eek_key_set_outline (EEK_KEY(k), outline);
     }
 
-#if 0
+    eek_element_get_bounds (EEK_ELEMENT(data.keyboard), &bounds);
+    scale = initial_width < initial_height ? initial_width / bounds.width : 
+        initial_height / bounds.height;
+
     g_hash_table_iter_init (&iter, data.oref_outline_hash);
     while (g_hash_table_iter_next (&iter, &k, &v)) {
         EekOutline *outline = v;
@@ -534,7 +534,6 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     }
 
     scale_bounds (EEK_ELEMENT(data.keyboard), scale);
-#endif
 
  out:
     g_string_free (data.text, TRUE);
