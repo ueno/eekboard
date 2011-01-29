@@ -254,6 +254,7 @@ render_key_outline (EekRenderer *renderer,
 
 struct _CalculateFontSizeCallbackData {
     gdouble size;
+    gdouble em_size;
     EekRenderer *renderer;
 };
 typedef struct _CalculateFontSizeCallbackData CalculateFontSizeCallbackData;
@@ -271,16 +272,14 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     gdouble size;
     EekSymbol *symbol;
     EekBounds bounds;
-    gchar *label;
+    gchar *label = NULL;
 
     symbol = eek_key_get_symbol (EEK_KEY(element));
-    if (!symbol ||
-        eek_symbol_get_category (symbol) != EEK_SYMBOL_CATEGORY_LETTER)
-        return;
-
-    label = eek_symbol_get_label (symbol);
+    if (symbol &&
+        eek_symbol_get_category (symbol) == EEK_SYMBOL_CATEGORY_LETTER)
+        label = eek_symbol_get_label (symbol);
     if (!label)
-        return;
+        label = g_strdup ("M");
 
     base_font = pango_context_get_font_description (priv->pcontext);
     font = pango_font_description_copy (base_font);
@@ -305,9 +304,12 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
         sy = bounds.height * PANGO_SCALE / extents.height;
 
     size *= MIN(sx, sy);
-    if (size < data->size &&
-        size >= pango_font_description_get_size (base_font))
-        data->size = size;
+    if (size >= pango_font_description_get_size (base_font)) {
+        if (size < data->size)
+            data->size = size;
+        if (size < data->em_size)
+            data->em_size = size;
+    }
 }
 
 static void
@@ -327,11 +329,12 @@ calculate_font_size (EekRenderer *renderer)
 
     base_font = pango_context_get_font_description (priv->pcontext);
     data.size = G_MAXDOUBLE;
+    data.em_size = G_MAXDOUBLE;
     data.renderer = renderer;
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
                                  calculate_font_size_section_callback,
                                  &data);
-    return data.size;
+    return data.size > 0 ? data.size : data.em_size;
 }
 
 static void
@@ -1026,10 +1029,11 @@ eek_renderer_find_key_by_position (EekRenderer *renderer,
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
     eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
 
-    g_assert (x >= bounds.x * priv->scale);
-    g_assert (y >= bounds.y * priv->scale);
-    g_assert (x <= bounds.width * priv->scale);
-    g_assert (y <= bounds.height * priv->scale);
+    if (x < bounds.x * priv->scale ||
+        y < bounds.y * priv->scale ||
+        x > bounds.width * priv->scale ||
+        y > bounds.height * priv->scale)
+        return NULL;
 
     data.point.x = x;
     data.point.y = y;
