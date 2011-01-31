@@ -445,12 +445,8 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     gdouble size, scale;
     gint i;
 
-    symbol = eek_key_get_symbol_with_fallback (key, -1, 0);
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
-        return;
-
-    category = eek_symbol_get_category (symbol);
-    if (category == EEK_SYMBOL_CATEGORY_UNKNOWN)
         return;
 
     label = eek_symbol_get_label (symbol);
@@ -473,6 +469,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
 
     font = pango_font_description_copy (priv->font);
     size = pango_font_description_get_size (font);
+    category = eek_symbol_get_category (symbol);
     for (i = 0; i < G_N_ELEMENTS(symbol_category_scale_factors); i++)
         if (symbol_category_scale_factors[i].category == category) {
             size *= symbol_category_scale_factors[i].scale;
