@@ -55,6 +55,7 @@ struct _OutputCallbackData {
     GString *output;
     gint indent;
     GArray *outline_array;
+    gint key_serial;
 };
 typedef struct _OutputCallbackData OutputCallbackData;
 
@@ -78,20 +79,34 @@ output_key_callback (EekElement *element, gpointer user_data)
     gint i, num_symbols;
     EekSymbolMatrix *matrix;
     gint column, row;
-    guint keycode = eek_key_get_keycode (EEK_KEY(element));
+    guint keycode;
+    gchar *id;
+
+    keycode = eek_key_get_keycode (EEK_KEY(element));
+    if (keycode == EEK_INVALID_KEYCODE)
+        id = g_strdup_printf ("key%d", data->key_serial);
+    else
+        id = g_strdup_printf ("keycode%d", keycode);
+    data->key_serial++;
 
     eek_key_get_index (EEK_KEY(element), &column, &row);
     g_string_append_indent (data->output, data->indent);
     if (eek_element_get_name (element))
         g_string_markup_printf (data->output,
-                                "<key id=\"key%u\" column=\"%d\" row=\"%d\" "
-                                "name=\"%s\">\n",
-                                keycode, column, row,
-                                eek_element_get_name (element));
+                                "<key id=\"%s\" name=\"%s\" "
+                                "column=\"%d\" row=\"%d\">\n",
+                                id,
+                                eek_element_get_name (element),
+                                column,
+                                row);
     else
         g_string_markup_printf (data->output,
-                                "<key id=\"key%d\" column=\"%d\" row=\"%d\">\n",
-                                keycode, column, row);
+                                "<key id=\"%s\" "
+                                "column=\"%d\" row=\"%d\">\n",
+                                id,
+                                column,
+                                row);
+    g_free (id);
 
     eek_element_get_bounds (element, &bounds);
     g_string_append_indent (data->output, data->indent + 1);
@@ -121,15 +136,27 @@ output_key_callback (EekElement *element, gpointer user_data)
                                 matrix->num_groups, matrix->num_levels);
 
         for (i = 0; i < num_symbols; i++) {
+            EekSymbol *symbol = matrix->data[i];
+
             g_string_append_indent (data->output, data->indent + 2);
-            if (EEK_IS_KEYSYM(matrix->data[i]))
-                g_string_markup_printf (data->output,
-                                        "<keysym>%s</keysym>\n",
-                                        eek_symbol_get_name (matrix->data[i]));
+            if (EEK_IS_KEYSYM(symbol)) {
+                guint xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
+
+                if (xkeysym != EEK_INVALID_KEYSYM)
+                    g_string_markup_printf
+                        (data->output,
+                         "<keysym keyval=\"%u\">%s</keysym>\n",
+                         xkeysym,
+                         eek_symbol_get_name (symbol));
+                else
+                    g_string_markup_printf (data->output,
+                                            "<keysym>%s</keysym>\n",
+                                            eek_symbol_get_name (symbol));
+            }
             else
                 g_string_markup_printf (data->output,
                                         "<symbol>%s</symbol>\n",
-                                        eek_symbol_get_name (matrix->data[i]));
+                                        eek_symbol_get_name (symbol));
         }
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output, "</symbols>\n");
@@ -202,10 +229,15 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
     g_assert (EEK_IS_KEYBOARD(keyboard));
  
     g_string_append_indent (output, indent);
-    g_string_markup_printf (output, "<?xml version=\"1.0\"?>\n"
-                            "<keyboard version=\""
-                            EEK_XML_SCHEMA_VERSION
-                            "\">\n");
+    if (eek_element_get_name (EEK_ELEMENT(keyboard)))
+        g_string_markup_printf (output, "<?xml version=\"1.0\"?>\n"
+                                "<keyboard version=\"%s\" id=\"%s\">\n",
+                                EEK_XML_SCHEMA_VERSION,
+                                eek_element_get_name (EEK_ELEMENT(keyboard)));
+    else
+        g_string_markup_printf (output, "<?xml version=\"1.0\"?>\n"
+                                "<keyboard version=\"%s\">\n",
+                                EEK_XML_SCHEMA_VERSION);
 
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     g_string_append_indent (output, indent + 1);
@@ -214,6 +246,7 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
     data.output = output;
     data.indent = indent;
     data.outline_array = g_array_new (FALSE, FALSE, sizeof (gpointer));
+    data.key_serial = 0;
 
     data.indent++;
     eek_container_foreach_child (EEK_CONTAINER(keyboard),

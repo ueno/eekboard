@@ -65,6 +65,7 @@ struct _ParseCallbackData {
     EekOrientation orientation;
     GSList *points;
     GSList *symbols;
+    guint keyval;
     gint groups, levels;
     EekOutline outline;
     gchar *oref;
@@ -159,6 +160,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     const gchar **names = attribute_names;
     const gchar **values = attribute_values;
     gint column = -1, row = -1, groups = -1, levels = -1;
+    guint keyval = EEK_INVALID_KEYSYM;
     gchar *name = NULL, *id = NULL, *version = NULL;
 
     validate (element_name, data->element_stack, error);
@@ -170,10 +172,12 @@ start_element_callback (GMarkupParseContext *pcontext,
             column = strtol (*values, NULL, 10);
         else if (g_strcmp0 (*names, "row") == 0)
             row = strtol (*values, NULL, 10);
-        else if (g_strcmp0 (*names, "name") == 0)
-            name = g_strdup (*values);
         else if (g_strcmp0 (*names, "id") == 0)
             id = g_strdup (*values);
+        else if (g_strcmp0 (*names, "name") == 0)
+            name = g_strdup (*values);
+        else if (g_strcmp0 (*names, "keyval") == 0)
+            keyval = strtoul (*values, NULL, 10);
         else if (g_strcmp0 (*names, "version") == 0)
             version = g_strdup (*values);
         else if (g_strcmp0 (*names, "groups") == 0)
@@ -188,24 +192,25 @@ start_element_callback (GMarkupParseContext *pcontext,
         data->keyboard = g_object_new (EEK_TYPE_KEYBOARD,
                                        "layout", data->layout,
                                        NULL);
-        if (name)
-            eek_element_set_name (EEK_ELEMENT(data->keyboard), name);
+        if (id)
+            eek_element_set_name (EEK_ELEMENT(data->keyboard), id);
         goto out;
     }
 
     if (g_strcmp0 (element_name, "section") == 0) {
         data->section = eek_keyboard_create_section (data->keyboard);
-        if (name)
-            eek_element_set_name (EEK_ELEMENT(data->section), name);
+        if (id)
+            eek_element_set_name (EEK_ELEMENT(data->section), id);
         goto out;
     }
 
     if (g_strcmp0 (element_name, "key") == 0) {
         data->key = eek_section_create_key (data->section, column, row);
-        if (name)
-            eek_element_set_name (EEK_ELEMENT(data->key), name);
-        if (id && g_str_has_prefix (id, "key"))
-            eek_key_set_keycode (data->key, strtoul (id + 3, NULL, 10));
+        if (id) {
+            eek_element_set_name (EEK_ELEMENT(data->key), id);
+            if (g_str_has_prefix (id, "keycode"))
+                eek_key_set_keycode (data->key, strtoul (id + 7, NULL, 10));
+        }
         goto out;
     }
 
@@ -215,6 +220,9 @@ start_element_callback (GMarkupParseContext *pcontext,
         data->symbols = NULL;
         goto out;
     }
+
+    if (g_strcmp0 (element_name, "keysym") == 0)
+        data->keyval = keyval;
 
     if (g_strcmp0 (element_name, "outline") == 0) {
         data->oref = g_strdup (id);
@@ -357,13 +365,18 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "columns") == 0) {
-        data->num_columns = strtol (text, NULL, 10);
+    if (g_strcmp0 (element_name, "angle") == 0) {
+        eek_section_set_angle (data->section, strtol (text, NULL, 10));
         goto out;
     }
 
     if (g_strcmp0 (element_name, "orientation") == 0) {
         data->orientation = strtol (text, NULL, 10);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "columns") == 0) {
+        data->num_columns = strtol (text, NULL, 10);
         goto out;
     }
 
@@ -377,10 +390,13 @@ end_element_callback (GMarkupParseContext *pcontext,
     }
 
     if (g_strcmp0 (element_name, "keysym") == 0) {
-        gchar *name = g_strdup (text);
-        data->symbols = g_slist_prepend (data->symbols,
-                                         eek_keysym_new_from_name (name));
-        g_free (name);
+        EekKeysym *keysym;
+
+        if (data->keyval != EEK_INVALID_KEYSYM)
+            keysym = eek_keysym_new (data->keyval);
+        else
+            keysym = eek_keysym_new_from_name (text);
+        data->symbols = g_slist_prepend (data->symbols, keysym);
         goto out;
     }
 
@@ -519,7 +535,8 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     }
 
     eek_element_get_bounds (EEK_ELEMENT(data.keyboard), &bounds);
-    scale = initial_width < initial_height ? initial_width / bounds.width : 
+    scale = initial_width * bounds.height < initial_height * bounds.width ?
+        initial_width / bounds.width :
         initial_height / bounds.height;
 
     g_hash_table_iter_init (&iter, data.oref_outline_hash);
