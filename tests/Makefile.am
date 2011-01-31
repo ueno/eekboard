@@ -19,7 +19,8 @@
 INCLUDES = -I$(top_srcdir) $(GIO2_CFLAGS) $(GTK_CFLAGS) $(XKB_CFLAGS)
 
 TESTS = eek-simple-test eek-xkb-test eek-xml-test
-noinst_PROGRAMS = $(TESTS)
+SAMPLES = eek-example-xml
+noinst_PROGRAMS = $(TESTS) $(SAMPLES)
 
 eek_simple_test_SOURCES = eek-simple-test.c
 eek_simple_test_LDADD = $(top_builddir)/eek/libeek.la
@@ -29,3 +30,6 @@ eek_xkb_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xk
 
 eek_xml_test_SOURCES = eek-xml-test.c
 eek_xml_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la
+
+eek_example_xml_SOURCES = eek-example-xml.c
+eek_example_xml_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(top_builddir)/eek/libeek-gtk.la
