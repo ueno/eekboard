@@ -6,7 +6,7 @@ create keyboard-like UI ("libeek").
 
 * Requirements
 
-  * GLib2, GTK, GConf2, PangoCairo, libxklavier, libfakekey, libnotify, CSPI
+  * GLib2, GTK, GConf2, PangoCairo, libxklavier, libfakekey, CSPI
   * Clutter (optional)
   * Clutter-Gtk (optional)
   * Vala (optional)
@@ -19,15 +19,26 @@ Build from git repo:
   $ git clone git://github.com/ueno/eekboard.git
   $ cd eekboard
   $ ./autogen.sh --prefix=/usr --enable-gtk-doc
-
-Build from tarball:
-
   $ ./configure
   $ make
-  $ sudo make install
-  $ eekboard
+
+How to test (dump/load the current layout):
+
+  $ ./tests/eek-example-xml -d > keyboard.xml
+  $ ./tests/eek-example-xml -l keyboard.xml
+
+NOTE: eekboard is now being heavily rewritten and it may behave
+wrongly.  Make sure to close windows where you are doing any important
+work, before running eekboard.
+
+  $ ./src/eekboard-server &
+  $ ./src/eekboard-system-client --xklavier --accessibility --fakekey
+
+Where --xklavier is to monitor system keyboard layout change,
+--accessibility is to track focus/key events via AT-SPI, and --fakekey
+generates X key events when eekboard-server signals virtual
+key-press/key-release events.
 
 * Documentation
 
 <file:docs/reference/eek/html/index.html>
-

@@ -17,8 +17,18 @@
 # 02110-1301 USA
 
 if ENABLE_EEKBOARD
-bin_PROGRAMS = eekboard
-eekboard_CFLAGS = \
+bin_PROGRAMS = eekboard-system-client eekboard-server
+noinst_LIBRARIES = libeekboard.a
+
+libeekboard_a_headers = proxy.h
+
+libeekboard_a_CFLAGS = \
+	-I$(top_srcdir) \
+	$(GIO2_CFLAGS)
+
+libeekboard_a_SOURCES = proxy.c
+
+eekboard_system_client_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
 	$(GTK_CFLAGS) \
@@ -26,24 +36,45 @@ eekboard_CFLAGS = \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
 	$(LIBFAKEKEY_CFLAGS) \
-	$(CSPI_CFLAGS) \
-	$(NOTIFY_CFLAGS)
+	$(CSPI_CFLAGS)
 
-eekboard_LDFLAGS = \
+eekboard_system_client_LDADD = \
+	libeekboard.a \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
-	$(top_builddir)/eek/libeek-gtk.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
 	$(GCONF2_LIBS) \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS) \
 	$(LIBFAKEKEY_LIBS) \
-	$(CSPI_LIBS) \
-	$(NOTIFY_LIBS)
+	$(CSPI_LIBS)
+
+eekboard_system_client_headers = system-client.h
+eekboard_system_client_SOURCES = system-client.c system-client-main.c
+
+eekboard_server_CFLAGS = \
+	-I$(top_srcdir) \
+	$(GIO2_CFLAGS) \
+	$(GTK_CFLAGS)
+
+eekboard_server_LDADD = \
+	libeekboard.a \
+	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eek/libeek-gtk.la \
+	$(GIO2_LIBS) \
+	$(GTK_LIBS)
+
+eekboard_server_headers = server.h
+eekboard_server_SOURCES = server.c server-main.c
 
 if HAVE_CLUTTER
-eekboard_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
-eekboard_LDFLAGS += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
+eekboard_server_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
+eekboard_server_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif
+
+noinst_HEADERS = \
+	$(libeekboard_a_headers) \
+	$(eekboard_system_client_headers) \
+	$(eekboard_server_headers)
 endif
