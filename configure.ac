@@ -106,24 +106,6 @@ PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
 PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
   [AC_MSG_ERROR([AT-SPI C not found])])
 
-PKG_CHECK_MODULES([NOTIFY], [libnotify], ,
-  [AC_MSG_ERROR([libnotify not found])])
-
-dnl libnotify >= 0.7.0 omitted the feature to attach notification to widget.
-need_libnotify_attach_workaround=0
-save_CFLAGS="$CFLAGS"
-CFLAGS="$NOTIFY_CFLAGS"
-save_LIBS="$LIBS"
-LIBS="$NOTIFY_LIBS"
-AC_TRY_LINK([#include <libnotify/notification.h>],
-  [notify_notification_new (NULL, NULL, NULL);], ,
-  [need_libnotify_attach_workaround=1])
-CFLAGS="$save_CFLAGS"
-LIBS="$save_LIBS"
-AC_DEFINE_UNQUOTED([NEED_LIBNOTIFY_ATTACH_WORKAROUND],
-  $need_libnotify_attach_workaround,
-  [Define if notify_notification_new work around is needed])
-
 dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
