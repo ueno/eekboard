@@ -17,11 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-#include "eek/eek-xml.h"
-#include "eek/eek-xkl.h"
 
 /* For gdk_x11_display_get_xdisplay().  See main(). */
 #include <gtk/gtk.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
+#include "eek/eek-xml.h"
+#include "eek/eek-xkl.h"
 
 static void
 test_output_parse (void)
