@@ -113,11 +113,31 @@ eek_keysym_real_get_name (EekSymbol *self)
     return priv->name;
 }
 
+static gboolean
+get_unichar (guint xkeysym, gunichar *uc) {
+    /* Check for Latin-1 characters (1:1 mapping) */
+    if ((xkeysym >= 0x0020 && xkeysym <= 0x007e) ||
+        (xkeysym >= 0x00a0 && xkeysym <= 0x00ff)) {
+        *uc = xkeysym;
+        return TRUE;
+    }
+
+    /* Also check for directly encoded 24-bit UCS characters:
+     */
+    if ((xkeysym & 0xff000000) == 0x01000000) {
+        *uc = xkeysym & 0x00ffffff;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static gchar *
 eek_keysym_real_get_label (EekSymbol *self)
 {
     EekKeysymPrivate *priv = EEK_KEYSYM_GET_PRIVATE(self);
     EekKeysymEntry *entry;
+    gunichar uc;
 
     /* First, search special keysyms. */
     entry = find_keysym_entry_by_xkeysym (priv->xkeysym,
@@ -125,16 +145,9 @@ eek_keysym_real_get_label (EekSymbol *self)
                                           G_N_ELEMENTS(special_keysym_entries));
     if (entry)
         return g_strdup (entry->name);
-  
-    /* Check for Latin-1 characters (1:1 mapping) */
-    if ((priv->xkeysym >= 0x0020 && priv->xkeysym <= 0x007e) ||
-        (priv->xkeysym >= 0x00a0 && priv->xkeysym <= 0x00ff))
-        return unichar_to_utf8 (priv->xkeysym);
 
-    /* Also check for directly encoded 24-bit UCS characters:
-     */
-    if ((priv->xkeysym & 0xff000000) == 0x01000000)
-        return unichar_to_utf8 (priv->xkeysym & 0x00ffffff);
+    if (get_unichar (priv->xkeysym, &uc))
+        return unichar_to_utf8 (uc);
 
     /* Search known unicode keysyms. */
     entry = find_keysym_entry_by_xkeysym (priv->xkeysym,
@@ -217,17 +230,30 @@ eek_keysym_new (guint xkeysym)
 
     keysym = g_object_new (EEK_TYPE_KEYSYM, NULL);
     priv = EEK_KEYSYM_GET_PRIVATE(keysym);
+    priv->xkeysym = xkeysym;
 
+    /* First check the X standard keysyms */
     entry = find_keysym_entry_by_xkeysym (xkeysym,
                                           xkeysym_keysym_entries,
                                           G_N_ELEMENTS(xkeysym_keysym_entries));
+    if (!entry) {
+        gunichar uc;
+
+        /* Check the special unicode mappings */
+        if (get_unichar (priv->xkeysym, &uc)) {
+            priv->category = EEK_SYMBOL_CATEGORY_LETTER;
+            return keysym;
+        }
+
+        entry = find_keysym_entry_by_xkeysym
+            (priv->xkeysym,
+             unicode_keysym_entries,
+             G_N_ELEMENTS(unicode_keysym_entries));
+    }
+
     if (entry)
         memcpy (priv, entry, sizeof (EekKeysymEntry));
-    else {
-        // g_warning ("can't find keysym entry %u", xkeysym);
-        memcpy (priv, &invalid_keysym_entry, sizeof (EekKeysymEntry));
-        priv->xkeysym = xkeysym;
-    }
+
     return keysym;
 }
 
