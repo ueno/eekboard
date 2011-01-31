@@ -472,7 +472,7 @@ get_keyboard (EekKey *key)
 EekSymbol *
 eek_key_get_symbol (EekKey *key)
 {
-    return eek_key_get_symbol_with_fallback (key, -1, -1);
+    return eek_key_get_symbol_with_fallback (key, 0, 0);
 }
 
 /**

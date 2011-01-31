@@ -261,7 +261,7 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
     symbol = eek_key_get_symbol_at_index (key,
                                           priv->group,
                                           priv->level,
-                                          -1,
+                                          0,
                                           0);
     if (!symbol)
         return;
@@ -292,7 +292,7 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     symbol = eek_key_get_symbol_at_index (key,
                                           priv->group,
                                           priv->level,
-                                          -1,
+                                          0,
                                           0);
     if (!symbol)
         return;
