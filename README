@@ -1,10 +1,11 @@
 eekboard - an easy to use virtual keyboard library -*- outline -*-
 
-eekboard is a virtual keyboard software package which ships with a
-standalone virtual keyboard application ("eekboard"), and a library to
-create keyboard-like UI ("libeek").
+eekboard is a virtual keyboard software package, including a set of
+tools to implement desktop virtual keyboard solutions.
 
-* Requirements
+* How to build
+
+** Requirements
 
   * GLib2, GTK, GConf2, PangoCairo, libxklavier, libfakekey, CSPI
   * Clutter (optional)
@@ -12,9 +13,7 @@ create keyboard-like UI ("libeek").
   * Vala (optional)
   * gobject-introspection (optional)
 
-* How to test
-
-Build from git repo:
+** Build from git repo
 
   $ git clone git://github.com/ueno/eekboard.git
   $ cd eekboard
@@ -22,19 +21,40 @@ Build from git repo:
   $ ./configure
   $ make
 
+* How to test
+
+eekboard currently includes 4 tools to implement your own virtual
+keyboard:
+
+- eekboard-server
+  a D-Bus server draws an interactive on-screen keyboard
+
+- eekboard-system-client
+  a client of "eekboard-server".  It listens system events (focus
+  change, keystroke, keyboard change).
+
+- eekboard-xml
+  a tool to dump the current system keyboard layout into an XML file.
+  It also supports loading an XML file.
+  
+- eekboard-client
+  a tool to test interaction with eekboard-server
+
+** Test with eekboard-client
+
+Start eekboard-server:
+
+  $ ./src/eekboard-server &
+
 Dump the current system keyboard layout into an XML file:
 
   $ ./src/eekboard-xml --dump > keyboard.xml
 
-Load the XML file and display a keyboard created from it:
+(Optional) you can check the layout with:
 
   $ ./src/eekboard-xml --load keyboard.xml
 
-Start D-Bus server:
-
-  $ ./src/eekboard-server &
-
-Access to the D-Bus server:
+Access to eekboard-server:
 
   $ ./src/eekboard-client --set-keyboard keyboard.xml
   $ ./src/eekboard-client --show
@@ -45,11 +65,17 @@ Access to the D-Bus server:
   $ ./src/eekboard-client --press-key 65
   $ ./src/eekboard-client --release-key 65
 
-Listen and follow the system events:
+** Test with eekboard-system-client
 
 NOTE: eekboard-system-client is now being heavily developed and it may
 behave wrongly.  Make sure to close windows where you are doing any
 important work, before running eekboard.
+
+Start eekboard-server:
+
+  $ ./src/eekboard-server &
+
+Start eekboard-system-client
 
   $ ./src/eekboard-system-client \
       --listen-keyboard \
@@ -57,10 +83,13 @@ important work, before running eekboard.
       --listen-keystroke \
       --generate-key-event
 
-Where --listen-keyboard is to monitor system keyboard state/config
-change, --listen-focus is to track focus change, --listen-keystroke is
-to track keystroke events, and --generate-key-event is to generate X
-key events on virtual key-press/key-release events.
+Where:
+
+--listen-keyboard is to monitor system keyboard state/config change,
+--listen-focus is to track focus change,
+--listen-keystroke is to track keystroke events, and
+--generate-key-event is to generate X key events on virtual
+  key-press/key-release events.
 
 * Documentation
 
