@@ -161,6 +161,7 @@ update_widget (EekboardServer *server)
     gtk_widget_set_can_focus (server->window, FALSE);
     g_object_set (G_OBJECT(server->window), "accept_focus", FALSE, NULL);
     gtk_window_set_title (GTK_WINDOW(server->window), "Keyboard");
+    gtk_window_set_keep_above (GTK_WINDOW(server->window), TRUE);
 
     screen = gdk_screen_get_default ();
     root = gtk_widget_get_root_window (server->window);
