@@ -25,6 +25,8 @@ static gchar *opt_set_keyboard = NULL;
 static gint opt_set_group = -1;
 static gboolean opt_show = FALSE;
 static gboolean opt_hide = FALSE;
+static gint opt_press_key = -1;
+static gint opt_release_key = -1;
 static gboolean opt_listen = FALSE;
 
 static const GOptionEntry options[] = {
@@ -36,6 +38,10 @@ static const GOptionEntry options[] = {
      "Show keyboard"},
     {"hide", '\0', 0, G_OPTION_ARG_NONE, &opt_hide,
      "Hide keyboard"},
+    {"press-key", '\0', 0, G_OPTION_ARG_INT, &opt_press_key,
+     "Press key"},
+    {"release-key", '\0', 0, G_OPTION_ARG_INT, &opt_release_key,
+     "Release key"},
     {"listen", '\0', 0, G_OPTION_ARG_NONE, &opt_listen,
      "Listen events"},
     {NULL}
@@ -125,6 +131,14 @@ main (int argc, char **argv)
 
     if (opt_hide) {
         eekboard_proxy_hide (proxy);
+    }
+
+    if (opt_press_key >= 0) {
+        eekboard_proxy_press_key (proxy, opt_press_key);
+    }
+
+    if (opt_release_key >= 0) {
+        eekboard_proxy_release_key (proxy, opt_release_key);
     }
 
     if (opt_listen) {

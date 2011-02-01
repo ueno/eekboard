@@ -339,29 +339,11 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
                        void                      *user_data)
 {
     EekboardSystemClient *client = user_data;
-    EekKey *key;
-    EekSymbol *symbol;
-
-    return FALSE;
-
-    key = eek_keyboard_find_key_by_keycode (client->keyboard,
-                                            stroke->keycode);
-    if (!key)
-        return FALSE;
-
-    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    if (!symbol)
-        return FALSE;
-
-    /* XXX: Ignore modifier keys since there is no way to receive
-       SPI_KEY_RELEASED event for them. */
-    if (eek_symbol_is_modifier (symbol))
-        return FALSE;
 
     if (stroke->type == SPI_KEY_PRESSED)
-        g_signal_emit_by_name (key, "pressed");
+        eekboard_proxy_press_key (client->proxy, stroke->keycode);
     else
-        g_signal_emit_by_name (key, "released");
+        eekboard_proxy_release_key (client->proxy, stroke->keycode);
     return TRUE;
 }
 

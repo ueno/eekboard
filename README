@@ -42,6 +42,8 @@ Access to the D-Bus server:
   KeyPressed XXXXX
   KeyReleased XXXXX
   $ ./src/eekboard-client --set-group 1
+  $ ./src/eekboard-client --press-key 65
+  $ ./src/eekboard-client --release-key 65
 
 Listen and follow the system events:
 

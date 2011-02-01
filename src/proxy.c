@@ -142,9 +142,9 @@ proxy_call_async_ready_cb (GObject      *source_object,
     result = g_dbus_proxy_call_finish (G_DBUS_PROXY(source_object),
                                        res,
                                        &error);
-    g_assert_no_error (error);
-    g_assert (result != NULL);
-    g_variant_unref (result);
+    // g_assert_no_error (error);
+    if (result)
+        g_variant_unref (result);
 }
 
 void
@@ -204,6 +204,34 @@ eekboard_proxy_hide (EekboardProxy *proxy)
     g_dbus_proxy_call (G_DBUS_PROXY(proxy),
                        "Hide",
                        NULL,
+                       G_DBUS_CALL_FLAGS_NONE,
+                       -1,
+                       NULL,
+                       proxy_call_async_ready_cb,
+                       NULL);
+}
+
+void
+eekboard_proxy_press_key (EekboardProxy *proxy,
+                          guint          keycode)
+{
+    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+                       "PressKey",
+                       g_variant_new ("(u)", keycode),
+                       G_DBUS_CALL_FLAGS_NONE,
+                       -1,
+                       NULL,
+                       proxy_call_async_ready_cb,
+                       NULL);
+}
+
+void
+eekboard_proxy_release_key (EekboardProxy *proxy,
+                            guint          keycode)
+{
+    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+                       "ReleaseKey",
+                       g_variant_new ("(u)", keycode),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
                        NULL,

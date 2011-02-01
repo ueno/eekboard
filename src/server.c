@@ -53,10 +53,10 @@ static const gchar introspection_xml[] =
     "    <method name='Show'/>"
     "    <method name='Hide'/>"
     "    <method name='PressKey'>"
-    "      <arg type='s' name='key_id' direction='in'/>"
+    "      <arg type='u' name='keycode'/>"
     "    </method>"
     "    <method name='ReleaseKey'>"
-    "      <arg type='s' name='key_id' direction='in'/>"
+    "      <arg type='u' name='keycode'/>"
     "    </method>"
     "    <signal name='KeyPressed'>"
     "      <arg type='u' name='keycode'/>"
@@ -397,6 +397,49 @@ handle_method_call (GDBusConnection       *connection,
     if (g_strcmp0 (method_name, "Hide") == 0) {
         if (server->window)
             gtk_widget_hide (server->window);
+        g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "PressKey") == 0 ||
+        g_strcmp0 (method_name, "ReleaseKey") == 0) {
+        EekKey *key;
+        guint keycode;
+
+        if (!server->keyboard) {
+            g_dbus_method_invocation_return_error (invocation,
+                                                   G_IO_ERROR,
+                                                   G_IO_ERROR_FAILED_HANDLED,
+                                                   "keyboard is not set");
+            return;
+        }
+
+        g_variant_get (parameters, "(u)", &keycode);
+        key = eek_keyboard_find_key_by_keycode (server->keyboard, keycode);
+
+        if (!key) {
+            g_dbus_method_invocation_return_error (invocation,
+                                                   G_IO_ERROR,
+                                                   G_IO_ERROR_FAILED_HANDLED,
+                                                   "key for %u is not found",
+                                                   keycode);
+            return;
+        }
+
+        if (g_strcmp0 (method_name, "PressKey") == 0) {
+            g_signal_handler_block (server->keyboard,
+                                    server->key_pressed_handler);
+            g_signal_emit_by_name (key, "pressed");
+            g_signal_handler_unblock (server->keyboard,
+                                      server->key_pressed_handler);
+        } else {
+            g_signal_handler_block (server->keyboard,
+                                    server->key_released_handler);
+            g_signal_emit_by_name (key, "released");
+            g_signal_handler_unblock (server->keyboard,
+                                      server->key_released_handler);
+        }
+
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }

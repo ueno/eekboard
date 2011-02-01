@@ -43,6 +43,10 @@ void           eekboard_proxy_set_group    (EekboardProxy   *proxy,
                                             gint             group);
 void           eekboard_proxy_show         (EekboardProxy   *proxy);
 void           eekboard_proxy_hide         (EekboardProxy   *proxy);
+void           eekboard_proxy_press_key    (EekboardProxy   *proxy,
+                                            guint            keycode);
+void           eekboard_proxy_release_key  (EekboardProxy   *proxy,
+                                            guint            keycode);
 
 G_END_DECLS
 #endif  /* EEKBOARD_PROXY_H */
