@@ -393,9 +393,11 @@ eek_key_init (EekKey *self)
  * @key: an #EekKey
  * @keycode: keycode
  *
- * Set the keycode of @key to @keycode.  The keycode values are
- * identical to the X keycode name, if the keyboard is built with
- * #EekXkbLayout or #EekXklLayout.
+ * Set the keycode of @key to @keycode.  Since typically the keycode
+ * value is used to find a key in a keyboard by calling
+ * eek_keyboard_find_key_by_keycode, it is not necessarily the same as
+ * the X keycode but it should be unique in the keyboard @key belongs
+ * to.
  */
 void
 eek_key_set_keycode (EekKey *key,
