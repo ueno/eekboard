@@ -48,18 +48,18 @@ main (int argc, char **argv)
 
     server = eekboard_server_new (connection);
 
-    loop = g_main_loop_new(NULL, FALSE);
-
     if (!eekboard_server_start (server)) {
         g_printerr ("Can't start server\n");
         exit (1);
     }
-    g_main_loop_run(loop);
+
+    loop = g_main_loop_new (NULL, FALSE);
+    g_main_loop_run (loop);
     eekboard_server_stop (server);
 
-    g_object_unref(server);
-    g_object_unref(connection);
-    g_main_loop_unref(loop);
+    g_object_unref (server);
+    g_object_unref (connection);
+    g_main_loop_unref (loop);
 
     return 0;
 }

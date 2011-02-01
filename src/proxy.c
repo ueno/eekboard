@@ -50,7 +50,6 @@ eekboard_proxy_real_g_signal (GDBusProxy  *self,
     EekboardProxy *proxy = EEKBOARD_PROXY (self);
     guint *keycode;
 
-    g_debug ("%s %s", sender_name, signal_name);
     if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
 
         g_variant_get (parameters, "(u)", &keycode);

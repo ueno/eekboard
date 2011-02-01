@@ -236,7 +236,7 @@ handle_method_call (GDBusConnection       *connection,
 {
     EekboardServer *server = user_data;
 
-    g_debug ("%s", method_name);
+    // g_debug ("%s", method_name);
     if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
         GVariant *variant;
         gchar *data;
@@ -269,31 +269,50 @@ handle_method_call (GDBusConnection       *connection,
         
         update_widget (server);
         g_dbus_method_invocation_return_value (invocation, NULL);
-    } else if (g_strcmp0 (method_name, "SetGroup") == 0) {
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "SetGroup") == 0) {
         gint group;
 
-        if (!server->keyboard)
+        if (!server->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
                                                    "keyboard is not set");
+            return;
+        }
+
         g_variant_get (parameters, "(i)", &group);
         eek_keyboard_set_group (server->keyboard, group);
         g_dbus_method_invocation_return_value (invocation, NULL);
-    } else if (g_strcmp0 (method_name, "Show") == 0) {
-        if (!server->keyboard)
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "Show") == 0) {
+        if (!server->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
                                                    "keyboard is not set");
+            return;
+        }
+
         if (server->window)
             gtk_widget_show_all (server->window);
         g_dbus_method_invocation_return_value (invocation, NULL);
-    } else if (g_strcmp0 (method_name, "Hide") == 0) {
+        return;
+
+    }
+
+    if (g_strcmp0 (method_name, "Hide") == 0) {
         if (server->window)
             gtk_widget_hide (server->window);
         g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
     }
+
+    g_return_if_reached ();
 }
 
 static const GDBusInterfaceVTable interface_vtable =
@@ -308,7 +327,7 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
-    //g_debug ("name acquired %s", name);
+    // g_debug ("name acquired %s", name);
 }
 
 static void
@@ -316,7 +335,7 @@ on_name_lost (GDBusConnection *connection,
               const gchar     *name,
               gpointer         user_data)
 {
-    //g_debug ("name lost %s", name);
+    // g_debug ("name lost %s", name);
 }
 
 EekboardServer *
