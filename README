@@ -49,12 +49,16 @@ NOTE: eekboard-system-client is now being heavily developed and it may
 behave wrongly.  Make sure to close windows where you are doing any
 important work, before running eekboard.
 
-  $ ./src/eekboard-system-client --xklavier --accessibility --fakekey
+  $ ./src/eekboard-system-client \
+      --listen-keyboard \
+      --listen-focus \
+      --listen-keystroke \
+      --generate-key-event
 
-Where --xklavier is to monitor system keyboard layout change,
---accessibility is to track focus/key events via AT-SPI, and --fakekey
-generates X key events when eekboard-server signals virtual
-key-press/key-release events.
+Where --listen-keyboard is to monitor system keyboard state/config
+change, --listen-focus is to track focus change, --listen-keystroke is
+to track keystroke events, and --generate-key-event is to generate X
+key events on virtual key-press/key-release events.
 
 * Documentation
 

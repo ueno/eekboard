@@ -4,17 +4,20 @@
 #include <gconf/gconf-client.h>
 #include "system-client.h"
 
-gboolean opt_xkl = FALSE;
-gboolean opt_cspi = FALSE;
+gboolean opt_keyboard = FALSE;
+gboolean opt_focus = FALSE;
+gboolean opt_keystroke = FALSE;
 gboolean opt_fakekey = FALSE;
 
 static const GOptionEntry options[] = {
-    {"xklavier", 'x', 0, G_OPTION_ARG_NONE, &opt_xkl,
-     "Listen xklavier events"},
-    {"accessibility", 'a', 0, G_OPTION_ARG_NONE, &opt_cspi,
-     "Listen accessibility events"},
-    {"fakekey", 'k', 0, G_OPTION_ARG_NONE, &opt_fakekey,
-     "Generate X key events via libfakekey"},
+    {"listen-keyboard", 'k', 0, G_OPTION_ARG_NONE, &opt_keyboard,
+     "Listen keyboard change events with libxklavier"},
+    {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
+     "Listen focus change events with AT-SPI"},
+    {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
+     "Listen keystroke events with AT-SPI"},
+    {"generate-key-event", 'g', 0, G_OPTION_ARG_NONE, &opt_fakekey,
+     "Generate X key events with libfakekey"},
     {NULL}
 };
 
@@ -47,7 +50,7 @@ main (int argc, char **argv)
 
     gconfc = gconf_client_get_default ();
     error = NULL;
-    if (opt_cspi) {
+    if (opt_focus || opt_keystroke) {
         if (gconf_client_get_bool (gconfc,
                                    "/desktop/gnome/interface/accessibility",
                                    &error) ||
@@ -59,8 +62,15 @@ main (int argc, char **argv)
                 exit (1);
             }
 
-            if (!eekboard_system_client_enable_cspi (client)) {
-                g_printerr ("Can't register accessibility event listeners\n");
+            if (opt_focus &&
+                !eekboard_system_client_enable_cspi_focus (client)) {
+                g_printerr ("Can't register focus change event listeners\n");
+                exit (1);
+            }
+
+            if (opt_keystroke &&
+                !eekboard_system_client_enable_cspi_keystroke (client)) {
+                g_printerr ("Can't register keystroke event listeners\n");
                 exit (1);
             }
         } else {
@@ -68,7 +78,7 @@ main (int argc, char **argv)
             exit (1);
         }
     }
-    if (opt_xkl &&
+    if (opt_keyboard &&
         !eekboard_system_client_enable_xkl (client)) {
         g_printerr ("Can't register xklavier event listeners\n"); 
         exit (1);

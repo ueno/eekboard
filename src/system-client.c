@@ -122,7 +122,8 @@ eekboard_system_client_dispose (GObject *object)
     EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
 
     eekboard_system_client_disable_xkl (client);
-    eekboard_system_client_disable_cspi (client);
+    eekboard_system_client_disable_cspi_focus (client);
+    eekboard_system_client_disable_cspi_keystroke (client);
     eekboard_system_client_disable_fakekey (client);
 
     if (client->proxy) {
@@ -226,7 +227,7 @@ eekboard_system_client_disable_xkl (EekboardSystemClient *client)
 }
 
 gboolean
-eekboard_system_client_enable_cspi (EekboardSystemClient *client)
+eekboard_system_client_enable_cspi_focus (EekboardSystemClient *client)
 {
     client->focus_listener = SPI_createAccessibleEventListener
         ((AccessibleEventListenerCB)focus_listener_cb,
@@ -240,6 +241,22 @@ eekboard_system_client_enable_cspi (EekboardSystemClient *client)
                                           "focus:"))
         return FALSE;
 
+    return TRUE;
+}
+
+void
+eekboard_system_client_disable_cspi_focus (EekboardSystemClient *client)
+{
+    if (client->focus_listener) {
+        SPI_deregisterGlobalEventListenerAll (client->focus_listener);
+        AccessibleEventListener_unref (client->focus_listener);
+        client->focus_listener = NULL;
+    }
+}
+
+gboolean
+eekboard_system_client_enable_cspi_keystroke (EekboardSystemClient *client)
+{
     client->keystroke_listener =
         SPI_createAccessibleKeystrokeListener (keystroke_listener_cb,
                                                client);
@@ -256,13 +273,8 @@ eekboard_system_client_enable_cspi (EekboardSystemClient *client)
 }
 
 void
-eekboard_system_client_disable_cspi (EekboardSystemClient *client)
+eekboard_system_client_disable_cspi_keystroke (EekboardSystemClient *client)
 {
-    if (client->focus_listener) {
-        SPI_deregisterGlobalEventListenerAll (client->focus_listener);
-        AccessibleEventListener_unref (client->focus_listener);
-        client->focus_listener = NULL;
-    }
     if (client->keystroke_listener) {
         SPI_deregisterAccessibleKeystrokeListener (client->keystroke_listener,
                                                    0);

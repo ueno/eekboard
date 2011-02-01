@@ -39,9 +39,14 @@ gboolean               eekboard_system_client_enable_xkl
 void                   eekboard_system_client_disable_xkl
                        (EekboardSystemClient *client);
 
-gboolean               eekboard_system_client_enable_cspi
+gboolean               eekboard_system_client_enable_cspi_focus
                        (EekboardSystemClient *client);
-void                   eekboard_system_client_disable_cspi
+void                   eekboard_system_client_disable_cspi_focus
+                       (EekboardSystemClient *client);
+
+gboolean               eekboard_system_client_enable_cspi_keystroke
+                       (EekboardSystemClient *client);
+void                   eekboard_system_client_disable_cspi_keystroke
                        (EekboardSystemClient *client);
 
 gboolean               eekboard_system_client_enable_fakekey

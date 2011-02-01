@@ -78,6 +78,9 @@ struct _EekboardServer {
     GtkWidget *window;
     GtkWidget *widget;
     EekKeyboard *keyboard;
+
+    gulong key_pressed_handler;
+    gulong key_released_handler;
 };
 
 struct _EekboardServerClass {
@@ -235,6 +238,8 @@ eekboard_server_init (EekboardServer *server)
     server->keyboard = NULL;
     server->widget = NULL;
     server->window = NULL;
+    server->key_pressed_handler = 0;
+    server->key_released_handler = 0;
 }
 
 static void
@@ -278,6 +283,19 @@ on_key_released (EekKeyboard *keyboard,
 }
 
 static void
+disconnect_keyboard_signals (EekboardServer *server)
+{
+    if (g_signal_handler_is_connected (server->keyboard,
+                                       server->key_pressed_handler))
+        g_signal_handler_disconnect (server->keyboard,
+                                     server->key_pressed_handler);
+    if (g_signal_handler_is_connected (server->keyboard,
+                                       server->key_released_handler))
+        g_signal_handler_disconnect (server->keyboard,
+                                     server->key_released_handler);
+}
+
+static void
 handle_method_call (GDBusConnection       *connection,
                     const gchar           *sender,
                     const gchar           *object_path,
@@ -311,12 +329,15 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         server->keyboard = eek_keyboard_new (layout, CSW, CSH);
-        g_signal_connect (server->keyboard, "key-pressed",
-                          G_CALLBACK(on_key_pressed),
-                          server);
-        g_signal_connect (server->keyboard, "key-released",
-                          G_CALLBACK(on_key_released),
-                          server);
+        disconnect_keyboard_signals (server);
+        server->key_pressed_handler =
+            g_signal_connect (server->keyboard, "key-pressed",
+                              G_CALLBACK(on_key_pressed),
+                              server);
+        server->key_released_handler =
+            g_signal_connect (server->keyboard, "key-released",
+                              G_CALLBACK(on_key_released),
+                              server);
         eek_keyboard_set_modifier_behavior (server->keyboard,
                                             EEK_MODIFIER_BEHAVIOR_LATCH);
         
