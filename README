@@ -27,19 +27,20 @@ eekboard currently includes 4 tools to implement your own virtual
 keyboard:
 
 - eekboard-server
-  a D-Bus server draws an interactive on-screen keyboard
+  a D-Bus server which draws interactive on-screen keyboards.
+
+- eekboard-client
+  a test client of eekboard-server.
 
 - eekboard-system-client
-  a client of "eekboard-server".  It listens system events (focus
-  change, keystroke, keyboard change).
+  another client of eekboard-server.  It listens system events (focus
+  change, keystroke, and keyboard change) and generates X key events
+  when some keys are pressed on the on-screen keyboard.
 
 - eekboard-xml
   a tool to dump the current system keyboard layout into an XML file.
-  It also supports loading an XML file.
+  It's also capable of loading an XML file and displaying the layout.
   
-- eekboard-client
-  a tool to test interaction with eekboard-server
-
 ** Test with eekboard-client
 
 Start eekboard-server:
@@ -57,7 +58,7 @@ Dump the current system keyboard layout into an XML file:
 Access to eekboard-server:
 
   $ ./src/eekboard-client --set-keyboard keyboard.xml
-  $ ./src/eekboard-client --show
+  $ ./src/eekboard-client --show   # will pop up a keyboard window
   $ ./src/eekboard-client --listen # press some keys on the keyboard
   KeyPressed XXXXX
   KeyReleased XXXXX
