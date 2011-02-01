@@ -29,7 +29,7 @@ G_BEGIN_DECLS
  *
  * Pseudo keysym used for error reporting.
  */
-#define EEK_INVALID_KEYSYM ((guint)(-1))
+#define EEK_INVALID_KEYSYM (0)
 
 #define EEK_TYPE_KEYSYM (eek_keysym_get_type())
 #define EEK_KEYSYM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_KEYSYM, EekKeysym))

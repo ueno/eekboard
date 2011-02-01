@@ -96,7 +96,7 @@ typedef enum
  *
  * Pseudo keycode used for error reporting.
  */
-#define EEK_INVALID_KEYCODE ((guint)(-1))
+#define EEK_INVALID_KEYCODE (0)
     
 typedef struct _EekElement EekElement;
 typedef struct _EekContainer EekContainer;
