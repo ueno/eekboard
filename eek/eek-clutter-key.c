@@ -40,6 +40,8 @@ struct _EekClutterKeyPrivate
 {
     EekKey *key;
     EekClutterRenderer *renderer;
+    gulong pressed_handler;
+    gulong released_handler;
 };
 
 static void
@@ -99,10 +101,12 @@ eek_clutter_key_real_realize (ClutterActor *self)
     set_position (self);
     clutter_actor_set_reactive (self, TRUE);
 
-    g_signal_connect (priv->key, "pressed",
-                      G_CALLBACK(on_pressed), self);
-    g_signal_connect (priv->key, "released",
-                      G_CALLBACK(on_released), self);
+    priv->pressed_handler =
+        g_signal_connect (priv->key, "pressed",
+                          G_CALLBACK(on_pressed), self);
+    priv->released_handler =
+        g_signal_connect (priv->key, "released",
+                          G_CALLBACK(on_released), self);
 }
 
 static void
@@ -225,6 +229,10 @@ eek_clutter_key_dispose (GObject *object)
     }
 
     if (priv->key) {
+        if (g_signal_handler_is_connected (priv->key, priv->pressed_handler))
+            g_signal_handler_disconnect (priv->key, priv->pressed_handler);
+        if (g_signal_handler_is_connected (priv->key, priv->released_handler))
+            g_signal_handler_disconnect (priv->key, priv->released_handler);
         g_object_unref (priv->key);
         priv->key = NULL;
     }
