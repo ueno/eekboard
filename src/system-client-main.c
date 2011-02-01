@@ -5,19 +5,29 @@
 #include "system-client.h"
 
 gboolean opt_keyboard = FALSE;
+
+#ifdef HAVE_CSPI
 gboolean opt_focus = FALSE;
 gboolean opt_keystroke = FALSE;
+#endif  /* HAVE_CSPI */
+
+#ifdef HAVE_FAKEKEY
 gboolean opt_fakekey = FALSE;
+#endif  /* HAVE_FAKEKEY */
 
 static const GOptionEntry options[] = {
     {"listen-keyboard", 'k', 0, G_OPTION_ARG_NONE, &opt_keyboard,
      "Listen keyboard change events with libxklavier"},
+#ifdef HAVE_CSPI
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      "Listen focus change events with AT-SPI"},
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      "Listen keystroke events with AT-SPI"},
+#endif  /* HAVE_CSPI */
+#ifdef HAVE_FAKEKEY
     {"generate-key-event", 'g', 0, G_OPTION_ARG_NONE, &opt_fakekey,
      "Generate X key events with libfakekey"},
+#endif  /* HAVE_FAKEKEY */
     {NULL}
 };
 
@@ -49,6 +59,8 @@ main (int argc, char **argv)
     client = eekboard_system_client_new (connection);
 
     gconfc = gconf_client_get_default ();
+
+#ifdef HAVE_CSPI
     error = NULL;
     if (opt_focus || opt_keystroke) {
         if (gconf_client_get_bool (gconfc,
@@ -78,17 +90,21 @@ main (int argc, char **argv)
             exit (1);
         }
     }
+#endif  /* HAVE_CSPI */
+
     if (opt_keyboard &&
         !eekboard_system_client_enable_xkl (client)) {
         g_printerr ("Can't register xklavier event listeners\n"); 
         exit (1);
     }
 
+#ifdef HAVE_FAKEKEY
     if (opt_fakekey &&
         !eekboard_system_client_enable_fakekey (client)) {
         g_printerr ("Can't init fakekey\n"); 
         exit (1);
     }
+#endif  /* HAVE_FAKEKEY */
 
     gtk_main ();
 

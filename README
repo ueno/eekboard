@@ -1,17 +1,14 @@
-eekboard - an easy to use virtual keyboard library -*- outline -*-
+eekboard - an easy to use virtual keyboard toolkit -*- outline -*-
 
 eekboard is a virtual keyboard software package, including a set of
-tools to implement desktop virtual keyboard solutions.
+tools to implement desktop virtual keyboards.
 
 * How to build
 
-** Requirements
+** Dependencies
 
-  * GLib2, GTK, GConf2, PangoCairo, libxklavier, libfakekey, CSPI
-  * Clutter (optional)
-  * Clutter-Gtk (optional)
-  * Vala (optional)
-  * gobject-introspection (optional)
+REQUIRED: GLib2, GTK, GConf2, PangoCairo, libxklavier
+OPTIONAL: fakekey, CSPI, Clutter, Clutter-Gtk, Vala, gobject-introspection
 
 ** Build from git repo
 

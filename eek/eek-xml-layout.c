@@ -392,8 +392,10 @@ end_element_callback (GMarkupParseContext *pcontext,
     if (g_strcmp0 (element_name, "keysym") == 0) {
         EekKeysym *keysym;
 
-        if (data->keyval != EEK_INVALID_KEYSYM)
+        if (data->keyval != EEK_INVALID_KEYSYM) {
             keysym = eek_keysym_new (data->keyval);
+            g_debug ("%u %s", data->keyval, eek_symbol_get_label (EEK_SYMBOL(keysym)));
+        }
         else
             keysym = eek_keysym_new_from_name (text);
         data->symbols = g_slist_prepend (data->symbols, keysym);

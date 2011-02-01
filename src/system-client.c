@@ -15,14 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <libxklavier/xklavier.h>
-#include <cspi/spi.h>
-#include <gdk/gdkx.h>
-#include <fakekey/fakekey.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <libxklavier/xklavier.h>
+
+#ifdef HAVE_CSPI
+#include <cspi/spi.h>
+#endif  /* HAVE_CSPI */
+
+#include <gdk/gdkx.h>
+
+#ifdef HAVE_FAKEKEY
+#include <fakekey/fakekey.h>
+#endif  /* HAVE_FAKEKEY */
 
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
@@ -49,7 +56,6 @@ struct _EekboardSystemClient {
     GdkDisplay *display;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
-    FakeKey *fakekey;
 
     gulong xkl_config_changed_handler;
     gulong xkl_state_changed_handler;
@@ -57,8 +63,14 @@ struct _EekboardSystemClient {
     gulong key_pressed_handler;
     gulong key_released_handler;
 
+#ifdef HAVE_CSPI
     AccessibleEventListener *focus_listener;
     AccessibleEventListener *keystroke_listener;
+#endif  /* HAVE_CSPI */
+
+#ifdef HAVE_FAKEKEY
+    FakeKey *fakekey;
+#endif  /* HAVE_FAKEKEY */
 };
 
 struct _EekboardSystemClientClass {
@@ -81,12 +93,14 @@ static void            on_xkl_state_changed
                                           gboolean                   restore,
                                           gpointer                   user_data);
 
+#ifdef HAVE_CSPI
 static SPIBoolean      focus_listener_cb (const AccessibleEvent     *event,
                                           void                      *user_data);
 
 static SPIBoolean      keystroke_listener_cb
                                          (const AccessibleKeystroke *stroke,
                                           void                      *user_data);
+#endif  /* HAVE_CSPI */
 static void            set_keyboard      (EekboardSystemClient     *client);
 
 static void
@@ -122,18 +136,26 @@ eekboard_system_client_dispose (GObject *object)
     EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
 
     eekboard_system_client_disable_xkl (client);
+
+#ifdef HAVE_CSPI
     eekboard_system_client_disable_cspi_focus (client);
     eekboard_system_client_disable_cspi_keystroke (client);
+#endif  /* HAVE_CSPI */
+
+#ifdef HAVE_FAKEKEY
     eekboard_system_client_disable_fakekey (client);
+#endif  /* HAVE_FAKEKEY */
 
     if (client->proxy) {
         g_object_unref (client->proxy);
         client->proxy = NULL;
     }
-    
+
+#ifdef HAVE_FAKEKEY
     if (client->fakekey) {
         client->fakekey = NULL;
     }
+#endif  /* HAVE_FAKEKEY */
 
     if (client->display) {
         gdk_display_close (client->display);
@@ -169,14 +191,18 @@ eekboard_system_client_init (EekboardSystemClient *client)
     client->display = NULL;
     client->xkl_engine = NULL;
     client->xkl_config_registry = NULL;
-    client->focus_listener = NULL;
-    client->keystroke_listener = NULL;
     client->proxy = NULL;
-    client->fakekey = NULL;
     client->key_pressed_handler = 0;
     client->key_released_handler = 0;
     client->xkl_config_changed_handler = 0;
     client->xkl_state_changed_handler = 0;
+#ifdef HAVE_CSPI
+    client->focus_listener = NULL;
+    client->keystroke_listener = NULL;
+#endif  /* HAVE_CSPI */
+#ifdef HAVE_FAKEKEY
+    client->fakekey = NULL;
+#endif  /* HAVE_FAKEKEY */
 }
 
 gboolean
@@ -235,6 +261,7 @@ eekboard_system_client_disable_xkl (EekboardSystemClient *client)
                                      client->xkl_state_changed_handler);
 }
 
+#ifdef HAVE_CSPI
 gboolean
 eekboard_system_client_enable_cspi_focus (EekboardSystemClient *client)
 {
@@ -292,14 +319,6 @@ eekboard_system_client_disable_cspi_keystroke (EekboardSystemClient *client)
     }
 }
 
-EekboardSystemClient *
-eekboard_system_client_new (GDBusConnection *connection)
-{
-    return g_object_new (EEKBOARD_TYPE_SYSTEM_CLIENT,
-                         "connection", connection,
-                         NULL);
-}
-
 static SPIBoolean
 focus_listener_cb (const AccessibleEvent *event,
                    void                  *user_data)
@@ -350,6 +369,15 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
         eekboard_proxy_release_key (client->proxy, stroke->keycode);
     return TRUE;
 }
+#endif  /* HAVE_CSPI */
+
+EekboardSystemClient *
+eekboard_system_client_new (GDBusConnection *connection)
+{
+    return g_object_new (EEKBOARD_TYPE_SYSTEM_CLIENT,
+                         "connection", connection,
+                         NULL);
+}
 
 static GdkFilterReturn
 filter_xkl_event (GdkXEvent *xev,
@@ -371,8 +399,10 @@ on_xkl_config_changed (XklEngine *xklengine,
 
     set_keyboard (client);
 
+#ifdef HAVE_FAKEKEY
     if (client->fakekey)
         fakekey_reload_keysyms (client->fakekey);
+#endif  /* HAVE_FAKEKEY */
 }
 
 static void
@@ -413,6 +443,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
     }
 }
 
+#ifdef HAVE_FAKEKEY
 G_INLINE_FUNC FakeKeyModifier
 get_fakekey_modifiers (EekModifierType modifiers)
 {
@@ -519,3 +550,4 @@ eekboard_system_client_disable_fakekey (EekboardSystemClient *client)
         g_signal_handler_disconnect (client->proxy,
                                      client->key_released_handler);
 }
+#endif  /* HAVE_FAKEKEY */

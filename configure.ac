@@ -85,7 +85,7 @@ AM_CONDITIONAL([HAVE_GTK_2],[test "$with_gtk" = "2.0"])
 AM_CONDITIONAL([HAVE_GTK_3],[test "$with_gtk" = "3.0"])
 
 AM_PATH_GLIB_2_0
-PKG_CHECK_MODULES([GLIB2], [glib-2.0], ,
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.25.4], ,
   [AC_MSG_ERROR([GLib2 not found])])
 PKG_CHECK_MODULES([GIO2], [gio-2.0], ,
   [AC_MSG_ERROR([Gio2 not found])])
@@ -101,10 +101,36 @@ PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
-PKG_CHECK_MODULES([LIBFAKEKEY], [libfakekey], ,
-  [AC_MSG_ERROR([libfakekey not found])])
-PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
-  [AC_MSG_ERROR([AT-SPI C not found])])
+
+dnl use libfakekey to generate key events
+AC_MSG_CHECKING([whether you enable fakekey])
+AC_ARG_ENABLE(fakekey,
+              AS_HELP_STRING([--enable-fakekey=no/yes],
+                             [Enable fakekey default=yes]),,
+              enable_fakekey=yes)
+
+if test x$enable_fakekey = xyes; then
+  PKG_CHECK_MODULES([FAKEKEY], [libfakekey], ,
+    [AC_MSG_ERROR([fakekey not found])])
+  AC_DEFINE([HAVE_FAKEKEY], [1], [Define if fakekey is found])
+fi
+AM_CONDITIONAL(ENABLE_FAKEKEY, [test x$enable_fakekey = xyes])
+AC_MSG_RESULT($enable_fakekey)
+
+dnl use AT-SPI to capture focus/keystroke events
+AC_MSG_CHECKING([whether you enable AT-SPI event handling])
+AC_ARG_ENABLE(cspi,
+              AS_HELP_STRING([--enable-cspi=no/yes],
+                             [Enable AT-SPI event handling default=yes]),,
+              enable_cspi=yes)
+
+if test x$enable_cspi = xyes; then
+  PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
+    [AC_MSG_ERROR([AT-SPI C not found])])
+  AC_DEFINE([HAVE_CSPI], [1], [Define if CSPI is found])
+fi
+AC_MSG_RESULT($enable_cspi)
+AM_CONDITIONAL(ENABLE_CSPI, [test x$enable_cspi = xyes])
 
 dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
@@ -146,7 +172,7 @@ if test x$enable_clutter = xyes; then
   AC_DEFINE_UNQUOTED([NEED_SWAP_EVENT_WORKAROUND], $need_swap_event_workaround,
     [Define if GLX_INTEL_swap_event work around is needed])
 fi
-AM_CONDITIONAL(HAVE_CLUTTER, [test x$enable_clutter = xyes])
+AM_CONDITIONAL(ENABLE_CLUTTER, [test x$enable_clutter = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
@@ -162,7 +188,7 @@ AM_GLIB_DEFINE_LOCALEDIR(EEKBOARD_LOCALEDIR)
 
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
-AC_CONFIG_HEADERS([eek/config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
 src/Makefile

@@ -22,7 +22,7 @@ lib_LTLIBRARIES =				\
 	libeek-xkb.la				\
 	libeek-xkl.la
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 lib_LTLIBRARIES += libeek-clutter.la
 endif
 
@@ -86,7 +86,7 @@ libeek_la_SOURCES =				\
 libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS)
 libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) -lm
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 libeek_clutter_public_headers =			\
 	$(srcdir)/eek-clutter-keyboard.h	\
 	$(srcdir)/eek-clutter.h
@@ -178,7 +178,7 @@ pkgconfig_DATA =				\
 	eek-xkb-$(EEK_API_VERSION).pc		\
 	eek-xkl-$(EEK_API_VERSION).pc
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 pkgconfig_DATA += eek-clutter-$(EEK_API_VERSION).pc
 endif
 
@@ -215,7 +215,7 @@ EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_gtk_la_CFLAGS)
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek-gtk.la
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_gtk_sources) $(libeek_gtk_public_headers)
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 EekClutter@EEK_LIBRARY_SUFFIX@.gir: libeek-clutter.la Eek@EEK_LIBRARY_SUFFIX@.gir
 EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Clutter-1.0 Eek@EEK_LIBRARY_SUFFIX@
 EekClutter@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_clutter_la_CFLAGS)
@@ -241,7 +241,7 @@ INTROSPECTION_GIRS +=				\
 	EekXkb@EEK_LIBRARY_SUFFIX@.gir		\
 	EekXkl@EEK_LIBRARY_SUFFIX@.gir
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 INTROSPECTION_GIRS +=				\
 	EekClutter@EEK_LIBRARY_SUFFIX@.gir
 endif

@@ -38,9 +38,7 @@ eekboard_system_client_CFLAGS = \
 	$(GTK_CFLAGS) \
 	$(GCONF2_CFLAGS) \
 	$(XKB_CFLAGS) \
-	$(LIBXKLAVIER_CFLAGS) \
-	$(LIBFAKEKEY_CFLAGS) \
-	$(CSPI_CFLAGS)
+	$(LIBXKLAVIER_CFLAGS)
 
 eekboard_system_client_LDADD = \
 	libeekboard.a \
@@ -50,9 +48,21 @@ eekboard_system_client_LDADD = \
 	$(GTK_LIBS) \
 	$(GCONF2_LIBS) \
 	$(XKB_LIBS) \
-	$(LIBXKLAVIER_LIBS) \
-	$(LIBFAKEKEY_LIBS) \
+	$(LIBXKLAVIER_LIBS)
+
+if ENABLE_FAKEKEY
+eekboard_system_client_CFLAGS += \
+	$(FAKEKEY_CFLAGS)
+eekboard_system_client_LDADD += \
+	$(FAKEKEY_LIBS)
+endif
+
+if ENABLE_CSPI
+eekboard_system_client_CFLAGS += \
+	$(CSPI_CFLAGS)
+eekboard_system_client_LDADD += \
 	$(CSPI_LIBS)
+endif
 
 eekboard_system_client_headers = system-client.h
 eekboard_system_client_SOURCES = system-client.c system-client-main.c
@@ -72,7 +82,7 @@ eekboard_server_LDADD = \
 eekboard_server_headers = server.h
 eekboard_server_SOURCES = server.c server-main.c
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 eekboard_server_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
 eekboard_server_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif

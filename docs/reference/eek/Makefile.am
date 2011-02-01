@@ -104,7 +104,7 @@ GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
 	$(GIO2_LIBS) \
 	$(XKB_LIBS)
 
-if HAVE_CLUTTER
+if ENABLE_CLUTTER
 GTKDOC_LIBS += $(top_srcdir)/eek/libeek-clutter.la $(CLUTTER_LIBS)
 endif
 
