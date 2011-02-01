@@ -100,17 +100,17 @@ eek_keyboard_real_get_symbol_index (EekKeyboard *self,
 }
 
 static void
-key_pressed_event (EekSection  *section,
-                   EekKey      *key,
-                   EekKeyboard *keyboard)
+on_key_pressed (EekSection  *section,
+                EekKey      *key,
+                EekKeyboard *keyboard)
 {
     g_signal_emit_by_name (keyboard, "key-pressed", key);
 }
 
 static void
-key_released_event (EekSection  *section,
-                    EekKey      *key,
-                    EekKeyboard *keyboard)
+on_key_released (EekSection  *section,
+                 EekKey      *key,
+                 EekKeyboard *keyboard)
 {
     g_signal_emit_by_name (keyboard, "key-released", key);
 }
@@ -124,9 +124,9 @@ eek_keyboard_real_create_section (EekKeyboard *self)
     g_return_val_if_fail (section, NULL);
 
     g_signal_connect (section, "key-pressed",
-                      G_CALLBACK(key_pressed_event), self);
+                      G_CALLBACK(on_key_pressed), self);
     g_signal_connect (section, "key-released",
-                      G_CALLBACK(key_released_event), self);
+                      G_CALLBACK(on_key_released), self);
 
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(section));
@@ -283,7 +283,7 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
 
 static void
 eek_keyboard_real_key_released (EekKeyboard *self,
-                               EekKey      *key)
+                                EekKey      *key)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     EekSymbol *symbol;

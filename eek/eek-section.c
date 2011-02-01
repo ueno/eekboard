@@ -128,13 +128,15 @@ eek_section_real_get_row (EekSection     *self,
 }
 
 static void
-pressed_event (EekKey *key, EekSection *section)
+on_pressed (EekKey     *key,
+            EekSection *section)
 {
     g_signal_emit_by_name (section, "key-pressed", key);
 }
 
 static void
-released_event (EekKey *key, EekSection *section)
+on_released (EekKey     *key,
+             EekSection *section)
 {
     g_signal_emit_by_name (section, "key-released", key);
 }
@@ -159,8 +161,8 @@ eek_section_real_create_key (EekSection  *self,
                         NULL);
     g_return_val_if_fail (key, NULL);
 
-    g_signal_connect (key, "pressed", G_CALLBACK(pressed_event), self);
-    g_signal_connect (key, "released", G_CALLBACK(released_event), self);
+    g_signal_connect (key, "pressed", G_CALLBACK(on_pressed), self);
+    g_signal_connect (key, "released", G_CALLBACK(on_released), self);
 
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(key));
