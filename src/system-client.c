@@ -46,7 +46,6 @@ struct _EekboardSystemClient {
     EekboardProxy *proxy;
 
     EekKeyboard *keyboard;
-    Accessible *accessible;
     GdkDisplay *display;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
@@ -167,7 +166,6 @@ static void
 eekboard_system_client_init (EekboardSystemClient *client)
 {
     client->keyboard = NULL;
-    client->accessible = NULL;
     client->display = NULL;
     client->xkl_engine = NULL;
     client->xkl_config_registry = NULL;
@@ -318,29 +316,14 @@ focus_listener_cb (const AccessibleEvent *event,
         case SPI_ROLE_PARAGRAPH:
         case SPI_ROLE_PASSWORD_TEXT:
         case SPI_ROLE_TERMINAL:
-            if (g_strcmp0 (event->type, "focus") == 0 ||
-                event->detail1 == 1) {
-                client->accessible = accessible;
-                eekboard_proxy_show (client->proxy);
-            } else if (event->detail1 == 0 &&
-                       accessible == client->accessible) {
-                client->accessible = NULL;
-                eekboard_proxy_hide (client->proxy);
-            }
         case SPI_ROLE_ENTRY:
-            if (g_strcmp0 (event->type, "focus") == 0 ||
-                event->detail1 == 1) {
-                client->accessible = accessible;
+            if (g_strcmp0 (event->type, "focus") == 0 || event->detail1 == 1)
                 eekboard_proxy_show (client->proxy);
-            } else if (event->detail1 == 0 &&
-                       accessible == client->accessible) {
-                client->accessible = NULL;
-                eekboard_proxy_hide (client->proxy);
-            }
         default:
             ;
         }
-    }
+    } else
+        eekboard_proxy_hide (client->proxy);
 
     return FALSE;
 }
