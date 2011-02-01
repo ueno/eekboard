@@ -22,6 +22,7 @@
 #include "proxy.h"
 
 static gchar *opt_set_keyboard = NULL;
+static gint opt_set_group = -1;
 static gboolean opt_show = FALSE;
 static gboolean opt_hide = FALSE;
 static gboolean opt_listen = FALSE;
@@ -29,6 +30,8 @@ static gboolean opt_listen = FALSE;
 static const GOptionEntry options[] = {
     {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_keyboard,
      "Set keyboard from an XML file"},
+    {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
+     "Set group of the keyboard"},
     {"show", '\0', 0, G_OPTION_ARG_NONE, &opt_show,
      "Show keyboard"},
     {"hide", '\0', 0, G_OPTION_ARG_NONE, &opt_hide,
@@ -110,6 +113,10 @@ main (int argc, char **argv)
         g_object_unref (layout);
         eekboard_proxy_set_keyboard (proxy, keyboard);
         g_object_unref (keyboard);
+    }
+
+    if (opt_set_group >= 0) {
+        eekboard_proxy_set_group (proxy, opt_set_group);
     }
 
     if (opt_show) {

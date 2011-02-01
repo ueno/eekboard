@@ -57,6 +57,9 @@ struct _EekGtkKeyboardPrivate
     EekRenderer *renderer;
     EekKeyboard *keyboard;
     EekKey *dragged_key;
+    gulong key_pressed_handler;
+    gulong key_released_handler;
+    gulong symbol_index_changed_handler;
 };
 
 static EekColor * color_from_gdk_color    (GdkColor    *gdk_color);
@@ -206,12 +209,15 @@ eek_gtk_keyboard_set_keyboard (EekGtkKeyboard *self,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     priv->keyboard = g_object_ref (keyboard);
 
-    g_signal_connect (priv->keyboard, "key-pressed",
-                      G_CALLBACK(on_key_pressed), self);
-    g_signal_connect (priv->keyboard, "key-released",
-                      G_CALLBACK(on_key_released), self);
-    g_signal_connect (priv->keyboard, "symbol-index-changed",
-                      G_CALLBACK(on_symbol_index_changed), self);
+    priv->key_pressed_handler =
+        g_signal_connect (priv->keyboard, "key-pressed",
+                          G_CALLBACK(on_key_pressed), self);
+    priv->key_released_handler =
+        g_signal_connect (priv->keyboard, "key-released",
+                          G_CALLBACK(on_key_released), self);
+    priv->symbol_index_changed_handler =
+        g_signal_connect (priv->keyboard, "symbol-index-changed",
+                          G_CALLBACK(on_symbol_index_changed), self);
 }
 
 static void
@@ -246,6 +252,19 @@ eek_gtk_keyboard_dispose (GObject *object)
     }
 
     if (priv->keyboard) {
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->key_pressed_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->key_pressed_handler);
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->key_released_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->key_released_handler);
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->symbol_index_changed_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->symbol_index_changed_handler);
+            
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }

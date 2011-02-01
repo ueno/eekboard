@@ -41,6 +41,7 @@ Access to the D-Bus server:
   $ ./src/eekboard-client --listen # press some keys on the keyboard
   KeyPressed XXXXX
   KeyReleased XXXXX
+  $ ./src/eekboard-client --set-group 1
 
 Listen and follow the system events:
 

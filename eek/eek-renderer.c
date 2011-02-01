@@ -53,6 +53,7 @@ struct _EekRendererPrivate
     PangoFontDescription *font;
     GHashTable *outline_surface_cache;
     cairo_surface_t *keyboard_surface;
+    gulong symbol_index_changed_handler;
 };
 
 struct {
@@ -536,9 +537,10 @@ eek_renderer_set_property (GObject      *object,
         priv->keyboard = g_value_get_object (value);
         g_object_ref (priv->keyboard);
 
-        g_signal_connect (priv->keyboard, "symbol-index-changed",
-                          G_CALLBACK(on_symbol_index_changed),
-                          object);
+        priv->symbol_index_changed_handler =
+            g_signal_connect (priv->keyboard, "symbol-index-changed",
+                              G_CALLBACK(on_symbol_index_changed),
+                              object);
         break;
     case PROP_PCONTEXT:
         priv->pcontext = g_value_get_object (value);
@@ -553,6 +555,10 @@ eek_renderer_dispose (GObject *object)
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
 
     if (priv->keyboard) {
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->symbol_index_changed_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->symbol_index_changed_handler);
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }
@@ -571,7 +577,6 @@ static void
 eek_renderer_finalize (GObject *object)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
-
     g_hash_table_destroy (priv->outline_surface_cache);
     G_OBJECT_CLASS (eek_renderer_parent_class)->finalize (object);
 }
@@ -638,6 +643,7 @@ eek_renderer_init (EekRenderer *self)
                                NULL,
                                free_surface);
     priv->keyboard_surface = NULL;
+    priv->symbol_index_changed_handler = 0;
 }
 
 static void

@@ -51,11 +51,11 @@ struct _EekboardSystemClient {
     XklConfigRegistry *xkl_config_registry;
     FakeKey *fakekey;
 
-    gulong xkl_config_changed_handler_id;
-    gulong xkl_state_changed_handler_id;
+    gulong xkl_config_changed_handler;
+    gulong xkl_state_changed_handler;
 
-    gulong key_pressed_handler_id;
-    gulong key_released_handler_id;
+    gulong key_pressed_handler;
+    gulong key_released_handler;
 
     AccessibleEventListener *focus_listener;
     AccessibleEventListener *keystroke_listener;
@@ -167,10 +167,10 @@ eekboard_system_client_init (EekboardSystemClient *client)
     client->keystroke_listener = NULL;
     client->proxy = NULL;
     client->fakekey = NULL;
-    client->key_pressed_handler_id = 0;
-    client->key_released_handler_id = 0;
-    client->xkl_config_changed_handler_id = 0;
-    client->xkl_state_changed_handler_id = 0;
+    client->key_pressed_handler = 0;
+    client->key_released_handler = 0;
+    client->xkl_config_changed_handler = 0;
+    client->xkl_state_changed_handler = 0;
 }
 
 gboolean
@@ -189,10 +189,10 @@ eekboard_system_client_enable_xkl (EekboardSystemClient *client)
         xkl_config_registry_load (client->xkl_config_registry, FALSE);
     }
 
-    client->xkl_config_changed_handler_id =
+    client->xkl_config_changed_handler =
         g_signal_connect (client->xkl_engine, "X-config-changed",
                           G_CALLBACK(on_xkl_config_changed), client);
-    client->xkl_state_changed_handler_id =
+    client->xkl_state_changed_handler =
         g_signal_connect (client->xkl_engine, "X-state-changed",
                           G_CALLBACK(on_xkl_state_changed), client);
 
@@ -216,13 +216,13 @@ eekboard_system_client_disable_xkl (EekboardSystemClient *client)
     if (client->xkl_engine)
         xkl_engine_stop_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
     if (g_signal_handler_is_connected (client->xkl_engine,
-                                       client->xkl_config_changed_handler_id))
+                                       client->xkl_config_changed_handler))
         g_signal_handler_disconnect (client->xkl_engine,
-                                     client->xkl_config_changed_handler_id);
+                                     client->xkl_config_changed_handler);
     if (g_signal_handler_is_connected (client->xkl_engine,
-                                       client->xkl_state_changed_handler_id))
+                                       client->xkl_state_changed_handler))
         g_signal_handler_disconnect (client->xkl_engine,
-                                     client->xkl_state_changed_handler_id);
+                                     client->xkl_state_changed_handler);
 }
 
 gboolean
@@ -450,10 +450,10 @@ eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
     }
     g_assert (client->fakekey);
 
-    client->key_pressed_handler_id =
+    client->key_pressed_handler =
         g_signal_connect (client->proxy, "key-pressed",
                           G_CALLBACK(on_key_pressed), client);
-    client->key_released_handler_id =
+    client->key_released_handler =
         g_signal_connect (client->proxy, "key-pressed",
                           G_CALLBACK(on_key_released), client);
 
@@ -467,11 +467,11 @@ eekboard_system_client_disable_fakekey (EekboardSystemClient *client)
         fakekey_release (client->fakekey);
 
     if (g_signal_handler_is_connected (client->proxy,
-                                       client->key_pressed_handler_id))
+                                       client->key_pressed_handler))
         g_signal_handler_disconnect (client->proxy,
-                                     client->key_pressed_handler_id);
+                                     client->key_pressed_handler);
     if (g_signal_handler_is_connected (client->proxy,
-                                       client->key_released_handler_id))
+                                       client->key_released_handler))
         g_signal_handler_disconnect (client->proxy,
-                                     client->key_released_handler_id);
+                                     client->key_released_handler);
 }

@@ -101,6 +101,16 @@ on_allocation_changed (ClutterActor          *stage,
 #endif
 
 static void
+on_destroy (GtkWidget *widget, gpointer user_data)
+{
+    EekboardServer *server = user_data;
+
+    g_assert (widget == server->window);
+    server->window = NULL;
+    server->widget = NULL;
+}
+
+static void
 update_widget (EekboardServer *server)
 {
     GdkScreen *screen;
@@ -141,6 +151,8 @@ update_widget (EekboardServer *server)
     gtk_widget_set_size_request (server->widget, bounds.width, bounds.height);
 
     server->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    g_signal_connect (server->window, "destroy",
+                      G_CALLBACK(on_destroy), server);
     gtk_container_add (GTK_CONTAINER(server->window), server->widget);
 
     gtk_widget_set_can_focus (server->window, FALSE);
@@ -308,7 +320,13 @@ handle_method_call (GDBusConnection       *connection,
         eek_keyboard_set_modifier_behavior (server->keyboard,
                                             EEK_MODIFIER_BEHAVIOR_LATCH);
         
-        update_widget (server);
+        if (server->window) {
+            gboolean was_visible = gtk_widget_get_visible (server->window);
+            update_widget (server);
+            if (was_visible)
+                gtk_widget_show_all (server->window);
+        }
+
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }
@@ -326,6 +344,14 @@ handle_method_call (GDBusConnection       *connection,
 
         g_variant_get (parameters, "(i)", &group);
         eek_keyboard_set_group (server->keyboard, group);
+
+        if (server->window) {
+            gboolean was_visible = gtk_widget_get_visible (server->window);
+            update_widget (server);
+            if (was_visible)
+                gtk_widget_show_all (server->window);
+        }
+
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }
@@ -339,11 +365,12 @@ handle_method_call (GDBusConnection       *connection,
             return;
         }
 
-        if (server->window)
-            gtk_widget_show_all (server->window);
+        if (!server->window)
+            update_widget (server);
+        g_assert (server->window);
+        gtk_widget_show_all (server->window);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
-
     }
 
     if (g_strcmp0 (method_name, "Hide") == 0) {
