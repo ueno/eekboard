@@ -26,7 +26,7 @@ Dump the current system layout to an XML file:
 
   $ ./tests/eek-example-xml -d > keyboard.xml
 
-Load and display a keyboard created from an XML file:
+Load the XML file and show a keyboard created from it on the display:
 
   $ ./tests/eek-example-xml -l keyboard.xml
 
