@@ -47,6 +47,7 @@ struct _EekboardSystemClient {
 
     EekKeyboard *keyboard;
     Accessible *accessible;
+    GdkDisplay *display;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
     FakeKey *fakekey;
@@ -135,6 +136,11 @@ eekboard_system_client_dispose (GObject *object)
         client->fakekey = NULL;
     }
 
+    if (client->display) {
+        gdk_display_close (client->display);
+        client->display = NULL;
+    }
+
     G_OBJECT_CLASS (eekboard_system_client_parent_class)->dispose (object);
 }
 
@@ -162,6 +168,7 @@ eekboard_system_client_init (EekboardSystemClient *client)
 {
     client->keyboard = NULL;
     client->accessible = NULL;
+    client->display = NULL;
     client->xkl_engine = NULL;
     client->xkl_config_registry = NULL;
     client->focus_listener = NULL;
@@ -177,12 +184,16 @@ eekboard_system_client_init (EekboardSystemClient *client)
 gboolean
 eekboard_system_client_enable_xkl (EekboardSystemClient *client)
 {
-    if (!client->xkl_engine) {
-        Display *display;
-
-        display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-        client->xkl_engine = xkl_engine_get_instance (display);
+    if (!client->display) {
+        client->display = gdk_display_get_default ();
     }
+    g_assert (client->display);
+
+    if (!client->xkl_engine) {
+        client->xkl_engine =
+            xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY (client->display));
+    }
+    g_assert (client->xkl_engine);
 
     if (!client->xkl_config_registry) {
         client->xkl_config_registry =
@@ -366,6 +377,9 @@ on_xkl_config_changed (XklEngine *xklengine,
     EekboardSystemClient *client = user_data;
 
     set_keyboard (client);
+
+    if (client->fakekey)
+        fakekey_reload_keysyms (client->fakekey);
 }
 
 static void
@@ -379,6 +393,8 @@ set_keyboard (EekboardSystemClient *client)
         g_object_unref (client->keyboard);
     layout = eek_xkl_layout_new ();
     client->keyboard = eek_keyboard_new (layout, CSW, CSH);
+    eek_keyboard_set_modifier_behavior (client->keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
 
     keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
     eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
@@ -404,6 +420,23 @@ on_xkl_state_changed (XklEngine           *xklengine,
     }
 }
 
+G_INLINE_FUNC FakeKeyModifier
+get_fakekey_modifiers (EekModifierType modifiers)
+{
+    FakeKeyModifier retval = 0;
+
+    if (modifiers & EEK_SHIFT_MASK)
+        retval |= FAKEKEYMOD_SHIFT;
+    if (modifiers & EEK_CONTROL_MASK)
+        retval |= FAKEKEYMOD_CONTROL;
+    if (modifiers & EEK_MOD1_MASK)
+        retval |= FAKEKEYMOD_ALT;
+    if (modifiers & EEK_META_MASK)
+        retval |= FAKEKEYMOD_META;
+
+    return retval;
+}
+
 static void
 on_key_pressed (EekboardProxy *proxy,
                 guint          keycode,
@@ -412,14 +445,29 @@ on_key_pressed (EekboardProxy *proxy,
     EekboardSystemClient *client = user_data;
     EekKey *key;
     EekSymbol *symbol;
+    EekModifierType modifiers;
 
     g_assert (client->fakekey);
+
+    modifiers = eek_keyboard_get_modifiers (client->keyboard);
     key = eek_keyboard_find_key_by_keycode (client->keyboard, keycode);
+    if (!key) {
+        // g_debug ("Can't find key for keycode %u", keycode);
+        return;
+    }
+
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol))
-        fakekey_press_keysym (client->fakekey,
-                              eek_keysym_get_xkeysym (EEK_KEYSYM(symbol)),
-                              eek_keyboard_get_modifiers (client->keyboard));
+    if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
+        fakekey_send_keyevent (client->fakekey,
+                               keycode,
+                               True,
+                               get_fakekey_modifiers (modifiers));
+        fakekey_send_keyevent (client->fakekey,
+                               keycode,
+                               False,
+                               get_fakekey_modifiers (modifiers));
+    }
+    g_signal_emit_by_name (key, "pressed");
 }
 
 static void
@@ -428,19 +476,28 @@ on_key_released (EekboardProxy *proxy,
                  gpointer       user_data)
 {
     EekboardSystemClient *client = user_data;
+    EekKey *key;
 
     g_assert (client->fakekey);
     fakekey_release (client->fakekey);
+    key = eek_keyboard_find_key_by_keycode (client->keyboard, keycode);
+    if (!key) {
+        // g_debug ("Can't find key for keycode %u", keycode);
+        return;
+    }
+    g_signal_emit_by_name (key, "released");
 }
 
 gboolean
 eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
 {
-    if (!client->fakekey) {
-        Display *display;
+    if (!client->display) {
+        client->display = gdk_display_get_default ();
+    }
+    g_assert (client->display);
 
-        display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-        client->fakekey = fakekey_init (display);
+    if (!client->fakekey) {
+        client->fakekey = fakekey_init (GDK_DISPLAY_XDISPLAY (client->display));
     }
     g_assert (client->fakekey);
 
