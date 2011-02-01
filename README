@@ -24,11 +24,11 @@ Build from git repo:
 
 Dump the current system keyboard layout into an XML file:
 
-  $ ./tests/eek-example-xml -d > keyboard.xml
+  $ ./src/eekboard-xml --dump > keyboard.xml
 
 Load the XML file and display a keyboard created from it:
 
-  $ ./tests/eek-example-xml -l keyboard.xml
+  $ ./src/eekboard-xml --load keyboard.xml
 
 Start D-Bus server:
 

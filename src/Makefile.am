@@ -17,7 +17,11 @@
 # 02110-1301 USA
 
 if ENABLE_EEKBOARD
-bin_PROGRAMS = eekboard-system-client eekboard-client eekboard-server
+bin_PROGRAMS = \
+	eekboard-system-client \
+	eekboard-client \
+	eekboard-server \
+	eekboard-xml
 noinst_LIBRARIES = libeekboard.a
 
 libeekboard_a_headers = proxy.h
@@ -84,9 +88,26 @@ eekboard_client_LDADD = \
 
 eekboard_client_SOURCES = client-main.c
 
+eekboard_xml_CFLAGS = \
+	-I$(top_srcdir) \
+	$(GIO2_CFLAGS) \
+	$(GTK_CFLAGS) \
+	$(LIBXKLAVIER_CFLAGS)
+
+eekboard_xml_LDADD = \
+	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eek/libeek-xkl.la \
+	$(top_builddir)/eek/libeek-gtk.la \
+	$(GIO2_LIBS) \
+	$(GTK_LIBS) \
+	$(LIBXKLAVIER_CFLAGS)
+
+eekboard_xml_SOURCES = xml-main.c
+
 noinst_HEADERS = \
 	$(libeekboard_a_headers) \
 	$(eekboard_system_client_headers) \
 	$(eekboard_client_headers) \
-	$(eekboard_server_headers)
+	$(eekboard_server_headers) \
+	$(eekboard_xml_headers)
 endif
