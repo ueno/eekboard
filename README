@@ -22,11 +22,11 @@ Build from git repo:
   $ ./configure
   $ make
 
-Dump the current system layout to an XML file:
+Dump the current system keyboard layout into an XML file:
 
   $ ./tests/eek-example-xml -d > keyboard.xml
 
-Load the XML file and show a keyboard created from it on the display:
+Load the XML file and display a keyboard created from it:
 
   $ ./tests/eek-example-xml -l keyboard.xml
 
