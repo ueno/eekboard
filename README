@@ -22,16 +22,32 @@ Build from git repo:
   $ ./configure
   $ make
 
-How to test (dump/load the current layout):
+Dump the current system layout to an XML file:
 
   $ ./tests/eek-example-xml -d > keyboard.xml
+
+Load and display a keyboard created from an XML file:
+
   $ ./tests/eek-example-xml -l keyboard.xml
 
-NOTE: eekboard is now being heavily rewritten and it may behave
-wrongly.  Make sure to close windows where you are doing any important
-work, before running eekboard.
+Start D-Bus server:
 
   $ ./src/eekboard-server &
+
+Access to the D-Bus server:
+
+  $ ./src/eekboard-client --set-keyboard keyboard.xml
+  $ ./src/eekboard-client --show
+  $ ./src/eekboard-client --listen # press some keys on the keyboard
+  KeyPressed XXXXX
+  KeyReleased XXXXX
+
+Listen and follow the system events:
+
+NOTE: eekboard-system-client is now being heavily developed and it may
+behave wrongly.  Make sure to close windows where you are doing any
+important work, before running eekboard.
+
   $ ./src/eekboard-system-client --xklavier --accessibility --fakekey
 
 Where --xklavier is to monitor system keyboard layout change,
@@ -41,4 +57,4 @@ key-press/key-release events.
 
 * Documentation
 
-<file:docs/reference/eek/html/index.html>
+See file:docs/reference/eek/html/index.html

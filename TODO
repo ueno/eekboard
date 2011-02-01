@@ -1,14 +1,1 @@
-- packaging
--- debian
--- add more tests
-
-- eekboard
--- rewrite in Vala
-
-- libeek
--- CSS based themes
--- Caribou layout engine (XML)
--- matchbox-keyboard layout engine (XML)
--- delay initialization of XKB and XKL layouts
--- add mechanism to change appearances (colors?) of UI widgets
-   depending on modifier states
+See https://github.com/ueno/eekboard/wiki/TODO
