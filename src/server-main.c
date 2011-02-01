@@ -23,6 +23,10 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
+#if HAVE_CLUTTER_GTK
+#include <clutter-gtk/clutter-gtk.h>
+#endif
+
 #include "server.h"
 #include "eek/eek.h"
 
@@ -34,10 +38,17 @@ main (int argc, char **argv)
     GError *error;
     GMainLoop *loop;
 
-    if (!gtk_init_check (&argc, &argv)) {
-        g_warning ("Can't init GTK");
+#if HAVE_CLUTTER_GTK
+    if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        g_printerr ("Can't init GTK with Clutter\n");
         exit (1);
     }
+#else
+    if (!gtk_init_check (&argc, &argv)) {
+        g_printerr ("Can't init GTK\n");
+        exit (1);
+    }
+#endif
 
     error = NULL;
     connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);

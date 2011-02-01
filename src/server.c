@@ -22,7 +22,14 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek/eek.h"
+
+#if HAVE_CLUTTER_GTK
+#include <clutter-gtk/clutter-gtk.h>
+#include "eek/eek-clutter.h"
+#else  /* HAVE_CLUTTER_GTK */
 #include "eek/eek-gtk.h"
+#endif  /* !HAVE_CLUTTER_GTK */
+
 #include "server.h"
 
 #define CSW 640
@@ -79,6 +86,20 @@ struct _EekboardServerClass {
 
 G_DEFINE_TYPE (EekboardServer, eekboard_server, G_TYPE_OBJECT);
 
+#if HAVE_CLUTTER_GTK
+static void
+on_allocation_changed (ClutterActor          *stage,
+                       ClutterActorBox       *box,
+                       ClutterAllocationFlags flags,
+                       gpointer               user_data)
+{
+    ClutterActor *actor = user_data;
+    clutter_actor_set_size (actor,
+                            box->x2 - box->x1,
+                            box->y2 - box->y1);
+}
+#endif
+
 static void
 update_widget (EekboardServer *server)
 {
@@ -87,6 +108,10 @@ update_widget (EekboardServer *server)
     gint monitor;
     GdkRectangle rect;
     EekBounds bounds;
+#if HAVE_CLUTTER_GTK
+    ClutterActor *stage, *actor;
+    ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
+#endif
 
     if (server->widget)
         gtk_widget_destroy (server->widget);
@@ -94,9 +119,25 @@ update_widget (EekboardServer *server)
     if (server->window)
         gtk_widget_destroy (server->window);
 
-    server->widget = eek_gtk_keyboard_new (server->keyboard);
-
     eek_element_get_bounds (EEK_ELEMENT(server->keyboard), &bounds);
+#if HAVE_CLUTTER_GTK
+    server->widget = gtk_clutter_embed_new ();
+    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(server->widget));
+    actor = eek_clutter_keyboard_new (server->keyboard);
+    clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
+
+    clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
+    clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
+    clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
+                                    bounds.width / 3,
+                                    bounds.height / 3);
+    g_signal_connect (stage,
+                      "allocation-changed",
+                      G_CALLBACK(on_allocation_changed),
+                      actor);
+#else
+    server->widget = eek_gtk_keyboard_new (server->keyboard);
+#endif
     gtk_widget_set_size_request (server->widget, bounds.width, bounds.height);
 
     server->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
