@@ -112,7 +112,8 @@ eekboard_xml_LDADD = \
 	$(GTK_LIBS) \
 	$(LIBXKLAVIER_CFLAGS)
 
-eekboard_xml_SOURCES = xml-main.c
+eekboard_xml_headers = xklutil.h
+eekboard_xml_SOURCES = xklutil.c xml-main.c
 
 noinst_HEADERS = \
 	$(libeekboard_a_headers) \
