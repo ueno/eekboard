@@ -34,6 +34,7 @@
 
 #include "eek-element.h"
 #include "eek-container.h"
+#include "eek-serializable.h"
 
 enum {
     PROP_0,
@@ -42,7 +43,11 @@ enum {
     PROP_LAST
 };
 
-G_DEFINE_ABSTRACT_TYPE (EekElement, eek_element, G_TYPE_OBJECT);
+static void eek_serializable_iface_init (EekSerializableIface *iface);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (EekElement, eek_element, G_TYPE_OBJECT,
+                                  G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
+                                                         eek_serializable_iface_init));
 
 #define EEK_ELEMENT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_ELEMENT, EekElementPrivate))
@@ -54,6 +59,61 @@ struct _EekElementPrivate
     EekBounds bounds;
     EekElement *parent;
 };
+
+static GVariant *
+_g_variant_new_bounds (EekBounds *bounds)
+{
+    GVariantBuilder builder;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("ad"));
+    g_variant_builder_add (&builder, "d", bounds->x);
+    g_variant_builder_add (&builder, "d", bounds->y);
+    g_variant_builder_add (&builder, "d", bounds->width);
+    g_variant_builder_add (&builder, "d", bounds->height);
+
+    return g_variant_builder_end (&builder);
+}
+
+static void
+_g_variant_get_bounds (GVariant *variant, EekBounds *bounds)
+{
+    g_variant_get_child (variant, 0, "d", &bounds->x);
+    g_variant_get_child (variant, 1, "d", &bounds->y);
+    g_variant_get_child (variant, 2, "d", &bounds->width);
+    g_variant_get_child (variant, 3, "d", &bounds->height);
+}
+
+static void
+eek_element_real_serialize (EekSerializable *self,
+                            GVariantBuilder *builder)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    g_variant_builder_add (builder, "s", priv->name);
+    g_variant_builder_add (builder, "v", _g_variant_new_bounds (&priv->bounds));
+}
+
+static gsize
+eek_element_real_deserialize (EekSerializable *self,
+                              GVariant        *variant,
+                              gsize            index)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+    GVariant *bounds;
+
+    g_variant_get_child (variant, index++, "s", &priv->name);
+    g_variant_get_child (variant, index++, "v", &bounds);
+    _g_variant_get_bounds (bounds, &priv->bounds);
+
+    return index;
+}
+
+static void
+eek_serializable_iface_init (EekSerializableIface *iface)
+{
+    iface->serialize = eek_element_real_serialize;
+    iface->deserialize = eek_element_real_deserialize;
+}
 
 static void
 eek_element_real_set_parent (EekElement *self,

@@ -38,6 +38,7 @@
 #include "eek-section.h"
 #include "eek-keyboard.h"
 #include "eek-symbol.h"
+#include "eek-serializable.h"
 
 enum {
     PROP_0,
@@ -57,7 +58,11 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE (EekKey, eek_key, EEK_TYPE_ELEMENT);
+static void eek_serializable_iface_init (EekSerializableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekKey, eek_key, EEK_TYPE_ELEMENT,
+                         G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
+                                                eek_serializable_iface_init));
 
 #define EEK_KEY_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_KEY, EekKeyPrivate))
@@ -72,6 +77,79 @@ struct _EekKeyPrivate
     EekOutline *outline;
     gboolean is_pressed;
 };
+
+static EekSerializableIface *eek_key_parent_serializable_iface;
+
+static GVariant *
+_g_variant_new_symbol_matrix (EekSymbolMatrix *symbol_matrix)
+{
+    GVariantBuilder builder, array;
+    gint i, num_symbols = symbol_matrix->num_groups * symbol_matrix->num_levels;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("iiav"));
+    g_variant_builder_add (&builder, "i", symbol_matrix->num_groups);
+    g_variant_builder_add (&builder, "i", symbol_matrix->num_levels);
+    g_variant_builder_init (&array, G_VARIANT_TYPE ("av"));
+    for (i = 0; i < num_symbols; i++) {
+        GVariant *symbol = eek_serializable_serialize
+            (EEK_SERIALIZABLE(symbol_matrix->data[i]));
+        g_variant_builder_add (&builder, "v", symbol);
+    }
+    g_variant_builder_add (&builder, "av", g_variant_builder_end (&array));
+    return g_variant_builder_end (&builder);
+}
+
+static EekSymbolMatrix *
+_g_variant_get_symbol_matrix (GVariant *variant)
+{
+    g_return_val_if_reached (NULL);     /* TODO */
+}
+
+static void
+eek_key_real_serialize (EekSerializable *self,
+                        GVariantBuilder *builder)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    eek_key_parent_serializable_iface->serialize (self, builder);
+
+    g_variant_builder_add (builder, "u", priv->keycode);
+    g_variant_builder_add (builder, "v",
+                           _g_variant_new_symbol_matrix (priv->symbol_matrix));
+    g_variant_builder_add (builder, "i", priv->column);
+    g_variant_builder_add (builder, "i", priv->row);
+}
+
+static gsize
+eek_key_real_deserialize (EekSerializable *self,
+                          GVariant        *variant,
+                          gsize            index)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+    GVariant *symbol_matrix;
+
+    index = eek_key_parent_serializable_iface->deserialize (self,
+                                                            variant,
+                                                            index);
+
+    g_variant_get_child (variant, index++, "u", &priv->keycode);
+    g_variant_get_child (variant, index++, "v", &symbol_matrix);
+    priv->symbol_matrix = _g_variant_get_symbol_matrix (symbol_matrix);
+    g_variant_get_child (variant, index++, "i", &priv->column);
+    g_variant_get_child (variant, index++, "i", &priv->row);
+
+    return index;
+}
+
+static void
+eek_serializable_iface_init (EekSerializableIface *iface)
+{
+    eek_key_parent_serializable_iface =
+        g_type_interface_peek_parent (iface);
+
+    iface->serialize = eek_key_real_serialize;
+    iface->deserialize = eek_key_real_deserialize;
+}
 
 static void
 eek_key_real_set_keycode (EekKey *self, guint keycode)

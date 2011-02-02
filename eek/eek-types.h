@@ -122,9 +122,9 @@ typedef struct _EekColor EekColor;
  */
 struct _EekSymbolMatrix
 {
-    EekSymbol **data;
     gint num_groups;
     gint num_levels;
+    EekSymbol **data;
 };
 
 GType             eek_symbol_matrix_get_type
