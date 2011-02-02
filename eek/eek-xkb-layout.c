@@ -185,9 +185,10 @@ create_key (EekXkbLayout *layout,
     bounds.height = xkb_to_pixmap_coord(layout, xkbbounds->y2 - xkbbounds->y1);
 
     keycode = find_keycode (layout, name);
-    if (keycode == EEK_INVALID_KEYCODE)
+    if (keycode == EEK_INVALID_KEYCODE) {
         num_groups = num_levels = 0;
-    else {
+        matrix = eek_symbol_matrix_new (0, 0);
+    } else {
         KeySym keysym;
         gint i, j;
 
