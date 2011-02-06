@@ -78,14 +78,12 @@ Start eekboard-system-client
   $ ./src/eekboard-system-client \
       --listen-keyboard \
       --listen-focus \
-      --listen-keystroke \
       --generate-key-event
 
 Where:
 
 --listen-keyboard is to monitor system keyboard state/config change,
---listen-focus is to track focus change,
---listen-keystroke is to track keystroke events, and
+--listen-focus is to track focus change, and
 --generate-key-event is to generate X key events on virtual
   key-press/key-release events.
 
