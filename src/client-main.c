@@ -62,7 +62,7 @@ on_key_released (guint keycode, gpointer user_data)
 int
 main (int argc, char **argv)
 {
-    EekboardProxy *proxy = NULL;
+    EekboardDevice *device = NULL;
     GDBusConnection *connection = NULL;
     GError *error;
     GOptionContext *context;
@@ -86,10 +86,10 @@ main (int argc, char **argv)
     }
 
     error = NULL;
-    proxy = eekboard_proxy_new ("/com/redhat/eekboard/Keyboard",
-                                 connection,
-                                 NULL,
-                                 &error);
+    device = eekboard_device_new ("/com/redhat/eekboard/Device",
+                                  connection,
+                                  NULL,
+                                  &error);
     if (error) {
         g_printerr ("%s\n", error->message);
         retval = 1;
@@ -118,42 +118,42 @@ main (int argc, char **argv)
         g_object_unref (input);
         keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
-        eekboard_proxy_set_keyboard (proxy, keyboard);
+        eekboard_device_set_keyboard (device, keyboard);
         g_object_unref (keyboard);
     }
 
     if (opt_set_group >= 0) {
-        eekboard_proxy_set_group (proxy, opt_set_group);
+        eekboard_device_set_group (device, opt_set_group);
     }
 
     if (opt_show) {
-        eekboard_proxy_show (proxy);
+        eekboard_device_show (device);
     }
 
     if (opt_hide) {
-        eekboard_proxy_hide (proxy);
+        eekboard_device_hide (device);
     }
 
     if (opt_press_key >= 0) {
-        eekboard_proxy_press_key (proxy, opt_press_key);
+        eekboard_device_press_key (device, opt_press_key);
     }
 
     if (opt_release_key >= 0) {
-        eekboard_proxy_release_key (proxy, opt_release_key);
+        eekboard_device_release_key (device, opt_release_key);
     }
 
     if (opt_listen) {
-        g_signal_connect (proxy, "key-pressed",
+        g_signal_connect (device, "key-pressed",
                           G_CALLBACK(on_key_pressed), NULL);
-        g_signal_connect (proxy, "key-released",
+        g_signal_connect (device, "key-released",
                           G_CALLBACK(on_key_released), NULL);
         loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (loop);
     }
 
  out:
-    if (proxy)
-        g_object_unref (proxy);
+    if (device)
+        g_object_unref (device);
     if (connection)
         g_object_unref (connection);
     if (loop)

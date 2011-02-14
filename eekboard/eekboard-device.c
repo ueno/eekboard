@@ -19,7 +19,7 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#include "eekboard-proxy.h"
+#include "eekboard-device.h"
 
 enum {
     KEY_PRESSED,
@@ -29,35 +29,35 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-struct _EekboardProxy {
+struct _EekboardDevice {
     GDBusProxy parent;
 };
 
-struct _EekboardProxyClass {
+struct _EekboardDeviceClass {
     GDBusProxyClass parent_class;
 };
 
-G_DEFINE_TYPE (EekboardProxy, eekboard_proxy, G_TYPE_DBUS_PROXY);
+G_DEFINE_TYPE (EekboardDevice, eekboard_device, G_TYPE_DBUS_PROXY);
 
 static void
-eekboard_proxy_real_g_signal (GDBusProxy  *self,
+eekboard_device_real_g_signal (GDBusProxy  *self,
                               const gchar *sender_name,
                               const gchar *signal_name,
                               GVariant    *parameters)
 {
-    EekboardProxy *proxy = EEKBOARD_PROXY (self);
+    EekboardDevice *device = EEKBOARD_DEVICE (self);
     guint *keycode;
 
     if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
 
         g_variant_get (parameters, "(u)", &keycode);
-        g_signal_emit_by_name (proxy, "key-pressed", keycode);
+        g_signal_emit_by_name (device, "key-pressed", keycode);
         return;
     }
 
     if (g_strcmp0 (signal_name, "KeyReleased") == 0) {
         g_variant_get (parameters, "(u)", &keycode);
-        g_signal_emit_by_name (proxy, "key-released", keycode);
+        g_signal_emit_by_name (device, "key-released", keycode);
         return;
     }
 
@@ -65,12 +65,12 @@ eekboard_proxy_real_g_signal (GDBusProxy  *self,
 }
 
 static void
-eekboard_proxy_class_init (EekboardProxyClass *klass)
+eekboard_device_class_init (EekboardDeviceClass *klass)
 {
     GDBusProxyClass *proxy_class = G_DBUS_PROXY_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-    proxy_class->g_signal = eekboard_proxy_real_g_signal;
+    proxy_class->g_signal = eekboard_device_real_g_signal;
 
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
@@ -98,15 +98,15 @@ eekboard_proxy_class_init (EekboardProxyClass *klass)
 }
 
 static void
-eekboard_proxy_init (EekboardProxy *proxy)
+eekboard_device_init (EekboardDevice *device)
 {
 }
 
-EekboardProxy *
-eekboard_proxy_new (const gchar     *path,
-                    GDBusConnection *connection,
-                    GCancellable    *cancellable,
-                    GError         **error)
+EekboardDevice *
+eekboard_device_new (const gchar     *path,
+                     GDBusConnection *connection,
+                     GCancellable    *cancellable,
+                     GError         **error)
 {
     GInitable *initable;
 
@@ -114,7 +114,7 @@ eekboard_proxy_new (const gchar     *path,
     g_assert (G_IS_DBUS_CONNECTION(connection));
 
     initable =
-        g_initable_new (EEKBOARD_TYPE_PROXY,
+        g_initable_new (EEKBOARD_TYPE_DEVICE,
                         cancellable,
                         error,
                         "g-connection", connection,
@@ -125,7 +125,7 @@ eekboard_proxy_new (const gchar     *path,
                         "g-object-path", path,
                         NULL);
     if (initable != NULL)
-        return EEKBOARD_PROXY (initable);
+        return EEKBOARD_DEVICE (initable);
     return NULL;
 }
 
@@ -146,12 +146,12 @@ proxy_call_async_ready_cb (GObject      *source_object,
 }
 
 void
-eekboard_proxy_set_keyboard (EekboardProxy *proxy, EekKeyboard *keyboard)
+eekboard_device_set_keyboard (EekboardDevice *device, EekKeyboard *keyboard)
 {
     GVariant *variant;
 
     variant = eek_serializable_serialize (EEK_SERIALIZABLE(keyboard));
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "SetKeyboard",
                        g_variant_new ("(v)", variant),
                        G_DBUS_CALL_FLAGS_NONE,
@@ -163,9 +163,10 @@ eekboard_proxy_set_keyboard (EekboardProxy *proxy, EekKeyboard *keyboard)
 }
 
 void
-eekboard_proxy_set_group (EekboardProxy *proxy, gint group)
+eekboard_device_set_group (EekboardDevice *device,
+                           gint            group)
 {
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "SetGroup",
                        g_variant_new ("(i)", group),
                        G_DBUS_CALL_FLAGS_NONE,
@@ -176,9 +177,9 @@ eekboard_proxy_set_group (EekboardProxy *proxy, gint group)
 }
 
 void
-eekboard_proxy_show (EekboardProxy *proxy)
+eekboard_device_show (EekboardDevice *device)
 {
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "Show",
                        NULL,
                        G_DBUS_CALL_FLAGS_NONE,
@@ -189,9 +190,9 @@ eekboard_proxy_show (EekboardProxy *proxy)
 }
 
 void
-eekboard_proxy_hide (EekboardProxy *proxy)
+eekboard_device_hide (EekboardDevice *device)
 {
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "Hide",
                        NULL,
                        G_DBUS_CALL_FLAGS_NONE,
@@ -202,10 +203,10 @@ eekboard_proxy_hide (EekboardProxy *proxy)
 }
 
 void
-eekboard_proxy_press_key (EekboardProxy *proxy,
-                          guint          keycode)
+eekboard_device_press_key (EekboardDevice *device,
+                           guint           keycode)
 {
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "PressKey",
                        g_variant_new ("(u)", keycode),
                        G_DBUS_CALL_FLAGS_NONE,
@@ -216,10 +217,10 @@ eekboard_proxy_press_key (EekboardProxy *proxy,
 }
 
 void
-eekboard_proxy_release_key (EekboardProxy *proxy,
-                            guint          keycode)
+eekboard_device_release_key (EekboardDevice *device,
+                             guint           keycode)
 {
-    g_dbus_proxy_call (G_DBUS_PROXY(proxy),
+    g_dbus_proxy_call (G_DBUS_PROXY(device),
                        "ReleaseKey",
                        g_variant_new ("(u)", keycode),
                        G_DBUS_CALL_FLAGS_NONE,

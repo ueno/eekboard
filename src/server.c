@@ -43,7 +43,7 @@ enum {
 
 static const gchar introspection_xml[] =
     "<node>"
-    "  <interface name='com.redhat.eekboard.Keyboard'>"
+    "  <interface name='com.redhat.eekboard.Device'>"
     "    <method name='SetKeyboard'>"
     "      <arg type='v' name='keyboard'/>"
     "    </method>"
@@ -253,9 +253,9 @@ on_key_pressed (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Keyboard",
-                                   "/com/redhat/eekboard/Keyboard",
-                                   "com.redhat.eekboard.Keyboard",
+                                   "com.redhat.eekboard.Device",
+                                   "/com/redhat/eekboard/Device",
+                                   "com.redhat.eekboard.Device",
                                    "KeyPressed",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -273,9 +273,9 @@ on_key_released (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Keyboard",
-                                   "/com/redhat/eekboard/Keyboard",
-                                   "com.redhat.eekboard.Keyboard",
+                                   "com.redhat.eekboard.Device",
+                                   "/com/redhat/eekboard/Device",
+                                   "com.redhat.eekboard.Device",
                                    "KeyReleased",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -481,7 +481,7 @@ eekboard_server_start (EekboardServer *server)
     error = NULL;
     registration_id = g_dbus_connection_register_object
         (server->connection,
-         "/com/redhat/eekboard/Keyboard",
+         "/com/redhat/eekboard/Device",
          server->introspection_data->interfaces[0],
          &interface_vtable,
          server,
@@ -493,7 +493,7 @@ eekboard_server_start (EekboardServer *server)
 
     server->owner_id =
         g_bus_own_name_on_connection (server->connection,
-                                      "com.redhat.eekboard.Keyboard",
+                                      "com.redhat.eekboard.Device",
                                       G_BUS_NAME_OWNER_FLAGS_NONE,
                                       on_name_acquired,
                                       on_name_lost,

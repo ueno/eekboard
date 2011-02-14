@@ -18,6 +18,6 @@
 #ifndef EEKBOARD_H
 #define EEKBOARD_H 1
 
-#include "eekboard/eekboard-proxy.h"
+#include "eekboard/eekboard-device.h"
 
 #endif  /* EEKBOARD_H */

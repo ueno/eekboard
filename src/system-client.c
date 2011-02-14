@@ -50,7 +50,7 @@ typedef struct _EekboardSystemClientClass EekboardSystemClientClass;
 struct _EekboardSystemClient {
     GObject parent;
 
-    EekboardProxy *proxy;
+    EekboardDevice *device;
 
     EekKeyboard *keyboard;
     GdkDisplay *display;
@@ -117,7 +117,7 @@ eekboard_system_client_set_property (GObject      *object,
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
         error = NULL;
-        client->proxy = eekboard_proxy_new ("/com/redhat/eekboard/Keyboard",
+        client->device = eekboard_device_new ("/com/redhat/eekboard/Device",
                                              connection,
                                              NULL,
                                              &error);
@@ -146,9 +146,9 @@ eekboard_system_client_dispose (GObject *object)
     eekboard_system_client_disable_fakekey (client);
 #endif  /* HAVE_FAKEKEY */
 
-    if (client->proxy) {
-        g_object_unref (client->proxy);
-        client->proxy = NULL;
+    if (client->device) {
+        g_object_unref (client->device);
+        client->device = NULL;
     }
 
 #ifdef HAVE_FAKEKEY
@@ -191,7 +191,7 @@ eekboard_system_client_init (EekboardSystemClient *client)
     client->display = NULL;
     client->xkl_engine = NULL;
     client->xkl_config_registry = NULL;
-    client->proxy = NULL;
+    client->device = NULL;
     client->key_pressed_handler = 0;
     client->key_released_handler = 0;
     client->xkl_config_changed_handler = 0;
@@ -337,12 +337,12 @@ focus_listener_cb (const AccessibleEvent *event,
         case SPI_ROLE_TERMINAL:
         case SPI_ROLE_ENTRY:
             if (g_strcmp0 (event->type, "focus") == 0 || event->detail1 == 1)
-                eekboard_proxy_show (client->proxy);
+                eekboard_device_show (client->device);
         default:
             ;
         }
     } else
-        eekboard_proxy_hide (client->proxy);
+        eekboard_device_hide (client->device);
 
     return FALSE;
 }
@@ -364,9 +364,9 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
     }
 
     if (stroke->type == SPI_KEY_PRESSED)
-        eekboard_proxy_press_key (client->proxy, stroke->keycode);
+        eekboard_device_press_key (client->device, stroke->keycode);
     else
-        eekboard_proxy_release_key (client->proxy, stroke->keycode);
+        eekboard_device_release_key (client->device, stroke->keycode);
     return TRUE;
 }
 #endif  /* HAVE_CSPI */
@@ -422,7 +422,7 @@ set_keyboard (EekboardSystemClient *client)
     keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
     eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
 
-    eekboard_proxy_set_keyboard (client->proxy, client->keyboard);
+    eekboard_device_set_keyboard (client->device, client->keyboard);
 }
 
 static void
@@ -438,7 +438,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
         gint group = eek_keyboard_get_group (client->keyboard);
         if (group != value) {
             eek_keyboard_set_group (client->keyboard, value);
-            eekboard_proxy_set_group (client->proxy, value);
+            eekboard_device_set_group (client->device, value);
         }
     }
 }
@@ -462,7 +462,7 @@ get_fakekey_modifiers (EekModifierType modifiers)
 }
 
 static void
-on_key_pressed (EekboardProxy *proxy,
+on_key_pressed (EekboardDevice *device,
                 guint          keycode,
                 gpointer       user_data)
 {
@@ -495,7 +495,7 @@ on_key_pressed (EekboardProxy *proxy,
 }
 
 static void
-on_key_released (EekboardProxy *proxy,
+on_key_released (EekboardDevice *device,
                  guint          keycode,
                  gpointer       user_data)
 {
@@ -526,10 +526,10 @@ eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
     g_assert (client->fakekey);
 
     client->key_pressed_handler =
-        g_signal_connect (client->proxy, "key-pressed",
+        g_signal_connect (client->device, "key-pressed",
                           G_CALLBACK(on_key_pressed), client);
     client->key_released_handler =
-        g_signal_connect (client->proxy, "key-pressed",
+        g_signal_connect (client->device, "key-pressed",
                           G_CALLBACK(on_key_released), client);
 
     return TRUE;
@@ -541,13 +541,13 @@ eekboard_system_client_disable_fakekey (EekboardSystemClient *client)
     if (client->fakekey)
         fakekey_release (client->fakekey);
 
-    if (g_signal_handler_is_connected (client->proxy,
+    if (g_signal_handler_is_connected (client->device,
                                        client->key_pressed_handler))
-        g_signal_handler_disconnect (client->proxy,
+        g_signal_handler_disconnect (client->device,
                                      client->key_pressed_handler);
-    if (g_signal_handler_is_connected (client->proxy,
+    if (g_signal_handler_is_connected (client->device,
                                        client->key_released_handler))
-        g_signal_handler_disconnect (client->proxy,
+        g_signal_handler_disconnect (client->device,
                                      client->key_released_handler);
 }
 #endif  /* HAVE_FAKEKEY */
