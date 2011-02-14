@@ -27,8 +27,10 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#include "eek-types.h"
+#include <string.h>
 #include <math.h>
+
+#include "eek-types.h"
 
 /* EekSymbolMatrix */
 EekSymbolMatrix *
@@ -147,15 +149,20 @@ eek_bounds_get_type (void)
 }
 
 /* EekOutline */
-static EekOutline *
+EekOutline *
 eek_outline_copy (const EekOutline *outline)
 {
-    return g_slice_dup (EekOutline, outline);
+    EekOutline *_outline = g_slice_dup (EekOutline, outline);
+    _outline->num_points = outline->num_points;
+    _outline->points = g_slice_alloc0 (sizeof (EekPoint) * outline->num_points);
+    memcpy (_outline->points, outline->points, sizeof (EekPoint) * outline->num_points);
+    return _outline;
 }
 
-static void
+void
 eek_outline_free (EekOutline *outline)
 {
+    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
     g_slice_free (EekOutline, outline);
 }
 

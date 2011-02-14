@@ -48,7 +48,6 @@ G_DEFINE_TYPE (EekXmlLayout, eek_xml_layout, EEK_TYPE_LAYOUT);
 struct _EekXmlLayoutPrivate
 {
     GInputStream *source;
-    GHashTable *outline_hash;
 };
 
 #define BUFSIZE	8192
@@ -86,7 +85,7 @@ static const gchar *valid_path_list[] = {
     "orientation/row/section/keyboard",
     "key/section/keyboard",
     "bounds/key/section/keyboard",
-    "outline-ref/key/section/keyboard",
+    "oref/key/section/keyboard",
     "symbols/key/section/keyboard",
     "groups/symbols/key/section/keyboard",
     "levels/symbols/key/section/keyboard",
@@ -293,7 +292,7 @@ end_element_callback (GMarkupParseContext *pcontext,
         outline->points = g_slice_alloc0 (sizeof (EekPoint) *
                                           outline->num_points);
         for (head = data->points = g_slist_reverse (data->points), i = 0;
-             head;
+             head && i < outline->num_points;
              head = g_slist_next (head), i++) {
             memcpy (&outline->points[i], head->data, sizeof (EekPoint));
             g_slice_free1 (sizeof (EekPoint), head->data);
@@ -406,7 +405,7 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "outline-ref") == 0) {
+    if (g_strcmp0 (element_name, "oref") == 0) {
         g_hash_table_insert (data->key_oref_hash, data->key, g_strdup (text));
         goto out;
     }
@@ -433,14 +432,6 @@ static const GMarkupParser parser = {
     0,
     0
 };
-
-static void
-outline_free (gpointer data)
-{
-    EekOutline *outline = data;
-    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
-    g_boxed_free (EEK_TYPE_OUTLINE, outline);
-}
 
 static void scale_bounds_callback (EekElement *element,
                                    gpointer    user_data);
@@ -485,6 +476,7 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     gdouble scale;
     GHashTableIter iter;
     gpointer k, v;
+    GHashTable *oref_hash;
 
     g_return_val_if_fail (priv->source, NULL);
 
@@ -495,10 +487,11 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
                                                 g_direct_equal,
                                                 NULL,
                                                 g_free);
-    data.oref_outline_hash = g_hash_table_new_full (g_str_hash,
-                                                    g_str_equal,
-                                                    g_free,
-                                                    outline_free);
+    data.oref_outline_hash =
+        g_hash_table_new_full (g_str_hash,
+                               g_str_equal,
+                               g_free,
+                               (GDestroyNotify)eek_outline_free);
 
     pcontext = g_markup_parse_context_new (&parser, 0, &data, NULL);
     while (1) {
@@ -528,28 +521,35 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     if (!data.keyboard)
         goto out;
 
-    g_hash_table_iter_init (&iter, data.key_oref_hash);
-    while (g_hash_table_iter_next (&iter, &k, &v)) {
-        EekOutline *outline = g_hash_table_lookup (data.oref_outline_hash, v);
-        g_assert (outline);
-        eek_key_set_outline (EEK_KEY(k), outline);
-    }
-
     eek_element_get_bounds (EEK_ELEMENT(data.keyboard), &bounds);
     scale = initial_width * bounds.height < initial_height * bounds.width ?
         initial_width / bounds.width :
         initial_height / bounds.height;
 
+    oref_hash = g_hash_table_new (g_str_hash, g_str_equal);
     g_hash_table_iter_init (&iter, data.oref_outline_hash);
     while (g_hash_table_iter_next (&iter, &k, &v)) {
         EekOutline *outline = v;
+        gulong oref;
         gint i;
 
         for (i = 0; i < outline->num_points; i++) {
             outline->points[i].x *= scale;
             outline->points[i].y *= scale;
         }
+
+        oref = eek_keyboard_add_outline (data.keyboard, outline);
+        g_hash_table_insert (oref_hash, k, (gpointer) oref);
     }
+
+    g_hash_table_iter_init (&iter, data.key_oref_hash);
+    while (g_hash_table_iter_next (&iter, &k, &v)) {
+        gulong oref;
+
+        oref = (gulong) g_hash_table_lookup (oref_hash, v);
+        eek_key_set_oref (EEK_KEY(k), oref);
+    }
+    g_hash_table_destroy (oref_hash);
 
     scale_bounds (EEK_ELEMENT(data.keyboard), scale);
 
@@ -557,7 +557,8 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     g_string_free (data.text, TRUE);
     if (data.key_oref_hash)
         g_hash_table_destroy (data.key_oref_hash);
-    priv->outline_hash = data.oref_outline_hash;
+    if (data.oref_outline_hash)
+        g_hash_table_destroy (data.oref_outline_hash);
 
     return data.keyboard;
 }
@@ -613,17 +614,6 @@ eek_xml_layout_dispose (GObject *object)
 }
 
 static void
-eek_xml_layout_finalize (GObject *object)
-{
-    EekXmlLayoutPrivate *priv = EEK_XML_LAYOUT_GET_PRIVATE (object);
-
-    if (priv->outline_hash)
-        g_hash_table_unref (priv->outline_hash);
-
-    G_OBJECT_CLASS (eek_xml_layout_parent_class)->finalize (object);
-}
-
-static void
 eek_xml_layout_class_init (EekXmlLayoutClass *klass)
 {
     EekLayoutClass *layout_class = EEK_LAYOUT_CLASS (klass);
@@ -637,7 +627,6 @@ eek_xml_layout_class_init (EekXmlLayoutClass *klass)
     gobject_class->set_property = eek_xml_layout_set_property;
     gobject_class->get_property = eek_xml_layout_get_property;
     gobject_class->dispose = eek_xml_layout_dispose;
-    gobject_class->finalize = eek_xml_layout_finalize;
 
     pspec = g_param_spec_object ("source",
 				 "Source",

@@ -27,5 +27,6 @@
 #include "eek-symbol.h"
 #include "eek-keysym.h"
 #include "eek-xml.h"
+#include "eek-serializable.h"
 
 #endif  /* EEK_H */

@@ -54,8 +54,8 @@ struct _EekKey
  * section
  * @get_index: virtual function for getting position of the key in the
  * section
- * @set_outline: virtual function for setting outline shape of the key
- * @get_outline: virtual function for getting outline shape of the key
+ * @set_oref: virtual function for setting outline id of the key
+ * @get_oref: virtual function for getting outline id of the key
  * @pressed: class handler for #EekKey::pressed signal
  * @released: class handler for #EekKey::released signal
  * @is_pressed: virtual function for getting whether the key is pressed
@@ -80,9 +80,9 @@ struct _EekKeyClass
                                             gint            *column,
                                             gint            *row);
 
-    void             (* set_outline)       (EekKey          *self,
-                                            EekOutline      *outline);
-    EekOutline      *(* get_outline)       (EekKey          *self);
+    void             (* set_oref)          (EekKey          *self,
+                                            gulong           oref);
+    gulong           (* get_oref)          (EekKey          *self);
 
     gboolean         (* is_pressed)        (EekKey          *self);
 
@@ -104,7 +104,7 @@ void             eek_key_set_symbol_matrix   (EekKey          *key,
                                               EekSymbolMatrix *matrix);
 EekSymbolMatrix *eek_key_get_symbol_matrix   (EekKey          *key);
 EekSymbol       *eek_key_get_symbol          (EekKey          *key);
-EekSymbol *      eek_key_get_symbol_with_fallback
+EekSymbol       *eek_key_get_symbol_with_fallback
                                              (EekKey          *key,
                                               gint             fallback_group,
                                               gint             fallback_level);
@@ -121,9 +121,9 @@ void             eek_key_get_index           (EekKey          *key,
                                               gint            *column,
                                               gint            *row);
 
-void             eek_key_set_outline         (EekKey          *key,
-                                              EekOutline      *outline);
-EekOutline      *eek_key_get_outline         (EekKey          *key);
+void             eek_key_set_oref            (EekKey          *key,
+                                              gulong           oref);
+gulong           eek_key_get_oref            (EekKey          *key);
 
 gboolean         eek_key_is_pressed          (EekKey          *key);
 

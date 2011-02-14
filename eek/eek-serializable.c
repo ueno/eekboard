@@ -53,23 +53,27 @@ eek_serializable_serialize (EekSerializable *object)
 EekSerializable *
 eek_serializable_deserialize (GVariant *variant)
 {
-    GVariant *var = NULL;
     gchar *type_name = NULL;
     GType type;
     EekSerializable *object;
+    gsize index = 0;
 
     g_return_val_if_fail (variant != NULL, NULL);
 
-    g_variant_get_child (var, 0, "&s", &type_name);
+    g_variant_get_child (variant, index++, "&s", &type_name);
     type = g_type_from_name (type_name);
 
     g_return_val_if_fail (g_type_is_a (type, EEK_TYPE_SERIALIZABLE), NULL);
 
     object = g_object_new (type, NULL);
 
-    EEK_SERIALIZABLE_GET_IFACE (object)->deserialize (object, var, 1);
-    g_variant_unref (var);
+    index = EEK_SERIALIZABLE_GET_IFACE (object)->deserialize (object,
+                                                              variant,
+                                                              index);
+    if (index < 0) {
+        g_object_unref (object);
+        g_return_val_if_reached (NULL);
+    }
 
-    g_object_unref (object);
-    g_return_val_if_reached (NULL);
+    return object;
 }

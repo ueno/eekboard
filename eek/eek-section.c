@@ -34,6 +34,7 @@
 #endif  /* HAVE_CONFIG_H */
 #include "eek-section.h"
 #include "eek-key.h"
+#include "eek-serializable.h"
 
 enum {
     PROP_0,
@@ -49,7 +50,11 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE (EekSection, eek_section, EEK_TYPE_CONTAINER);
+static void eek_serializable_iface_init (EekSerializableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekSection, eek_section, EEK_TYPE_CONTAINER,
+                         G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
+                                                eek_serializable_iface_init));
 
 #define EEK_SECTION_GET_PRIVATE(obj)                           \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_SECTION, EekSectionPrivate))
@@ -66,8 +71,81 @@ struct _EekSectionPrivate
 {
     gint angle;
     GSList *rows;
-    GSList *keys;
 };
+
+static EekSerializableIface *eek_section_parent_serializable_iface;
+
+static GVariant *
+_g_variant_new_row (EekRow *row)
+{
+    GVariantBuilder builder;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("(iu)"));
+    g_variant_builder_add (&builder, "i", row->num_columns);
+    g_variant_builder_add (&builder, "u", row->orientation);
+
+    return g_variant_builder_end (&builder);
+}
+
+static EekRow *
+_g_variant_get_row (GVariant *variant)
+{
+    EekRow *row = g_slice_new (EekRow);
+    g_variant_get_child (variant, 0, "i", &row->num_columns);
+    g_variant_get_child (variant, 1, "u", &row->orientation);
+    return row;
+}
+
+static void
+eek_section_real_serialize (EekSerializable *self,
+                            GVariantBuilder *builder)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    GSList *head;
+    GVariantBuilder array;
+
+    eek_section_parent_serializable_iface->serialize (self, builder);
+
+    g_variant_builder_add (builder, "i", priv->angle);
+
+    g_variant_builder_init (&array, G_VARIANT_TYPE("av"));
+    for (head = priv->rows; head; head = g_slist_next (head))
+        g_variant_builder_add (&array, "v", _g_variant_new_row (head->data));
+    g_variant_builder_add (builder, "v", g_variant_builder_end (&array));
+}
+
+static gsize
+eek_section_real_deserialize (EekSerializable *self,
+                              GVariant        *variant,
+                              gsize            index)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    GVariant *array, *child;
+    GVariantIter iter;
+
+    index = eek_section_parent_serializable_iface->deserialize (self,
+                                                                variant,
+                                                                index);
+
+    g_variant_get_child (variant, index++, "i", &priv->angle);
+    g_variant_get_child (variant, index++, "v", &array);
+    g_variant_iter_init (&iter, array);
+    while (g_variant_iter_next (&iter, "v", &child))
+        priv->rows = g_slist_prepend (priv->rows, _g_variant_get_row (child));
+    priv->rows = g_slist_reverse (priv->rows);
+
+    return index;
+}
+
+static void
+eek_serializable_iface_init (EekSerializableIface *iface)
+{
+    eek_section_parent_serializable_iface =
+        g_type_interface_peek_parent (iface);
+
+    iface->serialize = eek_section_real_serialize;
+    iface->deserialize = eek_section_real_deserialize;
+}
 
 static void
 eek_section_real_set_angle (EekSection *self,
@@ -161,9 +239,6 @@ eek_section_real_create_key (EekSection  *self,
                         NULL);
     g_return_val_if_fail (key, NULL);
 
-    g_signal_connect (key, "pressed", G_CALLBACK(on_pressed), self);
-    g_signal_connect (key, "released", G_CALLBACK(on_released), self);
-
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(key));
 
@@ -238,8 +313,25 @@ eek_section_get_property (GObject    *object,
 }
 
 static void
+eek_section_real_child_added (EekContainer *self,
+                              EekElement   *element)
+{
+    g_signal_connect (element, "pressed", G_CALLBACK(on_pressed), self);
+    g_signal_connect (element, "released", G_CALLBACK(on_released), self);
+}
+
+static void
+eek_section_real_child_removed (EekContainer *self,
+                                EekElement   *element)
+{
+    g_signal_handlers_disconnect_by_func (element, on_pressed, self);
+    g_signal_handlers_disconnect_by_func (element, on_released, self);
+}
+
+static void
 eek_section_class_init (EekSectionClass *klass)
 {
+    EekContainerClass *container_class = EEK_CONTAINER_CLASS (klass);
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec        *pspec;
 
@@ -252,6 +344,10 @@ eek_section_class_init (EekSectionClass *klass)
     klass->get_row = eek_section_real_get_row;
     klass->create_key = eek_section_real_create_key;
     klass->find_key_by_keycode = eek_section_real_find_key_by_keycode;
+
+    /* signals */
+    container_class->child_added = eek_section_real_child_added;
+    container_class->child_removed = eek_section_real_child_removed;
 
     gobject_class->set_property = eek_section_set_property;
     gobject_class->get_property = eek_section_get_property;

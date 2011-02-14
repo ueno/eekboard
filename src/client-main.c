@@ -70,6 +70,7 @@ main (int argc, char **argv)
     gint retval = 0;
 
     g_type_init ();
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
     context = g_option_context_new ("eekboard-client");
     g_option_context_add_main_entries (context, options, NULL);

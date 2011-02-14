@@ -89,7 +89,7 @@ eek_element_real_serialize (EekSerializable *self,
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
 
-    g_variant_builder_add (builder, "s", priv->name);
+    g_variant_builder_add (builder, "s", priv->name == NULL ? "" : priv->name);
     g_variant_builder_add (builder, "v", _g_variant_new_bounds (&priv->bounds));
 }
 

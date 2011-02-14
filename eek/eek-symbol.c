@@ -23,6 +23,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-symbol.h"
+#include "eek-serializable.h"
 
 enum {
     PROP_0,
@@ -40,71 +41,47 @@ struct _EekSymbolPrivate {
     EekModifierType modifier_mask;
 };
 
-G_DEFINE_TYPE (EekSymbol, eek_symbol, G_TYPE_OBJECT);
+static void eek_serializable_iface_init (EekSerializableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekSymbol, eek_symbol, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
+                                                eek_serializable_iface_init));
 
 #define EEK_SYMBOL_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_SYMBOL, EekSymbolPrivate))
 
 static void
-eek_symbol_real_set_name (EekSymbol   *self,
-                          const gchar *name)
+eek_symbol_real_serialize (EekSerializable *self,
+                           GVariantBuilder *builder)
 {
     EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    g_free (priv->name);
-    priv->name = g_strdup (name);
+
+    g_variant_builder_add (builder, "s", priv->name);
+    g_variant_builder_add (builder, "s", priv->label);
+    g_variant_builder_add (builder, "u", priv->category);
+    g_variant_builder_add (builder, "u", priv->modifier_mask);
 }
 
-G_CONST_RETURN gchar *
-eek_symbol_real_get_name (EekSymbol *self)
+static gsize
+eek_symbol_real_deserialize (EekSerializable *self,
+                             GVariant        *variant,
+                             gsize            index)
 {
     EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    return priv->name;
-}
 
-static void
-eek_symbol_real_set_label (EekSymbol   *self,
-                           const gchar *label)
-{
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    g_free (priv->label);
-    priv->label = g_strdup (label);
-}
+    g_variant_get_child (variant, index++, "s", &priv->name);
+    g_variant_get_child (variant, index++, "s", &priv->label);
+    g_variant_get_child (variant, index++, "u", &priv->category);
+    g_variant_get_child (variant, index++, "u", &priv->modifier_mask);
 
-gchar *
-eek_symbol_real_get_label (EekSymbol *self)
-{
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    return priv->label;
+    return index;
 }
 
 static void
-eek_symbol_real_set_category (EekSymbol        *self,
-                              EekSymbolCategory category)
+eek_serializable_iface_init (EekSerializableIface *iface)
 {
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    priv->category = category;
-}
-
-EekSymbolCategory
-eek_symbol_real_get_category (EekSymbol *self)
-{
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    return priv->category;
-}
-
-static void
-eek_symbol_real_set_modifier_mask (EekSymbol      *self,
-                                   EekModifierType mask)
-{
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    priv->modifier_mask = mask;
-}
-
-EekModifierType
-eek_symbol_real_get_modifier_mask (EekSymbol *self)
-{
-    EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-    return priv->modifier_mask;
+    iface->serialize = eek_symbol_real_serialize;
+    iface->deserialize = eek_symbol_real_deserialize;
 }
 
 static void
@@ -121,11 +98,11 @@ eek_symbol_set_property (GObject      *object,
         eek_symbol_set_label (EEK_SYMBOL(object), g_value_get_string (value));
         break;
     case PROP_CATEGORY:
-        eek_symbol_set_category (EEK_SYMBOL(object), g_value_get_int (value));
+        eek_symbol_set_category (EEK_SYMBOL(object), g_value_get_uint (value));
         break;
     case PROP_MODIFIER_MASK:
         eek_symbol_set_modifier_mask (EEK_SYMBOL(object),
-                                      g_value_get_int (value));
+                                      g_value_get_uint (value));
         break;
     default:
         g_object_set_property (object,
@@ -149,11 +126,11 @@ eek_symbol_get_property (GObject    *object,
         g_value_set_string (value, eek_symbol_get_label (EEK_SYMBOL(object)));
         break;
     case PROP_CATEGORY:
-        g_value_set_int (value, eek_symbol_get_category (EEK_SYMBOL(object)));
+        g_value_set_uint (value, eek_symbol_get_category (EEK_SYMBOL(object)));
         break;
     case PROP_MODIFIER_MASK:
-        g_value_set_int (value,
-                         eek_symbol_get_modifier_mask (EEK_SYMBOL(object)));
+        g_value_set_uint (value,
+                          eek_symbol_get_modifier_mask (EEK_SYMBOL(object)));
         break;
     default:
         g_object_get_property (object,
@@ -180,32 +157,37 @@ eek_symbol_class_init (EekSymbolClass *klass)
 
     g_type_class_add_private (gobject_class, sizeof (EekSymbolPrivate));
 
-    klass->set_name = eek_symbol_real_set_name;
-    klass->get_name = eek_symbol_real_get_name;
-    klass->set_label = eek_symbol_real_set_label;
-    klass->get_label = eek_symbol_real_get_label;
-    klass->set_category = eek_symbol_real_set_category;
-    klass->get_category = eek_symbol_real_get_category;
-    klass->set_modifier_mask = eek_symbol_real_set_modifier_mask;
-    klass->get_modifier_mask = eek_symbol_real_get_modifier_mask;
-
     gobject_class->set_property = eek_symbol_set_property;
     gobject_class->get_property = eek_symbol_get_property;
     gobject_class->finalize = eek_symbol_finalize;
 
     pspec = g_param_spec_string ("name",
                                  "Name",
-                                 "Canonical name of the keysym",
+                                 "Canonical name of the symbol",
                                  NULL,
-                                 G_PARAM_READWRITE);
+                                 G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_NAME, pspec);
 
     pspec = g_param_spec_string ("label",
                                  "Label",
-                                 "Text used to display the keysym",
+                                 "Text used to display the symbol",
                                  NULL,
-                                 G_PARAM_READWRITE);
+                                 G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_LABEL, pspec);
+
+    pspec = g_param_spec_uint ("category",
+                               "Category",
+                               "Category of the symbol",
+                               0, G_MAXUINT, 0,
+                               G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_CATEGORY, pspec);
+
+    pspec = g_param_spec_uint ("modifier-mask",
+                               "Modifier mask",
+                               "Modifier mask of the symbol",
+                               0, G_MAXUINT, 0,
+                               G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_MODIFIER_MASK, pspec);
 }
 
 static void
@@ -230,58 +212,92 @@ void
 eek_symbol_set_name (EekSymbol   *symbol,
                      const gchar *name)
 {
+    EekSymbolPrivate *priv;
+
     g_return_if_fail (EEK_IS_SYMBOL(symbol));
-    EEK_SYMBOL_GET_CLASS(symbol)->set_name (symbol, name);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    g_free (priv->name);
+    priv->name = g_strdup (name);
 }
 
 G_CONST_RETURN gchar *
 eek_symbol_get_name (EekSymbol *symbol)
 {
+    EekSymbolPrivate *priv;
+
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
-    return EEK_SYMBOL_GET_CLASS(symbol)->get_name (symbol);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    return priv->name;
 }
 
 void
 eek_symbol_set_label (EekSymbol   *symbol,
                       const gchar *label)
 {
+    EekSymbolPrivate *priv;
+
     g_return_if_fail (EEK_IS_SYMBOL(symbol));
-    return EEK_SYMBOL_GET_CLASS(symbol)->set_label (symbol, label);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    g_free (priv->label);
+    priv->label = g_strdup (label);
 }
 
 gchar *
 eek_symbol_get_label (EekSymbol *symbol)
 {
+    EekSymbolPrivate *priv;
+
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
-    return EEK_SYMBOL_GET_CLASS(symbol)->get_label (symbol);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    return g_strdup (priv->label);
 }
 
 void
 eek_symbol_set_category (EekSymbol        *symbol,
                          EekSymbolCategory category)
 {
+    EekSymbolPrivate *priv;
+
     g_return_if_fail (EEK_IS_SYMBOL(symbol));
-    return EEK_SYMBOL_GET_CLASS(symbol)->set_category (symbol, category);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    priv->category = category;
 }
 
 EekSymbolCategory
 eek_symbol_get_category (EekSymbol *symbol)
 {
+    EekSymbolPrivate *priv;
+
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), EEK_SYMBOL_CATEGORY_UNKNOWN);
-    return EEK_SYMBOL_GET_CLASS(symbol)->get_category (symbol);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    return priv->category;
 }
 
 void
 eek_symbol_set_modifier_mask (EekSymbol      *symbol,
                               EekModifierType mask)
 {
+    EekSymbolPrivate *priv;
+
     g_return_if_fail (EEK_IS_SYMBOL(symbol));
-    return EEK_SYMBOL_GET_CLASS(symbol)->set_modifier_mask (symbol, mask);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    priv->modifier_mask = mask;
 }
 
 EekModifierType
 eek_symbol_get_modifier_mask (EekSymbol *symbol)
 {
+    EekSymbolPrivate *priv;
+
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), 0);
-    return EEK_SYMBOL_GET_CLASS(symbol)->get_modifier_mask (symbol);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    return priv->modifier_mask;
 }

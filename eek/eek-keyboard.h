@@ -102,6 +102,10 @@ void                eek_keyboard_get_size
                                      (EekKeyboard        *keyboard,
                                       gdouble            *width,
                                       gdouble            *height);
+void                eek_keyboard_set_size
+                                     (EekKeyboard        *keyboard,
+                                      gdouble             width,
+                                      gdouble             height);
 void                eek_keyboard_set_symbol_index
                                      (EekKeyboard        *keyboard,
                                       gint                group,
@@ -136,6 +140,14 @@ EekSection         *eek_keyboard_create_section
 EekKey             *eek_keyboard_find_key_by_keycode
                                      (EekKeyboard        *keyboard,
                                       guint               keycode);
+
+gulong              eek_keyboard_add_outline
+                                     (EekKeyboard        *keyboard,
+                                      EekOutline         *outline);
+
+EekOutline         *eek_keyboard_get_outline
+                                     (EekKeyboard        *keyboard,
+                                      gulong              oref);
 
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

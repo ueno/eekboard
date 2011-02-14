@@ -54,7 +54,7 @@ g_string_markup_printf (GString *output, const gchar *format, ...)
 struct _OutputCallbackData {
     GString *output;
     gint indent;
-    GArray *outline_array;
+    GHashTable *oref_hash;
     gint key_serial;
 };
 typedef struct _OutputCallbackData OutputCallbackData;
@@ -75,12 +75,12 @@ output_key_callback (EekElement *element, gpointer user_data)
 {
     OutputCallbackData *data = user_data;
     EekBounds bounds;
-    EekOutline *outline;
     gint i, num_symbols;
     EekSymbolMatrix *matrix;
     gint column, row;
     guint keycode;
     gchar *id;
+    gulong oref;
 
     keycode = eek_key_get_keycode (EEK_KEY(element));
     if (keycode == EEK_INVALID_KEYCODE)
@@ -112,19 +112,16 @@ output_key_callback (EekElement *element, gpointer user_data)
     g_string_append_indent (data->output, data->indent + 1);
     output_bounds (data->output, &bounds);
 
-    outline = eek_key_get_outline (EEK_KEY(element));
-    if (outline) {
-        for (i = 0;
-             i < data->outline_array->len &&
-                 g_array_index (data->outline_array, gpointer, i) != outline;
-             i++)
-            ;
-        if (i == data->outline_array->len)
-            g_array_append_val (data->outline_array, outline);
+    oref = eek_key_get_oref (EEK_KEY(element));
+    if (oref != 0) {
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output,
-                                "<outline-ref>outline%d</outline-ref>\n",
-                                i);
+                                "<oref>outline%u</oref>\n",
+                                oref);
+        if (!g_hash_table_lookup (data->oref_hash, (gpointer)oref))
+            g_hash_table_insert (data->oref_hash,
+                                 (gpointer)oref,
+                                 (gpointer)TRUE);
     }
 
     matrix = eek_key_get_symbol_matrix (EEK_KEY(element));
@@ -224,7 +221,8 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
 {
     OutputCallbackData data;
     EekBounds bounds;
-    gint i;
+    gulong oref;
+    GHashTableIter iter;
 
     g_assert (EEK_IS_KEYBOARD(keyboard));
  
@@ -245,7 +243,7 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
 
     data.output = output;
     data.indent = indent;
-    data.outline_array = g_array_new (FALSE, FALSE, sizeof (gpointer));
+    data.oref_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
     data.key_serial = 0;
 
     data.indent++;
@@ -254,14 +252,14 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
                                  &data);
     data.indent--;
 
-    for (i = 0; i < data.outline_array->len; i++) {
+    g_hash_table_iter_init (&iter, data.oref_hash);
+    while (g_hash_table_iter_next (&iter, (gpointer *)&oref, NULL)) {
         EekOutline *outline;
         gint j;
 
+        outline = eek_keyboard_get_outline (keyboard, oref);
         g_string_append_indent (output, indent + 1);
-        g_string_markup_printf (output, "<outline id=\"outline%d\">\n", i);
-
-        outline = g_array_index (data.outline_array, gpointer, i);
+        g_string_markup_printf (output, "<outline id=\"outline%u\">\n", oref);
         for (j = 0; j < outline->num_points; j++) {
             g_string_append_indent (output, indent + 2);
             g_string_markup_printf (output, "<point>%lf,%lf</point>\n",
@@ -272,7 +270,7 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
         g_string_append_indent (output, indent + 1);
         g_string_markup_printf (output, "</outline>\n");
     }
-    g_array_free (data.outline_array, TRUE);
+    g_hash_table_destroy (data.oref_hash);
 
     g_string_append_indent (output, indent);
     g_string_markup_printf (output, "</keyboard>\n");

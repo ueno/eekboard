@@ -50,6 +50,14 @@ main (int argc, char **argv)
     }
 #endif
 
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+
+    g_type_class_ref (EEK_TYPE_KEYBOARD);
+    g_type_class_ref (EEK_TYPE_SECTION);
+    g_type_class_ref (EEK_TYPE_KEY);
+    g_type_class_ref (EEK_TYPE_SYMBOL);
+    g_type_class_ref (EEK_TYPE_KEYSYM);
+
     error = NULL;
     connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
     if (error) {

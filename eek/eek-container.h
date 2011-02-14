@@ -81,14 +81,16 @@ struct _EekContainerClass
     gpointer pdummy[24];
 };
 
-GType       eek_container_get_type       (void) G_GNUC_CONST;
+GType       eek_container_get_type      (void) G_GNUC_CONST;
 
-void        eek_container_foreach_child  (EekContainer      *container,
-                                          EekCallback        callback,
-                                          gpointer           user_data);
-EekElement *eek_container_find           (EekContainer      *container,
-                                          EekCompareFunc     func,
-                                          gpointer           user_data);
+void        eek_container_foreach_child (EekContainer  *container,
+                                         EekCallback    callback,
+                                         gpointer       user_data);
+EekElement *eek_container_find          (EekContainer  *container,
+                                         EekCompareFunc func,
+                                         gpointer       user_data);
+void        eek_container_add_child     (EekContainer  *container,
+                                         EekElement    *element);
 
 G_END_DECLS
 #endif  /* EEK_CONTAINER_H */

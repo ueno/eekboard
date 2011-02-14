@@ -46,7 +46,7 @@ enum {
     PROP_SYMBOL_MATRIX,
     PROP_COLUMN,
     PROP_ROW,
-    PROP_OUTLINE,
+    PROP_OREF,
     PROP_LAST
 };
 
@@ -74,7 +74,7 @@ struct _EekKeyPrivate
     EekSymbolMatrix *symbol_matrix;
     gint column;
     gint row;
-    EekOutline *outline;
+    gulong oref;
     gboolean is_pressed;
 };
 
@@ -86,23 +86,45 @@ _g_variant_new_symbol_matrix (EekSymbolMatrix *symbol_matrix)
     GVariantBuilder builder, array;
     gint i, num_symbols = symbol_matrix->num_groups * symbol_matrix->num_levels;
 
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("iiav"));
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("(iiv)"));
     g_variant_builder_add (&builder, "i", symbol_matrix->num_groups);
     g_variant_builder_add (&builder, "i", symbol_matrix->num_levels);
     g_variant_builder_init (&array, G_VARIANT_TYPE ("av"));
     for (i = 0; i < num_symbols; i++) {
         GVariant *symbol = eek_serializable_serialize
             (EEK_SERIALIZABLE(symbol_matrix->data[i]));
-        g_variant_builder_add (&builder, "v", symbol);
+        g_variant_builder_add (&array, "v", symbol);
     }
-    g_variant_builder_add (&builder, "av", g_variant_builder_end (&array));
+    g_variant_builder_add (&builder, "v", g_variant_builder_end (&array));
     return g_variant_builder_end (&builder);
 }
 
 static EekSymbolMatrix *
 _g_variant_get_symbol_matrix (GVariant *variant)
 {
-    g_return_val_if_reached (NULL);     /* TODO */
+    gint num_groups, num_levels, i;
+    EekSymbolMatrix *symbol_matrix;
+    GVariant *array, *child;
+    GVariantIter iter;
+
+    g_variant_get_child (variant, 0, "i", &num_groups);
+    g_variant_get_child (variant, 1, "i", &num_levels);
+    symbol_matrix = eek_symbol_matrix_new (num_groups, num_levels);
+
+    g_variant_get_child (variant, 2, "v", &array);
+    g_variant_iter_init (&iter, array);
+    for (i = 0; i < num_groups * num_levels; i++) {
+        EekSerializable *serializable;
+
+        if (!g_variant_iter_next (&iter, "v", &child)) {
+            eek_symbol_matrix_free (symbol_matrix);
+            g_return_val_if_reached (NULL);
+        }
+
+        serializable = eek_serializable_deserialize (child);
+        symbol_matrix->data[i] = EEK_SYMBOL(serializable);
+    }
+    return symbol_matrix;
 }
 
 static void
@@ -118,6 +140,7 @@ eek_key_real_serialize (EekSerializable *self,
                            _g_variant_new_symbol_matrix (priv->symbol_matrix));
     g_variant_builder_add (builder, "i", priv->column);
     g_variant_builder_add (builder, "i", priv->row);
+    g_variant_builder_add (builder, "u", priv->oref);
 }
 
 static gsize
@@ -137,6 +160,7 @@ eek_key_real_deserialize (EekSerializable *self,
     priv->symbol_matrix = _g_variant_get_symbol_matrix (symbol_matrix);
     g_variant_get_child (variant, index++, "i", &priv->column);
     g_variant_get_child (variant, index++, "i", &priv->row);
+    g_variant_get_child (variant, index++, "u", &priv->oref);
 
     return index;
 }
@@ -208,17 +232,17 @@ eek_key_real_get_index (EekKey *self,
 }
 
 static void
-eek_key_real_set_outline (EekKey *self, EekOutline *outline)
+eek_key_real_set_oref (EekKey *self, gulong oref)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    priv->outline = outline;
+    priv->oref = oref;
 }
 
-static EekOutline *
-eek_key_real_get_outline (EekKey *self)
+static gulong
+eek_key_real_get_oref (EekKey *self)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->outline;
+    return priv->oref;
 }
 
 static gboolean
@@ -283,8 +307,8 @@ eek_key_set_property (GObject      *object,
         eek_key_get_index (EEK_KEY(object), &column, &row);
         eek_key_set_index (EEK_KEY(object), column, g_value_get_int (value));
         break;
-    case PROP_OUTLINE:
-        eek_key_set_outline (EEK_KEY(object), g_value_get_pointer (value));
+    case PROP_OREF:
+        eek_key_set_oref (EEK_KEY(object), g_value_get_uint (value));
         break;
     default:
         g_object_set_property (object,
@@ -319,8 +343,8 @@ eek_key_get_property (GObject    *object,
         eek_key_get_index (EEK_KEY(object), &column, &row);
         g_value_set_int (value, row);
         break;
-    case PROP_OUTLINE:
-        g_value_set_pointer (value, eek_key_get_outline (EEK_KEY(object)));
+    case PROP_OREF:
+        g_value_set_uint (value, eek_key_get_oref (EEK_KEY(object)));
         break;
     default:
         g_object_get_property (object,
@@ -345,8 +369,8 @@ eek_key_class_init (EekKeyClass *klass)
     klass->get_symbol_matrix = eek_key_real_get_symbol_matrix;
     klass->set_index = eek_key_real_set_index;
     klass->get_index = eek_key_real_get_index;
-    klass->set_outline = eek_key_real_set_outline;
-    klass->get_outline = eek_key_real_get_outline;
+    klass->set_oref = eek_key_real_set_oref;
+    klass->get_oref = eek_key_real_get_oref;
     klass->is_pressed = eek_key_real_is_pressed;
 
     gobject_class->set_property = eek_key_set_property;
@@ -406,18 +430,16 @@ eek_key_class_init (EekKeyClass *klass)
     g_object_class_install_property (gobject_class, PROP_ROW, pspec);
 
     /**
-     * EekKey:outline:
+     * EekKey:oref:
      *
-     * The pointer to the outline shape of #EekKey.
+     * The outline id of #EekKey.
      */
-    /* Use pointer instead of boxed to avoid copy, since we can
-       assume that only a few outline shapes are used in a whole
-       keyboard (unlike symbol matrix and bounds). */
-    pspec = g_param_spec_pointer ("outline",
-                                  "Outline",
-                                  "Pointer to outline shape of the key",
-                                  G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_OUTLINE, pspec);
+    pspec = g_param_spec_ulong ("oref",
+                                "Oref",
+                                "Outline id of the key",
+                                0, G_MAXULONG, 0,
+                                G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_OREF, pspec);
 
     /**
      * EekKey::pressed:
@@ -463,7 +485,7 @@ eek_key_init (EekKey *self)
     priv->keycode = 0;
     priv->symbol_matrix = eek_symbol_matrix_new (0, 0);
     priv->column = priv->row = 0;
-    priv->outline = NULL;
+    priv->oref = 0;
 }
 
 /**
@@ -639,8 +661,7 @@ eek_key_get_symbol_at_index (EekKey *key,
  * @column: column index of @key in #EekSection
  * @row: row index of @key in #EekSection
  *
- * Set the index of @key (i.e. logical location of @key in
- * #EekSection) to @column and @row.
+ * Set the location of @key in #EekSection with @column and @row.
  */
 void
 eek_key_set_index (EekKey *key,
@@ -657,8 +678,7 @@ eek_key_set_index (EekKey *key,
  * @column: pointer where the column index of @key in #EekSection will be stored
  * @row: pointer where the row index of @key in #EekSection will be stored
  *
- * Get the index of @key (i.e. logical location of @key in
- * #EekSection).
+ * Get the location of @key in #EekSection.
  */
 void
 eek_key_get_index (EekKey *key,
@@ -670,32 +690,32 @@ eek_key_get_index (EekKey *key,
 }
 
 /**
- * eek_key_set_outline:
+ * eek_key_set_oref:
  * @key: an #EekKey
- * @outline: outline of @key
+ * @oref: outline id of @key
  *
- * Set the outline shape of @key to @outline.
+ * Set the outline id of @key to @oref.
  */
 void
-eek_key_set_outline (EekKey     *key,
-                     EekOutline *outline)
+eek_key_set_oref (EekKey *key,
+                  gulong  oref)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_outline (key, outline);
+    EEK_KEY_GET_CLASS(key)->set_oref (key, oref);
 }
 
 /**
- * eek_key_get_outline:
+ * eek_key_get_oref:
  * @key: an #EekKey
  *
- * Get the outline shape of @key.
- * Returns: an #EekOutline pointer or NULL on failure
+ * Get the outline id of @key.
+ * Returns: a non-zero unsigned integer on success, 0 if the id is not set
  */
-EekOutline *
-eek_key_get_outline (EekKey *key)
+gulong
+eek_key_get_oref (EekKey *key)
 {
-    g_return_val_if_fail (EEK_IS_KEY (key), NULL);
-    return EEK_KEY_GET_CLASS(key)->get_outline (key);
+    g_return_val_if_fail (EEK_IS_KEY (key), 0);
+    return EEK_KEY_GET_CLASS(key)->get_oref (key);
 }
 
 /**

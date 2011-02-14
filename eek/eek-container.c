@@ -82,7 +82,6 @@ eek_container_real_deserialize (EekSerializable *self,
                                 GVariant        *variant,
                                 gsize            index)
 {
-    EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
     GVariant *array, *child;
     GVariantIter iter;
 
@@ -94,9 +93,9 @@ eek_container_real_deserialize (EekSerializable *self,
     g_variant_iter_init (&iter, array);
     while (g_variant_iter_next (&iter, "v", &child)) {
         EekSerializable *serializable = eek_serializable_deserialize (child);
-        priv->children = g_slist_prepend (priv->children, serializable);
+        eek_container_add_child (EEK_CONTAINER(self),
+                                 EEK_ELEMENT(serializable));
     }
-    priv->children = g_slist_reverse (priv->children);
 
     return index;
 }
@@ -122,6 +121,7 @@ eek_container_real_add_child (EekContainer *self,
 
     priv->children = g_slist_prepend (priv->children, child);
     eek_element_set_parent (child, EEK_ELEMENT(self));
+    g_signal_emit_by_name (self, "child-added", child);
 }
 
 static void
@@ -137,6 +137,7 @@ eek_container_real_remove_child (EekContainer *self,
     g_object_unref (child);
     priv->children = g_slist_remove_link (priv->children, head);
     eek_element_set_parent (child, NULL);
+    g_signal_emit_by_name (self, "child-removed", child);
 }
 
 static void
@@ -201,6 +202,10 @@ eek_container_class_init (EekContainerClass *klass)
     klass->remove_child = eek_container_real_remove_child;
     klass->foreach_child = eek_container_real_foreach_child;
     klass->find = eek_container_real_find;
+
+    /* signals */
+    klass->child_added = NULL;
+    klass->child_removed = NULL;
 
     gobject_class->finalize = eek_container_finalize;
     gobject_class->dispose = eek_container_dispose;
@@ -289,4 +294,12 @@ eek_container_find (EekContainer  *container,
     return EEK_CONTAINER_GET_CLASS(container)->find (container,
                                                      func,
                                                      user_data);
+}
+
+void
+eek_container_add_child (EekContainer *container, EekElement *element)
+{
+    g_return_if_fail (EEK_IS_CONTAINER(container));
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    return EEK_CONTAINER_GET_CLASS(container)->add_child (container, element);
 }

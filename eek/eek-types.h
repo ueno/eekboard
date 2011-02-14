@@ -192,7 +192,9 @@ struct _EekOutline
     gint num_points;
 };
 
-GType eek_outline_get_type (void) G_GNUC_CONST;
+GType       eek_outline_get_type (void) G_GNUC_CONST;
+EekOutline *eek_outline_copy     (const EekOutline *outline);
+void        eek_outline_free     (EekOutline       *outline);
 
 /**
  * EekColor:

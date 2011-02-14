@@ -70,8 +70,8 @@ struct _EekXkbLayoutPrivate
     /* Actual XKB configuration of DISPLAY. */
     XkbDescRec *xkb;
 
-    /* Hash table to cache outlines by shape address. */
-    GHashTable *outline_hash;
+    /* Hash table to cache orefs by shape address. */
+    GHashTable *shape_oref_hash;
 
     gint scale_numerator;
     gint scale_denominator;
@@ -109,6 +109,7 @@ xkb_to_pixmap_double (EekXkbLayout *layout,
 
 static void
 create_key (EekXkbLayout *layout,
+            EekKeyboard  *keyboard,
             EekSection   *section,
             gint          column,
             gint          row,
@@ -125,14 +126,16 @@ create_key (EekXkbLayout *layout,
     EekBounds bounds;
     EekSymbolMatrix *matrix = NULL;
     gchar name[XkbKeyNameLength + 1];
-    EekOutline *outline;
     KeyCode keycode;
     gint num_groups, num_levels, num_symbols;
+    gulong oref;
 
     xkbgeometry = priv->xkb->geom;
     xkbshape = &xkbgeometry->shapes[xkbkey->shape_ndx];
-    outline = g_hash_table_lookup (priv->outline_hash, xkbshape);
-    if (outline == NULL) {
+    oref = (gulong)g_hash_table_lookup (priv->shape_oref_hash, xkbshape);
+    if (oref == 0) {
+        EekOutline *outline;
+
         xkboutline = xkbshape->primary == NULL ? &xkbshape->outlines[0] :
             xkbshape->primary;
 
@@ -172,7 +175,8 @@ create_key (EekXkbLayout *layout,
                     xkb_to_pixmap_coord(layout, xkboutline->points[i].y);
             }
         }
-        g_hash_table_insert (priv->outline_hash, xkbshape, outline);
+        oref = eek_keyboard_add_outline (keyboard, outline);
+        g_hash_table_insert (priv->shape_oref_hash, xkbshape, (gpointer)oref);
     }
 
     memset (name, 0, sizeof name);
@@ -210,7 +214,7 @@ create_key (EekXkbLayout *layout,
     eek_key_set_keycode (key, keycode);
     eek_key_set_symbol_matrix (key, matrix);
     eek_symbol_matrix_free (matrix);
-    eek_key_set_outline (key, outline);
+    eek_key_set_oref (key, oref);
 }
 
 static void
@@ -262,7 +266,7 @@ create_section (EekXkbLayout  *layout,
                 top += xkbkey->gap;
             else
                 left += xkbkey->gap;
-            create_key (layout, section, j, i, left, top, xkbkey);
+            create_key (layout, keyboard, section, j, i, left, top, xkbkey);
             xkbbounds = &xkbgeometry->shapes[xkbkey->shape_ndx].bounds;
             if (xkbrow->vertical)
                 top += xkbbounds->y2 - xkbbounds->y1;
@@ -301,14 +305,6 @@ create_keyboard (EekXkbLayout *layout, EekKeyboard *keyboard)
     eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
 }
 
-static void
-outline_free (gpointer data)
-{
-    EekOutline *outline = data;
-    g_slice_free1 (sizeof (EekPoint) * outline->num_points, outline->points);
-    g_boxed_free (EEK_TYPE_OUTLINE, outline);
-}
-
 static EekKeyboard *
 eek_xkb_layout_real_create_keyboard (EekLayout *self,
                                      gdouble    initial_width,
@@ -324,15 +320,12 @@ eek_xkb_layout_real_create_keyboard (EekLayout *self,
     bounds.height = initial_height;
     eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
 
-    if (priv->outline_hash)
-        g_hash_table_unref (priv->outline_hash);
+    if (priv->shape_oref_hash)
+        g_hash_table_destroy (priv->shape_oref_hash);
 
-    priv->outline_hash = g_hash_table_new_full (g_direct_hash,
-                                                g_direct_equal,
-                                                NULL,
-                                                outline_free);
-
+    priv->shape_oref_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
     create_keyboard (EEK_XKB_LAYOUT(self), keyboard);
+    g_hash_table_destroy (priv->shape_oref_hash);
 
     return keyboard;
 }
@@ -345,8 +338,6 @@ eek_xkb_layout_finalize (GObject *object)
     g_free (priv->names.keycodes);
     g_free (priv->names.geometry);
     g_free (priv->names.symbols);
-    if (priv->outline_hash)
-        g_hash_table_unref (priv->outline_hash);
     XkbFreeKeyboard (priv->xkb, 0, TRUE);	/* free_all = TRUE */
     G_OBJECT_CLASS (eek_xkb_layout_parent_class)->finalize (object);
 }

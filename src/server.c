@@ -310,26 +310,21 @@ handle_method_call (GDBusConnection       *connection,
 
     // g_debug ("%s", method_name);
     if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
+        EekSerializable *serializable;
         GVariant *variant;
         gchar *data;
-        GInputStream *input;
-        EekLayout *layout;
 
         g_variant_get (parameters, "(v)", &variant);
-        g_variant_get (variant, "(&s)", &data);
-        input = g_memory_input_stream_new_from_data (data, -1, NULL);
-        g_variant_unref (variant);
-
-        layout = eek_xml_layout_new (input);
-        if (!layout) {
+        serializable = eek_serializable_deserialize (variant);
+        if (!EEK_IS_KEYBOARD(serializable)) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
-                                                   "can't create layout");
+                                                   "not a keyboard");
             return;
         }
-
-        server->keyboard = eek_keyboard_new (layout, CSW, CSH);
+        
+        server->keyboard = EEK_KEYBOARD(serializable);
         disconnect_keyboard_signals (server);
         server->key_pressed_handler =
             g_signal_connect (server->keyboard, "key-pressed",

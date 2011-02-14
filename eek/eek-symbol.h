@@ -69,24 +69,6 @@ struct _EekSymbol {
 struct _EekSymbolClass {
     /*< private >*/
     GObjectClass parent_class;
-
-    /*< public >*/
-    void                  (* set_name)          (EekSymbol        *self,
-                                                 const gchar      *name);
-    G_CONST_RETURN gchar *(* get_name)          (EekSymbol        *self);
-    void                  (* set_label)         (EekSymbol        *self,
-                                                 const gchar      *label);
-    gchar                *(* get_label)         (EekSymbol        *self);
-    void                  (* set_category)      (EekSymbol        *self,
-                                                 EekSymbolCategory category);
-    EekSymbolCategory     (* get_category)      (EekSymbol        *self);
-    void                  (* set_modifier_mask) (EekSymbol        *self,
-                                                 EekModifierType   mask);
-    EekModifierType       (* get_modifier_mask) (EekSymbol        *self);
-
-    /*< private >*/
-    /* padding */
-    gpointer pdummy[24];
 };
 
 GType                 eek_symbol_get_type          (void) G_GNUC_CONST;

@@ -21,8 +21,6 @@
 
 #include "proxy.h"
 
-#define BUFSIZE 8192
-
 enum {
     KEY_PRESSED,
     KEY_RELEASED,
@@ -150,17 +148,9 @@ proxy_call_async_ready_cb (GObject      *source_object,
 void
 eekboard_proxy_set_keyboard (EekboardProxy *proxy, EekKeyboard *keyboard)
 {
-    GString *output;
     GVariant *variant;
-    gchar *data;
 
-    output = g_string_sized_new (BUFSIZE);
-    eek_keyboard_output (keyboard, output, 0);
-
-    data = g_string_free (output, FALSE);
-    variant = g_variant_new ("(s)", data);
-    g_free (data);
-
+    variant = eek_serializable_serialize (EEK_SERIALIZABLE(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(proxy),
                        "SetKeyboard",
                        g_variant_new ("(v)", variant),

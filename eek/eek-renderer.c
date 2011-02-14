@@ -184,9 +184,9 @@ render_key_outline (EekRenderer *renderer,
     EekOutline *outline;
     EekBounds bounds;
     cairo_pattern_t *pat;
-    EekPoint *points;
     gdouble scale;
     gint i;
+    gulong oref;
 
     /* need to rescale so that the border fit inside the clipping
        region */
@@ -194,12 +194,15 @@ render_key_outline (EekRenderer *renderer,
     scale = MIN((bounds.width - priv->border_width) / bounds.width,
                 (bounds.height - priv->border_width) / bounds.height);
 
-    outline = eek_key_get_outline (key);
-    points = g_slice_copy (sizeof (EekPoint) * outline->num_points,
-                           outline->points);
+    oref = eek_key_get_oref (key);
+    if (oref == 0)
+        return;
+
+    outline = eek_keyboard_get_outline (priv->keyboard, oref);
+    outline = eek_outline_copy (outline);
     for (i = 0; i < outline->num_points; i++) {
-        points[i].x *= priv->scale * scale;
-        points[i].y *= priv->scale * scale;
+        outline->points[i].x *= priv->scale * scale;
+        outline->points[i].y *= priv->scale * scale;
     }
 
     cairo_translate (cr,
@@ -227,7 +230,7 @@ render_key_outline (EekRenderer *renderer,
     cairo_set_source (cr, pat);
     _eek_rounded_polygon (cr,
                           outline->corner_radius,
-                          points,
+                          outline->points,
                           outline->num_points);
     cairo_fill (cr);
 
@@ -246,11 +249,11 @@ render_key_outline (EekRenderer *renderer,
 
     _eek_rounded_polygon (cr,
                           outline->corner_radius,
-                          points,
+                          outline->points,
                           outline->num_points);
     cairo_stroke (cr);
 
-    g_slice_free1 (sizeof (EekPoint) * outline->num_points, points);
+    eek_outline_free (outline);
 }
 
 struct _CalculateFontSizeCallbackData {
@@ -338,6 +341,20 @@ calculate_font_size (EekRenderer *renderer)
     return data.size > 0 ? data.size : data.em_size;
 }
 
+static EekKeyboard *
+get_keyboard (EekKey *key)
+{
+    EekElement *parent;
+
+    parent = eek_element_get_parent (EEK_ELEMENT(key));
+    g_return_val_if_fail (EEK_IS_SECTION(parent), NULL);
+
+    parent = eek_element_get_parent (parent);
+    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), NULL);
+
+    return EEK_KEYBOARD(parent);
+}
+
 static void
 render_key (EekRenderer *self,
             cairo_t     *cr,
@@ -349,10 +366,16 @@ render_key (EekRenderer *self,
     EekBounds bounds;
     PangoLayout *layout;
     PangoRectangle extents = { 0, };
+    gulong oref;
+    EekKeyboard *keyboard;
 
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    outline = eek_key_get_outline (key);
+    oref = eek_key_get_oref (key);
+    if (oref == 0)
+        return;
 
+    keyboard = get_keyboard (key);
+    outline = eek_keyboard_get_outline (keyboard, oref);
     outline_surface = g_hash_table_lookup (priv->outline_surface_cache,
                                            outline);
     if (!outline_surface) {
