@@ -37,6 +37,9 @@ eek/eek-marshalers.[ch]
 eek/*.pc
 eek/*.gir
 eek/*.typelib
+eekboard/*.pc
+eekboard/*.gir
+eekboard/*.typelib
 tests/eek-simple-test
 tests/eek-xkb-test
 tests/eek-xml-test
@@ -54,6 +57,16 @@ docs/reference/eek/eek.args
 docs/reference/eek/eek.hierarchy
 docs/reference/eek/eek.interfaces
 docs/reference/eek/eek.prerequisites
+docs/reference/eekboard/*.stamp
+docs/reference/eekboard/*.txt
+!/docs/reference/eekboard/eekboard-sections.txt
+docs/reference/eekboard/xml
+docs/reference/eekboard/html
+docs/reference/eekboard/eekboard.signals
+docs/reference/eekboard/eekboard.args
+docs/reference/eekboard/eekboard.hierarchy
+docs/reference/eekboard/eekboard.interfaces
+docs/reference/eekboard/eekboard.prerequisites
 po/*.gmo
 po/Makefile.in.in
 po/POTFILES

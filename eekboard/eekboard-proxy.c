@@ -19,7 +19,7 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#include "proxy.h"
+#include "eekboard-proxy.h"
 
 enum {
     KEY_PRESSED,

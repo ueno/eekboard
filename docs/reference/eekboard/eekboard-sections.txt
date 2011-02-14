@@ -1,0 +1,20 @@
+<SECTION>
+<FILE>eekboard-proxy</FILE>
+EekboardProxy
+EekboardProxyClass
+eekboard_proxy_new
+eekboard_proxy_set_keyboard
+eekboard_proxy_set_group
+eekboard_proxy_show
+eekboard_proxy_hide
+eekboard_proxy_press_key
+eekboard_proxy_release_key
+<SUBSECTION Standard>
+EEKBOARD_PROXY
+EEKBOARD_IS_PROXY
+EEKBOARD_TYPE_PROXY
+EEKBOARD_PROXY_CLASS
+EEKBOARD_IS_PROXY_CLASS
+EEKBOARD_PROXY_GET_CLASS
+</SECTION>
+

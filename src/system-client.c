@@ -33,8 +33,8 @@
 
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
+#include "eekboard/eekboard.h"
 #include "system-client.h"
-#include "proxy.h"
 
 #define CSW 640
 #define CSH 480

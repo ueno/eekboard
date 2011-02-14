@@ -16,4 +16,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-SUBDIRS = eek eekboard
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Eekboard
+Description: A Library to Create Keyboard-like UI
+URL: http://ueno.github.com/eekboard/
+Version: @VERSION@
+Requires: gobject-2.0
+Libs: -L${libdir} -leek
+Cflags: -I${includedir}/eekboard-@EEK_API_VERSION@

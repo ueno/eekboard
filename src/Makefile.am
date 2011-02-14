@@ -22,15 +22,6 @@ bin_PROGRAMS = \
 	eekboard-client \
 	eekboard-server \
 	eekboard-xml
-noinst_LIBRARIES = libeekboard.a
-
-libeekboard_a_headers = proxy.h
-
-libeekboard_a_CFLAGS = \
-	-I$(top_srcdir) \
-	$(GIO2_CFLAGS)
-
-libeekboard_a_SOURCES = proxy.c
 
 eekboard_system_client_CFLAGS = \
 	-I$(top_srcdir) \
@@ -41,8 +32,7 @@ eekboard_system_client_CFLAGS = \
 	$(LIBXKLAVIER_CFLAGS)
 
 eekboard_system_client_LDADD = \
-	libeekboard.a \
-	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
@@ -73,8 +63,7 @@ eekboard_server_CFLAGS = \
 	$(GTK_CFLAGS)
 
 eekboard_server_LDADD = \
-	libeekboard.a \
-	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek-gtk.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS)
@@ -92,8 +81,7 @@ eekboard_client_CFLAGS = \
 	$(GIO2_CFLAGS)
 
 eekboard_client_LDADD = \
-	libeekboard.a \
-	$(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eekboard/libeekboard.la \
 	$(GIO2_LIBS)
 
 eekboard_client_SOURCES = client-main.c
@@ -115,8 +103,11 @@ eekboard_xml_LDADD = \
 eekboard_xml_headers = xklutil.h
 eekboard_xml_SOURCES = xklutil.c xml-main.c
 
+eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
+eekboard_HEADERS =				\
+	$(libeekboard_headers)
+
 noinst_HEADERS = \
-	$(libeekboard_a_headers) \
 	$(eekboard_system_client_headers) \
 	$(eekboard_client_headers) \
 	$(eekboard_server_headers) \

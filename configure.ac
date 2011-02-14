@@ -191,6 +191,7 @@ GOBJECT_INTROSPECTION_CHECK([0.6.7])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile
 eek/Makefile
+eekboard/Makefile
 src/Makefile
 tests/Makefile
 bindings/Makefile
@@ -198,12 +199,14 @@ bindings/vala/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/eek/Makefile
+docs/reference/eekboard/Makefile
 po/Makefile.in
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc
 eek/eek-xkb-${EEK_API_VERSION}.pc
-eek/eek-xkl-${EEK_API_VERSION}.pc])
+eek/eek-xkl-${EEK_API_VERSION}.pc
+eekboard/eekboard-${EEK_API_VERSION}.pc])
 AC_OUTPUT
 AC_MSG_RESULT([
 Build options:
