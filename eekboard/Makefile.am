@@ -40,6 +40,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir) --includedir=$(top_srcdir)/
 
 if HAVE_INTROSPECTION
 Eekboard@EEK_LIBRARY_SUFFIX@.gir: libeekboard.la
+Eekboard@EEK_LIBRARY_SUFFIX_U@_gir_SCANNERFLAGS = --strip-prefix=Eekboard
 Eekboard@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = Eek@EEK_LIBRARY_SUFFIX@
 Eekboard@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeekboard_la_CFLAGS)
 Eekboard@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeekboard.la
