@@ -301,3 +301,17 @@ eek_symbol_get_modifier_mask (EekSymbol *symbol)
     priv = EEK_SYMBOL_GET_PRIVATE(symbol);
     return priv->modifier_mask;
 }
+
+/**
+ * eek_symbol_is_modifier:
+ * @symbol: an #EekSymbol
+ *
+ * Check if @symbol is a modifier.
+ * Returns: %TRUE if @symbol is a modifier.
+ */
+gboolean
+eek_symbol_is_modifier (EekSymbol *symbol)
+{
+    return eek_symbol_get_modifier_mask (symbol) != 0;
+}
+

@@ -86,16 +86,7 @@ EekSymbolCategory     eek_symbol_get_category      (EekSymbol        *symbol);
 EekModifierType       eek_symbol_get_modifier_mask (EekSymbol        *keysym);
 void                  eek_symbol_set_modifier_mask (EekSymbol        *keysym,
                                                     EekModifierType   mask);
-
-/**
- * eek_symbol_is_modifier:
- * @symbol: an #EekSymbol
- *
- * Check if @symbol is a modifier.
- * Returns: %TRUE if @symbol is a modifier.
- */
-#define eek_symbol_is_modifier(symbol) \
-    (eek_symbol_get_modifier_mask ((symbol)) != 0)
+gboolean              eek_symbol_is_modifier       (EekSymbol        *symbol);
 
 G_END_DECLS
 
