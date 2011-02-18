@@ -37,6 +37,7 @@ G_DEFINE_TYPE (EekboardKeyboard, eekboard_keyboard, G_TYPE_DBUS_PROXY);
 struct _EekboardKeyboardPrivate
 {
     EekKeyboard *description;
+    gboolean visible;
 };
 
 static void
@@ -46,18 +47,24 @@ eekboard_keyboard_real_g_signal (GDBusProxy  *self,
                                  GVariant    *parameters)
 {
     EekboardKeyboard *keyboard = EEKBOARD_KEYBOARD (self);
-    guint *keycode;
+    EekboardKeyboardPrivate *priv = EEKBOARD_KEYBOARD_GET_PRIVATE (keyboard);
 
     if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
-
+        guint keycode;
         g_variant_get (parameters, "(u)", &keycode);
         g_signal_emit_by_name (keyboard, "key-pressed", keycode);
         return;
     }
 
     if (g_strcmp0 (signal_name, "KeyReleased") == 0) {
+        guint keycode;
         g_variant_get (parameters, "(u)", &keycode);
         g_signal_emit_by_name (keyboard, "key-released", keycode);
+        return;
+    }
+
+    if (g_strcmp0 (signal_name, "VisibilityChanged") == 0) {
+        g_variant_get (parameters, "(b)", &priv->visible);
         return;
     }
 
@@ -134,6 +141,7 @@ eekboard_keyboard_init (EekboardKeyboard *self)
 
     priv = self->priv = EEKBOARD_KEYBOARD_GET_PRIVATE(self);
     priv->description = NULL;
+    priv->visible = FALSE;
 }
 
 /**
@@ -286,4 +294,15 @@ eekboard_keyboard_release_key (EekboardKeyboard *keyboard,
                        NULL,
                        proxy_call_async_ready_cb,
                        NULL);
+}
+
+gboolean
+eekboard_keyboard_get_visible (EekboardKeyboard *keyboard)
+{
+    EekboardKeyboardPrivate *priv;
+
+    g_assert (EEKBOARD_IS_KEYBOARD(keyboard));
+
+    priv = EEKBOARD_KEYBOARD_GET_PRIVATE (keyboard);
+    return priv->visible;
 }

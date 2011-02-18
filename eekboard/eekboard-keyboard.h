@@ -65,6 +65,7 @@ void              eekboard_keyboard_press_key   (EekboardKeyboard *keyboard,
                                                  guint             keycode);
 void              eekboard_keyboard_release_key (EekboardKeyboard *keyboard,
                                                  guint             keycode);
+gboolean          eekboard_keyboard_get_visible (EekboardKeyboard *keyboard);
 
 G_END_DECLS
 #endif  /* EEKBOARD_KEYBOARD_H */

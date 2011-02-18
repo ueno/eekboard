@@ -64,6 +64,9 @@ static const gchar introspection_xml[] =
     "    <signal name='KeyReleased'>"
     "      <arg type='u' name='keycode'/>"
     "    </signal>"
+    "    <signal name='VisibilityChanged'>"
+    "      <arg type='b' name='visible'/>"
+    "    </signal>"
     "  </interface>"
     "</node>";
 
@@ -114,6 +117,26 @@ on_destroy (GtkWidget *widget, gpointer user_data)
 }
 
 static void
+on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
+{
+    EekboardServer *server = user_data;
+    gboolean visible;
+    GError *error;
+
+    g_object_get (object, "visible", &visible, NULL);
+
+    error = NULL;
+    g_dbus_connection_emit_signal (server->connection,
+                                   "com.redhat.eekboard.Keyboard",
+                                   "/com/redhat/eekboard/Keyboard",
+                                   "com.redhat.eekboard.Keyboard",
+                                   "VisibilityChanged",
+                                   g_variant_new ("(b)", visible),
+                                   &error);
+    g_assert_no_error (error);
+}
+
+static void
 update_widget (EekboardServer *server)
 {
     GdkScreen *screen;
@@ -156,6 +179,8 @@ update_widget (EekboardServer *server)
     server->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     g_signal_connect (server->window, "destroy",
                       G_CALLBACK(on_destroy), server);
+    g_signal_connect (server->window, "notify::visible",
+                      G_CALLBACK(on_notify_visible), server);
     gtk_container_add (GTK_CONTAINER(server->window), server->widget);
 
     gtk_widget_set_can_focus (server->window, FALSE);
@@ -312,7 +337,6 @@ handle_method_call (GDBusConnection       *connection,
     if (g_strcmp0 (method_name, "SetDescription") == 0) {
         EekSerializable *serializable;
         GVariant *variant;
-        gchar *data;
 
         g_variant_get (parameters, "(v)", &variant);
         serializable = eek_serializable_deserialize (variant);
@@ -387,6 +411,7 @@ handle_method_call (GDBusConnection       *connection,
         g_assert (server->window);
         gtk_widget_show_all (server->window);
         g_dbus_method_invocation_return_value (invocation, NULL);
+        g_object_notify (G_OBJECT(server->window), "visible");
         return;
     }
 
@@ -394,6 +419,7 @@ handle_method_call (GDBusConnection       *connection,
         if (server->window)
             gtk_widget_hide (server->window);
         g_dbus_method_invocation_return_value (invocation, NULL);
+        g_object_notify (G_OBJECT(server->window), "visible");
         return;
     }
 
