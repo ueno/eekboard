@@ -30,8 +30,8 @@ static gint opt_release_key = -1;
 static gboolean opt_listen = FALSE;
 
 static const GOptionEntry options[] = {
-    {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_description,
-     "Set keyboard from an XML file"},
+    {"set-description", '\0', 0, G_OPTION_ARG_STRING, &opt_set_description,
+     "Set keyboard description from an XML file"},
     {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
      "Set group of the keyboard"},
     {"show", '\0', 0, G_OPTION_ARG_NONE, &opt_show,
