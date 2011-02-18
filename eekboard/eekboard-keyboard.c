@@ -96,6 +96,17 @@ eekboard_keyboard_real_key_released (EekboardKeyboard *self,
 }
 
 static void
+eekboard_keyboard_dispose (GObject *self)
+{
+    EekboardKeyboardPrivate *priv = EEKBOARD_KEYBOARD_GET_PRIVATE (self);
+    
+    if (priv->description) {
+        g_object_unref (priv->description);
+        priv->description = NULL;
+    }
+}
+
+static void
 eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
 {
     GDBusProxyClass *proxy_class = G_DBUS_PROXY_CLASS (klass);
@@ -108,6 +119,8 @@ eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
     klass->key_released = eekboard_keyboard_real_key_released;
 
     proxy_class->g_signal = eekboard_keyboard_real_g_signal;
+
+    gobject_class->dispose = eekboard_keyboard_dispose;
 
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
@@ -227,7 +240,11 @@ void
 eekboard_keyboard_set_group (EekboardKeyboard *keyboard,
                              gint              group)
 {
+    EekboardKeyboardPrivate *priv;
+
     g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
+
+    priv = EEKBOARD_KEYBOARD_GET_PRIVATE (keyboard);
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "SetGroup",
                        g_variant_new ("(i)", group),
@@ -236,6 +253,7 @@ eekboard_keyboard_set_group (EekboardKeyboard *keyboard,
                        NULL,
                        proxy_call_async_ready_cb,
                        NULL);
+    eek_keyboard_set_group (priv->description, group);
 }
 
 void
