@@ -21,7 +21,7 @@
 
 #include "eekboard/eekboard.h"
 
-static gchar *opt_set_keyboard = NULL;
+static gchar *opt_set_description = NULL;
 static gint opt_set_group = -1;
 static gboolean opt_show = FALSE;
 static gboolean opt_hide = FALSE;
@@ -30,7 +30,7 @@ static gint opt_release_key = -1;
 static gboolean opt_listen = FALSE;
 
 static const GOptionEntry options[] = {
-    {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_keyboard,
+    {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_description,
      "Set keyboard from an XML file"},
     {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
      "Set group of the keyboard"},
@@ -62,7 +62,7 @@ on_key_released (guint keycode, gpointer user_data)
 int
 main (int argc, char **argv)
 {
-    EekboardDevice *device = NULL;
+    EekboardKeyboard *keyboard = NULL;
     GDBusConnection *connection = NULL;
     GError *error;
     GOptionContext *context;
@@ -86,7 +86,7 @@ main (int argc, char **argv)
     }
 
     error = NULL;
-    device = eekboard_device_new ("/com/redhat/eekboard/Device",
+    keyboard = eekboard_keyboard_new ("/com/redhat/eekboard/Keyboard",
                                   connection,
                                   NULL,
                                   &error);
@@ -96,64 +96,64 @@ main (int argc, char **argv)
         goto out;
     }
 
-    if (opt_set_keyboard) {
+    if (opt_set_description) {
         GFile *file;
         GFileInputStream *input;
         EekLayout *layout;
-        EekKeyboard *keyboard;
+        EekKeyboard *description;
         GError *error;
 
-        file = g_file_new_for_path (opt_set_keyboard);
+        file = g_file_new_for_path (opt_set_description);
 
         error = NULL;
         input = g_file_read (file, NULL, &error);
         if (error) {
             g_printerr ("Can't read file %s: %s\n",
-                        opt_set_keyboard, error->message);
+                        opt_set_description, error->message);
             retval = 1;
             goto out;
         }
 
         layout = eek_xml_layout_new (G_INPUT_STREAM(input));
         g_object_unref (input);
-        keyboard = eek_keyboard_new (layout, 640, 480);
+        description = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
-        eekboard_device_set_keyboard (device, keyboard);
-        g_object_unref (keyboard);
+        eekboard_keyboard_set_description (keyboard, description);
+        g_object_unref (description);
     }
 
     if (opt_set_group >= 0) {
-        eekboard_device_set_group (device, opt_set_group);
+        eekboard_keyboard_set_group (keyboard, opt_set_group);
     }
 
     if (opt_show) {
-        eekboard_device_show (device);
+        eekboard_keyboard_show (keyboard);
     }
 
     if (opt_hide) {
-        eekboard_device_hide (device);
+        eekboard_keyboard_hide (keyboard);
     }
 
     if (opt_press_key >= 0) {
-        eekboard_device_press_key (device, opt_press_key);
+        eekboard_keyboard_press_key (keyboard, opt_press_key);
     }
 
     if (opt_release_key >= 0) {
-        eekboard_device_release_key (device, opt_release_key);
+        eekboard_keyboard_release_key (keyboard, opt_release_key);
     }
 
     if (opt_listen) {
-        g_signal_connect (device, "key-pressed",
+        g_signal_connect (keyboard, "key-pressed",
                           G_CALLBACK(on_key_pressed), NULL);
-        g_signal_connect (device, "key-released",
+        g_signal_connect (keyboard, "key-released",
                           G_CALLBACK(on_key_released), NULL);
         loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (loop);
     }
 
  out:
-    if (device)
-        g_object_unref (device);
+    if (keyboard)
+        g_object_unref (keyboard);
     if (connection)
         g_object_unref (connection);
     if (loop)

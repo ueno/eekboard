@@ -43,9 +43,9 @@ enum {
 
 static const gchar introspection_xml[] =
     "<node>"
-    "  <interface name='com.redhat.eekboard.Device'>"
-    "    <method name='SetKeyboard'>"
-    "      <arg type='v' name='keyboard'/>"
+    "  <interface name='com.redhat.eekboard.Keyboard'>"
+    "    <method name='SetDescription'>"
+    "      <arg type='v' name='description'/>"
     "    </method>"
     "    <method name='SetGroup'>"
     "      <arg type='i' name='group'/>"
@@ -253,9 +253,9 @@ on_key_pressed (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Device",
-                                   "/com/redhat/eekboard/Device",
-                                   "com.redhat.eekboard.Device",
+                                   "com.redhat.eekboard.Keyboard",
+                                   "/com/redhat/eekboard/Keyboard",
+                                   "com.redhat.eekboard.Keyboard",
                                    "KeyPressed",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -273,9 +273,9 @@ on_key_released (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Device",
-                                   "/com/redhat/eekboard/Device",
-                                   "com.redhat.eekboard.Device",
+                                   "com.redhat.eekboard.Keyboard",
+                                   "/com/redhat/eekboard/Keyboard",
+                                   "com.redhat.eekboard.Keyboard",
                                    "KeyReleased",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -309,7 +309,7 @@ handle_method_call (GDBusConnection       *connection,
     EekboardServer *server = user_data;
 
     // g_debug ("%s", method_name);
-    if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
+    if (g_strcmp0 (method_name, "SetDescription") == 0) {
         EekSerializable *serializable;
         GVariant *variant;
         gchar *data;
@@ -481,7 +481,7 @@ eekboard_server_start (EekboardServer *server)
     error = NULL;
     registration_id = g_dbus_connection_register_object
         (server->connection,
-         "/com/redhat/eekboard/Device",
+         "/com/redhat/eekboard/Keyboard",
          server->introspection_data->interfaces[0],
          &interface_vtable,
          server,
@@ -493,7 +493,7 @@ eekboard_server_start (EekboardServer *server)
 
     server->owner_id =
         g_bus_own_name_on_connection (server->connection,
-                                      "com.redhat.eekboard.Device",
+                                      "com.redhat.eekboard.Keyboard",
                                       G_BUS_NAME_OWNER_FLAGS_NONE,
                                       on_name_acquired,
                                       on_name_lost,

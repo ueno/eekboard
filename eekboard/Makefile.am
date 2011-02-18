@@ -18,8 +18,8 @@
 
 lib_LTLIBRARIES = libeekboard.la
 
-libeekboard_headers = eekboard.h eekboard-device.h
-libeekboard_sources = eekboard-device.c
+libeekboard_headers = eekboard.h eekboard-keyboard.h
+libeekboard_sources = eekboard-keyboard.c
 
 libeekboard_la_SOURCES = $(libeekboard_sources)
 libeekboard_la_CFLAGS = -I$(top_srcdir) $(GIO2_CFLAGS)

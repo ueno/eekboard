@@ -18,6 +18,6 @@
 #ifndef EEKBOARD_H
 #define EEKBOARD_H 1
 
-#include "eekboard/eekboard-device.h"
+#include "eekboard/eekboard-keyboard.h"
 
 #endif  /* EEKBOARD_H */
