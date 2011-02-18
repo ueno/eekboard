@@ -87,7 +87,7 @@ struct _EekKeyboardClass
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[23];
+    gpointer pdummy[24];
 };
 
 GType               eek_keyboard_get_type

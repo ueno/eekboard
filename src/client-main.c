@@ -87,9 +87,9 @@ main (int argc, char **argv)
 
     error = NULL;
     keyboard = eekboard_keyboard_new ("/com/redhat/eekboard/Keyboard",
-                                  connection,
-                                  NULL,
-                                  &error);
+                                      connection,
+                                      NULL,
+                                      &error);
     if (error) {
         g_printerr ("%s\n", error->message);
         retval = 1;

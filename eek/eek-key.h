@@ -92,7 +92,7 @@ struct _EekKeyClass
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[23];
+    gpointer pdummy[24];
 };
 
 GType            eek_key_get_type            (void) G_GNUC_CONST;

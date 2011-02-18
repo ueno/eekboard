@@ -46,7 +46,7 @@ struct _EekSerializableIface
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[5];
+    gpointer pdummy[24];
 };
 
 GType            eek_serializable_get_type    (void);
