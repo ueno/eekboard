@@ -196,6 +196,7 @@ eekboard_keyboard_set_description (EekboardKeyboard *keyboard,
     GVariant *variant;
 
     g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
+    g_return_if_fail (EEK_IS_KEYBOARD(description));
 
     priv = EEKBOARD_KEYBOARD_GET_PRIVATE(keyboard);
     if (priv->description)
@@ -218,6 +219,7 @@ void
 eekboard_keyboard_set_group (EekboardKeyboard *keyboard,
                              gint              group)
 {
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "SetGroup",
                        g_variant_new ("(i)", group),
@@ -231,6 +233,7 @@ eekboard_keyboard_set_group (EekboardKeyboard *keyboard,
 void
 eekboard_keyboard_show (EekboardKeyboard *keyboard)
 {
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "Show",
                        NULL,
@@ -244,6 +247,7 @@ eekboard_keyboard_show (EekboardKeyboard *keyboard)
 void
 eekboard_keyboard_hide (EekboardKeyboard *keyboard)
 {
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "Hide",
                        NULL,
@@ -258,6 +262,7 @@ void
 eekboard_keyboard_press_key (EekboardKeyboard *keyboard,
                              guint             keycode)
 {
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "PressKey",
                        g_variant_new ("(u)", keycode),
@@ -272,6 +277,7 @@ void
 eekboard_keyboard_release_key (EekboardKeyboard *keyboard,
                                guint             keycode)
 {
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "ReleaseKey",
                        g_variant_new ("(u)", keycode),

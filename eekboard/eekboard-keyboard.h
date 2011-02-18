@@ -43,8 +43,10 @@ struct _EekboardKeyboard {
 struct _EekboardKeyboardClass {
     GDBusProxyClass parent_class;
 
-    void (*key_pressed) (EekboardKeyboard *keyboard, guint keycode);
-    void (*key_released) (EekboardKeyboard *keyboard, guint keycode);
+    void (*key_pressed)  (EekboardKeyboard *self,
+                          guint             keycode);
+    void (*key_released) (EekboardKeyboard *self,
+                          guint             keycode);
 };
 
 GType             eekboard_keyboard_get_type    (void) G_GNUC_CONST;
