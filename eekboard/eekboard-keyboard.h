@@ -33,6 +33,15 @@ G_BEGIN_DECLS
 typedef struct _EekboardKeyboard EekboardKeyboard;
 typedef struct _EekboardKeyboardClass EekboardKeyboardClass;
 
+struct _EekboardKeyboard {
+    GDBusProxy parent;
+};
+
+struct _EekboardKeyboardClass {
+    GDBusProxyClass parent_class;
+};
+
+GType             eekboard_keyboard_get_type    (void) G_GNUC_CONST;
 EekboardKeyboard *eekboard_keyboard_new         (const gchar      *path,
                                                  GDBusConnection  *connection,
                                                  GCancellable     *cancellable,

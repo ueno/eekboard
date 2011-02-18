@@ -29,14 +29,6 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-struct _EekboardKeyboard {
-    GDBusProxy parent;
-};
-
-struct _EekboardKeyboardClass {
-    GDBusProxyClass parent_class;
-};
-
 G_DEFINE_TYPE (EekboardKeyboard, eekboard_keyboard, G_TYPE_DBUS_PROXY);
 
 static void
@@ -102,6 +94,15 @@ eekboard_keyboard_init (EekboardKeyboard *keyboard)
 {
 }
 
+/**
+ * eekboard_keyboard_new:
+ * @path: object path in DBus
+ * @connection: #GDBusConnection
+ * @cancellable: #GCancellable
+ * @error: a pointer of #GError
+ *
+ * Create a new #EekboardKeyboard.
+ */
 EekboardKeyboard *
 eekboard_keyboard_new (const gchar     *path,
                        GDBusConnection *connection,
@@ -151,7 +152,7 @@ eekboard_keyboard_set_description (EekboardKeyboard *keyboard,
 {
     GVariant *variant;
 
-    variant = eek_serializable_serialize (description);
+    variant = eek_serializable_serialize (EEK_SERIALIZABLE(description));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),
                        "SetDescription",
                        g_variant_new ("(v)", variant),
