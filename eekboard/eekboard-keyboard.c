@@ -31,11 +31,19 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_TYPE (EekboardKeyboard, eekboard_keyboard, G_TYPE_DBUS_PROXY);
 
+#define EEKBOARD_KEYBOARD_GET_PRIVATE(obj)                               \
+    (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEKBOARD_TYPE_KEYBOARD, EekboardKeyboardPrivate))
+
+struct _EekboardKeyboardPrivate
+{
+    EekKeyboard *description;
+};
+
 static void
 eekboard_keyboard_real_g_signal (GDBusProxy  *self,
-                              const gchar *sender_name,
-                              const gchar *signal_name,
-                              GVariant    *parameters)
+                                 const gchar *sender_name,
+                                 const gchar *signal_name,
+                                 GVariant    *parameters)
 {
     EekboardKeyboard *keyboard = EEKBOARD_KEYBOARD (self);
     guint *keycode;
@@ -57,10 +65,40 @@ eekboard_keyboard_real_g_signal (GDBusProxy  *self,
 }
 
 static void
+eekboard_keyboard_real_key_pressed (EekboardKeyboard *self,
+                                    guint             keycode)
+{
+    EekboardKeyboardPrivate *priv = EEKBOARD_KEYBOARD_GET_PRIVATE(self);
+    if (priv->description) {
+        EekKey *key = eek_keyboard_find_key_by_keycode (priv->description,
+                                                        keycode);
+        g_signal_emit_by_name (key, "pressed");
+    }
+}
+
+static void
+eekboard_keyboard_real_key_released (EekboardKeyboard *self,
+                                     guint             keycode)
+{
+    EekboardKeyboardPrivate *priv = EEKBOARD_KEYBOARD_GET_PRIVATE(self);
+    if (priv->description) {
+        EekKey *key = eek_keyboard_find_key_by_keycode (priv->description,
+                                                        keycode);
+        g_signal_emit_by_name (key, "released");
+    }
+}
+
+static void
 eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
 {
     GDBusProxyClass *proxy_class = G_DBUS_PROXY_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+    g_type_class_add_private (gobject_class,
+                              sizeof (EekboardKeyboardPrivate));
+
+    klass->key_pressed = eekboard_keyboard_real_key_pressed;
+    klass->key_released = eekboard_keyboard_real_key_released;
 
     proxy_class->g_signal = eekboard_keyboard_real_g_signal;
 
@@ -68,7 +106,7 @@ eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
         g_signal_new ("key-pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
-                      0,
+                      G_STRUCT_OFFSET(EekboardKeyboardClass, key_pressed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__UINT,
@@ -80,7 +118,7 @@ eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
         g_signal_new ("key-released",
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
-                      0,
+                      G_STRUCT_OFFSET(EekboardKeyboardClass, key_released),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__UINT,
@@ -90,8 +128,12 @@ eekboard_keyboard_class_init (EekboardKeyboardClass *klass)
 }
 
 static void
-eekboard_keyboard_init (EekboardKeyboard *keyboard)
+eekboard_keyboard_init (EekboardKeyboard *self)
 {
+    EekboardKeyboardPrivate *priv;
+
+    priv = self->priv = EEKBOARD_KEYBOARD_GET_PRIVATE(self);
+    priv->description = NULL;
 }
 
 /**
@@ -150,7 +192,15 @@ void
 eekboard_keyboard_set_description (EekboardKeyboard *keyboard,
                                    EekKeyboard      *description)
 {
+    EekboardKeyboardPrivate *priv;
     GVariant *variant;
+
+    g_return_if_fail (EEKBOARD_IS_KEYBOARD(keyboard));
+
+    priv = EEKBOARD_KEYBOARD_GET_PRIVATE(keyboard);
+    if (priv->description)
+        g_object_unref (priv->description);
+    priv->description = g_object_ref (description);
 
     variant = eek_serializable_serialize (EEK_SERIALIZABLE(description));
     g_dbus_proxy_call (G_DBUS_PROXY(keyboard),

@@ -497,7 +497,6 @@ on_key_pressed (EekboardKeyboard *keyboard,
                                False,
                                get_fakekey_modifiers (modifiers));
     }
-    g_signal_emit_by_name (key, "pressed");
 }
 
 static void
@@ -515,7 +514,6 @@ on_key_released (EekboardKeyboard *keyboard,
         // g_debug ("Can't find key for keycode %u", keycode);
         return;
     }
-    g_signal_emit_by_name (key, "released");
 }
 
 gboolean
