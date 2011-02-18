@@ -37,12 +37,12 @@ libeek_public_headers =				\
 	$(srcdir)/eek-keysym.h			\
 	$(srcdir)/eek-types.h			\
 	$(srcdir)/eek-xml.h			\
+	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-serializable.h		\
 	$(srcdir)/eek.h
 
 libeek_private_headers =			\
 	$(srcdir)/eek-renderer.h		\
-	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
 	$(srcdir)/eek-xkeysym-keysym-entries.h	\
