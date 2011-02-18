@@ -567,9 +567,9 @@ get_keyboard (EekKey *key)
 /**
  * eek_key_get_symbol:
  * @key: an #EekKey
+ * @returns: (transfer none): the current #EekSymbol or %NULL on failure
  *
  * Get the current symbol of @key.
- * Returns: an #EekSymbol or %NULL on failure
  */
 EekSymbol *
 eek_key_get_symbol (EekKey *key)
@@ -582,9 +582,9 @@ eek_key_get_symbol (EekKey *key)
  * @key: an #EekKey
  * @fallback_group: fallback group index
  * @fallback_level: fallback level index
+ * @returns: (transfer none): the current #EekSymbol or %NULL on failure
  *
  * Get the current symbol of @key.
- * Returns: an #EekSymbol or %NULL on failure
  */
 EekSymbol *
 eek_key_get_symbol_with_fallback (EekKey *key,
@@ -614,9 +614,9 @@ eek_key_get_symbol_with_fallback (EekKey *key,
  * @level: level index of the symbol matrix
  * @fallback_group: fallback group index
  * @fallback_level: fallback level index
+ * @returns: (transfer none): an #EekSymbol at (@group, @level), or %NULL
  *
  * Get the symbol at (@group, @level) in the symbol matrix of @key.
- * Returns: an #EekSymbol or %NULL on failure
  */
 EekSymbol *
 eek_key_get_symbol_at_index (EekKey *key,
