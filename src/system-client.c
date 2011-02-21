@@ -468,52 +468,37 @@ get_fakekey_modifiers (EekModifierType modifiers)
 }
 
 static void
-on_key_pressed (EekboardKeyboard *keyboard,
-                guint          keycode,
-                gpointer       user_data)
+on_key_pressed (EekKeyboard *keyboard,
+                EekKey      *key,
+                gpointer     user_data)
 {
     EekboardSystemClient *client = user_data;
-    EekKey *key;
     EekSymbol *symbol;
     EekModifierType modifiers;
+    FakeKeyModifier fakekey_modefiers;
+    guint keycode;
 
     g_assert (client->fakekey);
 
     modifiers = eek_keyboard_get_modifiers (client->description);
-    key = eek_keyboard_find_key_by_keycode (client->description, keycode);
-    if (!key) {
-        // g_debug ("Can't find key for keycode %u", keycode);
-        return;
-    }
-
+    fakekey_modefiers = get_fakekey_modifiers (modifiers);
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
+    keycode = eek_key_get_keycode (key);
     if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
-        fakekey_send_keyevent (client->fakekey,
-                               keycode,
-                               True,
-                               get_fakekey_modifiers (modifiers));
-        fakekey_send_keyevent (client->fakekey,
-                               keycode,
-                               False,
-                               get_fakekey_modifiers (modifiers));
+        fakekey_send_keyevent (client->fakekey, keycode, True, modifiers);
+        fakekey_send_keyevent (client->fakekey, keycode, False, modifiers);
     }
 }
 
 static void
-on_key_released (EekboardKeyboard *keyboard,
-                 guint          keycode,
-                 gpointer       user_data)
+on_key_released (EekKeyboard *keyboard,
+                 EekKey      *key,
+                 gpointer     user_data)
 {
     EekboardSystemClient *client = user_data;
-    EekKey *key;
 
     g_assert (client->fakekey);
     fakekey_release (client->fakekey);
-    key = eek_keyboard_find_key_by_keycode (client->description, keycode);
-    if (!key) {
-        // g_debug ("Can't find key for keycode %u", keycode);
-        return;
-    }
 }
 
 gboolean
@@ -530,10 +515,10 @@ eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
     g_assert (client->fakekey);
 
     client->key_pressed_handler =
-        g_signal_connect (client->keyboard, "key-pressed",
+        g_signal_connect (client->description, "key-pressed",
                           G_CALLBACK(on_key_pressed), client);
     client->key_released_handler =
-        g_signal_connect (client->keyboard, "key-released",
+        g_signal_connect (client->description, "key-released",
                           G_CALLBACK(on_key_released), client);
 
     return TRUE;
