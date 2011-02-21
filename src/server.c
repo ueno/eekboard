@@ -37,13 +37,14 @@
 
 enum {
     PROP_0,
+    PROP_OBJECT_PATH,
     PROP_CONNECTION,
     PROP_LAST
 };
 
 static const gchar introspection_xml[] =
     "<node>"
-    "  <interface name='com.redhat.eekboard.Keyboard'>"
+    "  <interface name='com.redhat.Eekboard.Keyboard'>"
     "    <method name='SetDescription'>"
     "      <arg type='v' name='description'/>"
     "    </method>"
@@ -75,8 +76,9 @@ typedef struct _EekboardServerClass EekboardServerClass;
 struct _EekboardServer {
     GObject parent;
     GDBusConnection *connection;
-    guint owner_id;
     GDBusNodeInfo *introspection_data;
+    guint registration_id;
+    char *object_path;
 
     GtkWidget *window;
     GtkWidget *widget;
@@ -91,6 +93,22 @@ struct _EekboardServerClass {
 };
 
 G_DEFINE_TYPE (EekboardServer, eekboard_server, G_TYPE_OBJECT);
+
+static void handle_method_call (GDBusConnection       *connection,
+                                const gchar           *sender,
+                                const gchar           *object_path,
+                                const gchar           *interface_name,
+                                const gchar           *method_name,
+                                GVariant              *parameters,
+                                GDBusMethodInvocation *invocation,
+                                gpointer               user_data);
+
+static const GDBusInterfaceVTable interface_vtable =
+{
+  handle_method_call,
+  NULL,
+  NULL
+};
 
 #if HAVE_CLUTTER_GTK
 static void
@@ -127,9 +145,9 @@ on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Keyboard",
-                                   "/com/redhat/eekboard/Keyboard",
-                                   "com.redhat.eekboard.Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
+                                   "/com/redhat/Eekboard/Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
                                    "VisibilityChanged",
                                    g_variant_new ("(b)", visible),
                                    &error);
@@ -207,6 +225,11 @@ eekboard_server_set_property (GObject      *object,
     GDBusConnection *connection;
 
     switch (prop_id) {
+    case PROP_OBJECT_PATH:
+        if (server->object_path)
+            g_free (server->object_path);
+        server->object_path = g_strdup (g_value_get_string (value));
+        break;
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
         if (server->connection)
@@ -225,11 +248,42 @@ static void
 eekboard_server_dispose (GObject *object)
 {
     EekboardServer *server = EEKBOARD_SERVER(object);
+
     if (server->connection) {
+        if (server->registration_id > 0) {
+            g_dbus_connection_unregister_object (server->connection,
+                                                 server->registration_id);
+            server->registration_id = 0;
+        }
+
         g_object_unref (server->connection);
         server->connection = NULL;
     }
+
+    if (server->introspection_data) {
+        g_dbus_node_info_unref (server->introspection_data);
+        server->introspection_data = NULL;
+    }
+
     G_OBJECT_CLASS (eekboard_server_parent_class)->dispose (object);
+}
+
+static void
+eekboard_server_constructed (GObject *object)
+{
+    EekboardServer *server = EEKBOARD_SERVER (object);
+    if (server->connection && server->object_path) {
+        GError *error = NULL;
+
+        server->registration_id = g_dbus_connection_register_object
+            (server->connection,
+             server->object_path,
+             server->introspection_data->interfaces[0],
+             &interface_vtable,
+             server,
+             NULL,
+             &error);
+    }
 }
 
 static void
@@ -238,8 +292,18 @@ eekboard_server_class_init (EekboardServerClass *klass)
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec *pspec;
 
+    gobject_class->constructed = eekboard_server_constructed;
     gobject_class->set_property = eekboard_server_set_property;
     gobject_class->dispose = eekboard_server_dispose;
+
+    pspec = g_param_spec_string ("object-path",
+                                 "Object-path",
+                                 "Object-path",
+                                 NULL,
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_OBJECT_PATH,
+                                     pspec);
 
     pspec = g_param_spec_object ("connection",
                                  "Connection",
@@ -260,7 +324,8 @@ eekboard_server_init (EekboardServer *server)
     server->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
     g_assert (server->introspection_data != NULL);
-    server->owner_id = 0;
+    server->registration_id = 0;
+    server->object_path = NULL;
     server->keyboard = NULL;
     server->widget = NULL;
     server->window = NULL;
@@ -278,9 +343,9 @@ on_key_pressed (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Keyboard",
-                                   "/com/redhat/eekboard/Keyboard",
-                                   "com.redhat.eekboard.Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
+                                   "/com/redhat/Eekboard/Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
                                    "KeyPressed",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -298,9 +363,9 @@ on_key_released (EekKeyboard *keyboard,
 
     error = NULL;
     g_dbus_connection_emit_signal (server->connection,
-                                   "com.redhat.eekboard.Keyboard",
-                                   "/com/redhat/eekboard/Keyboard",
-                                   "com.redhat.eekboard.Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
+                                   "/com/redhat/Eekboard/Keyboard",
+                                   "com.redhat.Eekboard.Keyboard",
                                    "KeyReleased",
                                    g_variant_new ("(u)",
                                                   eek_key_get_keycode (key)),
@@ -469,70 +534,12 @@ handle_method_call (GDBusConnection       *connection,
     g_return_if_reached ();
 }
 
-static const GDBusInterfaceVTable interface_vtable =
-{
-  handle_method_call,
-  NULL,
-  NULL
-};
-
-static void
-on_name_acquired (GDBusConnection *connection,
-                  const gchar     *name,
-                  gpointer         user_data)
-{
-    // g_debug ("name acquired %s", name);
-}
-
-static void
-on_name_lost (GDBusConnection *connection,
-              const gchar     *name,
-              gpointer         user_data)
-{
-    // g_debug ("name lost %s", name);
-}
-
 EekboardServer *
-eekboard_server_new (GDBusConnection *connection)
+eekboard_server_new (const gchar     *object_path,
+                     GDBusConnection *connection)
 {
-    return g_object_new (EEKBOARD_TYPE_SERVER, "connection", connection, NULL);
-}
-
-gboolean
-eekboard_server_start (EekboardServer *server)
-{
-    guint registration_id;
-    GError *error;
-
-    error = NULL;
-    registration_id = g_dbus_connection_register_object
-        (server->connection,
-         "/com/redhat/eekboard/Keyboard",
-         server->introspection_data->interfaces[0],
-         &interface_vtable,
-         server,
-         NULL,
-         &error);
-    if (error)
-        g_printerr ("%s\n", error->message);
-    g_assert (registration_id > 0);
-
-    server->owner_id =
-        g_bus_own_name_on_connection (server->connection,
-                                      "com.redhat.eekboard.Keyboard",
-                                      G_BUS_NAME_OWNER_FLAGS_NONE,
-                                      on_name_acquired,
-                                      on_name_lost,
-                                      NULL,
-                                      NULL);
-    return server->owner_id > 0;
-}
-
-void
-eekboard_server_stop (EekboardServer *server)
-{
-    if (server->owner_id > 0)
-        g_bus_unown_name (server->owner_id);
-    if (server->introspection_data)
-        g_dbus_node_info_unref (server->introspection_data);
+    return g_object_new (EEKBOARD_TYPE_SERVER,
+                         "object-path", object_path,
+                         "connection", connection,
+                         NULL);
 }

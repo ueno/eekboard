@@ -117,7 +117,7 @@ eekboard_system_client_set_property (GObject      *object,
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
         error = NULL;
-        client->keyboard = eekboard_keyboard_new ("/com/redhat/eekboard/Keyboard",
+        client->keyboard = eekboard_keyboard_new ("/com/redhat/Eekboard/Keyboard",
                                              connection,
                                              NULL,
                                              &error);

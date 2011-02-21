@@ -86,7 +86,7 @@ main (int argc, char **argv)
     }
 
     error = NULL;
-    keyboard = eekboard_keyboard_new ("/com/redhat/eekboard/Keyboard",
+    keyboard = eekboard_keyboard_new ("/com/redhat/Eekboard/Keyboard",
                                       connection,
                                       NULL,
                                       &error);

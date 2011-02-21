@@ -31,10 +31,8 @@ G_BEGIN_DECLS
 
 typedef struct _EekboardServer EekboardServer;
 
-EekboardServer *eekboard_server_new   (GDBusConnection *connection);
-
-gboolean        eekboard_server_start (EekboardServer  *server);
-void            eekboard_server_stop  (EekboardServer  *server);
+EekboardServer *eekboard_server_new        (const gchar     *object_path,
+                                            GDBusConnection *connection);
 
 G_END_DECLS
 #endif  /* EEKBOARD_SERVER_H */

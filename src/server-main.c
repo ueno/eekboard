@@ -37,6 +37,7 @@ main (int argc, char **argv)
     GDBusConnection *connection;
     GError *error;
     GMainLoop *loop;
+    guint owner_id;
 
 #if HAVE_CLUTTER_GTK
     if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
@@ -65,17 +66,29 @@ main (int argc, char **argv)
         exit (1);
     }
 
-    server = eekboard_server_new (connection);
+    server = eekboard_server_new ("/com/redhat/Eekboard/Keyboard", connection);
 
-    if (!eekboard_server_start (server)) {
+    if (server == NULL) {
         g_printerr ("Can't start server\n");
+        exit (1);
+    }
+
+    owner_id = g_bus_own_name_on_connection (connection,
+                                             "com.redhat.Eekboard.Keyboard",
+                                             G_BUS_NAME_OWNER_FLAGS_NONE,
+                                             NULL,
+                                             NULL,
+                                             NULL,
+                                             NULL);
+    if (owner_id == 0) {
+        g_printerr ("Can't own the name\n");
         exit (1);
     }
 
     loop = g_main_loop_new (NULL, FALSE);
     g_main_loop_run (loop);
-    eekboard_server_stop (server);
 
+    g_bus_unown_name (owner_id);
     g_object_unref (server);
     g_object_unref (connection);
     g_main_loop_unref (loop);

@@ -182,10 +182,10 @@ eekboard_keyboard_new (const gchar     *path,
                         cancellable,
                         error,
                         "g-connection", connection,
-                        "g-name", "com.redhat.eekboard.Keyboard",
+                        "g-name", "com.redhat.Eekboard.Keyboard",
                         "g-flags", G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START |
                         G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
-                        "g-interface-name", "com.redhat.eekboard.Keyboard",
+                        "g-interface-name", "com.redhat.Eekboard.Keyboard",
                         "g-object-path", path,
                         NULL);
     if (initable != NULL)
