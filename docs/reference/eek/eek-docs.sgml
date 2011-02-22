@@ -8,15 +8,15 @@
   <bookinfo>
     <title>libeek Reference Manual</title>
     <releaseinfo>
-      for libeek 0.0.5.
+      for libeek 0.90.0.
     </releaseinfo>
     <copyright>
-      <year>2010</year>
+      <year>2010-2011</year>
       <holder>Daiki Ueno</holder>
     </copyright>
 
     <copyright>
-      <year>2010</year>
+      <year>2010-2011</year>
       <holder>Red Hat, Inc.</holder>
     </copyright>
 

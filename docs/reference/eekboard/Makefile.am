@@ -97,7 +97,7 @@ HTML_IMAGES=
 # e.g. GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS = $(GIO2_CFLAGS)
-GTKDOC_LIBS = $(top_builddir)/eekboard/libeekboard.la
+GTKDOC_LIBS = $(top_builddir)/eekboard/libeekboard.la $(GIO2_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

@@ -15,6 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * SECTION:eekboard-context
+ * @short_description: input context maintained by #EekboardServer.
+ *
+ * The #EekboardContext class provides a client access to remote input
+ * context.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -151,6 +160,12 @@ eekboard_context_class_init (EekboardContextClass *klass)
 
     gobject_class->dispose = eekboard_context_dispose;
 
+    /**
+     * EekboardContext::enabled:
+     * @context: an #EekboardContext
+     *
+     * The ::enabled signal is emitted each time @context is enabled.
+     */
     signals[ENABLED] =
         g_signal_new ("enabled",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -162,6 +177,12 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       G_TYPE_NONE,
                       0);
 
+    /**
+     * EekboardContext::disabled:
+     * @context: an #EekboardContext
+     *
+     * The ::disabled signal is emitted each time @context is disabled.
+     */
     signals[DISABLED] =
         g_signal_new ("disabled",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -173,6 +194,14 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       G_TYPE_NONE,
                       0);
 
+    /**
+     * EekboardContext::key-pressed:
+     * @context: an #EekboardContext
+     * @keycode: keycode
+     *
+     * The ::key-pressed signal is emitted each time a key is pressed
+     * in @context.
+     */
     signals[KEY_PRESSED] =
         g_signal_new ("key-pressed",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -185,6 +214,14 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       1,
                       G_TYPE_UINT);
 
+    /**
+     * EekboardContext::key-released:
+     * @context: an #EekboardContext
+     * @keycode: keycode
+     *
+     * The ::key-released signal is emitted each time a key is released
+     * in @context.
+     */
     signals[KEY_RELEASED] =
         g_signal_new ("key-released",
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -209,6 +246,16 @@ eekboard_context_init (EekboardContext *self)
     priv->enabled = FALSE;
 }
 
+/**
+ * eekboard_context_new:
+ * @connection: a #GDBusConnection
+ * @object_path: object path
+ * @cancellable: a #GCancellable
+ *
+ * Create a D-Bus proxy of an input context maintained by
+ * eekboard-server.  This function is seldom called from applications
+ * since eekboard_server_create_context() calls it implicitly.
+ */
 EekboardContext *
 eekboard_context_new (GDBusConnection *connection,
                       const gchar     *object_path,
@@ -250,6 +297,14 @@ context_async_ready_callback (GObject      *source_object,
         g_variant_unref (result);
 }
 
+/**
+ * eekboard_context_set_keyboard:
+ * @context: an #EekboardContext
+ * @keyboard: an #EekKeyboard
+ * @cancellable: a #GCancellable
+ *
+ * Set the keyboard description of @context to @keyboard.
+ */
 void
 eekboard_context_set_keyboard (EekboardContext *context,
                                EekKeyboard     *keyboard,
@@ -278,6 +333,14 @@ eekboard_context_set_keyboard (EekboardContext *context,
     g_variant_unref (variant);
 }
 
+/**
+ * eekboard_context_set_group:
+ * @context: an #EekboardContext
+ * @group: group number
+ * @cancellable: a #GCancellable
+ *
+ * Set the keyboard group of @context.
+ */
 void
 eekboard_context_set_group (EekboardContext *context,
                             gint             group,
@@ -303,6 +366,14 @@ eekboard_context_set_group (EekboardContext *context,
                        NULL);
 }
 
+/**
+ * eekboard_context_show_keyboard:
+ * @context: an #EekboardContext
+ * @cancellable: a #GCancellable
+ *
+ * Request eekboard-server to show a keyboard set by
+ * eekboard_context_set_keyboard().
+ */
 void
 eekboard_context_show_keyboard (EekboardContext *context,
                                 GCancellable    *cancellable)
@@ -325,6 +396,13 @@ eekboard_context_show_keyboard (EekboardContext *context,
                        NULL);
 }
 
+/**
+ * eekboard_context_hide_keyboard:
+ * @context: an #EekboardContext
+ * @cancellable: a #GCancellable
+ *
+ * Request eekboard-server to hide a keyboard.
+ */
 void
 eekboard_context_hide_keyboard (EekboardContext *context,
                                 GCancellable    *cancellable)
@@ -347,6 +425,14 @@ eekboard_context_hide_keyboard (EekboardContext *context,
                        NULL);
 }
 
+/**
+ * eekboard_context_press_key:
+ * @context: an #EekboardContext
+ * @keycode: keycode number
+ * @cancellable: a #GCancellable
+ *
+ * Tell eekboard-server that a key identified by @keycode is pressed.
+ */
 void
 eekboard_context_press_key (EekboardContext *context,
                             guint            keycode,
@@ -370,6 +456,14 @@ eekboard_context_press_key (EekboardContext *context,
                        NULL);
 }
 
+/**
+ * eekboard_context_release_key:
+ * @context: an #EekboardContext
+ * @keycode: keycode number
+ * @cancellable: a #GCancellable
+ *
+ * Tell eekboard-server that a key identified by @keycode is released.
+ */
 void
 eekboard_context_release_key (EekboardContext *context,
                               guint            keycode,
@@ -393,6 +487,12 @@ eekboard_context_release_key (EekboardContext *context,
                        NULL);
 }
 
+/**
+ * eekboard_context_is_keyboard_visible:
+ * @context: an #EekboardContext
+ *
+ * Check if keyboard is visible.
+ */
 gboolean
 eekboard_context_is_keyboard_visible (EekboardContext *context)
 {
@@ -404,6 +504,15 @@ eekboard_context_is_keyboard_visible (EekboardContext *context)
     return priv->enabled && priv->keyboard_visible;
 }
 
+/**
+ * eekboard_context_set_enabled:
+ * @context: an #EekboardContext
+ * @enabled: flag to indicate if @context is enabled
+ *
+ * Set @context enabled or disabled.  This function is seldom called
+ * since the flag is set via D-Bus signal #EekboardContext::enabled
+ * and #EekboardContext::disabled.
+ */
 void
 eekboard_context_set_enabled (EekboardContext *context,
                               gboolean         enabled)
@@ -416,6 +525,12 @@ eekboard_context_set_enabled (EekboardContext *context,
     priv->enabled = enabled;
 }
 
+/**
+ * eekboard_context_is_enabled:
+ * @context: an #EekboardContext
+ *
+ * Check if @context is enabled.
+ */
 gboolean
 eekboard_context_is_enabled (EekboardContext *context)
 {

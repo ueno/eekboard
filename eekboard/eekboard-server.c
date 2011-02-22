@@ -15,6 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * SECTION:eekboard-server
+ * @short_description: D-Bus proxy of eekboard-server
+ *
+ * The #EekboardServer class provides a client side access to eekboard-server.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -68,6 +76,13 @@ eekboard_server_init (EekboardServer *self)
                                (GDestroyNotify)g_object_unref);
 }
 
+/**
+ * eekboard_server_new:
+ * @connection: a #GDBusConnection
+ * @cancellable: a #GCancellable
+ *
+ * Create a D-Bus proxy of eekboard-server.
+ */
 EekboardServer *
 eekboard_server_new (GDBusConnection *connection,
                      GCancellable    *cancellable)
@@ -92,6 +107,14 @@ eekboard_server_new (GDBusConnection *connection,
     return NULL;
 }
 
+/**
+ * eekboard_server_create_context:
+ * @server: an #EekboardServer
+ * @client_name: name of the client
+ * @cancellable: a #GCancellable
+ *
+ * Create a new input context.
+ */
 EekboardContext *
 eekboard_server_create_context (EekboardServer *server,
                                 const gchar    *client_name,
@@ -148,6 +171,14 @@ server_async_ready_callback (GObject      *source_object,
         g_variant_unref (result);
 }
 
+/**
+ * eekboard_server_push_context:
+ * @server: an #EekboardServer
+ * @context: an #EekboardContext
+ * @cancellable: a #GCancellable
+ *
+ * Enable the input context @context and disable the others.
+ */
 void
 eekboard_server_push_context (EekboardServer  *server,
                               EekboardContext *context,
@@ -177,6 +208,13 @@ eekboard_server_push_context (EekboardServer  *server,
                        NULL);
 }
 
+/**
+ * eekboard_server_pop_context:
+ * @server: an #EekboardServer
+ * @cancellable: a #GCancellable
+ *
+ * Disable the current input context and enable the previous one.
+ */
 void
 eekboard_server_pop_context (EekboardServer  *server,
                              GCancellable    *cancellable)
@@ -193,6 +231,14 @@ eekboard_server_pop_context (EekboardServer  *server,
                        NULL);
 }
 
+/**
+ * eekboard_server_destroy_context:
+ * @server: an #EekboardServer
+ * @context: an #EekboardContext
+ * @cancellable: a #GCancellable
+ *
+ * Remove @context from @server.
+ */
 void
 eekboard_server_destroy_context (EekboardServer  *server,
                                  EekboardContext *context,
