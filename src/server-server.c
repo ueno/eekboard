@@ -237,6 +237,8 @@ remove_context_from_stack (ServerServer *server, ServerContext *context)
         g_slist_free1 (head);
         g_object_unref (context);
     }
+    if (server->context_stack)
+        server_context_set_enabled (server->context_stack->data, TRUE);
 }
 
 static void
