@@ -657,7 +657,7 @@ eek_renderer_init (EekRenderer *self)
     priv->pcontext = NULL;
     priv->foreground = eek_color_new (0.3, 0.3, 0.3, 1.0);
     priv->background = eek_color_new (1.0, 1.0, 1.0, 1.0);
-    priv->border_width = 3.0;
+    priv->border_width = 1.0;
     priv->scale = 1.0;
     priv->font = NULL;
     priv->outline_surface_cache =
