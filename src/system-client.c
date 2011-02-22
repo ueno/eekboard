@@ -494,18 +494,18 @@ on_key_pressed (EekKeyboard *keyboard,
     EekboardSystemClient *client = user_data;
     EekSymbol *symbol;
     EekModifierType modifiers;
-    FakeKeyModifier fakekey_modefiers;
+    FakeKeyModifier fakekey_modifiers;
     guint keycode;
 
     g_assert (client->fakekey);
 
     modifiers = eek_keyboard_get_modifiers (client->keyboard);
-    fakekey_modefiers = get_fakekey_modifiers (modifiers);
+    fakekey_modifiers = get_fakekey_modifiers (modifiers);
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     keycode = eek_key_get_keycode (key);
     if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
-        fakekey_send_keyevent (client->fakekey, keycode, True, modifiers);
-        fakekey_send_keyevent (client->fakekey, keycode, False, modifiers);
+        fakekey_send_keyevent (client->fakekey, keycode, True, fakekey_modifiers);
+        fakekey_send_keyevent (client->fakekey, keycode, False, fakekey_modifiers);
     }
 }
 
