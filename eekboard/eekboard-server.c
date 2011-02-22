@@ -29,28 +29,16 @@ G_DEFINE_TYPE (EekboardServer, eekboard_server, G_TYPE_DBUS_PROXY);
 struct _EekboardServerPrivate
 {
     GHashTable *context_hash;
-    GSList *context_stack;
-
-    /* used in eekboard_server_push_context and
-       eekboard_server_destroy_context as a callback data */
-    EekboardContext *context;
 };
 
 static void
 eekboard_server_dispose (GObject *object)
 {
     EekboardServerPrivate *priv = EEKBOARD_SERVER_GET_PRIVATE(object);
-    GSList *head;
 
     if (priv->context_hash) {
         g_hash_table_destroy (priv->context_hash);
         priv->context_hash = NULL;
-    }
-
-    for (head = priv->context_stack; head; head = priv->context_stack) {
-        g_object_unref (head->data);
-        priv->context_stack = g_slist_next (head);
-        g_slist_free1 (head);
     }
 
     G_OBJECT_CLASS (eekboard_server_parent_class)->dispose (object);
@@ -78,8 +66,6 @@ eekboard_server_init (EekboardServer *self)
                                g_str_equal,
                                (GDestroyNotify)g_free,
                                (GDestroyNotify)g_object_unref);
-    priv->context_stack = NULL;
-    priv->context = NULL;
 }
 
 EekboardServer *
@@ -141,33 +127,25 @@ eekboard_server_create_context (EekboardServer *server,
     }
 
     priv = EEKBOARD_SERVER_GET_PRIVATE(server);
-    g_hash_table_insert (priv->context_hash, g_strdup (object_path), context);
+    g_hash_table_insert (priv->context_hash,
+                         g_strdup (object_path),
+                         g_object_ref (context));
     return context;
 }
 
 static void
-push_context_async_ready_callback (GObject      *source_object,
-                                   GAsyncResult *res,
-                                   gpointer      user_data)
+server_async_ready_callback (GObject      *source_object,
+                             GAsyncResult *res,
+                             gpointer      user_data)
 {
-    EekboardServer *server = user_data;
-    EekboardServerPrivate *priv = EEKBOARD_SERVER_GET_PRIVATE(server);
     GError *error = NULL;
     GVariant *result;
 
     result = g_dbus_proxy_call_finish (G_DBUS_PROXY(source_object),
                                        res,
                                        &error);
-    if (result) {
+    if (result)
         g_variant_unref (result);
-
-        if (priv->context_stack)
-            eekboard_context_set_enabled (priv->context_stack->data, FALSE);
-        priv->context_stack = g_slist_prepend (priv->context_stack,
-                                               priv->context);
-        g_object_ref (priv->context);
-        eekboard_context_set_enabled (priv->context, TRUE);
-    }
 }
 
 void
@@ -188,43 +166,15 @@ eekboard_server_push_context (EekboardServer  *server,
     if (!context)
         return;
 
-    priv->context = context;
+    eekboard_context_set_enabled (context, TRUE);
     g_dbus_proxy_call (G_DBUS_PROXY(server),
                        "PushContext",
                        g_variant_new ("(s)", object_path),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
                        cancellable,
-                       push_context_async_ready_callback,
-                       server);
-}
-
-static void
-pop_context_async_ready_callback (GObject      *source_object,
-                                  GAsyncResult *res,
-                                  gpointer      user_data)
-{
-    EekboardServer *server = user_data;
-    EekboardServerPrivate *priv = EEKBOARD_SERVER_GET_PRIVATE(server);
-    GError *error = NULL;
-    GVariant *result;
-
-    result = g_dbus_proxy_call_finish (G_DBUS_PROXY(source_object),
-                                       res,
-                                       &error);
-    if (result) {
-        g_variant_unref (result);
-
-        if (priv->context_stack) {
-            EekboardContext *context = priv->context_stack->data;
-
-            eekboard_context_set_enabled (context, FALSE);
-            priv->context_stack = g_slist_next (priv->context_stack);
-            g_object_unref (context);
-            if (priv->context_stack)
-                eekboard_context_set_enabled (priv->context_stack->data, TRUE);
-        }
-    }
+                       server_async_ready_callback,
+                       NULL);
 }
 
 void
@@ -239,39 +189,8 @@ eekboard_server_pop_context (EekboardServer  *server,
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
                        cancellable,
-                       pop_context_async_ready_callback,
-                       server);
-}
-
-static void
-destroy_context_async_ready_callback (GObject      *source_object,
-                                      GAsyncResult *res,
-                                      gpointer      user_data)
-{
-    EekboardServer *server = user_data;
-    EekboardServerPrivate *priv = EEKBOARD_SERVER_GET_PRIVATE(server);
-    GError *error = NULL;
-    GVariant *result;
-    const gchar *object_path;
-    GSList *head;
-
-    result = g_dbus_proxy_call_finish (G_DBUS_PROXY(source_object),
-                                       res,
-                                       &error);
-    if (result) {
-        g_variant_unref (result);
-
-        head = g_slist_find (priv->context_stack, priv->context);
-        if (head) {
-            priv->context_stack = g_slist_remove_link (priv->context_stack,
-                                                       head);
-            g_slist_free1 (head);
-        }
-
-        object_path =
-            g_dbus_proxy_get_object_path (G_DBUS_PROXY(priv->context));
-        g_hash_table_remove (priv->context_hash, object_path);
-    }
+                       server_async_ready_callback,
+                       NULL);
 }
 
 void
@@ -285,16 +204,17 @@ eekboard_server_destroy_context (EekboardServer  *server,
     g_return_if_fail (EEKBOARD_IS_SERVER(server));
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
 
-    object_path = g_dbus_proxy_get_object_path (G_DBUS_PROXY(context));
-
     priv = EEKBOARD_SERVER_GET_PRIVATE(server);
-    priv->context = context;
+
+    object_path = g_dbus_proxy_get_object_path (G_DBUS_PROXY(context));
+    g_hash_table_remove (priv->context_hash, object_path);
+
     g_dbus_proxy_call (G_DBUS_PROXY(server),
                        "DestroyContext",
                        g_variant_new ("(s)", object_path),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
                        cancellable,
-                       destroy_context_async_ready_callback,
-                       server);
+                       server_async_ready_callback,
+                       NULL);
 }

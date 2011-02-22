@@ -415,3 +415,14 @@ eekboard_context_set_enabled (EekboardContext *context,
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
     priv->enabled = enabled;
 }
+
+gboolean
+eekboard_context_is_enabled (EekboardContext *context)
+{
+    EekboardContextPrivate *priv;
+
+    g_assert (EEKBOARD_IS_CONTEXT(context));
+
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+    return priv->enabled;
+}

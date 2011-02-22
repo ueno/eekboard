@@ -76,6 +76,7 @@ gboolean         eekboard_context_is_keyboard_visible
                                                 (EekboardContext *context);
 void             eekboard_context_set_enabled   (EekboardContext *context,
                                                  gboolean         enabled);
+gboolean         eekboard_context_is_enabled    (EekboardContext *context);
 
 G_END_DECLS
 #endif  /* EEKBOARD_CONTEXT_H */

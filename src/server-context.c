@@ -84,6 +84,7 @@ struct _ServerContext {
     char *object_path;
 
     gboolean enabled;
+    gboolean last_keyboard_visible;
 
     GtkWidget *window;
     GtkWidget *widget;
@@ -347,6 +348,9 @@ server_context_init (ServerContext *context)
     context->registration_id = 0;
     context->object_path = NULL;
 
+    context->enabled = FALSE;
+    context->last_keyboard_visible = FALSE;
+
     context->keyboard = NULL;
     context->widget = NULL;
     context->window = NULL;
@@ -429,11 +433,6 @@ handle_method_call (GDBusConnection       *connection,
         EekSerializable *serializable;
         GVariant *variant;
 
-        if (!context->enabled) {
-            g_dbus_method_invocation_return_value (invocation, NULL);
-            return;
-        }
-
         g_variant_get (parameters, "(v)", &variant);
         serializable = eek_serializable_deserialize (variant);
         if (!EEK_IS_KEYBOARD(serializable)) {
@@ -470,11 +469,6 @@ handle_method_call (GDBusConnection       *connection,
 
     if (g_strcmp0 (method_name, "SetGroup") == 0) {
         gint group;
-
-        if (!context->enabled) {
-            g_dbus_method_invocation_return_value (invocation, NULL);
-            return;
-        }
 
         if (!context->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
@@ -526,11 +520,6 @@ handle_method_call (GDBusConnection       *connection,
         g_strcmp0 (method_name, "ReleaseKey") == 0) {
         EekKey *key;
         guint keycode;
-
-        if (!context->enabled) {
-            g_dbus_method_invocation_return_value (invocation, NULL);
-            return;
-        }
 
         if (!context->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
@@ -604,6 +593,8 @@ server_context_set_enabled (ServerContext *context, gboolean enabled)
                                        NULL,
                                        &error);
         g_assert_no_error (error);
+        if (context->last_keyboard_visible && context->window)
+            gtk_widget_show_all (context->window);
     } else {
         error = NULL;
         g_dbus_connection_emit_signal (context->connection,
@@ -614,6 +605,11 @@ server_context_set_enabled (ServerContext *context, gboolean enabled)
                                        NULL,
                                        &error);
         g_assert_no_error (error);
+        if (context->window) {
+            context->last_keyboard_visible =
+                gtk_widget_get_visible (context->window);
+            gtk_widget_hide (context->window);
+        }
     }
     context->enabled = enabled;
 }
