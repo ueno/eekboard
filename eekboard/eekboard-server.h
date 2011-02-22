@@ -19,6 +19,7 @@
 #define EEKBOARD_SERVER_H 1
 
 #include <gio/gio.h>
+#include "eekboard/eekboard-context.h"
 
 G_BEGIN_DECLS
 
@@ -30,9 +31,34 @@ G_BEGIN_DECLS
 #define EEKBOARD_SERVER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEKBOARD_TYPE_SERVER, EekboardServerClass))
 
 typedef struct _EekboardServer EekboardServer;
+typedef struct _EekboardServerClass EekboardServerClass;
+typedef struct _EekboardServerPrivate EekboardServerPrivate;
 
-EekboardServer *eekboard_server_new        (const gchar     *object_path,
-                                            GDBusConnection *connection);
+struct _EekboardServer {
+    GDBusProxy parent;
+
+    EekboardServerPrivate *priv;
+};
+
+struct _EekboardServerClass {
+    GDBusProxyClass parent_class;
+};
+
+GType            eekboard_server_get_type        (void) G_GNUC_CONST;
+
+EekboardServer  *eekboard_server_new             (GDBusConnection *connection,
+                                                  GCancellable    *cancellable);
+EekboardContext *eekboard_server_create_context  (EekboardServer  *server,
+                                                  const gchar     *client_name,
+                                                  GCancellable    *cancellable);
+void             eekboard_server_push_context    (EekboardServer  *server,
+                                                  EekboardContext *context,
+                                                  GCancellable    *cancellable);
+void             eekboard_server_pop_context     (EekboardServer  *server,
+                                                  GCancellable    *cancellable);
+void             eekboard_server_destroy_context (EekboardServer  *server,
+                                                  EekboardContext *context,
+                                                  GCancellable    *cancellable);
 
 G_END_DECLS
 #endif  /* EEKBOARD_SERVER_H */

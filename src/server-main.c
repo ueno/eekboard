@@ -27,13 +27,28 @@
 #include <clutter-gtk/clutter-gtk.h>
 #endif
 
-#include "server.h"
+#include "server-server.h"
 #include "eek/eek.h"
+
+static void
+on_name_acquired (GDBusConnection *connection,
+                  const gchar     *name,
+                  gpointer         user_data)
+{
+}
+
+static void
+on_name_lost (GDBusConnection *connection,
+              const gchar     *name,
+              gpointer         user_data)
+{
+  exit (1);
+}
 
 int
 main (int argc, char **argv)
 {
-    EekboardServer *server;
+    ServerServer *server;
     GDBusConnection *connection;
     GError *error;
     GMainLoop *loop;
@@ -66,18 +81,18 @@ main (int argc, char **argv)
         exit (1);
     }
 
-    server = eekboard_server_new ("/com/redhat/Eekboard/Keyboard", connection);
+    server = server_server_new (SERVER_SERVER_PATH, connection);
 
     if (server == NULL) {
-        g_printerr ("Can't start server\n");
+        g_printerr ("Can't create server server\n");
         exit (1);
     }
 
     owner_id = g_bus_own_name_on_connection (connection,
-                                             "com.redhat.Eekboard.Keyboard",
+                                             SERVER_SERVER_INTERFACE,
                                              G_BUS_NAME_OWNER_FLAGS_NONE,
-                                             NULL,
-                                             NULL,
+                                             on_name_acquired,
+                                             on_name_lost,
                                              NULL,
                                              NULL);
     if (owner_id == 0) {

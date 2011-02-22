@@ -21,22 +21,22 @@
 
 #include "eekboard/eekboard.h"
 
-static gchar *opt_set_description = NULL;
+static gchar *opt_set_keyboard = NULL;
 static gint opt_set_group = -1;
-static gboolean opt_show = FALSE;
-static gboolean opt_hide = FALSE;
+static gboolean opt_show_keyboard = FALSE;
+static gboolean opt_hide_keyboard = FALSE;
 static gint opt_press_key = -1;
 static gint opt_release_key = -1;
 static gboolean opt_listen = FALSE;
 
 static const GOptionEntry options[] = {
-    {"set-description", '\0', 0, G_OPTION_ARG_STRING, &opt_set_description,
-     "Set keyboard description from an XML file"},
+    {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_keyboard,
+     "Set keyboard keyboard from an XML file"},
     {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
      "Set group of the keyboard"},
-    {"show", '\0', 0, G_OPTION_ARG_NONE, &opt_show,
+    {"show-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_show_keyboard,
      "Show keyboard"},
-    {"hide", '\0', 0, G_OPTION_ARG_NONE, &opt_hide,
+    {"hide-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_hide_keyboard,
      "Hide keyboard"},
     {"press-key", '\0', 0, G_OPTION_ARG_INT, &opt_press_key,
      "Press key"},
@@ -62,20 +62,21 @@ on_key_released (guint keycode, gpointer user_data)
 int
 main (int argc, char **argv)
 {
-    EekboardKeyboard *keyboard = NULL;
+    EekboardServer *server = NULL;
+    EekboardContext *context = NULL;
     GDBusConnection *connection = NULL;
     GError *error;
-    GOptionContext *context;
+    GOptionContext *option_context;
     GMainLoop *loop = NULL;
     gint retval = 0;
 
     g_type_init ();
     g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
-    context = g_option_context_new ("eekboard-client");
-    g_option_context_add_main_entries (context, options, NULL);
-    g_option_context_parse (context, &argc, &argv, NULL);
-    g_option_context_free (context);
+    option_context = g_option_context_new ("eekboard-client");
+    g_option_context_add_main_entries (option_context, options, NULL);
+    g_option_context_parse (option_context, &argc, &argv, NULL);
+    g_option_context_free (option_context);
 
     error = NULL;
     connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
@@ -85,75 +86,82 @@ main (int argc, char **argv)
         goto out;
     }
 
-    error = NULL;
-    keyboard = eekboard_keyboard_new ("/com/redhat/Eekboard/Keyboard",
-                                      connection,
-                                      NULL,
-                                      &error);
-    if (error) {
-        g_printerr ("%s\n", error->message);
+    server = eekboard_server_new (connection, NULL);
+    if (!server) {
+        g_printerr ("Can't create server\n");
         retval = 1;
         goto out;
     }
 
-    if (opt_set_description) {
+    context = eekboard_server_create_context (server,
+                                              "eekboard-client",
+                                              NULL);
+    if (!context) {
+        g_printerr ("Can't create context\n");
+        retval = 1;
+        goto out;
+    }
+
+    eekboard_server_push_context (server, context, NULL);
+
+    if (opt_set_keyboard) {
         GFile *file;
         GFileInputStream *input;
         EekLayout *layout;
-        EekKeyboard *description;
-        GError *error;
+        EekKeyboard *keyboard;
 
-        file = g_file_new_for_path (opt_set_description);
+        file = g_file_new_for_path (opt_set_keyboard);
 
         error = NULL;
         input = g_file_read (file, NULL, &error);
         if (error) {
             g_printerr ("Can't read file %s: %s\n",
-                        opt_set_description, error->message);
+                        opt_set_keyboard, error->message);
             retval = 1;
             goto out;
         }
 
         layout = eek_xml_layout_new (G_INPUT_STREAM(input));
         g_object_unref (input);
-        description = eek_keyboard_new (layout, 640, 480);
+        keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
-        eekboard_keyboard_set_description (keyboard, description);
-        g_object_unref (description);
+
+        eekboard_context_set_keyboard (context, keyboard, NULL);
+        g_object_unref (keyboard);
     }
 
     if (opt_set_group >= 0) {
-        eekboard_keyboard_set_group (keyboard, opt_set_group);
+        eekboard_context_set_group (context, opt_set_group, NULL);
     }
 
-    if (opt_show) {
-        eekboard_keyboard_show (keyboard);
+    if (opt_show_keyboard) {
+        eekboard_context_show_keyboard (context, NULL);
     }
 
-    if (opt_hide) {
-        eekboard_keyboard_hide (keyboard);
+    if (opt_hide_keyboard) {
+        eekboard_context_hide_keyboard (context, NULL);
     }
 
     if (opt_press_key >= 0) {
-        eekboard_keyboard_press_key (keyboard, opt_press_key);
+        eekboard_context_press_key (context, opt_press_key, NULL);
     }
 
     if (opt_release_key >= 0) {
-        eekboard_keyboard_release_key (keyboard, opt_release_key);
+        eekboard_context_release_key (context, opt_release_key, NULL);
     }
 
     if (opt_listen) {
-        g_signal_connect (keyboard, "key-pressed",
+        g_signal_connect (context, "key-pressed",
                           G_CALLBACK(on_key_pressed), NULL);
-        g_signal_connect (keyboard, "key-released",
+        g_signal_connect (context, "key-released",
                           G_CALLBACK(on_key_released), NULL);
         loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (loop);
     }
 
  out:
-    if (keyboard)
-        g_object_unref (keyboard);
+    if (context)
+        g_object_unref (context);
     if (connection)
         g_object_unref (connection);
     if (loop)

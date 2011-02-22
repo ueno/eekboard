@@ -172,22 +172,12 @@ eek_container_dispose (GObject *object)
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(object);
     GSList *head;
 
-    for (head = priv->children; head; head = g_slist_next (head)) {
-        if (head->data) {
-            g_object_unref (head->data);
-            head->data = NULL;
-        }
+    for (head = priv->children; head; head = priv->children) {
+        g_object_unref (head->data);
+        priv->children = g_slist_next (head);
+        g_slist_free1 (head);
     }
     G_OBJECT_CLASS(eek_container_parent_class)->dispose (object);
-}
-
-static void
-eek_container_finalize (GObject *object)
-{
-    EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(object);
-
-    g_slist_free (priv->children);
-    G_OBJECT_CLASS(eek_container_parent_class)->finalize (object);
 }
 
 static void
@@ -207,7 +197,6 @@ eek_container_class_init (EekContainerClass *klass)
     klass->child_added = NULL;
     klass->child_removed = NULL;
 
-    gobject_class->finalize = eek_container_finalize;
     gobject_class->dispose = eek_container_dispose;
 
     /**

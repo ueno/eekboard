@@ -68,8 +68,8 @@ eekboard_server_LDADD = \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS)
 
-eekboard_server_headers = server.h
-eekboard_server_SOURCES = server.c server-main.c
+eekboard_server_headers = server-server.h server-context.h
+eekboard_server_SOURCES = server-server.c server-context.c server-main.c
 
 if ENABLE_CLUTTER
 eekboard_server_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
