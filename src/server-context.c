@@ -212,7 +212,8 @@ update_widget (ServerContext *context)
 
     gtk_widget_set_can_focus (context->window, FALSE);
     g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
-    gtk_window_set_title (GTK_WINDOW(context->window), "Context");
+    gtk_window_set_title (GTK_WINDOW(context->window), "Keyboard");
+    gtk_window_set_icon_name (GTK_WINDOW(context->window), "input-keyboard");
     gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
 
     screen = gdk_screen_get_default ();
