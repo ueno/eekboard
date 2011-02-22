@@ -33,6 +33,7 @@ eekboard_system_client_CFLAGS = \
 
 eekboard_system_client_LDADD = \
 	$(top_builddir)/eekboard/libeekboard.la \
+	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
@@ -64,6 +65,7 @@ eekboard_server_CFLAGS = \
 
 eekboard_server_LDADD = \
 	$(top_builddir)/eekboard/libeekboard.la \
+	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-gtk.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS)
@@ -82,6 +84,7 @@ eekboard_client_CFLAGS = \
 
 eekboard_client_LDADD = \
 	$(top_builddir)/eekboard/libeekboard.la \
+	$(top_builddir)/eek/libeek.la \
 	$(GIO2_LIBS)
 
 eekboard_client_SOURCES = client-main.c
@@ -98,7 +101,7 @@ eekboard_xml_LDADD = \
 	$(top_builddir)/eek/libeek-gtk.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
-	$(LIBXKLAVIER_CFLAGS)
+	$(LIBXKLAVIER_LIBS)
 
 eekboard_xml_headers = xklutil.h
 eekboard_xml_SOURCES = xklutil.c xml-main.c

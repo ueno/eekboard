@@ -22,10 +22,10 @@ TESTS = eek-simple-test eek-xkb-test eek-xml-test
 noinst_PROGRAMS = $(TESTS)
 
 eek_simple_test_SOURCES = eek-simple-test.c
-eek_simple_test_LDADD = $(top_builddir)/eek/libeek.la
+eek_simple_test_LDADD = $(top_builddir)/eek/libeek.la $(GIO2_LIBS)
 
 eek_xkb_test_SOURCES = eek-xkb-test.c
-eek_xkb_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la
+eek_xkb_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la  $(GIO2_LIBS) $(GTK_LIBS)
 
 eek_xml_test_SOURCES = eek-xml-test.c
-eek_xml_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la
+eek_xml_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(GIO2_LIBS) $(GTK_LIBS)
