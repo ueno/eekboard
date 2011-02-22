@@ -15,77 +15,67 @@ OPTIONAL: fakekey, CSPI, Clutter, Clutter-Gtk, Vala, gobject-introspection
   $ git clone git://github.com/ueno/eekboard.git
   $ cd eekboard
   $ ./autogen.sh --prefix=/usr --enable-gtk-doc
-  $ ./configure
   $ make
+  $ sudo make install
+
+** Build from tarball
+
+  $ ./configure --prefix=/usr
+  $ make
+  $ sudo make install
 
 * How to test
 
 eekboard currently includes 4 tools to implement your own virtual
-keyboard:
+keyboard.
 
-- eekboard-server
-  a D-Bus server which draws interactive on-screen keyboards.
+** eekboard-server
 
-- eekboard-client
-  a test client of eekboard-server.
+eekboard-server is a D-Bus server which is responsible for drawing
+interactive on-screen keyboards.  Since it has a D-Bus service
+activation entry, you will not need to start it manually, but you can
+do that with:
 
-- eekboard-system-client
-  another client of eekboard-server.  It listens system events (focus
-  change, keystroke, and keyboard change) and generates X key events
-  when some keys are pressed on the on-screen keyboard.
+  $ eekboard-server &
 
-- eekboard-xml
-  a tool to dump the current system keyboard layout into an XML file.
-  It's also capable of loading an XML file and displaying the layout.
-  
-** Test with eekboard-client
+** eekboard-system-client
 
-Start eekboard-server:
+eekboard-system-client is a client of eekboard-server.  It listens
+system events (focus change, keystroke, and keyboard change) and
+generates X key events when some keys are pressed on the on-screen
+keyboard.  It can be started with:
 
-  $ ./src/eekboard-server &
-
-Dump the current system keyboard layout into an XML file:
-
-  $ ./src/eekboard-xml --dump > keyboard.xml
-
-(Optional) you can check the layout with:
-
-  $ ./src/eekboard-xml --load keyboard.xml
-
-Access to eekboard-server:
-
-  $ ./src/eekboard-client --set-keyboard keyboard.xml
-  $ ./src/eekboard-client --show   # will pop up a keyboard window
-  $ ./src/eekboard-client --listen # press some keys on the keyboard
-  KeyPressed XXXXX
-  KeyReleased XXXXX
-  $ ./src/eekboard-client --set-group 1
-  $ ./src/eekboard-client --press-key 65
-  $ ./src/eekboard-client --release-key 65
-
-** Test with eekboard-system-client
-
-NOTE: eekboard-system-client is now being heavily developed and it may
-behave wrongly.  Make sure to close windows where you are doing any
-important work, before running eekboard.
-
-Start eekboard-server:
-
-  $ ./src/eekboard-server &
-
-Start eekboard-system-client
-
-  $ ./src/eekboard-system-client \
-      --listen-keyboard \
-      --listen-focus \
-      --generate-key-event
+  $ eekboard-system-client -kfg
 
 Where:
 
---listen-keyboard is to monitor system keyboard state/config change,
---listen-focus is to track focus change, and
---generate-key-event is to generate X key events on virtual
-  key-press/key-release events.
+-k (--listen-keyboard) is to monitor system keyboard state/config change,
+-f (--listen-focus) is to track focus change, and
+-g (--generate-key-event) is to generate X key events on virtual
+key-press/key-release events.
+
+** eekboard-xml
+
+eekboard-xml is a tool to manipulate XML keyboard description used by
+eekboard-client tool and in the eekboard library.
+
+To dump the current system keyboard layout into an XML file:
+
+  $ eekboard-xml --dump > keyboard.xml
+
+You can display the dumped layout with:
+
+  $ eekboard-xml --load keyboard.xml
+
+** eekboard-client
+
+eekboard-client is a simple test client of eekboard-server.  To upload
+the keyboard description to the server, display it, and listen
+key events.
+
+  $ eekboard-client --set-keyboard keyboard.xml --show-keyboard --listen
+  KeyPressed XXXXX
+  KeyReleased XXXXX
 
 * Documentation
 
