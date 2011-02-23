@@ -34,7 +34,7 @@
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
 #include "eekboard/eekboard.h"
-#include "system-client.h"
+#include "desktop-client.h"
 
 #define CSW 640
 #define CSH 480
@@ -46,9 +46,9 @@ enum {
     PROP_LAST
 };
 
-typedef struct _EekboardSystemClientClass EekboardSystemClientClass;
+typedef struct _EekboardDesktopClientClass EekboardDesktopClientClass;
 
-struct _EekboardSystemClient {
+struct _EekboardDesktopClient {
     GObject parent;
 
     EekboardServer *server;
@@ -75,11 +75,11 @@ struct _EekboardSystemClient {
 #endif  /* HAVE_FAKEKEY */
 };
 
-struct _EekboardSystemClientClass {
+struct _EekboardDesktopClientClass {
     GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (EekboardSystemClient, eekboard_system_client, G_TYPE_OBJECT);
+G_DEFINE_TYPE (EekboardDesktopClient, eekboard_desktop_client, G_TYPE_OBJECT);
 
 static GdkFilterReturn filter_xkl_event  (GdkXEvent                 *xev,
                                           GdkEvent                  *event,
@@ -103,16 +103,16 @@ static SPIBoolean      keystroke_listener_cb
                                          (const AccessibleKeystroke *stroke,
                                           void                      *user_data);
 #endif  /* HAVE_CSPI */
-static void            set_keyboard      (EekboardSystemClient      *client,
+static void            set_keyboard      (EekboardDesktopClient      *client,
                                           gboolean                   show);
 
 static void
-eekboard_system_client_set_property (GObject      *object,
+eekboard_desktop_client_set_property (GObject      *object,
                                       guint         prop_id,
                                       const GValue *value,
                                       GParamSpec   *pspec)
 {
-    EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
+    EekboardDesktopClient *client = EEKBOARD_DESKTOP_CLIENT(object);
     GDBusConnection *connection;
 
     switch (prop_id) {
@@ -124,7 +124,7 @@ eekboard_system_client_set_property (GObject      *object,
 
         client->context =
             eekboard_server_create_context (client->server,
-                                            "eekboard-system-client",
+                                            "eekboard-desktop-client",
                                             NULL);
         g_assert (client->context);
 
@@ -139,12 +139,12 @@ eekboard_system_client_set_property (GObject      *object,
 }
 
 static void
-eekboard_system_client_get_property (GObject    *object,
+eekboard_desktop_client_get_property (GObject    *object,
                                      guint       prop_id,
                                      GValue     *value,
                                      GParamSpec *pspec)
 {
-    EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
+    EekboardDesktopClient *client = EEKBOARD_DESKTOP_CLIENT(object);
 
     switch (prop_id) {
     case PROP_CONTEXT:
@@ -159,19 +159,19 @@ eekboard_system_client_get_property (GObject    *object,
 }
 
 static void
-eekboard_system_client_dispose (GObject *object)
+eekboard_desktop_client_dispose (GObject *object)
 {
-    EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
+    EekboardDesktopClient *client = EEKBOARD_DESKTOP_CLIENT(object);
 
-    eekboard_system_client_disable_xkl (client);
+    eekboard_desktop_client_disable_xkl (client);
 
 #ifdef HAVE_CSPI
-    eekboard_system_client_disable_cspi_focus (client);
-    eekboard_system_client_disable_cspi_keystroke (client);
+    eekboard_desktop_client_disable_cspi_focus (client);
+    eekboard_desktop_client_disable_cspi_keystroke (client);
 #endif  /* HAVE_CSPI */
 
 #ifdef HAVE_FAKEKEY
-    eekboard_system_client_disable_fakekey (client);
+    eekboard_desktop_client_disable_fakekey (client);
 #endif  /* HAVE_FAKEKEY */
 
     if (client->context) {
@@ -204,18 +204,18 @@ eekboard_system_client_dispose (GObject *object)
         client->display = NULL;
     }
 
-    G_OBJECT_CLASS (eekboard_system_client_parent_class)->dispose (object);
+    G_OBJECT_CLASS (eekboard_desktop_client_parent_class)->dispose (object);
 }
 
 static void
-eekboard_system_client_class_init (EekboardSystemClientClass *klass)
+eekboard_desktop_client_class_init (EekboardDesktopClientClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec *pspec;
 
-    gobject_class->set_property = eekboard_system_client_set_property;
-    gobject_class->get_property = eekboard_system_client_get_property;
-    gobject_class->dispose = eekboard_system_client_dispose;
+    gobject_class->set_property = eekboard_desktop_client_set_property;
+    gobject_class->get_property = eekboard_desktop_client_get_property;
+    gobject_class->dispose = eekboard_desktop_client_dispose;
 
     pspec = g_param_spec_object ("connection",
                                  "Connection",
@@ -237,7 +237,7 @@ eekboard_system_client_class_init (EekboardSystemClientClass *klass)
 }
 
 static void
-eekboard_system_client_init (EekboardSystemClient *client)
+eekboard_desktop_client_init (EekboardDesktopClient *client)
 {
     client->server = NULL;
     client->context = NULL;
@@ -259,7 +259,7 @@ eekboard_system_client_init (EekboardSystemClient *client)
 }
 
 gboolean
-eekboard_system_client_enable_xkl (EekboardSystemClient *client)
+eekboard_desktop_client_enable_xkl (EekboardDesktopClient *client)
 {
     if (!client->display) {
         client->display = gdk_display_get_default ();
@@ -304,7 +304,7 @@ eekboard_system_client_enable_xkl (EekboardSystemClient *client)
 }
 
 void
-eekboard_system_client_disable_xkl (EekboardSystemClient *client)
+eekboard_desktop_client_disable_xkl (EekboardDesktopClient *client)
 {
     if (client->xkl_engine)
         xkl_engine_stop_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
@@ -320,7 +320,7 @@ eekboard_system_client_disable_xkl (EekboardSystemClient *client)
 
 #ifdef HAVE_CSPI
 gboolean
-eekboard_system_client_enable_cspi_focus (EekboardSystemClient *client)
+eekboard_desktop_client_enable_cspi_focus (EekboardDesktopClient *client)
 {
     client->focus_listener = SPI_createAccessibleEventListener
         ((AccessibleEventListenerCB)focus_listener_cb,
@@ -338,7 +338,7 @@ eekboard_system_client_enable_cspi_focus (EekboardSystemClient *client)
 }
 
 void
-eekboard_system_client_disable_cspi_focus (EekboardSystemClient *client)
+eekboard_desktop_client_disable_cspi_focus (EekboardDesktopClient *client)
 {
     if (client->focus_listener) {
         SPI_deregisterGlobalEventListenerAll (client->focus_listener);
@@ -348,7 +348,7 @@ eekboard_system_client_disable_cspi_focus (EekboardSystemClient *client)
 }
 
 gboolean
-eekboard_system_client_enable_cspi_keystroke (EekboardSystemClient *client)
+eekboard_desktop_client_enable_cspi_keystroke (EekboardDesktopClient *client)
 {
     client->keystroke_listener =
         SPI_createAccessibleKeystrokeListener (keystroke_listener_cb,
@@ -366,7 +366,7 @@ eekboard_system_client_enable_cspi_keystroke (EekboardSystemClient *client)
 }
 
 void
-eekboard_system_client_disable_cspi_keystroke (EekboardSystemClient *client)
+eekboard_desktop_client_disable_cspi_keystroke (EekboardDesktopClient *client)
 {
     if (client->keystroke_listener) {
         SPI_deregisterAccessibleKeystrokeListener (client->keystroke_listener,
@@ -380,7 +380,7 @@ static SPIBoolean
 focus_listener_cb (const AccessibleEvent *event,
                    void                  *user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
     Accessible *accessible = event->source;
     AccessibleStateSet *state_set = Accessible_getStateSet (accessible);
     AccessibleRole role = Accessible_getRole (accessible);
@@ -410,7 +410,7 @@ static SPIBoolean
 keystroke_listener_cb (const AccessibleKeystroke *stroke,
                        void                      *user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
     EekKey *key;
 
     /* Ignore modifiers since the keystroke listener does not called
@@ -433,10 +433,10 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
 }
 #endif  /* HAVE_CSPI */
 
-EekboardSystemClient *
-eekboard_system_client_new (GDBusConnection *connection)
+EekboardDesktopClient *
+eekboard_desktop_client_new (GDBusConnection *connection)
 {
-    return g_object_new (EEKBOARD_TYPE_SYSTEM_CLIENT,
+    return g_object_new (EEKBOARD_TYPE_DESKTOP_CLIENT,
                          "connection", connection,
                          NULL);
 }
@@ -446,7 +446,7 @@ filter_xkl_event (GdkXEvent *xev,
                   GdkEvent  *event,
                   gpointer   user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
     XEvent *xevent = (XEvent *)xev;
 
     xkl_engine_filter_events (client->xkl_engine, xevent);
@@ -457,7 +457,7 @@ static void
 on_xkl_config_changed (XklEngine *xklengine,
                        gpointer   user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
 
     set_keyboard (client, FALSE);
 
@@ -468,7 +468,7 @@ on_xkl_config_changed (XklEngine *xklengine,
 }
 
 static void
-set_keyboard (EekboardSystemClient *client,
+set_keyboard (EekboardDesktopClient *client,
               gboolean              show)
 {
     EekLayout *layout;
@@ -497,7 +497,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
                       gboolean             restore,
                       gpointer             user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
 
     if (type == GROUP_CHANGED && client->keyboard) {
         gint group = eek_keyboard_get_group (client->keyboard);
@@ -530,7 +530,7 @@ on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key,
                 gpointer     user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
     EekSymbol *symbol;
     EekModifierType modifiers;
     FakeKeyModifier fakekey_modifiers;
@@ -553,14 +553,14 @@ on_key_released (EekKeyboard *keyboard,
                  EekKey      *key,
                  gpointer     user_data)
 {
-    EekboardSystemClient *client = user_data;
+    EekboardDesktopClient *client = user_data;
 
     g_assert (client->fakekey);
     fakekey_release (client->fakekey);
 }
 
 gboolean
-eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
+eekboard_desktop_client_enable_fakekey (EekboardDesktopClient *client)
 {
     if (!client->display) {
         client->display = gdk_display_get_default ();
@@ -583,7 +583,7 @@ eekboard_system_client_enable_fakekey (EekboardSystemClient *client)
 }
 
 void
-eekboard_system_client_disable_fakekey (EekboardSystemClient *client)
+eekboard_desktop_client_disable_fakekey (EekboardDesktopClient *client)
 {
     if (client->fakekey)
         fakekey_release (client->fakekey);

@@ -24,7 +24,7 @@
 #include <gtk/gtk.h>
 #include <gconf/gconf-client.h>
 #include "eekboard/eekboard.h"
-#include "system-client.h"
+#include "desktop-client.h"
 
 #ifdef HAVE_CSPI
 gboolean opt_focus = FALSE;
@@ -59,7 +59,7 @@ on_notify_keyboard_visible (GObject    *object,
 int
 main (int argc, char **argv)
 {
-    EekboardSystemClient *client;
+    EekboardDesktopClient *client;
     EekboardContext *context;
     GDBusConnection *connection;
     GError *error;
@@ -72,7 +72,7 @@ main (int argc, char **argv)
         exit (1);
     }
 
-    option_context = g_option_context_new ("eekboard-system-client");
+    option_context = g_option_context_new ("eekboard-desktop-client");
     g_option_context_add_main_entries (option_context, options, NULL);
     g_option_context_parse (option_context, &argc, &argv, NULL);
     g_option_context_free (option_context);
@@ -83,7 +83,7 @@ main (int argc, char **argv)
         g_printerr ("%s\n", error->message);
         exit (1);
     }
-    client = eekboard_system_client_new (connection);
+    client = eekboard_desktop_client_new (connection);
 
     gconfc = gconf_client_get_default ();
 
@@ -102,37 +102,37 @@ main (int argc, char **argv)
             }
 
             if (opt_focus &&
-                !eekboard_system_client_enable_cspi_focus (client)) {
+                !eekboard_desktop_client_enable_cspi_focus (client)) {
                 g_printerr ("Can't register focus change event listeners\n");
                 exit (1);
             }
 
             if (opt_keystroke &&
-                !eekboard_system_client_enable_cspi_keystroke (client)) {
+                !eekboard_desktop_client_enable_cspi_keystroke (client)) {
                 g_printerr ("Can't register keystroke event listeners\n");
                 exit (1);
             }
         } else {
-            g_printerr ("System accessibility support is disabled");
+            g_printerr ("Desktop accessibility support is disabled");
             exit (1);
         }
     }
 #endif  /* HAVE_CSPI */
 
-    if (!eekboard_system_client_enable_xkl (client)) {
+    if (!eekboard_desktop_client_enable_xkl (client)) {
         g_printerr ("Can't register xklavier event listeners\n"); 
         exit (1);
     }
 
 #ifdef HAVE_FAKEKEY
-    if (!eekboard_system_client_enable_fakekey (client)) {
+    if (!eekboard_desktop_client_enable_fakekey (client)) {
         g_printerr ("Can't init fakekey\n"); 
         exit (1);
     }
 #endif  /* HAVE_FAKEKEY */
 
     loop = g_main_loop_new (NULL, FALSE);
-    if (opt_focus) {
+    if (!opt_focus) {
         g_object_get (client, "context", &context, NULL);
         g_signal_connect (context, "notify::keyboard-visible",
                           G_CALLBACK(on_notify_keyboard_visible), loop);

@@ -38,14 +38,14 @@ do that with:
 
   $ eekboard-server &
 
-** eekboard-system-client
+** eekboard-desktop-client
 
-eekboard-system-client is a client of eekboard-server.  It listens
+eekboard-desktop-client is a client of eekboard-server.  It listens
 desktop events (keyboard change, focus in/out, and keystroke) and
-generates X key events when some keys are pressed on the on-screen
+generates key events when some keys are pressed on the on-screen
 keyboard.  It can be started with:
 
-  $ eekboard-system-client
+  $ eekboard-desktop-client
 
 ** eekboard-xml
 
