@@ -116,6 +116,9 @@ noinst_HEADERS = \
 	$(eekboard_server_headers) \
 	$(eekboard_xml_headers)
 
+EXTRA_DIST = $(service_in_files)
+DISTCLEANFILES = $(service_DATA)
+
 servicedir       = $(datadir)/dbus-1/services
 service_in_files = eekboard-server.service.in
 service_DATA     = $(service_in_files:.service.in=.service)

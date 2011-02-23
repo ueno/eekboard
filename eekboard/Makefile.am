@@ -30,6 +30,9 @@ libeekboard_la_SOURCES = $(libeekboard_sources)
 libeekboard_la_CFLAGS = -I$(top_srcdir) $(GIO2_CFLAGS)
 libeekboard_la_LIBADD = $(top_builddir)/eek/libeek.la $(GIO2_LIBS)
 
+eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
+eekboard_HEADERS = $(libeekboard_headers)
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =				\
 	eekboard-$(EEK_API_VERSION).pc
