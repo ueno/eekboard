@@ -201,6 +201,14 @@ docs/reference/Makefile
 docs/reference/eek/Makefile
 docs/reference/eekboard/Makefile
 po/Makefile.in
+data/Makefile
+data/icons/Makefile
+data/icons/16x16/Makefile
+data/icons/22x22/Makefile
+data/icons/24x24/Makefile
+data/icons/32x32/Makefile
+data/icons/48x48/Makefile
+data/icons/scalable/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc
