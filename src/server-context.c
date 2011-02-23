@@ -609,6 +609,7 @@ server_context_set_enabled (ServerContext *context, gboolean enabled)
     if (context->enabled == enabled)
         return;
 
+    context->enabled = enabled;
     if (enabled) {
         error = NULL;
         g_dbus_connection_emit_signal (context->connection,
@@ -637,7 +638,6 @@ server_context_set_enabled (ServerContext *context, gboolean enabled)
             gtk_widget_hide (context->window);
         }
     }
-    context->enabled = enabled;
 }
 
 void
