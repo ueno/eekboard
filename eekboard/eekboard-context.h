@@ -35,20 +35,35 @@ typedef struct _EekboardContextClass EekboardContextClass;
 typedef struct _EekboardContextPrivate EekboardContextPrivate;
 
 struct _EekboardContext {
+    /*< private >*/
     GDBusProxy parent;
 
     EekboardContextPrivate *priv;
 };
 
+/**
+ * EekboardContextClass:
+ * @enabled: class handler for #EekboardContext::enabled signal
+ * @disabled: class handler for #EekboardContext::disabled signal
+ * @key_pressed: class handler for #EekboardContext::key-pressed signal
+ * @key_released: class handler for #EekboardContext::key-released signal
+ */
 struct _EekboardContextClass {
+    /*< private >*/
     GDBusProxyClass parent_class;
 
+    /*< public >*/
+    /* signals */
     void (*enabled)      (EekboardContext *self);
     void (*disabled)     (EekboardContext *self);
     void (*key_pressed)  (EekboardContext *self,
                           guint            keycode);
     void (*key_released) (EekboardContext *self,
                           guint            keycode);
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType            eekboard_context_get_type      (void) G_GNUC_CONST;

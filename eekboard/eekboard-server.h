@@ -35,13 +35,19 @@ typedef struct _EekboardServerClass EekboardServerClass;
 typedef struct _EekboardServerPrivate EekboardServerPrivate;
 
 struct _EekboardServer {
+    /*< private >*/
     GDBusProxy parent;
 
     EekboardServerPrivate *priv;
 };
 
 struct _EekboardServerClass {
+    /*< private >*/
     GDBusProxyClass parent_class;
+
+    /*< private >*/
+    /* padding */
+    gpointer pdummy[24];
 };
 
 GType            eekboard_server_get_type        (void) G_GNUC_CONST;
