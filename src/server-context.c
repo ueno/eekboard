@@ -82,6 +82,7 @@ struct _ServerContext {
     GDBusNodeInfo *introspection_data;
     guint registration_id;
     char *object_path;
+    char *client_connection;
 
     gboolean enabled;
     gboolean last_keyboard_visible;
@@ -213,7 +214,7 @@ update_widget (ServerContext *context)
     gtk_widget_set_can_focus (context->window, FALSE);
     g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
     gtk_window_set_title (GTK_WINDOW(context->window), "Keyboard");
-    gtk_window_set_icon_name (GTK_WINDOW(context->window), "input-keyboard");
+    gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
     gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
 
     screen = gdk_screen_get_default ();
@@ -290,6 +291,16 @@ server_context_dispose (GObject *object)
 }
 
 static void
+server_context_finalize (GObject *object)
+{
+    ServerContext *context = SERVER_CONTEXT(object);
+
+    g_free (context->client_connection);
+
+    G_OBJECT_CLASS (server_context_parent_class)->finalize (object);
+}
+
+static void
 server_context_constructed (GObject *object)
 {
     ServerContext *context = SERVER_CONTEXT (object);
@@ -316,6 +327,7 @@ server_context_class_init (ServerContextClass *klass)
     gobject_class->constructed = server_context_constructed;
     gobject_class->set_property = server_context_set_property;
     gobject_class->dispose = server_context_dispose;
+    gobject_class->finalize = server_context_finalize;
 
     pspec = g_param_spec_string ("object-path",
                                  "Object-path",
@@ -613,4 +625,17 @@ server_context_set_enabled (ServerContext *context, gboolean enabled)
         }
     }
     context->enabled = enabled;
+}
+
+void
+server_context_set_client_connection (ServerContext *context,
+                                      const gchar   *client_connection)
+{
+    context->client_connection = g_strdup (client_connection);
+}
+
+const gchar *
+server_context_get_client_connection (ServerContext *context)
+{
+    return context->client_connection;
 }

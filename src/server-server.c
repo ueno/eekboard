@@ -58,7 +58,6 @@ struct _ServerServer {
 
     GHashTable *context_hash;
     GSList *context_stack;
-    GHashTable *sender_object_path_hash;
 };
 
 struct _ServerServerClass {
@@ -121,11 +120,6 @@ server_server_dispose (GObject *object)
     if (server->context_hash) {
         g_hash_table_destroy (server->context_hash);
         server->context_hash = NULL;
-    }
-
-    if (server->sender_object_path_hash) {
-        g_hash_table_destroy (server->sender_object_path_hash);
-        server->sender_object_path_hash = NULL;
     }
 
     for (head = server->context_stack; head; head = server->context_stack) {
@@ -218,11 +212,6 @@ server_server_init (ServerServer *server)
                                (GDestroyNotify)g_free,
                                (GDestroyNotify)g_object_unref);
     server->context_stack = NULL;
-    server->sender_object_path_hash =
-        g_hash_table_new_full (g_str_hash,
-                               g_str_equal,
-                               (GDestroyNotify)g_free,
-                               NULL);
 }
 
 static void
@@ -234,8 +223,8 @@ remove_context_from_stack (ServerServer *server, ServerContext *context)
     if (head) {
         server->context_stack = g_slist_remove_link (server->context_stack,
                                                      head);
+        g_object_unref (head->data);
         g_slist_free1 (head);
-        g_object_unref (context);
     }
     if (server->context_stack)
         server_context_set_enabled (server->context_stack->data, TRUE);
@@ -247,18 +236,30 @@ server_name_vanished_callback (GDBusConnection *connection,
                                gpointer         user_data)
 {
     ServerServer *server = user_data;
-    const gchar *object_path;
+    GSList *head;
+    GHashTableIter iter;
+    gpointer k, v;
 
-    object_path = g_hash_table_lookup (server->sender_object_path_hash, name);
-    if (object_path) {
-        ServerContext *context;
+    g_hash_table_iter_init (&iter, server->context_hash);
+    while (g_hash_table_iter_next (&iter, &k, &v)) {
+        const gchar *client_connection =
+            server_context_get_client_connection (v);
+        if (g_strcmp0 (client_connection, name) == 0)
+            g_hash_table_iter_remove (&iter);
+    }
 
-        context = g_hash_table_lookup (server->context_hash, object_path);
-        if (context) {
-            remove_context_from_stack (server, context);
-            g_hash_table_remove (server->context_hash, object_path);
+    for (head = server->context_stack; head; head = server->context_stack) {
+        const gchar *client_connection =
+            server_context_get_client_connection (head->data);
+        if (g_strcmp0 (client_connection, name) == 0) {
+            server->context_stack = g_slist_remove_link (server->context_stack,
+                                                         head);
+            g_object_unref (head->data);
+            g_slist_free1 (head);
         }
     }
+    if (server->context_stack)
+        server_context_set_enabled (server->context_stack->data, TRUE);
 }
 
 static void
@@ -282,12 +283,10 @@ handle_method_call (GDBusConnection       *connection,
         g_variant_get (parameters, "(&s)", &client_name);
         object_path = g_strdup_printf (SERVER_CONTEXT_PATH, context_id++);
         context = server_context_new (object_path, server->connection);
+        server_context_set_client_connection (context, sender);
         g_hash_table_insert (server->context_hash,
                              object_path,
                              context);
-        g_hash_table_insert (server->sender_object_path_hash,
-                             g_strdup (sender),
-                             object_path);
         g_bus_watch_name_on_connection (server->connection,
                                         sender,
                                         G_BUS_NAME_WATCHER_FLAGS_NONE,

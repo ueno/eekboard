@@ -38,6 +38,11 @@ ServerContext *server_context_new         (const gchar     *object_path,
                                            GDBusConnection *connection);
 void           server_context_set_enabled (ServerContext   *context,
                                            gboolean         enabled);
+void           server_context_set_client_connection
+                                          (ServerContext   *context,
+                                           const gchar     *client_connection);
+const gchar   *server_context_get_client_connection
+                                          (ServerContext   *context);
 
 G_END_DECLS
 #endif  /* SERVER_CONTEXT_H */
