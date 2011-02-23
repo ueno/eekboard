@@ -41,18 +41,11 @@ do that with:
 ** eekboard-system-client
 
 eekboard-system-client is a client of eekboard-server.  It listens
-system events (focus change, keystroke, and keyboard change) and
+desktop events (keyboard change, focus in/out, and keystroke) and
 generates X key events when some keys are pressed on the on-screen
 keyboard.  It can be started with:
 
-  $ eekboard-system-client -kfg
-
-Where:
-
--k (--listen-keyboard) is to monitor system keyboard state/config change,
--f (--listen-focus) is to track focus change, and
--g (--generate-key-event) is to generate X key events on virtual
-key-press/key-release events.
+  $ eekboard-system-client
 
 ** eekboard-xml
 

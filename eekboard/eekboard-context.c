@@ -40,6 +40,12 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
+enum {
+    PROP_0,
+    PROP_KEYBOARD_VISIBLE,
+    PROP_LAST
+};
+
 G_DEFINE_TYPE (EekboardContext, eekboard_context, G_TYPE_DBUS_PROXY);
 
 #define EEKBOARD_CONTEXT_GET_PRIVATE(obj)                               \
@@ -86,7 +92,13 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
     }
 
     if (g_strcmp0 (signal_name, "KeyboardVisibilityChanged") == 0) {
-        g_variant_get (parameters, "(b)", &priv->keyboard_visible);
+        gboolean keyboard_visible;
+
+        g_variant_get (parameters, "(b)", &keyboard_visible);
+        if (keyboard_visible != priv->keyboard_visible) {
+            priv->keyboard_visible = keyboard_visible;
+            g_object_notify (G_OBJECT(context), "keyboard-visible");
+        }
         return;
     }
 
@@ -132,6 +144,25 @@ eekboard_context_real_key_released (EekboardContext *self,
 }
 
 static void
+eekboard_context_get_property (GObject    *object,
+                               guint       prop_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
+{
+    EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE(object);
+    switch (prop_id) {
+    case PROP_KEYBOARD_VISIBLE:
+        g_value_set_boolean (value, priv->keyboard_visible);
+        break;
+    default:
+        g_object_get_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
 eekboard_context_dispose (GObject *self)
 {
     EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE (self);
@@ -147,6 +178,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
 {
     GDBusProxyClass *proxy_class = G_DBUS_PROXY_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GParamSpec        *pspec;
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekboardContextPrivate));
@@ -158,7 +190,22 @@ eekboard_context_class_init (EekboardContextClass *klass)
 
     proxy_class->g_signal = eekboard_context_real_g_signal;
 
+    gobject_class->get_property = eekboard_context_get_property;
     gobject_class->dispose = eekboard_context_dispose;
+
+    /**
+     * EekboardContext:keyboard-visible:
+     *
+     * Flag to indicate if keyboard is visible or not.
+     */
+    pspec = g_param_spec_boolean ("keyboard-visible",
+                                  "Keyboard-visible",
+                                  "Flag that indicates if keyboard is visible",
+                                  FALSE,
+                                  G_PARAM_READABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEYBOARD_VISIBLE,
+                                     pspec);
 
     /**
      * EekboardContext::enabled:

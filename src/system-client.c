@@ -42,6 +42,7 @@
 enum {
     PROP_0,
     PROP_CONNECTION,
+    PROP_CONTEXT,
     PROP_LAST
 };
 
@@ -138,6 +139,26 @@ eekboard_system_client_set_property (GObject      *object,
 }
 
 static void
+eekboard_system_client_get_property (GObject    *object,
+                                     guint       prop_id,
+                                     GValue     *value,
+                                     GParamSpec *pspec)
+{
+    EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
+
+    switch (prop_id) {
+    case PROP_CONTEXT:
+        g_value_set_object (value, client->context);
+        break;
+    default:
+        g_object_get_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
 eekboard_system_client_dispose (GObject *object)
 {
     EekboardSystemClient *client = EEKBOARD_SYSTEM_CLIENT(object);
@@ -193,6 +214,7 @@ eekboard_system_client_class_init (EekboardSystemClientClass *klass)
     GParamSpec *pspec;
 
     gobject_class->set_property = eekboard_system_client_set_property;
+    gobject_class->get_property = eekboard_system_client_get_property;
     gobject_class->dispose = eekboard_system_client_dispose;
 
     pspec = g_param_spec_object ("connection",
@@ -202,6 +224,15 @@ eekboard_system_client_class_init (EekboardSystemClientClass *klass)
                                  G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_CONNECTION,
+                                     pspec);
+
+    pspec = g_param_spec_object ("context",
+                                 "Context",
+                                 "Context",
+                                 EEKBOARD_TYPE_CONTEXT,
+                                 G_PARAM_READABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_CONTEXT,
                                      pspec);
 }
 
