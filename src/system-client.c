@@ -102,7 +102,8 @@ static SPIBoolean      keystroke_listener_cb
                                          (const AccessibleKeystroke *stroke,
                                           void                      *user_data);
 #endif  /* HAVE_CSPI */
-static void            set_keyboard   (EekboardSystemClient      *client);
+static void            set_keyboard      (EekboardSystemClient      *client,
+                                          gboolean                   show);
 
 static void
 eekboard_system_client_set_property (GObject      *object,
@@ -262,7 +263,11 @@ eekboard_system_client_enable_xkl (EekboardSystemClient *client)
 
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-    set_keyboard (client);
+#ifdef HAVE_CSPI
+    set_keyboard (client, client->focus_listener ? FALSE : TRUE);
+#else
+    set_keyboard (client, TRUE);
+#endif
 
     return TRUE;
 }
@@ -423,7 +428,7 @@ on_xkl_config_changed (XklEngine *xklengine,
 {
     EekboardSystemClient *client = user_data;
 
-    set_keyboard (client);
+    set_keyboard (client, FALSE);
 
 #ifdef HAVE_FAKEKEY
     if (client->fakekey)
@@ -432,7 +437,8 @@ on_xkl_config_changed (XklEngine *xklengine,
 }
 
 static void
-set_keyboard (EekboardSystemClient *client)
+set_keyboard (EekboardSystemClient *client,
+              gboolean              show)
 {
     EekLayout *layout;
     gchar *keyboard_name;
@@ -449,6 +455,8 @@ set_keyboard (EekboardSystemClient *client)
     eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
 
     eekboard_context_set_keyboard (client->context, client->keyboard, NULL);
+    if (show)
+        eekboard_context_show_keyboard (client->context, NULL);
 }
 
 static void
