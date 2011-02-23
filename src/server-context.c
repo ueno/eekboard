@@ -93,6 +93,7 @@ struct _ServerContext {
 
     gulong key_pressed_handler;
     gulong key_released_handler;
+    gulong notify_visible_handler;
 };
 
 struct _ServerContextClass {
@@ -207,8 +208,9 @@ update_widget (ServerContext *context)
     context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     g_signal_connect (context->window, "destroy",
                       G_CALLBACK(on_destroy), context);
-    g_signal_connect (context->window, "notify::visible",
-                      G_CALLBACK(on_notify_visible), context);
+    context->notify_visible_handler =
+        g_signal_connect (context->window, "notify::visible",
+                          G_CALLBACK(on_notify_visible), context);
     gtk_container_add (GTK_CONTAINER(context->window), context->widget);
 
     gtk_widget_set_can_focus (context->window, FALSE);
@@ -471,9 +473,14 @@ handle_method_call (GDBusConnection       *connection,
         
         if (context->window) {
             gboolean was_visible = gtk_widget_get_visible (context->window);
+            /* avoid to send KeyboardVisibilityChanged */
+            g_signal_handler_block (context->window,
+                                    context->notify_visible_handler);
             update_widget (context);
             if (was_visible)
                 gtk_widget_show_all (context->window);
+            g_signal_handler_unblock (context->window,
+                                      context->notify_visible_handler);
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
@@ -496,9 +503,15 @@ handle_method_call (GDBusConnection       *connection,
 
         if (context->window) {
             gboolean was_visible = gtk_widget_get_visible (context->window);
+
+            /* avoid to send KeyboardVisibilityChanged */
+            g_signal_handler_block (context->window,
+                                    context->notify_visible_handler);
             update_widget (context);
             if (was_visible)
                 gtk_widget_show_all (context->window);
+            g_signal_handler_unblock (context->window,
+                                      context->notify_visible_handler);
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
