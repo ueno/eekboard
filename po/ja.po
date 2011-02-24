@@ -6,85 +6,74 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: eekboard 0.0.3\n"
+"Project-Id-Version: eekboard 0.90.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-23 16:52+0900\n"
-"PO-Revision-Date: 2010-06-23 16:55+0900\n"
+"POT-Creation-Date: 2011-02-24 17:36+0900\n"
+"PO-Revision-Date: 2011-02-24 17:36+0900\n"
 "Last-Translator: Daiki Ueno <ueno@unixuser.org>\n"
 "Language-Team: Japanese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/eekboard.c:198
-msgid "_File"
-msgstr "ファイル"
+#: ../src/client-main.c:36
+msgid "Upload keyboard description from an XML file"
+msgstr "XML ファイルから読み込んだキーボード記述をアップロード"
 
-#: ../src/eekboard.c:199
-msgid "_Keyboard"
-msgstr "キーボード"
+#: ../src/client-main.c:38
+msgid "Set group of the keyboard"
+msgstr "キーボードのグループを設定"
 
-#: ../src/eekboard.c:200
-msgid "_Help"
-msgstr "ヘルプ"
+#: ../src/client-main.c:40
+msgid "Show keyboard"
+msgstr "キーボードを表示"
 
-#: ../src/eekboard.c:202
-msgid "Country"
-msgstr "国"
+#: ../src/client-main.c:42
+msgid "Hide keyboard"
+msgstr "キーボードを隠す"
 
-#: ../src/eekboard.c:204
-msgid "Language"
-msgstr "言語"
+#: ../src/client-main.c:44
+msgid "Press key"
+msgstr "キーを押す"
 
-#: ../src/eekboard.c:206
-msgid "Model"
-msgstr "モデル"
+#: ../src/client-main.c:46
+msgid "Release key"
+msgstr "キーを離す"
 
-#: ../src/eekboard.c:208
-msgid "Layout"
-msgstr "レイアウト"
+#: ../src/client-main.c:48
+msgid "Listen events"
+msgstr "イベントの通知を受ける"
 
-#: ../src/eekboard.c:210
-msgid "Option"
-msgstr "オプション"
+#: ../src/desktop-client-main.c:38
+msgid "Listen focus change events with AT-SPI"
+msgstr "AT-SPI によるフォーカス変更イベントの通知を受ける"
 
-#: ../src/eekboard.c:217
-msgid "Monitor Key Typing"
-msgstr "打鍵をモニタ"
+#: ../src/desktop-client-main.c:40
+msgid "Listen keystroke events with AT-SPI"
+msgstr "AT-SPI による打鍵イベントの通知を受ける"
 
-#: ../src/eekboard.c:232
-msgid "Keyboard model to display"
-msgstr "表示するキーボードのモデル"
+#: ../src/xml-main.c:46
+msgid "Show the keyboard loaded from an XML file"
+msgstr "XML ファイルから読み込んだキーボードを表示"
 
-#: ../src/eekboard.c:234
-msgid "Keyboard layouts to display, separated with commas"
-msgstr "表示するキーボードのレイアウト，カンマ区切り"
+#: ../src/xml-main.c:48
+msgid "Output the current layout into an XML file"
+msgstr "現在のレイアウトを XML ファイルに出力"
 
-#: ../src/eekboard.c:236
-msgid "Keyboard layout options to display, separated with commas"
-msgstr "表示するキーボードのオプション，カンマ区切り"
+#: ../src/xml-main.c:50
+msgid "List configuration items for given spec"
+msgstr "与えられたスペックのための設定項目を一覧"
 
-#: ../src/eekboard.c:238
-msgid "List keyboard models"
-msgstr "キーボードのモデルを一覧"
+#: ../src/xml-main.c:52
+msgid "Specify model"
+msgstr "モデルを指定"
 
-#: ../src/eekboard.c:240
-msgid "List all available keyboard layouts and variants"
-msgstr "利用可能なキーボードのレイアウトとバリアントを一覧"
+#: ../src/xml-main.c:54
+msgid "Specify layouts"
+msgstr "レイアウトを指定"
 
-#: ../src/eekboard.c:242
-msgid "List all available keyboard layout options"
-msgstr "利用可能なキーボードのレイアウトオプションを一覧"
-
-#: ../src/eekboard.c:244
-msgid "Display version"
-msgstr "バージョンを表示"
-
-#: ../src/eekboard.c:261
-msgid "A virtual keyboard for GNOME"
-msgstr "GNOME 向け仮想キーボード"
-
-#: ../src/eekboard.c:265
-msgid "Eekboard web site"
-msgstr "Eekboard のウェブサイト"
+#: ../src/xml-main.c:56
+msgid "Specify options"
+msgstr "オプションを指定"

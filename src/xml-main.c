@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <gdk/gdkx.h>
+#include <glib/gi18n.h>
 
 #include "eek/eek-xml.h"
 #include "eek/eek-xkl.h"
@@ -42,17 +43,17 @@ static gchar *opt_list = NULL;
 
 static const GOptionEntry options[] = {
     {"load", 'l', 0, G_OPTION_ARG_STRING, &opt_load,
-     "Show the keyboard loaded from an XML file"},
+     N_("Show the keyboard loaded from an XML file")},
     {"dump", 'd', 0, G_OPTION_ARG_NONE, &opt_dump,
-     "Dump the current layout as XML"},
+     N_("Output the current layout into an XML file")},
     {"list", 'L', 0, G_OPTION_ARG_STRING, &opt_list,
-     "List configuration items for given spec"},
+     N_("List configuration items for given spec")},
     {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
-     "Specify model"},
+     N_("Specify model")},
     {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
-     "Specify layouts"},
+     N_("Specify layouts")},
     {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
-     "Specify options"},
+     N_("Specify options")},
     {NULL}
 };
 

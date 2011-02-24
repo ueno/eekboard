@@ -19,6 +19,8 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
+#include <glib/gi18n.h>
+
 #include "eekboard/eekboard.h"
 
 static gchar *opt_set_keyboard = NULL;
@@ -31,19 +33,19 @@ static gboolean opt_listen = FALSE;
 
 static const GOptionEntry options[] = {
     {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_keyboard,
-     "Set keyboard keyboard from an XML file"},
+     N_("Upload keyboard description from an XML file")},
     {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
-     "Set group of the keyboard"},
+     N_("Set group of the keyboard")},
     {"show-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_show_keyboard,
-     "Show keyboard"},
+     N_("Show keyboard")},
     {"hide-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_hide_keyboard,
-     "Hide keyboard"},
+     N_("Hide keyboard")},
     {"press-key", '\0', 0, G_OPTION_ARG_INT, &opt_press_key,
-     "Press key"},
+     N_("Press key")},
     {"release-key", '\0', 0, G_OPTION_ARG_INT, &opt_release_key,
-     "Release key"},
+     N_("Release key")},
     {"listen", '\0', 0, G_OPTION_ARG_NONE, &opt_listen,
-     "Listen events"},
+     N_("Listen events")},
     {NULL}
 };
 

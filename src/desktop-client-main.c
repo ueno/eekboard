@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <cspi/spi.h>
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf-client.h>
 #include "eekboard/eekboard.h"
 #include "desktop-client.h"
@@ -34,9 +35,9 @@ gboolean opt_keystroke = FALSE;
 static const GOptionEntry options[] = {
 #ifdef HAVE_CSPI
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
-     "Listen focus change events with AT-SPI"},
+     N_("Listen focus change events with AT-SPI")},
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
-     "Listen keystroke events with AT-SPI"},
+     N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_CSPI */
     {NULL}
 };

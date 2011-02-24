@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
