@@ -341,20 +341,6 @@ calculate_font_size (EekRenderer *renderer)
     return data.size > 0 ? data.size : data.em_size;
 }
 
-static EekKeyboard *
-get_keyboard (EekKey *key)
-{
-    EekElement *parent;
-
-    parent = eek_element_get_parent (EEK_ELEMENT(key));
-    g_return_val_if_fail (EEK_IS_SECTION(parent), NULL);
-
-    parent = eek_element_get_parent (parent);
-    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), NULL);
-
-    return EEK_KEYBOARD(parent);
-}
-
 static void
 render_key (EekRenderer *self,
             cairo_t     *cr,
@@ -367,15 +353,13 @@ render_key (EekRenderer *self,
     PangoLayout *layout;
     PangoRectangle extents = { 0, };
     gulong oref;
-    EekKeyboard *keyboard;
 
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     oref = eek_key_get_oref (key);
     if (oref == 0)
         return;
 
-    keyboard = get_keyboard (key);
-    outline = eek_keyboard_get_outline (keyboard, oref);
+    outline = eek_keyboard_get_outline (priv->keyboard, oref);
     outline_surface = g_hash_table_lookup (priv->outline_surface_cache,
                                            outline);
     if (!outline_surface) {
@@ -626,7 +610,7 @@ eek_renderer_class_init (EekRendererClass *klass)
                                  "Keyboard",
                                  "Keyboard",
                                  EEK_TYPE_KEYBOARD,
-                                 G_PARAM_WRITABLE);
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_KEYBOARD,
                                      pspec);
@@ -635,7 +619,7 @@ eek_renderer_class_init (EekRendererClass *klass)
                                  "Pango Context",
                                  "Pango Context",
                                  PANGO_TYPE_CONTEXT,
-                                 G_PARAM_WRITABLE);
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_PCONTEXT,
                                      pspec);
