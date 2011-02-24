@@ -58,7 +58,7 @@ class Context(gobject.GObject):
         self.__giobject.show_keyboard(None)
 
     def hide_keyboard(self):
-        self.__giobject.show_keyboard(None)
+        self.__giobject.hide_keyboard(None)
 
     def set_group(self, group):
         self.__giobject.set_group(group, None)
