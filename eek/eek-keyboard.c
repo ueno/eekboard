@@ -556,7 +556,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
      * is shifted to the pressed state.
      */
     signals[KEY_PRESSED] =
-        g_signal_new ("key-pressed",
+        g_signal_new (I_("key-pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyboardClass, key_pressed),
@@ -576,7 +576,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
      * is shifted to the released state.
      */
     signals[KEY_RELEASED] =
-        g_signal_new ("key-released",
+        g_signal_new (I_("key-released"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyboardClass, key_released),
@@ -597,7 +597,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
      * global configuration of group/level index changes.
      */
     signals[SYMBOL_INDEX_CHANGED] =
-        g_signal_new ("symbol-index-changed",
+        g_signal_new (I_("symbol-index-changed"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyboardClass, symbol_index_changed),

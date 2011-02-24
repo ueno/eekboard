@@ -376,7 +376,7 @@ eek_section_class_init (EekSectionClass *klass)
      * is shifted to the pressed state.
      */
     signals[KEY_PRESSED] =
-        g_signal_new ("key-pressed",
+        g_signal_new (I_("key-pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
                       0,
@@ -396,7 +396,7 @@ eek_section_class_init (EekSectionClass *klass)
      * is shifted to the released state.
      */
     signals[KEY_RELEASED] =
-        g_signal_new ("key-released",
+        g_signal_new (I_("key-released"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
                       0,

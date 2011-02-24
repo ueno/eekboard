@@ -208,7 +208,7 @@ eek_container_class_init (EekContainerClass *klass)
      * added to @container.
      */
     signals[CHILD_ADDED] =
-        g_signal_new ("child-added",
+        g_signal_new (I_("child-added"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET(EekContainerClass, child_added),
@@ -226,7 +226,7 @@ eek_container_class_init (EekContainerClass *klass)
      * removed from @container.
      */
     signals[CHILD_REMOVED] =
-        g_signal_new ("child-removed",
+        g_signal_new (I_("child-removed"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET(EekContainerClass, child_removed),

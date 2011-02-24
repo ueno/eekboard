@@ -30,6 +30,8 @@
 
 #include "eekboard/eekboard-context.h"
 
+#define I_(string) g_intern_static_string (string)
+
 enum {
     ENABLED,
     DISABLED,
@@ -211,10 +213,10 @@ eekboard_context_class_init (EekboardContextClass *klass)
      * EekboardContext::enabled:
      * @context: an #EekboardContext
      *
-     * The ::enabled signal is emitted each time @context is enabled.
+     * Emitted when @context is enabled.
      */
     signals[ENABLED] =
-        g_signal_new ("enabled",
+        g_signal_new (I_("enabled"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekboardContextClass, enabled),
@@ -231,7 +233,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
      * The ::disabled signal is emitted each time @context is disabled.
      */
     signals[DISABLED] =
-        g_signal_new ("disabled",
+        g_signal_new (I_("disabled"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekboardContextClass, disabled),
@@ -250,7 +252,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
      * in @context.
      */
     signals[KEY_PRESSED] =
-        g_signal_new ("key-pressed",
+        g_signal_new (I_("key-pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekboardContextClass, key_pressed),
@@ -270,7 +272,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
      * in @context.
      */
     signals[KEY_RELEASED] =
-        g_signal_new ("key-released",
+        g_signal_new (I_("key-released"),
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekboardContextClass, key_released),

@@ -24,6 +24,8 @@
 
 G_BEGIN_DECLS
 
+#define I_(string) g_intern_static_string (string)
+
 #define EEK_TYPE_SYMBOL_MATRIX (eek_symbol_matrix_get_type ())
 #define EEK_TYPE_POINT (eek_point_get_type ())
 #define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
