@@ -111,15 +111,19 @@ eek_clutter_renderer_render_key (EekClutterRenderer *renderer,
     PangoRectangle extents = { 0, };
     CoglColor color = { 0x00, 0x00, 0x00, 0xFF };
     ClutterGeometry geom;
+    gulong oref;
+    EekKeyboard *keyboard;
 
     g_assert (EEK_IS_CLUTTER_RENDERER(renderer));
     g_assert (CLUTTER_IS_ACTOR(actor));
     g_assert (EEK_IS_KEY(key));
 
+    oref = eek_key_get_oref (key);
+    g_object_get (renderer, "keyboard", &keyboard, NULL);
+    outline = eek_keyboard_get_outline (keyboard, oref);
+    g_object_unref (keyboard);
+
     priv = EEK_CLUTTER_RENDERER_GET_PRIVATE(renderer);
-
-    outline = eek_key_get_outline (key);
-
     outline_texture = g_hash_table_lookup (priv->outline_texture_cache,
                                            outline);
     if (!outline_texture) {

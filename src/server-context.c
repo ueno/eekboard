@@ -188,7 +188,7 @@ update_widget (ServerContext *context)
 #if HAVE_CLUTTER_GTK
     context->widget = gtk_clutter_embed_new ();
     stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
-    actor = eek_clutter_context_new (context->keyboard);
+    actor = eek_clutter_keyboard_new (context->keyboard);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
