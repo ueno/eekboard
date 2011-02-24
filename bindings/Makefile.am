@@ -16,8 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-if ENABLE_VALA
-SUBDIRS = vala
-else
 SUBDIRS =
+
+if ENABLE_PYTHON
+SUBDIRS += python
+endif
+
+if ENABLE_VALA
+SUBDIRS += vala
 endif

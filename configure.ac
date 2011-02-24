@@ -132,6 +132,37 @@ fi
 AC_MSG_RESULT($enable_cspi)
 AM_CONDITIONAL(ENABLE_CSPI, [test x$enable_cspi = xyes])
 
+dnl Python language binding
+AC_MSG_CHECKING([whether you enable Python language support])
+AC_ARG_ENABLE(python,
+              AS_HELP_STRING([--enable-python=no/yes],
+                             [Enable Python language binding default=yes]),,
+              enable_python=yes)
+AC_MSG_RESULT($enable_python)
+AM_CONDITIONAL(ENABLE_PYTHON, [test x$enable_python = xyes])
+
+if test x"$enable_python" = x"yes"; then
+    # check python
+    AM_PATH_PYTHON([2.5])
+    AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
+    if test x"$PYTHON_CONFIG" = x""; then
+        AC_PATH_PROG(PYTHON_CONFIG, python-config)
+    fi
+    if test x"$PYTHON_CONFIG" != x""; then
+        PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
+        PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+    else
+        PYTHON_CFLAGS=`$PYTHON $srcdir/python-config.py --includes`
+        PYTHON_LIBS=`$PYTHON $srcdir/python-config.py --libs`
+    fi
+    PYTHON_INCLUDES="$PYTHON_CFLAGS"
+    AC_SUBST(PYTHON_CFLAGS)
+    AC_SUBST(PYTHON_INCLUDES)
+    AC_SUBST(PYTHON_LIBS)
+else
+    enable_python="no (disabled, use --enable-python to enable)"
+fi
+
 dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
@@ -195,6 +226,8 @@ eekboard/Makefile
 src/Makefile
 tests/Makefile
 bindings/Makefile
+bindings/python/Makefile
+bindings/python/eekboard/Makefile
 bindings/vala/Makefile
 docs/Makefile
 docs/reference/Makefile
