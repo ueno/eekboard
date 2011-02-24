@@ -18,7 +18,7 @@
 #ifndef EEKBOARD_H
 #define EEKBOARD_H 1
 
-#include "eekboard/eekboard-server.h"
+#include "eekboard/eekboard-eekboard.h"
 #include "eekboard/eekboard-context.h"
 
 #endif  /* EEKBOARD_H */

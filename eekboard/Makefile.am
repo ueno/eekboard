@@ -20,10 +20,10 @@ lib_LTLIBRARIES = libeekboard.la
 
 libeekboard_headers =					\
 	eekboard.h					\
-	eekboard-server.h				\
+	eekboard-eekboard.h				\
 	eekboard-context.h			
 libeekboard_sources =				\
-	eekboard-server.c			\
+	eekboard-eekboard.c			\
 	eekboard-context.c
 
 libeekboard_la_SOURCES = $(libeekboard_sources)

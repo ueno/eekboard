@@ -62,7 +62,7 @@ on_key_released (guint keycode, gpointer user_data)
 int
 main (int argc, char **argv)
 {
-    EekboardServer *server = NULL;
+    EekboardEekboard *eekboard = NULL;
     EekboardContext *context = NULL;
     GDBusConnection *connection = NULL;
     GError *error;
@@ -86,14 +86,14 @@ main (int argc, char **argv)
         goto out;
     }
 
-    server = eekboard_server_new (connection, NULL);
-    if (!server) {
-        g_printerr ("Can't create server\n");
+    eekboard = eekboard_eekboard_new (connection, NULL);
+    if (!eekboard) {
+        g_printerr ("Can't create eekboard\n");
         retval = 1;
         goto out;
     }
 
-    context = eekboard_server_create_context (server,
+    context = eekboard_eekboard_create_context (eekboard,
                                               "eekboard-client",
                                               NULL);
     if (!context) {
@@ -102,7 +102,7 @@ main (int argc, char **argv)
         goto out;
     }
 
-    eekboard_server_push_context (server, context, NULL);
+    eekboard_eekboard_push_context (eekboard, context, NULL);
 
     if (opt_set_keyboard) {
         GFile *file;

@@ -51,7 +51,7 @@ typedef struct _EekboardDesktopClientClass EekboardDesktopClientClass;
 struct _EekboardDesktopClient {
     GObject parent;
 
-    EekboardServer *server;
+    EekboardEekboard *eekboard;
     EekboardContext *context;
 
     EekKeyboard *keyboard;
@@ -119,16 +119,16 @@ eekboard_desktop_client_set_property (GObject      *object,
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
 
-        client->server = eekboard_server_new (connection, NULL);
-        g_assert (client->server);
+        client->eekboard = eekboard_eekboard_new (connection, NULL);
+        g_assert (client->eekboard);
 
         client->context =
-            eekboard_server_create_context (client->server,
+            eekboard_eekboard_create_context (client->eekboard,
                                             "eekboard-desktop-client",
                                             NULL);
         g_assert (client->context);
 
-        eekboard_server_push_context (client->server, client->context, NULL);
+        eekboard_eekboard_push_context (client->eekboard, client->context, NULL);
         break;
     default:
         g_object_set_property (object,
@@ -175,17 +175,17 @@ eekboard_desktop_client_dispose (GObject *object)
 #endif  /* HAVE_FAKEKEY */
 
     if (client->context) {
-        if (client->server) {
-            eekboard_server_pop_context (client->server, NULL);
+        if (client->eekboard) {
+            eekboard_eekboard_pop_context (client->eekboard, NULL);
         }
 
         g_object_unref (client->context);
         client->context = NULL;
     }
 
-    if (client->server) {
-        g_object_unref (client->server);
-        client->server = NULL;
+    if (client->eekboard) {
+        g_object_unref (client->eekboard);
+        client->eekboard = NULL;
     }
 
     if (client->keyboard) {
@@ -239,7 +239,7 @@ eekboard_desktop_client_class_init (EekboardDesktopClientClass *klass)
 static void
 eekboard_desktop_client_init (EekboardDesktopClient *client)
 {
-    client->server = NULL;
+    client->eekboard = NULL;
     client->context = NULL;
     client->display = NULL;
     client->xkl_engine = NULL;
