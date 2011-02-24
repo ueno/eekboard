@@ -47,7 +47,7 @@ SCANGOBJ_OPTIONS=
 
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
-SCAN_OPTIONS=
+SCAN_OPTIONS=--rebuild-types
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
@@ -82,6 +82,9 @@ IGNORE_HFILES = \
 	eek-clutter-renderer.h \
 	eek-clutter-section.h \
 	eek-clutter-key.h
+if !ENABLE_CLUTTER
+IGNORE_HFILES += eek-clutter-keyboard.h eek-clutter.h
+endif
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -102,15 +105,19 @@ expand_content_files=eek-overview.xml
 # e.g. GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS = $(GIO2_CFLAGS)
-GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
-	$(top_srcdir)/eek/libeek-clutter.la \
-	$(top_srcdir)/eek/libeek-gtk.la \
-	$(top_srcdir)/eek/libeek-xkb.la \
-	$(top_srcdir)/eek/libeek-xkl.la \
+GTKDOC_LIBS = $(top_builddir)/eek/libeek.la \
+	$(top_builddir)/eek/libeek-gtk.la \
+	$(top_builddir)/eek/libeek-xkb.la \
+	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
-	$(CLUTTER_LIBS) \
 	$(GTK_LIBS) \
 	$(XKB_LIBS)
+
+if ENABLE_CLUTTER
+GTKDOC_LIBS += \
+	$(top_builddir)/eek/libeek-clutter.la \
+	$(CLUTTER_LIBS)
+endif
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
