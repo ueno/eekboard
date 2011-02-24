@@ -31,6 +31,12 @@ G_BEGIN_DECLS
 typedef struct _EekSerializable EekSerializable;
 typedef struct _EekSerializableIface EekSerializableIface;
 
+/**
+ * EekSerializableIface:
+ *
+ * @serialize: virtual function for serializing object into #GVariant
+ * @deserialize: virtual function for deserializing object from #GVariant
+ */
 struct _EekSerializableIface
 {
     /*< private >*/
@@ -41,8 +47,6 @@ struct _EekSerializableIface
     gsize (* deserialize) (EekSerializable       *object,
                            GVariant              *variant,
                            gsize                  index);
-    void  (* copy)        (EekSerializable       *dest,
-                           const EekSerializable *src);
 
     /*< private >*/
     /* padding */
@@ -51,7 +55,6 @@ struct _EekSerializableIface
 
 GType            eek_serializable_get_type    (void);
 
-EekSerializable *eek_serializable_copy        (EekSerializable *object);
 GVariant        *eek_serializable_serialize   (EekSerializable *object);
 EekSerializable *eek_serializable_deserialize (GVariant        *variant);
 

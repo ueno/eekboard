@@ -64,6 +64,35 @@ typedef enum {
     EEK_MODIFIER_BEHAVIOR_LATCH
 } EekModifierBehavior;
 
+/**
+ * EekModifierType:
+ * @EEK_SHIFT_MASK: the Shift key.
+ * @EEK_LOCK_MASK: a Lock key (depending on the modifier mapping of the
+ *  X server this may either be CapsLock or ShiftLock).
+ * @EEK_CONTROL_MASK: the Control key.
+ * @EEK_MOD1_MASK: the fourth modifier key (it depends on the modifier
+ *  mapping of the X server which key is interpreted as this modifier, but
+ *  normally it is the Alt key).
+ * @EEK_MOD2_MASK: the fifth modifier key (it depends on the modifier
+ *  mapping of the X server which key is interpreted as this modifier).
+ * @EEK_MOD3_MASK: the sixth modifier key (it depends on the modifier
+ *  mapping of the X server which key is interpreted as this modifier).
+ * @EEK_MOD4_MASK: the seventh modifier key (it depends on the modifier
+ *  mapping of the X server which key is interpreted as this modifier).
+ * @EEK_MOD5_MASK: the eighth modifier key (it depends on the modifier
+ *  mapping of the X server which key is interpreted as this modifier).
+ * @EEK_BUTTON1_MASK: the first mouse button.
+ * @EEK_BUTTON2_MASK: the second mouse button.
+ * @EEK_BUTTON3_MASK: the third mouse button.
+ * @EEK_BUTTON4_MASK: the fourth mouse button.
+ * @EEK_BUTTON5_MASK: the fifth mouse button.
+ * @EEK_SUPER_MASK: the Super modifier. Since 2.10
+ * @EEK_HYPER_MASK: the Hyper modifier. Since 2.10
+ * @EEK_META_MASK: the Meta modifier. Since 2.10
+ * @EEK_RELEASE_MASK: not used in EEK itself. GTK+ uses it to differentiate
+ *  between (keyval, modifiers) pairs from key press and release events.
+ * @EEK_MODIFIER_MASK: a mask covering all modifier types.
+ */
 typedef enum
 {
   EEK_SHIFT_MASK    = 1 << 0,

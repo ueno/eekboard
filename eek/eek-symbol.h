@@ -31,6 +31,11 @@ G_BEGIN_DECLS
  * @EEK_SYMBOL_CATEGORY_FUNCTION: the symbol represents a function
  * @EEK_SYMBOL_CATEGORY_KEYNAME: the symbol does not have meaning but
  * have a name
+ * @EEK_SYMBOL_CATEGORY_USER0: reserved for future use
+ * @EEK_SYMBOL_CATEGORY_USER1: reserved for future use
+ * @EEK_SYMBOL_CATEGORY_USER2: reserved for future use
+ * @EEK_SYMBOL_CATEGORY_USER3: reserved for future use
+ * @EEK_SYMBOL_CATEGORY_USER4: reserved for future use
  * @EEK_SYMBOL_CATEGORY_UNKNOWN: used for error reporting
  *
  * Category of the key symbols.
@@ -59,6 +64,12 @@ typedef enum {
 typedef struct _EekSymbolClass EekSymbolClass;
 typedef struct _EekSymbolPrivate EekSymbolPrivate;
 
+/**
+ * EekSymbol:
+ *
+ * The #EekSymbol structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _EekSymbol {
     /*< private >*/
     GObject parent;
@@ -66,6 +77,9 @@ struct _EekSymbol {
     EekSymbolPrivate *priv;
 };
 
+/**
+ * EekSymbolClass:
+ */
 struct _EekSymbolClass {
     /*< private >*/
     GObjectClass parent_class;

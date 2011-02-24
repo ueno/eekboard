@@ -37,14 +37,16 @@
     <title>API Manual</title>
     <chapter>
       <title>Base Classes, Interfaces, and Utilities</title>
+      <xi:include href="xml/eek-serializable.xml"/>
       <xi:include href="xml/eek-element.xml"/>
       <xi:include href="xml/eek-container.xml"/>
       <xi:include href="xml/eek-keyboard.xml"/>
       <xi:include href="xml/eek-section.xml"/>
       <xi:include href="xml/eek-key.xml"/>
+      <xi:include href="xml/eek-symbol.xml"/>
+      <xi:include href="xml/eek-keysym.xml"/>
       <xi:include href="xml/eek-layout.xml"/>
       <xi:include href="xml/eek-types.xml"/>
-      <xi:include href="xml/eek-keysym.xml"/>
     </chapter>
     <chapter>
       <title>Clutter Keyboard</title>
@@ -61,6 +63,11 @@
     <chapter>
       <title>XKB Layout Engine</title>
       <xi:include href="xml/eek-xkb-layout.xml"/>
+    </chapter>
+    <chapter>
+      <title>XML Layout Engine</title>
+      <xi:include href="xml/eek-xml-layout.xml"/>
+      <xi:include href="xml/eek-xml.xml"/>
     </chapter>
     <chapter id="object-tree">
       <title>Object Hierarchy</title>

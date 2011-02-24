@@ -37,6 +37,12 @@ G_BEGIN_DECLS
 typedef struct _EekKeyboardClass EekKeyboardClass;
 typedef struct _EekKeyboardPrivate EekKeyboardPrivate;
 
+/**
+ * EekKeyboard:
+ *
+ * The #EekKeyboard structure contains only private data and should
+ * only be accessed using the provided API.
+ */
 struct _EekKeyboard
 {
     /*< private >*/
@@ -47,16 +53,16 @@ struct _EekKeyboard
 
 /**
  * EekKeyboardClass:
- * @set_keysym_index: virtual function for setting group and level of
+ * @set_symbol_index: virtual function for setting group and level of
  * the entire keyboard
- * @get_keysym_index: virtual function for getting group and level of
+ * @get_symbol_index: virtual function for getting group and level of
  * the entire keyboard
  * @create_section: virtual function for creating a section
  * @find_key_by_keycode: virtual function for finding a key in the
  * keyboard by keycode
  * @key_pressed: class handler for #EekKeyboard::key-pressed signal
  * @key_released: class handler for #EekKeyboard::key-released signal
- * @keysym_index_changed: class handler for #EekKeyboard::keysym-index-changed signal
+ * @symbol_index_changed: class handler for #EekKeyboard::symbol-index-changed signal
  */
 struct _EekKeyboardClass
 {

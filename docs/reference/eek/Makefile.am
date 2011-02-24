@@ -76,7 +76,12 @@ EXTRA_HFILES=
 
 # Header files to ignore when scanning. Use base file name, no paths
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=config.h
+IGNORE_HFILES = \
+	config.h \
+	eek-renderer.h \
+	eek-clutter-renderer.h \
+	eek-clutter-section.h \
+	eek-clutter-key.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -98,15 +103,14 @@ expand_content_files=eek-overview.xml
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS = $(GIO2_CFLAGS)
 GTKDOC_LIBS = $(top_srcdir)/eek/libeek.la \
+	$(top_srcdir)/eek/libeek-clutter.la \
 	$(top_srcdir)/eek/libeek-gtk.la \
 	$(top_srcdir)/eek/libeek-xkb.la \
 	$(top_srcdir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
+	$(CLUTTER_LIBS) \
+	$(GTK_LIBS) \
 	$(XKB_LIBS)
-
-if ENABLE_CLUTTER
-GTKDOC_LIBS += $(top_srcdir)/eek/libeek-clutter.la $(CLUTTER_LIBS)
-endif
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

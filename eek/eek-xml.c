@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * SECTION: eek-xml
+ * @short_description: #EekKeyboard to XML conversion utilities
+ */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <glib/gprintf.h>
@@ -216,6 +221,14 @@ output_section_callback (EekElement *element, gpointer user_data)
     g_string_markup_printf (data->output, "</section>\n");
 }
 
+/**
+ * eek_keyboard_output:
+ * @keyboard: an #EekKeyboard
+ * @output: a GString
+ * @indent: an integer
+ *
+ * Convert @keyboard into the XML format and store it into @output.
+ */
 void
 eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
 {

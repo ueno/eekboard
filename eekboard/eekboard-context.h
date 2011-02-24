@@ -34,6 +34,12 @@ typedef struct _EekboardContext EekboardContext;
 typedef struct _EekboardContextClass EekboardContextClass;
 typedef struct _EekboardContextPrivate EekboardContextPrivate;
 
+/**
+ * EekboardContext:
+ *
+ * The #EekboardContext structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _EekboardContext {
     /*< private >*/
     GDBusProxy parent;

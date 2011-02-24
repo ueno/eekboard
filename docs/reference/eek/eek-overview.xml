@@ -43,19 +43,14 @@ clutter_group_add (CLUTTER_GROUP(stage), actor);
       </programlisting>
     </informalexample>
 
-    <para>The most interesting feature of libeek is that developer can
-    choose arbitrary combination of UI toolkits and layout engine
-    supported by libeek.  For example, to create a keyboard-like
-    #GtkWidget instead of #ClutterActor, all you need is to replace
-    eek_clutter_keyboard_new() with eek_gtk_keyboard_new() and
-    eek_clutter_keyboard_get_actor() with
-    eek_gtk_keyboard_get_widget().  Similarly, if you want to use XKB
-    configuration directly (without libxklavier), you will only need to
-    replace eek_xkl_layout_new () with eek_xkb_layout_new().</para>
+    <para>libeek currently supports GTK+ and Clutter as UI toolkits.
+    To create a keyboard-like #GtkWidget instead of #ClutterActor,
+    replace eek_clutter_keyboard_new() with eek_gtk_keyboard_new().
+    Similarly, if you want to use XKB configuration directly (without
+    libxklavier), you will only need to replace eek_xkl_layout_new ()
+    with eek_xkb_layout_new().</para>
 
-    <para>To achieve portability across different UI toolkits,
-    there is a seperate represention of keyboard elements apart from
-    the actual UI widgets.  For example, a keyboard is represented as a tree of
+    <para>In the above example, a keyboard is represented as a tree of
     #EekElement -- #EekKeyboard contains one or more #EekSection's and
     #EekSection contains one or more #EekKey's.  Each element may emit
     events when user pushes the corresponding UI widget.</para>

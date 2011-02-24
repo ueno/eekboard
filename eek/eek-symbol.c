@@ -18,6 +18,13 @@
  * 02110-1301 USA
  */
 
+/**
+ * SECTION:eek-symbol
+ * @short_description: Base class of a symbol
+ *
+ * The #EekSymbolClass class represents a symbol assigned to a key.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -256,6 +263,13 @@ eek_symbol_get_label (EekSymbol *symbol)
     return g_strdup (priv->label);
 }
 
+/**
+ * eek_symbol_set_category:
+ * @symbol: an #EekSymbol
+ * @category: an #EekSymbolCategory
+ *
+ * Set symbol category of @symbol to @category.
+ */
 void
 eek_symbol_set_category (EekSymbol        *symbol,
                          EekSymbolCategory category)
@@ -268,6 +282,12 @@ eek_symbol_set_category (EekSymbol        *symbol,
     priv->category = category;
 }
 
+/**
+ * eek_symbol_get_category:
+ * @symbol: an #EekSymbol
+ *
+ * Returns symbol category of @symbol.
+ */
 EekSymbolCategory
 eek_symbol_get_category (EekSymbol *symbol)
 {
@@ -279,6 +299,12 @@ eek_symbol_get_category (EekSymbol *symbol)
     return priv->category;
 }
 
+/**
+ * eek_symbol_set_modifier_mask:
+ * @symbol: an #EekSymbol
+ *
+ * Set modifier mask @symbol can trigger.
+ */
 void
 eek_symbol_set_modifier_mask (EekSymbol      *symbol,
                               EekModifierType mask)
@@ -291,6 +317,12 @@ eek_symbol_set_modifier_mask (EekSymbol      *symbol,
     priv->modifier_mask = mask;
 }
 
+/**
+ * eek_symbol_get_modifier_mask:
+ * @symbol: an #EekSymbol
+ *
+ * Returns modifier mask @symbol can trigger.
+ */
 EekModifierType
 eek_symbol_get_modifier_mask (EekSymbol *symbol)
 {

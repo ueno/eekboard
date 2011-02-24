@@ -35,6 +35,12 @@ typedef struct _EekXmlLayout        EekXmlLayout;
 typedef struct _EekXmlLayoutClass   EekXmlLayoutClass;
 typedef struct _EekXmlLayoutPrivate EekXmlLayoutPrivate;
 
+/**
+ * EekXmlLayout:
+ *
+ * The #EekXmlLayout structure contains only private data and should
+ * only be accessed using the provided API.
+ */
 struct _EekXmlLayout
 {
     /*< private >*/
@@ -43,6 +49,9 @@ struct _EekXmlLayout
     EekXmlLayoutPrivate *priv;
 };
 
+/**
+ * EekXmlLayoutClass:
+ */
 struct _EekXmlLayoutClass
 {
     /*< private >*/

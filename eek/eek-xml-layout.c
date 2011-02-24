@@ -21,12 +21,12 @@
  * @short_description: Layout engine which loads layout information from XML
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <stdlib.h>
+#include <string.h>
 
 #include "eek-xml-layout.h"
 #include "eek-keyboard.h"

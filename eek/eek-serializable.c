@@ -17,6 +17,20 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
+/**
+ * SECTION:eek-serializable
+ * @short_description: Interface implemented by #EekElement to
+ * serialize it to #GVariant
+ *
+ * The #EekSerializableIface interface defines serialize/deserialize
+ * method of #EekElement.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include "eek-serializable.h"
 
 GType

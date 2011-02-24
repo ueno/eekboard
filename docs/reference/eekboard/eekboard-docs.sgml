@@ -35,8 +35,8 @@
   <part id="apireference">
     <title>API Manual</title>
     <chapter>
-      <title>D-Bus proxy to eekboard-server</title>
-      <xi:include href="xml/eekboard-server.xml"/>
+      <title>D-Bus client interface to eekboard-server</title>
+      <xi:include href="xml/eekboard-eekboard.xml"/>
       <xi:include href="xml/eekboard-context.xml"/>
     </chapter>
     <chapter id="object-tree">
