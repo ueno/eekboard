@@ -181,9 +181,6 @@ update_widget (ServerContext *context)
     if (context->widget)
         gtk_widget_destroy (context->widget);
 
-    if (context->window)
-        gtk_widget_destroy (context->window);
-
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
 #if HAVE_CLUTTER_GTK
     context->widget = gtk_clutter_embed_new ();
@@ -205,27 +202,29 @@ update_widget (ServerContext *context)
 #endif
     gtk_widget_set_size_request (context->widget, bounds.width, bounds.height);
 
-    context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    g_signal_connect (context->window, "destroy",
-                      G_CALLBACK(on_destroy), context);
-    context->notify_visible_handler =
-        g_signal_connect (context->window, "notify::visible",
-                          G_CALLBACK(on_notify_visible), context);
+    if (!context->window) {
+        context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+        g_signal_connect (context->window, "destroy",
+                          G_CALLBACK(on_destroy), context);
+        context->notify_visible_handler =
+            g_signal_connect (context->window, "notify::visible",
+                              G_CALLBACK(on_notify_visible), context);
+
+        gtk_widget_set_can_focus (context->window, FALSE);
+        g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
+        gtk_window_set_title (GTK_WINDOW(context->window), "Keyboard");
+        gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
+        gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
+
+        screen = gdk_screen_get_default ();
+        root = gtk_widget_get_root_window (context->window);
+        monitor = gdk_screen_get_monitor_at_window (screen, root);
+        gdk_screen_get_monitor_geometry (screen, monitor, &rect);
+        gtk_window_move (GTK_WINDOW(context->window),
+                         MAX(rect.width - 20 - bounds.width, 0),
+                         MAX(rect.height - 40 - bounds.height, 0));
+    }
     gtk_container_add (GTK_CONTAINER(context->window), context->widget);
-
-    gtk_widget_set_can_focus (context->window, FALSE);
-    g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
-    gtk_window_set_title (GTK_WINDOW(context->window), "Keyboard");
-    gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
-    gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
-
-    screen = gdk_screen_get_default ();
-    root = gtk_widget_get_root_window (context->window);
-    monitor = gdk_screen_get_monitor_at_window (screen, root);
-    gdk_screen_get_monitor_geometry (screen, monitor, &rect);
-    gtk_window_move (GTK_WINDOW(context->window),
-                     MAX(rect.width - 20 - bounds.width, 0),
-                     MAX(rect.height - 40 - bounds.height, 0));
 }
 
 static void
