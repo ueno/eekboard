@@ -27,12 +27,22 @@
 #include "eekboard/eekboard.h"
 #include "desktop-client.h"
 
+static gboolean opt_system = FALSE;
+static gboolean opt_session = FALSE;
+static gchar *opt_address = NULL;
+
 #ifdef HAVE_CSPI
 gboolean opt_focus = FALSE;
 gboolean opt_keystroke = FALSE;
 #endif  /* HAVE_CSPI */
 
 static const GOptionEntry options[] = {
+    {"system", 'y', 0, G_OPTION_ARG_NONE, &opt_system,
+     N_("Connect to the system bus")},
+    {"session", 'e', 0, G_OPTION_ARG_NONE, &opt_session,
+     N_("Connect to the session bus")},
+    {"address", 'a', 0, G_OPTION_ARG_STRING, &opt_address,
+     N_("Connect to the given D-Bus address")},
 #ifdef HAVE_CSPI
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events with AT-SPI")},
@@ -62,6 +72,7 @@ main (int argc, char **argv)
 {
     EekboardDesktopClient *client;
     EekboardContext *context;
+    GBusType bus_type;
     GDBusConnection *connection;
     GError *error;
     GConfClient *gconfc;
@@ -78,12 +89,42 @@ main (int argc, char **argv)
     g_option_context_parse (option_context, &argc, &argv, NULL);
     g_option_context_free (option_context);
 
-    error = NULL;
-    connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
-    if (error) {
-        g_printerr ("%s\n", error->message);
-        exit (1);
+    if (opt_system)
+        bus_type = G_BUS_TYPE_SYSTEM;
+    else if (opt_address)
+        bus_type = G_BUS_TYPE_NONE;
+    else
+        bus_type = G_BUS_TYPE_SESSION;
+
+    switch (bus_type) {
+    case G_BUS_TYPE_SYSTEM:
+    case G_BUS_TYPE_SESSION:
+        error = NULL;
+        connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
+        if (connection == NULL) {
+            g_printerr ("Can't connect to the bus: %s\n", error->message);
+            exit (1);
+        }
+        break;
+    case G_BUS_TYPE_NONE:
+        error = NULL;
+        connection = g_dbus_connection_new_for_address_sync (opt_address,
+                                                             0,
+                                                             NULL,
+                                                             NULL,
+                                                             &error);
+        if (connection == NULL) {
+            g_printerr ("Can't connect to the bus at %s: %s\n",
+                        opt_address,
+                        error->message);
+            exit (1);
+        }
+        break;
+    default:
+        g_assert_not_reached ();
+        break;
     }
+
     client = eekboard_desktop_client_new (connection);
 
     gconfc = gconf_client_get_default ();
@@ -114,20 +155,20 @@ main (int argc, char **argv)
                 exit (1);
             }
         } else {
-            g_printerr ("Desktop accessibility support is disabled");
+            g_printerr ("Desktop accessibility support is disabled\n");
             exit (1);
         }
     }
 #endif  /* HAVE_CSPI */
 
     if (!eekboard_desktop_client_enable_xkl (client)) {
-        g_printerr ("Can't register xklavier event listeners\n"); 
+        g_printerr ("Can't register xklavier event listeners\n");
         exit (1);
     }
 
 #ifdef HAVE_FAKEKEY
     if (!eekboard_desktop_client_enable_fakekey (client)) {
-        g_printerr ("Can't init fakekey\n"); 
+        g_printerr ("Can't init fakekey\n");
         exit (1);
     }
 #endif  /* HAVE_FAKEKEY */
