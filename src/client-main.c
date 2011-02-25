@@ -105,7 +105,7 @@ main (int argc, char **argv)
         error = NULL;
         connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
         if (connection == NULL) {
-            g_printerr (_("Can't connect to the bus: %s\n"), error->message);
+            g_printerr ("Can't connect to the bus: %s\n", error->message);
             exit (1);
         }
         break;
@@ -117,7 +117,7 @@ main (int argc, char **argv)
                                                              NULL,
                                                              &error);
         if (connection == NULL) {
-            g_printerr (_("Can't connect to the bus at %s: %s\n"),
+            g_printerr ("Can't connect to the bus at %s: %s\n",
                         opt_address,
                         error->message);
             exit (1);
@@ -130,7 +130,7 @@ main (int argc, char **argv)
 
     eekboard = eekboard_eekboard_new (connection, NULL);
     if (eekboard == NULL) {
-        g_printerr (_("Can't create eekboard proxy\n"));
+        g_printerr ("Can't create eekboard proxy\n");
         retval = 1;
         goto out;
     }
@@ -139,7 +139,7 @@ main (int argc, char **argv)
                                                 "eekboard-client",
                                                 NULL);
     if (context == NULL) {
-        g_printerr (_("Can't create context\n"));
+        g_printerr ("Can't create context\n");
         retval = 1;
         goto out;
     }
@@ -157,7 +157,7 @@ main (int argc, char **argv)
         error = NULL;
         input = g_file_read (file, NULL, &error);
         if (error) {
-            g_printerr (_("Can't read file %s: %s\n"),
+            g_printerr ("Can't read file %s: %s\n",
                         opt_set_keyboard, error->message);
             retval = 1;
             goto out;

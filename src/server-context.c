@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <gtk/gtk.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <gtk/gtk.h>
+#include <glib/gi18n.h>
 
 #include "eek/eek.h"
 
@@ -212,7 +213,7 @@ update_widget (ServerContext *context)
 
         gtk_widget_set_can_focus (context->window, FALSE);
         g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
-        gtk_window_set_title (GTK_WINDOW(context->window), "Keyboard");
+        gtk_window_set_title (GTK_WINDOW(context->window), _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
 
