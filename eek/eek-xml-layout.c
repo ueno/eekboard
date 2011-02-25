@@ -64,6 +64,7 @@ struct _ParseCallbackData {
     EekOrientation orientation;
     GSList *points;
     GSList *symbols;
+    gchar *label;
     guint keyval;
     gint groups, levels;
     EekOutline outline;
@@ -160,7 +161,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     const gchar **values = attribute_values;
     gint column = -1, row = -1, groups = -1, levels = -1;
     guint keyval = EEK_INVALID_KEYSYM;
-    gchar *name = NULL, *id = NULL, *version = NULL;
+    gchar *name = NULL, *label = NULL, *id = NULL, *version = NULL;
 
     validate (element_name, data->element_stack, error);
     if (error && *error)
@@ -175,6 +176,8 @@ start_element_callback (GMarkupParseContext *pcontext,
             id = g_strdup (*values);
         else if (g_strcmp0 (*names, "name") == 0)
             name = g_strdup (*values);
+        else if (g_strcmp0 (*names, "label") == 0)
+            label = g_strdup (*values);
         else if (g_strcmp0 (*names, "keyval") == 0)
             keyval = strtoul (*values, NULL, 10);
         else if (g_strcmp0 (*names, "version") == 0)
@@ -220,8 +223,10 @@ start_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysym") == 0)
+    if (g_strcmp0 (element_name, "keysym") == 0) {
+        data->label = g_strdup (label);
         data->keyval = keyval;
+    }
 
     if (g_strcmp0 (element_name, "outline") == 0) {
         data->oref = g_strdup (id);
@@ -229,6 +234,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     }
  out:
     g_free (name);
+    g_free (label);
     g_free (id);
     g_free (version);
 
@@ -396,6 +402,10 @@ end_element_callback (GMarkupParseContext *pcontext,
             //g_debug ("%u %s", data->keyval, eek_symbol_get_label (EEK_SYMBOL(keysym)));
         } else
             keysym = eek_keysym_new_from_name (text);
+        if (data->label) {
+            eek_symbol_set_label (EEK_SYMBOL(keysym), data->label);
+            g_free (data->label);
+        }
         data->symbols = g_slist_prepend (data->symbols, keysym);
         goto out;
     }
