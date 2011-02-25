@@ -260,6 +260,13 @@ eek_gtk_keyboard_dispose (GObject *object)
             g_signal_handler_disconnect (priv->keyboard,
                                          priv->symbol_index_changed_handler);
             
+        if (priv->dragged_key) {
+            g_signal_emit_by_name (priv->dragged_key,
+                                   "released",
+                                   priv->keyboard);
+            priv->dragged_key = NULL;
+        }
+
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }
