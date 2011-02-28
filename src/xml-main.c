@@ -40,6 +40,7 @@ static gchar *opt_model = NULL;
 static gchar *opt_layouts = NULL;
 static gchar *opt_options = NULL;
 static gchar *opt_list = NULL;
+static guint opt_group = 0;
 
 static const GOptionEntry options[] = {
     {"load", 'l', 0, G_OPTION_ARG_STRING, &opt_load,
@@ -54,6 +55,8 @@ static const GOptionEntry options[] = {
      N_("Specify layouts")},
     {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
      N_("Specify options")},
+    {"group", 'g', 0, G_OPTION_ARG_INT, &opt_group,
+     N_("Specify group")},
     {NULL}
 };
 
@@ -109,6 +112,8 @@ main (int argc, char **argv)
         g_object_unref (input);
         keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
+
+        eek_keyboard_set_group (keyboard, opt_group);
 
         widget = eek_gtk_keyboard_new (keyboard);
         g_object_unref (keyboard);
