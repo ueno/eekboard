@@ -474,6 +474,7 @@ set_keyboard (EekboardDesktopClient *client,
     EekLayout *layout;
     gchar *keyboard_name;
     static gint keyboard_serial = 0;
+    guint keyboard_id;
 
     if (client->keyboard)
         g_object_unref (client->keyboard);
@@ -485,7 +486,10 @@ set_keyboard (EekboardDesktopClient *client,
     keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
     eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
 
-    eekboard_context_set_keyboard (client->context, client->keyboard, NULL);
+    keyboard_id = eekboard_context_add_keyboard (client->context,
+                                                 client->keyboard,
+                                                 NULL);
+    eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
     if (show)
         eekboard_context_show_keyboard (client->context, NULL);
 }

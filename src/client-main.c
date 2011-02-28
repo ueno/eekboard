@@ -151,6 +151,7 @@ main (int argc, char **argv)
         GFileInputStream *input;
         EekLayout *layout;
         EekKeyboard *keyboard;
+        guint keyboard_id;
 
         file = g_file_new_for_path (opt_set_keyboard);
 
@@ -168,8 +169,10 @@ main (int argc, char **argv)
         keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
 
-        eekboard_context_set_keyboard (context, keyboard, NULL);
+        keyboard_id = eekboard_context_add_keyboard (context, keyboard, NULL);
         g_object_unref (keyboard);
+
+        eekboard_context_set_keyboard (context, keyboard_id, NULL);
     }
 
     if (opt_set_group >= 0) {

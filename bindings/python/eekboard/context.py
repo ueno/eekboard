@@ -51,8 +51,14 @@ class Context(gobject.GObject):
     def get_giobject(self):
         return self.__giobject
 
-    def set_keyboard(self, keyboard):
-        self.__giobject.set_keyboard(keyboard, None)
+    def add_keyboard(self, keyboard):
+        return self.__giobject.add_keyboard(keyboard, None)
+
+    def remove_keyboard(self, keyboard_id):
+        return self.__giobject.remove_keyboard(keyboard_id, None)
+        
+    def set_keyboard(self, keyboard_id):
+        self.__giobject.set_keyboard(keyboard_id, None)
 
     def show_keyboard(self):
         self.__giobject.show_keyboard(None)

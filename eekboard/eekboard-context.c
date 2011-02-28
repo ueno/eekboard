@@ -56,6 +56,7 @@ G_DEFINE_TYPE (EekboardContext, eekboard_context, G_TYPE_DBUS_PROXY);
 struct _EekboardContextPrivate
 {
     EekKeyboard *keyboard;
+    GHashTable *keyboard_hash;
     gboolean keyboard_visible;
     gboolean enabled;
 };
@@ -172,6 +173,11 @@ eekboard_context_dispose (GObject *self)
     if (priv->keyboard) {
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
+    }
+
+    if (priv->keyboard_hash) {
+        g_hash_table_destroy (priv->keyboard_hash);
+        priv->keyboard_hash = NULL;
     }
 }
 
@@ -293,6 +299,11 @@ eekboard_context_init (EekboardContext *self)
     priv->keyboard = NULL;
     priv->keyboard_visible = FALSE;
     priv->enabled = FALSE;
+    priv->keyboard_hash =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               (GDestroyNotify)g_object_unref);
 }
 
 /**
@@ -347,39 +358,127 @@ context_async_ready_callback (GObject      *source_object,
 }
 
 /**
- * eekboard_context_set_keyboard:
+ * eekboard_context_add_keyboard:
  * @context: an #EekboardContext
  * @keyboard: an #EekKeyboard
  * @cancellable: a #GCancellable
  *
- * Set the keyboard description of @context to @keyboard.
+ * Register @keyboard in @context.
  */
-void
-eekboard_context_set_keyboard (EekboardContext *context,
+guint
+eekboard_context_add_keyboard (EekboardContext *context,
                                EekKeyboard     *keyboard,
                                GCancellable    *cancellable)
 {
     EekboardContextPrivate *priv;
-    GVariant *variant;
+    GVariant *variant, *result;
+    GError *error;
+
+    g_return_val_if_fail (EEKBOARD_IS_CONTEXT(context), 0);
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+
+    variant = eek_serializable_serialize (EEK_SERIALIZABLE(keyboard));
+
+    error = NULL;
+    result = g_dbus_proxy_call_sync (G_DBUS_PROXY(context),
+                                     "AddKeyboard",
+                                     g_variant_new ("(v)", variant),
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     cancellable,
+                                     &error);
+    g_variant_unref (variant);
+
+    if (result) {
+        guint keyboard_id;
+
+        g_variant_get (result, "(u)", &keyboard_id);
+        g_variant_unref (result);
+
+        if (keyboard_id != 0) {
+            g_hash_table_insert (priv->keyboard_hash,
+                                 GUINT_TO_POINTER(keyboard_id),
+                                 g_object_ref (keyboard));
+        }
+        return keyboard_id;
+    }
+    return 0;
+}
+
+/**
+ * eekboard_context_remove_keyboard:
+ * @context: an #EekboardContext
+ * @keyboard_id: keyboard ID
+ * @cancellable: a #GCancellable
+ *
+ * Unregister the keyboard with @keyboard_id in @context.
+ */
+void
+eekboard_context_remove_keyboard (EekboardContext *context,
+                                  guint            keyboard_id,
+                                  GCancellable    *cancellable)
+{
+    EekboardContextPrivate *priv;
+    EekKeyboard *keyboard;
 
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
 
-    priv = EEKBOARD_CONTEXT_GET_PRIVATE(context);
-    if (priv->keyboard)
-        g_object_unref (priv->keyboard);
-    priv->keyboard = g_object_ref (keyboard);
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
 
-    variant = eek_serializable_serialize (EEK_SERIALIZABLE(priv->keyboard));
+    keyboard = g_hash_table_lookup (priv->keyboard_hash,
+                                    GUINT_TO_POINTER(keyboard_id));
+    if (keyboard == priv->keyboard)
+        priv->keyboard = NULL;
+
+    g_hash_table_remove (priv->keyboard_hash, GUINT_TO_POINTER(keyboard_id));
+
     g_dbus_proxy_call (G_DBUS_PROXY(context),
-                       "SetKeyboard",
-                       g_variant_new ("(v)", variant),
+                       "RemoveKeyboard",
+                       g_variant_new ("(u)", keyboard_id),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
                        cancellable,
                        context_async_ready_callback,
                        NULL);
-    g_variant_unref (variant);
+}
+
+/**
+ * eekboard_context_set_keyboard:
+ * @context: an #EekboardContext
+ * @keyboard_id: keyboard ID
+ * @cancellable: a #GCancellable
+ *
+ * Select a keyboard with ID @keyboard_id in @context.
+ */
+void
+eekboard_context_set_keyboard (EekboardContext *context,
+                               guint            keyboard_id,
+                               GCancellable    *cancellable)
+{
+    EekboardContextPrivate *priv;
+    EekKeyboard *keyboard;
+
+    g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
+
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+
+    keyboard = g_hash_table_lookup (priv->keyboard_hash,
+                                    GUINT_TO_POINTER(keyboard_id));
+    if (!keyboard || keyboard == priv->keyboard)
+        return;
+
+    priv->keyboard = keyboard;
+
+    g_dbus_proxy_call (G_DBUS_PROXY(context),
+                       "SetKeyboard",
+                       g_variant_new ("(u)", keyboard_id),
+                       G_DBUS_CALL_FLAGS_NONE,
+                       -1,
+                       cancellable,
+                       context_async_ready_callback,
+                       NULL);
 }
 
 /**

@@ -46,8 +46,15 @@ enum {
 static const gchar introspection_xml[] =
     "<node>"
     "  <interface name='com.redhat.Eekboard.Context'>"
+    "    <method name='AddKeyboard'>"
+    "      <arg direction='in' type='v' name='keyboard'/>"
+    "      <arg direction='out' type='u' name='keyboard_id'/>"
+    "    </method>"
+    "    <method name='RemoveKeyboard'>"
+    "      <arg direction='in' type='u' name='keyboard_id'/>"
+    "    </method>"
     "    <method name='SetKeyboard'>"
-    "      <arg type='v' name='keyboard'/>"
+    "      <arg type='u' name='keyboard_id'/>"
     "    </method>"
     "    <method name='ShowKeyboard'/>"
     "    <method name='HideKeyboard'/>"
@@ -90,7 +97,9 @@ struct _ServerContext {
 
     GtkWidget *window;
     GtkWidget *widget;
+    guint keyboard_id;
     EekKeyboard *keyboard;
+    GHashTable *keyboard_hash;
 
     gulong key_pressed_handler;
     gulong key_released_handler;
@@ -264,8 +273,12 @@ server_context_dispose (GObject *object)
 
     if (context->keyboard) {
         disconnect_keyboard_signals (context);
-        g_object_unref (context->keyboard);
         context->keyboard = NULL;
+    }
+
+    if (context->keyboard_hash) {
+        g_hash_table_destroy (context->keyboard_hash);
+        context->keyboard_hash = NULL;
     }
 
     if (context->window) {
@@ -367,6 +380,12 @@ server_context_init (ServerContext *context)
     context->last_keyboard_visible = FALSE;
 
     context->keyboard = NULL;
+    context->keyboard_hash =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               (GDestroyNotify)g_object_unref);
+
     context->widget = NULL;
     context->window = NULL;
     context->key_pressed_handler = 0;
@@ -444,11 +463,13 @@ handle_method_call (GDBusConnection       *connection,
 {
     ServerContext *context = user_data;
 
-    if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
-        EekSerializable *serializable;
+    if (g_strcmp0 (method_name, "AddKeyboard") == 0) {
         GVariant *variant;
+        EekSerializable *serializable;
+        static guint keyboard_id = 0;
 
         g_variant_get (parameters, "(v)", &variant);
+
         serializable = eek_serializable_deserialize (variant);
         if (!EEK_IS_KEYBOARD(serializable)) {
             g_dbus_method_invocation_return_error (invocation,
@@ -457,9 +478,65 @@ handle_method_call (GDBusConnection       *connection,
                                                    "not a keyboard");
             return;
         }
-        
-        context->keyboard = EEK_KEYBOARD(serializable);
-        disconnect_keyboard_signals (context);
+        eek_keyboard_set_modifier_behavior (EEK_KEYBOARD(serializable),
+                                            EEK_MODIFIER_BEHAVIOR_LATCH);
+
+        g_hash_table_insert (context->keyboard_hash,
+                             GUINT_TO_POINTER(++keyboard_id),
+                             g_object_ref (serializable));
+        g_dbus_method_invocation_return_value (invocation,
+                                               g_variant_new ("(u)",
+                                                              keyboard_id));
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "RemoveKeyboard") == 0) {
+        guint keyboard_id;
+
+        g_variant_get (parameters, "(u)", &keyboard_id);
+
+        if (keyboard_id == context->keyboard_id) {
+            disconnect_keyboard_signals (context);
+            if (context->window) {
+                gtk_widget_hide (context->window);
+                gtk_widget_destroy (context->widget);
+            }
+
+            context->keyboard = NULL;
+        }
+
+        g_hash_table_remove (context->keyboard_hash,
+                             GUINT_TO_POINTER(keyboard_id));
+        g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
+        EekKeyboard *keyboard;
+        guint keyboard_id;
+
+        g_variant_get (parameters, "(u)", &keyboard_id);
+
+        keyboard = g_hash_table_lookup (context->keyboard_hash,
+                                        GUINT_TO_POINTER(keyboard_id));
+        if (!keyboard) {
+            g_dbus_method_invocation_return_error (invocation,
+                                                   G_IO_ERROR,
+                                                   G_IO_ERROR_FAILED_HANDLED,
+                                                   "no such keyboard");
+            return;
+        }
+
+        if (keyboard == context->keyboard) {
+            g_dbus_method_invocation_return_value (invocation, NULL);
+            return;
+        }
+
+        if (context->keyboard)
+            disconnect_keyboard_signals (context);
+
+        context->keyboard = keyboard;
+
         context->key_pressed_handler =
             g_signal_connect (context->keyboard, "key-pressed",
                               G_CALLBACK(on_key_pressed),
@@ -468,8 +545,6 @@ handle_method_call (GDBusConnection       *connection,
             g_signal_connect (context->keyboard, "key-released",
                               G_CALLBACK(on_key_released),
                               context);
-        eek_keyboard_set_modifier_behavior (context->keyboard,
-                                            EEK_MODIFIER_BEHAVIOR_LATCH);
         
         if (context->window) {
             gboolean was_visible = gtk_widget_get_visible (context->window);

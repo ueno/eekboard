@@ -77,8 +77,15 @@ GType            eekboard_context_get_type      (void) G_GNUC_CONST;
 EekboardContext *eekboard_context_new           (GDBusConnection *connection,
                                                  const gchar     *object_path,
                                                  GCancellable    *cancellable);
-void             eekboard_context_set_keyboard  (EekboardContext *context,
+guint            eekboard_context_add_keyboard  (EekboardContext *context,
                                                  EekKeyboard     *keyboard,
+                                                 GCancellable    *cancellable);
+void             eekboard_context_remove_keyboard
+                                                (EekboardContext *context,
+                                                 guint            keyboard_id,
+                                                 GCancellable    *cancellable);
+void             eekboard_context_set_keyboard  (EekboardContext *context,
+                                                 guint            keyboard_id,
                                                  GCancellable    *cancellable);
 void             eekboard_context_show_keyboard (EekboardContext *context,
                                                  GCancellable    *cancellable);
