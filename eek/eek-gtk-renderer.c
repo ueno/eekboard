@@ -85,7 +85,7 @@ eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
     width = gdk_pixbuf_get_width (pixbuf);
     height = gdk_pixbuf_get_height (pixbuf);
 
-    if (bounds.width * scale * height > bounds.height * scale * width)
+    if (bounds.width * scale * height < bounds.height * scale * width)
         scale *= bounds.width * scale / width;
     else
         scale *= bounds.height * scale / height;
