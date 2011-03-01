@@ -64,12 +64,13 @@ eek_symbol_real_serialize (EekSerializable *self,
                            GVariantBuilder *builder)
 {
     EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(self);
-
-    g_variant_builder_add (builder, "s", priv->name);
-    g_variant_builder_add (builder, "s", priv->label);
+#define NOTNULL(s) ((s) != NULL ? (s) : "")
+    g_variant_builder_add (builder, "s", NOTNULL(priv->name));
+    g_variant_builder_add (builder, "s", NOTNULL(priv->label));
     g_variant_builder_add (builder, "u", priv->category);
     g_variant_builder_add (builder, "u", priv->modifier_mask);
-    g_variant_builder_add (builder, "s", priv->icon_name);
+    g_variant_builder_add (builder, "s", NOTNULL(priv->icon_name));
+#undef NOTNULL
 }
 
 static gsize
@@ -258,6 +259,8 @@ eek_symbol_get_name (EekSymbol *symbol)
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
 
     priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    if (priv->name == NULL || *priv->name == '\0')
+        return NULL;
     return priv->name;
 }
 
@@ -282,6 +285,8 @@ eek_symbol_get_label (EekSymbol *symbol)
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
 
     priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    if (priv->label == NULL || *priv->label == '\0')
+        return NULL;
     return g_strdup (priv->label);
 }
 
@@ -390,5 +395,7 @@ eek_symbol_get_icon_name (EekSymbol *symbol)
     g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
 
     priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    if (priv->icon_name == NULL || *priv->icon_name == '\0')
+        return NULL;
     return priv->icon_name;
 }
