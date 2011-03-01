@@ -85,22 +85,27 @@ struct _EekSymbolClass {
     GObjectClass parent_class;
 };
 
-GType                 eek_symbol_get_type          (void) G_GNUC_CONST;
+GType                 eek_symbol_get_type      (void) G_GNUC_CONST;
 
-EekSymbol            *eek_symbol_new               (const gchar      *name);
-void                  eek_symbol_set_name          (EekSymbol        *symbol,
-                                                    const gchar      *name);
-G_CONST_RETURN gchar *eek_symbol_get_name          (EekSymbol        *symbol);
-void                  eek_symbol_set_label         (EekSymbol        *symbol,
-                                                    const gchar      *label);
-gchar                *eek_symbol_get_label         (EekSymbol        *symbol);
-void                  eek_symbol_set_category      (EekSymbol        *symbol,
-                                                    EekSymbolCategory category);
-EekSymbolCategory     eek_symbol_get_category      (EekSymbol        *symbol);
-EekModifierType       eek_symbol_get_modifier_mask (EekSymbol        *keysym);
-void                  eek_symbol_set_modifier_mask (EekSymbol        *keysym,
-                                                    EekModifierType   mask);
-gboolean              eek_symbol_is_modifier       (EekSymbol        *symbol);
+EekSymbol            *eek_symbol_new           (const gchar      *name);
+void                  eek_symbol_set_name      (EekSymbol        *symbol,
+                                                const gchar      *name);
+G_CONST_RETURN gchar *eek_symbol_get_name      (EekSymbol        *symbol);
+void                  eek_symbol_set_label     (EekSymbol        *symbol,
+                                                const gchar      *label);
+gchar                *eek_symbol_get_label     (EekSymbol        *symbol);
+void                  eek_symbol_set_category  (EekSymbol        *symbol,
+                                                EekSymbolCategory category);
+EekSymbolCategory     eek_symbol_get_category  (EekSymbol        *symbol);
+EekModifierType       eek_symbol_get_modifier_mask
+                                               (EekSymbol        *keysym);
+void                  eek_symbol_set_modifier_mask
+                                               (EekSymbol        *keysym,
+                                                EekModifierType   mask);
+gboolean              eek_symbol_is_modifier   (EekSymbol        *symbol);
+void                  eek_symbol_set_icon_name (EekSymbol        *symbol,
+                                                const gchar      *icon_name);
+G_CONST_RETURN gchar *eek_symbol_get_icon_name (EekSymbol        *symbol);
 
 G_END_DECLS
 

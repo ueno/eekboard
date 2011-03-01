@@ -65,6 +65,7 @@ struct _ParseCallbackData {
     GSList *points;
     GSList *symbols;
     gchar *label;
+    gchar *icon;
     guint keyval;
     gint groups, levels;
     EekOutline outline;
@@ -161,7 +162,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     const gchar **values = attribute_values;
     gint column = -1, row = -1, groups = -1, levels = -1;
     guint keyval = EEK_INVALID_KEYSYM;
-    gchar *name = NULL, *label = NULL, *id = NULL, *version = NULL;
+    gchar *name = NULL, *label = NULL, *icon = NULL, *id = NULL, *version = NULL;
 
     validate (element_name, data->element_stack, error);
     if (error && *error)
@@ -178,6 +179,8 @@ start_element_callback (GMarkupParseContext *pcontext,
             name = g_strdup (*values);
         else if (g_strcmp0 (*names, "label") == 0)
             label = g_strdup (*values);
+        else if (g_strcmp0 (*names, "icon") == 0)
+            icon = g_strdup (*values);
         else if (g_strcmp0 (*names, "keyval") == 0)
             keyval = strtoul (*values, NULL, 10);
         else if (g_strcmp0 (*names, "version") == 0)
@@ -225,6 +228,7 @@ start_element_callback (GMarkupParseContext *pcontext,
 
     if (g_strcmp0 (element_name, "keysym") == 0) {
         data->label = g_strdup (label);
+        data->icon = g_strdup (icon);
         data->keyval = keyval;
     }
 
@@ -235,6 +239,7 @@ start_element_callback (GMarkupParseContext *pcontext,
  out:
     g_free (name);
     g_free (label);
+    g_free (icon);
     g_free (id);
     g_free (version);
 
@@ -405,6 +410,10 @@ end_element_callback (GMarkupParseContext *pcontext,
         if (data->label) {
             eek_symbol_set_label (EEK_SYMBOL(keysym), data->label);
             g_free (data->label);
+        }
+        if (data->icon) {
+            eek_symbol_set_icon_name (EEK_SYMBOL(keysym), data->icon);
+            g_free (data->icon);
         }
         data->symbols = g_slist_prepend (data->symbols, keysym);
         goto out;

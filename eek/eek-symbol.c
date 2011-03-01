@@ -38,6 +38,7 @@ enum {
     PROP_LABEL,
     PROP_CATEGORY,
     PROP_MODIFIER_MASK,
+    PROP_ICON_NAME,
     PROP_LAST
 };
 
@@ -46,6 +47,7 @@ struct _EekSymbolPrivate {
     gchar *label;
     EekSymbolCategory category;
     EekModifierType modifier_mask;
+    gchar *icon_name;
 };
 
 static void eek_serializable_iface_init (EekSerializableIface *iface);
@@ -67,6 +69,7 @@ eek_symbol_real_serialize (EekSerializable *self,
     g_variant_builder_add (builder, "s", priv->label);
     g_variant_builder_add (builder, "u", priv->category);
     g_variant_builder_add (builder, "u", priv->modifier_mask);
+    g_variant_builder_add (builder, "s", priv->icon_name);
 }
 
 static gsize
@@ -80,6 +83,7 @@ eek_symbol_real_deserialize (EekSerializable *self,
     g_variant_get_child (variant, index++, "s", &priv->label);
     g_variant_get_child (variant, index++, "u", &priv->category);
     g_variant_get_child (variant, index++, "u", &priv->modifier_mask);
+    g_variant_get_child (variant, index++, "s", &priv->icon_name);
 
     return index;
 }
@@ -111,6 +115,10 @@ eek_symbol_set_property (GObject      *object,
         eek_symbol_set_modifier_mask (EEK_SYMBOL(object),
                                       g_value_get_uint (value));
         break;
+    case PROP_ICON_NAME:
+        eek_symbol_set_icon_name (EEK_SYMBOL(object),
+                                  g_value_get_string (value));
+        break;
     default:
         g_object_set_property (object,
                                g_param_spec_get_name (pspec),
@@ -139,6 +147,10 @@ eek_symbol_get_property (GObject    *object,
         g_value_set_uint (value,
                           eek_symbol_get_modifier_mask (EEK_SYMBOL(object)));
         break;
+    case PROP_ICON_NAME:
+        g_value_set_string (value,
+                            eek_symbol_get_icon_name (EEK_SYMBOL(object)));
+        break;
     default:
         g_object_get_property (object,
                                g_param_spec_get_name (pspec),
@@ -153,6 +165,8 @@ eek_symbol_finalize (GObject *object)
     EekSymbolPrivate *priv = EEK_SYMBOL_GET_PRIVATE(object);
 
     g_free (priv->name);
+    g_free (priv->label);
+    g_free (priv->icon_name);
     G_OBJECT_CLASS (eek_symbol_parent_class)->finalize (object);
 }
 
@@ -195,6 +209,13 @@ eek_symbol_class_init (EekSymbolClass *klass)
                                0, G_MAXUINT, 0,
                                G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_MODIFIER_MASK, pspec);
+
+    pspec = g_param_spec_string ("icon-name",
+                                 "Icon name",
+                                 "Icon name used to render the symbol",
+                                 NULL,
+                                 G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_ICON_NAME, pspec);
 }
 
 static void
@@ -205,6 +226,7 @@ eek_symbol_init (EekSymbol *self)
     priv = self->priv = EEK_SYMBOL_GET_PRIVATE(self);
     priv->name = NULL;
     priv->label = NULL;
+    priv->icon_name = NULL;
     priv->category = EEK_SYMBOL_CATEGORY_UNKNOWN;
     priv->modifier_mask = 0;
 }
@@ -347,3 +369,26 @@ eek_symbol_is_modifier (EekSymbol *symbol)
     return eek_symbol_get_modifier_mask (symbol) != 0;
 }
 
+void
+eek_symbol_set_icon_name (EekSymbol   *symbol,
+                     const gchar *icon_name)
+{
+    EekSymbolPrivate *priv;
+
+    g_return_if_fail (EEK_IS_SYMBOL(symbol));
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    g_free (priv->icon_name);
+    priv->icon_name = g_strdup (icon_name);
+}
+
+G_CONST_RETURN gchar *
+eek_symbol_get_icon_name (EekSymbol *symbol)
+{
+    EekSymbolPrivate *priv;
+
+    g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    return priv->icon_name;
+}

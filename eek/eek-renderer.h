@@ -68,9 +68,15 @@ struct _EekRendererClass
     void (* render_keyboard)    (EekRenderer *self,
                                  cairo_t     *cr);
 
+    void (* render_key_icon)    (EekRenderer *self,
+                                 cairo_t     *cr,
+                                 EekKey      *key,
+                                 gdouble      scale,
+                                 gboolean     rotate);
+
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[23];
 };
 
 GType        eek_renderer_get_type             (void) G_GNUC_CONST;
@@ -106,6 +112,12 @@ void         eek_renderer_render_key           (EekRenderer  *renderer,
                                                 gdouble       scale,
                                                 gboolean      rotate);
 
+void         eek_renderer_render_key_icon      (EekRenderer  *renderer,
+                                                cairo_t      *cr,
+                                                EekKey       *key,
+                                                gdouble       scale,
+                                                gboolean      rotate);
+
 void         eek_renderer_render_keyboard      (EekRenderer  *renderer,
                                                 cairo_t      *cr);
 
@@ -122,6 +134,12 @@ void         eek_renderer_set_border_width     (EekRenderer  *renderer,
 EekKey      *eek_renderer_find_key_by_position (EekRenderer  *renderer,
                                                 gdouble       x,
                                                 gdouble       y);
+void         eek_renderer_apply_transformation_for_key
+                                               (EekRenderer  *renderer,
+                                                cairo_t      *cr,
+                                                EekKey       *key,
+                                                gdouble       scale,
+                                                gboolean      rotate);
 
 G_END_DECLS
 #endif  /* EEK_RENDERER_H */

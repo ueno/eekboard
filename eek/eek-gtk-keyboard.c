@@ -29,7 +29,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-gtk-keyboard.h"
-#include "eek-renderer.h"
+#include "eek-gtk-renderer.h"
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
@@ -105,7 +105,7 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         PangoContext *pcontext;
 
         pcontext = gtk_widget_get_pango_context (self);
-        priv->renderer = eek_renderer_new (priv->keyboard, pcontext);
+        priv->renderer = eek_gtk_renderer_new (priv->keyboard, pcontext, self);
 
         eek_renderer_set_allocation_size (priv->renderer,
                                           allocation.width,

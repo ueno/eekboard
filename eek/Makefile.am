@@ -112,8 +112,11 @@ endif
 libeek_gtk_public_headers =			\
 	$(srcdir)/eek-gtk-keyboard.h		\
 	$(srcdir)/eek-gtk.h
+libeek_gtk_private_headers =			\
+	$(srcdir)/eek-gtk-renderer.h
 libeek_gtk_sources =				\
-	$(srcdir)/eek-gtk-keyboard.c
+	$(srcdir)/eek-gtk-keyboard.c		\
+	$(srcdir)/eek-gtk-renderer.c
 
 libeek_gtk_la_SOURCES = $(libeek_gtk_sources)
 libeek_gtk_la_CFLAGS = $(GTK_CFLAGS)
