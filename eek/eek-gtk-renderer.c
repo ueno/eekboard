@@ -73,11 +73,13 @@ eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
     g_return_if_fail (icon_name);
 
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    bounds.width *= scale;
+    bounds.height *= scale;
 
     error = NULL;
     pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
                                        icon_name,
-                                       MIN(bounds.width, bounds.height) * scale,
+                                       MIN(bounds.width, bounds.height),
                                        0,
                                        &error);
     g_return_if_fail (pixbuf);
@@ -85,12 +87,16 @@ eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
     width = gdk_pixbuf_get_width (pixbuf);
     height = gdk_pixbuf_get_height (pixbuf);
 
-    if (bounds.width * scale * height < bounds.height * scale * width)
-        scale *= bounds.width * scale / width;
+    if (bounds.width * height < bounds.height * width)
+        scale = bounds.width / width;
     else
-        scale *= bounds.height * scale / height;
+        scale = bounds.height / height;
 
     cairo_save (cr);
+    cairo_translate (cr,
+                     (bounds.width - width * scale) / 2,
+                     (bounds.height - height * scale) / 2);
+
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
     surface = pixbuf_to_cairo_surface (pixbuf);
     cairo_set_source_surface (cr, surface, 0.0, 0.0);
