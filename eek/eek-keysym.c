@@ -214,6 +214,14 @@ eek_keysym_init (EekKeysym *self)
     priv->xkeysym = EEK_INVALID_KEYSYM;
 }
 
+/**
+ * eek_keysym_new_with_modifier:
+ * @xkeysym: an X keysym value
+ * @modifier_mask: modifier assigned to @xkeysym
+ *
+ * Create an #EekKeysym with given X keysym value @xkeysym and
+ * modifier @modifier_mask.
+ */
 EekKeysym *
 eek_keysym_new_with_modifier (guint xkeysym, EekModifierType modifier_mask)
 {
@@ -291,12 +299,24 @@ eek_keysym_new_with_modifier (guint xkeysym, EekModifierType modifier_mask)
     return keysym;
 }
 
+/**
+ * eek_keysym_new:
+ * @xkeysym: an X keysym value
+ *
+ * Create an #EekKeysym with given X keysym value @xkeysym.
+ */
 EekKeysym *
 eek_keysym_new (guint xkeysym)
 {
     return eek_keysym_new_with_modifier (xkeysym, get_modifier_mask (xkeysym));
 }
 
+/**
+ * eek_keysym_new_from_name:
+ * @name: an X keysym name
+ *
+ * Create an #EekKeysym with an X keysym value looked up by @name.
+ */
 EekKeysym *
 eek_keysym_new_from_name (const gchar *name)
 {
@@ -315,6 +335,12 @@ eek_keysym_new_from_name (const gchar *name)
                          NULL);
 }
 
+/**
+ * eek_keysym_get_xkeysym:
+ * @keysym: an #EekKeysym
+ *
+ * Get an X keysym value associated with @keysym
+ */
 guint
 eek_keysym_get_xkeysym (EekKeysym *keysym)
 {
