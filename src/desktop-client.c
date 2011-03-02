@@ -35,6 +35,7 @@
 #include "eek/eek-xkl.h"
 #include "eekboard/eekboard.h"
 #include "desktop-client.h"
+#include "xklutil.h"
 
 #define CSW 640
 #define CSH 480
@@ -537,11 +538,11 @@ set_keyboard (EekboardDesktopClient *client,
     }
 
     if (options) {
-        gchar **options;
+        gchar **_options;
 
-        options = g_strsplit (options, ",", -1);
-        if (!eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options)) {
-            g_strfreev (options);
+        _options = g_strsplit (options, ",", -1);
+        if (!eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), _options)) {
+            g_strfreev (_options);
             g_object_unref (layout);
             return FALSE;
         }
