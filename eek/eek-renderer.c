@@ -276,12 +276,14 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     gdouble size;
     EekSymbol *symbol;
     EekBounds bounds;
-    gchar *label = "M";
+    const gchar *label = NULL;
 
     symbol = eek_key_get_symbol (EEK_KEY(element));
     if (symbol &&
         eek_symbol_get_category (symbol) == EEK_SYMBOL_CATEGORY_LETTER)
         label = eek_symbol_get_label (symbol);
+    if (!label)
+        label = "M";
 
     base_font = pango_context_get_font_description (priv->pcontext);
     font = pango_font_description_copy (base_font);
@@ -453,7 +455,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
     EekSymbol *symbol;
     EekSymbolCategory category;
-    gchar *label;
+    const gchar *label;
     EekBounds bounds;
     PangoFontDescription *font;
     gdouble size, scale;
