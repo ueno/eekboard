@@ -276,14 +276,12 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     gdouble size;
     EekSymbol *symbol;
     EekBounds bounds;
-    gchar *label = NULL;
+    gchar *label = "M";
 
     symbol = eek_key_get_symbol (EEK_KEY(element));
     if (symbol &&
         eek_symbol_get_category (symbol) == EEK_SYMBOL_CATEGORY_LETTER)
         label = eek_symbol_get_label (symbol);
-    if (!label)
-        label = g_strdup ("M");
 
     base_font = pango_context_get_font_description (priv->pcontext);
     font = pango_font_description_copy (base_font);
@@ -296,7 +294,6 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     pango_font_description_free (font);
 
     pango_layout_set_text (layout, label, -1);
-    g_free (label);
 
     pango_layout_get_extents (layout, NULL, &extents);
     g_object_unref (layout);
@@ -495,7 +492,6 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     pango_font_description_set_size (font, size * priv->scale * scale);
     pango_layout_set_font_description (layout, font);
     pango_layout_set_text (layout, label, -1);
-    g_free (label);
     pango_layout_set_width (layout,
                             PANGO_SCALE * bounds.width * priv->scale * scale);
     pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);

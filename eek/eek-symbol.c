@@ -277,7 +277,7 @@ eek_symbol_set_label (EekSymbol   *symbol,
     priv->label = g_strdup (label);
 }
 
-gchar *
+G_CONST_RETURN gchar *
 eek_symbol_get_label (EekSymbol *symbol)
 {
     EekSymbolPrivate *priv;
@@ -287,7 +287,7 @@ eek_symbol_get_label (EekSymbol *symbol)
     priv = EEK_SYMBOL_GET_PRIVATE(symbol);
     if (priv->label == NULL || *priv->label == '\0')
         return NULL;
-    return g_strdup (priv->label);
+    return priv->label;
 }
 
 /**

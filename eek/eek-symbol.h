@@ -93,7 +93,7 @@ void                  eek_symbol_set_name      (EekSymbol        *symbol,
 G_CONST_RETURN gchar *eek_symbol_get_name      (EekSymbol        *symbol);
 void                  eek_symbol_set_label     (EekSymbol        *symbol,
                                                 const gchar      *label);
-gchar                *eek_symbol_get_label     (EekSymbol        *symbol);
+G_CONST_RETURN gchar *eek_symbol_get_label     (EekSymbol        *symbol);
 void                  eek_symbol_set_category  (EekSymbol        *symbol,
                                                 EekSymbolCategory category);
 EekSymbolCategory     eek_symbol_get_category  (EekSymbol        *symbol);
