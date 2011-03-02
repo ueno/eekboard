@@ -176,6 +176,22 @@ on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
 }
 
 static void
+on_realize (GtkWidget *widget,
+            gpointer   user_data)
+{
+    ServerContext *context = user_data;
+
+    g_assert (context && context->window == widget);
+
+    /* make the window not maximizable */
+    gdk_window_set_functions (gtk_widget_get_window (widget),
+                              GDK_FUNC_RESIZE |
+                              GDK_FUNC_MOVE |
+                              GDK_FUNC_MINIMIZE |
+                              GDK_FUNC_CLOSE);
+}
+
+static void
 update_widget (ServerContext *context)
 {
     GdkScreen *screen;
@@ -225,6 +241,9 @@ update_widget (ServerContext *context)
         gtk_window_set_title (GTK_WINDOW(context->window), _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
+
+        g_signal_connect (context->window, "realize",
+                          G_CALLBACK(on_realize), context);
 
         screen = gdk_screen_get_default ();
         root = gtk_widget_get_root_window (context->window);
