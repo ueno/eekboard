@@ -32,27 +32,33 @@ G_BEGIN_DECLS
 typedef struct _EekboardDesktopClient EekboardDesktopClient;
 
 EekboardDesktopClient * eekboard_desktop_client_new
-                       (GDBusConnection      *connection);
+                        (GDBusConnection       *connection);
 
-gboolean               eekboard_desktop_client_enable_xkl
-                       (EekboardDesktopClient *client);
-void                   eekboard_desktop_client_disable_xkl
-                       (EekboardDesktopClient *client);
+gboolean                eekboard_desktop_client_set_xkl_config
+                        (EekboardDesktopClient *client,
+                         const gchar           *model,
+                         const gchar           *layouts,
+                         const gchar           *options);
 
-gboolean               eekboard_desktop_client_enable_cspi_focus
-                       (EekboardDesktopClient *client);
-void                   eekboard_desktop_client_disable_cspi_focus
-                       (EekboardDesktopClient *client);
+gboolean                eekboard_desktop_client_enable_xkl
+                        (EekboardDesktopClient *client);
+void                    eekboard_desktop_client_disable_xkl
+                        (EekboardDesktopClient *client);
 
-gboolean               eekboard_desktop_client_enable_cspi_keystroke
-                       (EekboardDesktopClient *client);
-void                   eekboard_desktop_client_disable_cspi_keystroke
-                       (EekboardDesktopClient *client);
+gboolean                eekboard_desktop_client_enable_cspi_focus
+                        (EekboardDesktopClient *client);
+void                    eekboard_desktop_client_disable_cspi_focus
+                        (EekboardDesktopClient *client);
 
-gboolean               eekboard_desktop_client_enable_fakekey
-                       (EekboardDesktopClient *client);
-void                   eekboard_desktop_client_disable_fakekey
-                       (EekboardDesktopClient *client);
+gboolean                eekboard_desktop_client_enable_cspi_keystroke
+                        (EekboardDesktopClient *client);
+void                    eekboard_desktop_client_disable_cspi_keystroke
+                        (EekboardDesktopClient *client);
+
+gboolean                eekboard_desktop_client_enable_fakekey
+                        (EekboardDesktopClient *client);
+void                    eekboard_desktop_client_disable_fakekey
+                        (EekboardDesktopClient *client);
 
 G_END_DECLS
 #endif  /* EEKBOARD_DESKTOP_CLIENT_H */

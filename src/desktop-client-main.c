@@ -32,9 +32,13 @@ static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
 #ifdef HAVE_CSPI
-gboolean opt_focus = FALSE;
-gboolean opt_keystroke = FALSE;
+static gboolean opt_focus = FALSE;
+static gboolean opt_keystroke = FALSE;
 #endif  /* HAVE_CSPI */
+
+static gchar *opt_model = NULL;
+static gchar *opt_layouts = NULL;
+static gchar *opt_options = NULL;
 
 static const GOptionEntry options[] = {
     {"system", 'y', 0, G_OPTION_ARG_NONE, &opt_system,
@@ -49,6 +53,12 @@ static const GOptionEntry options[] = {
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_CSPI */
+    {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
+     N_("Specify model")},
+    {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
+     N_("Specify layouts")},
+    {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
+     N_("Specify options")},
     {NULL}
 };
 
@@ -161,7 +171,15 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_CSPI */
 
-    if (!eekboard_desktop_client_enable_xkl (client)) {
+    if (opt_model || opt_layouts || opt_options) {
+        if (!eekboard_desktop_client_set_xkl_config (client,
+                                                     opt_model,
+                                                     opt_layouts,
+                                                     opt_options)) {
+            g_printerr ("Can't set xklavier config\n");
+            exit (1);
+        }
+    } else if (!eekboard_desktop_client_enable_xkl (client)) {
         g_printerr ("Can't register xklavier event listeners\n");
         exit (1);
     }

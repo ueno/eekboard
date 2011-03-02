@@ -103,8 +103,11 @@ static SPIBoolean      keystroke_listener_cb
                                          (const AccessibleKeystroke *stroke,
                                           void                      *user_data);
 #endif  /* HAVE_CSPI */
-static void            set_keyboard      (EekboardDesktopClient      *client,
-                                          gboolean                   show);
+static gboolean        set_keyboard      (EekboardDesktopClient     *client,
+                                          gboolean                   show,
+                                          const gchar               *model,
+                                          const gchar               *layouts,
+                                          const gchar               *options);
 
 static void
 eekboard_desktop_client_set_property (GObject      *object,
@@ -259,6 +262,27 @@ eekboard_desktop_client_init (EekboardDesktopClient *client)
 }
 
 gboolean
+eekboard_desktop_client_set_xkl_config (EekboardDesktopClient *client,
+                                        const gchar *model,
+                                        const gchar *layouts,
+                                        const gchar *options)
+{
+#ifdef HAVE_CSPI
+    return set_keyboard (client,
+                         client->focus_listener ? FALSE : TRUE,
+                         model,
+                         layouts,
+                         options);
+#else
+    return set_keyboard (client,
+                         TRUE,
+                         model,
+                         layouts,
+                         options);
+#endif
+}
+
+gboolean
 eekboard_desktop_client_enable_xkl (EekboardDesktopClient *client)
 {
     if (!client->display) {
@@ -295,12 +319,11 @@ eekboard_desktop_client_enable_xkl (EekboardDesktopClient *client)
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
 #ifdef HAVE_CSPI
-    set_keyboard (client, client->focus_listener ? FALSE : TRUE);
+    return set_keyboard (client, client->focus_listener ? FALSE : TRUE,
+                         NULL, NULL, NULL);
 #else
-    set_keyboard (client, TRUE);
+    return set_keyboard (client, TRUE, NULL, NULL, NULL);
 #endif
-
-    return TRUE;
 }
 
 void
@@ -458,8 +481,10 @@ on_xkl_config_changed (XklEngine *xklengine,
                        gpointer   user_data)
 {
     EekboardDesktopClient *client = user_data;
+    gboolean retval;
 
-    set_keyboard (client, FALSE);
+    retval = set_keyboard (client, FALSE, NULL, NULL, NULL);
+    g_return_if_fail (retval);
 
 #ifdef HAVE_FAKEKEY
     if (client->fakekey)
@@ -467,9 +492,12 @@ on_xkl_config_changed (XklEngine *xklengine,
 #endif  /* HAVE_FAKEKEY */
 }
 
-static void
+static gboolean
 set_keyboard (EekboardDesktopClient *client,
-              gboolean              show)
+              gboolean               show,
+              const gchar           *model,
+              const gchar           *layouts,
+              const gchar           *options)
 {
     EekLayout *layout;
     gchar *keyboard_name;
@@ -479,6 +507,46 @@ set_keyboard (EekboardDesktopClient *client,
     if (client->keyboard)
         g_object_unref (client->keyboard);
     layout = eek_xkl_layout_new ();
+
+    if (model) {
+        if (!eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), model)) {
+            g_object_unref (layout);
+            return FALSE;
+        }
+    }
+
+    if (layouts) {
+        XklConfigRec *rec;
+
+        rec = eekboard_xkl_config_rec_new_from_string (layouts);
+        if (!eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout),
+                                         rec->layouts)) {
+            g_object_unref (rec);
+            g_object_unref (layout);
+            return FALSE;
+        }
+
+        if (!eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout),
+                                          rec->variants)) {
+            g_object_unref (rec);
+            g_object_unref (layout);
+            return FALSE;
+        }            
+
+        g_object_unref (rec);
+    }
+
+    if (options) {
+        gchar **options;
+
+        options = g_strsplit (options, ",", -1);
+        if (!eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options)) {
+            g_strfreev (options);
+            g_object_unref (layout);
+            return FALSE;
+        }
+    }
+
     client->keyboard = eek_keyboard_new (layout, CSW, CSH);
     eek_keyboard_set_modifier_behavior (client->keyboard,
                                         EEK_MODIFIER_BEHAVIOR_LATCH);
@@ -492,6 +560,8 @@ set_keyboard (EekboardDesktopClient *client,
     eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
     if (show)
         eekboard_context_show_keyboard (client->context, NULL);
+
+    return TRUE;
 }
 
 static void
