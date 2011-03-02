@@ -560,6 +560,31 @@ eek_renderer_set_property (GObject      *object,
         priv->pcontext = g_value_get_object (value);
         g_object_ref (priv->pcontext);
         break;
+    default:
+        g_object_set_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
+    }
+}
+
+static void
+eek_renderer_get_property (GObject    *object,
+                           guint       prop_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
+{
+    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
+
+    switch (prop_id) {
+    case PROP_KEYBOARD:
+        g_value_set_object (value, priv->keyboard);
+        break;
+    default:
+        g_object_get_property (object,
+                               g_param_spec_get_name (pspec),
+                               value);
+        break;
     }
 }
 
@@ -610,6 +635,7 @@ eek_renderer_class_init (EekRendererClass *klass)
     klass->render_keyboard = eek_renderer_real_render_keyboard;
 
     gobject_class->set_property = eek_renderer_set_property;
+    gobject_class->get_property = eek_renderer_get_property;
     gobject_class->dispose = eek_renderer_dispose;
     gobject_class->finalize = eek_renderer_finalize;
 
@@ -617,7 +643,7 @@ eek_renderer_class_init (EekRendererClass *klass)
                                  "Keyboard",
                                  "Keyboard",
                                  EEK_TYPE_KEYBOARD,
-                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
+                                 G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class,
                                      PROP_KEYBOARD,
                                      pspec);
