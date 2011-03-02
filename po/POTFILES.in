@@ -4,3 +4,4 @@ src/client-main.c
 src/desktop-client.c
 src/desktop-client-main.c
 src/xml-main.c
+src/server-main.c
