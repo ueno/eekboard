@@ -232,12 +232,25 @@ eek_symbol_init (EekSymbol *self)
     priv->modifier_mask = 0;
 }
 
+/**
+ * eek_symbol_new:
+ * @name: name of the symbol
+ *
+ * Create a new #EekSymbol with @name.
+ */
 EekSymbol *
 eek_symbol_new (const gchar *name)
 {
     return g_object_new (EEK_TYPE_SYMBOL, "name", name);
 }
 
+/**
+ * eek_symbol_set_name:
+ * @symbol: an #EekSymbol
+ * @name: name of the symbol
+ *
+ * Set the name of @symbol to @name.
+ */
 void
 eek_symbol_set_name (EekSymbol   *symbol,
                      const gchar *name)
@@ -251,6 +264,12 @@ eek_symbol_set_name (EekSymbol   *symbol,
     priv->name = g_strdup (name);
 }
 
+/**
+ * eek_symbol_get_name:
+ * @symbol: an #EekSymbol
+ *
+ * Get the name of @symbol.
+ */
 G_CONST_RETURN gchar *
 eek_symbol_get_name (EekSymbol *symbol)
 {
@@ -264,6 +283,13 @@ eek_symbol_get_name (EekSymbol *symbol)
     return priv->name;
 }
 
+/**
+ * eek_symbol_set_label:
+ * @symbol: an #EekSymbol
+ * @label: label text of @symbol
+ *
+ * Set the label text of @symbol to @label.
+ */
 void
 eek_symbol_set_label (EekSymbol   *symbol,
                       const gchar *label)
@@ -277,6 +303,12 @@ eek_symbol_set_label (EekSymbol   *symbol,
     priv->label = g_strdup (label);
 }
 
+/**
+ * eek_symbol_get_label:
+ * @symbol: an #EekSymbol
+ *
+ * Get the label text of @symbol.
+ */
 G_CONST_RETURN gchar *
 eek_symbol_get_label (EekSymbol *symbol)
 {
@@ -313,7 +345,7 @@ eek_symbol_set_category (EekSymbol        *symbol,
  * eek_symbol_get_category:
  * @symbol: an #EekSymbol
  *
- * Returns symbol category of @symbol.
+ * Get symbol category of @symbol.
  */
 EekSymbolCategory
 eek_symbol_get_category (EekSymbol *symbol)
@@ -348,7 +380,7 @@ eek_symbol_set_modifier_mask (EekSymbol      *symbol,
  * eek_symbol_get_modifier_mask:
  * @symbol: an #EekSymbol
  *
- * Returns modifier mask @symbol can trigger.
+ * Get modifier mask @symbol can trigger.
  */
 EekModifierType
 eek_symbol_get_modifier_mask (EekSymbol *symbol)
@@ -374,9 +406,16 @@ eek_symbol_is_modifier (EekSymbol *symbol)
     return eek_symbol_get_modifier_mask (symbol) != 0;
 }
 
+/**
+ * eek_symbol_set_icon_name:
+ * @symbol: an #EekSymbol
+ * @icon_name: icon name of @symbol
+ *
+ * Set the icon name of @symbol to @icon_name.
+ */
 void
 eek_symbol_set_icon_name (EekSymbol   *symbol,
-                     const gchar *icon_name)
+                          const gchar *icon_name)
 {
     EekSymbolPrivate *priv;
 
@@ -387,6 +426,12 @@ eek_symbol_set_icon_name (EekSymbol   *symbol,
     priv->icon_name = g_strdup (icon_name);
 }
 
+/**
+ * eek_symbol_get_icon_name:
+ * @symbol: an #EekSymbol
+ *
+ * Get the icon name of @symbol.
+ */
 G_CONST_RETURN gchar *
 eek_symbol_get_icon_name (EekSymbol *symbol)
 {
