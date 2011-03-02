@@ -23,6 +23,8 @@ bin_PROGRAMS = \
 	eekboard-server \
 	eekboard-xml
 
+noinst_LTLIBRARIES = libxklutil.la
+
 eekboard_desktop_client_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
@@ -32,6 +34,7 @@ eekboard_desktop_client_CFLAGS = \
 	$(LIBXKLAVIER_CFLAGS)
 
 eekboard_desktop_client_LDADD = \
+	$(builddir)/libxklutil.la \
 	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
@@ -96,6 +99,7 @@ eekboard_xml_CFLAGS = \
 	$(LIBXKLAVIER_CFLAGS)
 
 eekboard_xml_LDADD = \
+	$(builddir)/libxklutil.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(top_builddir)/eek/libeek-gtk.la \
@@ -103,8 +107,12 @@ eekboard_xml_LDADD = \
 	$(GTK_LIBS) \
 	$(LIBXKLAVIER_LIBS)
 
-eekboard_xml_headers = xklutil.h
-eekboard_xml_SOURCES = xklutil.c xml-main.c
+eekboard_xml_SOURCES = xml-main.c
+
+libxklutil_la_headers = xklutil.h
+libxklutil_la_SOURCES = xklutil.c
+libxklutil_la_CFLAGS = $(LIBXKLAVIER_CFLAGS)
+libxklutil_la_LIBADD = $(LIBXKLAVIER_LIBS)
 
 eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
 eekboard_HEADERS =				\
