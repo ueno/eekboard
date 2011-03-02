@@ -122,7 +122,8 @@ noinst_HEADERS = \
 	$(eekboard_desktop_client_headers) \
 	$(eekboard_client_headers) \
 	$(eekboard_server_headers) \
-	$(eekboard_xml_headers)
+	$(eekboard_xml_headers) \
+	$(libxklutil_la_headers)
 
 EXTRA_DIST = $(service_in_files)
 DISTCLEANFILES = $(service_DATA)
