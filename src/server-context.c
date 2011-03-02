@@ -574,7 +574,7 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_variant_get (parameters, "(i)", &group);
-        eek_keyboard_set_group (context->keyboard, group);
+        eek_element_set_group (EEK_ELEMENT(context->keyboard), group);
 
         if (context->window) {
             gboolean was_visible = gtk_widget_get_visible (context->window);

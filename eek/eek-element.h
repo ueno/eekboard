@@ -46,23 +46,35 @@ struct _EekElementClass
 {
     /*< private >*/
     GObjectClass parent_class;
-    void                  (* set_parent) (EekElement  *self,
-                                          EekElement  *parent);
-    EekElement           *(* get_parent) (EekElement  *self);
-    void                  (* set_name)   (EekElement  *self,
-                                          const gchar *name);
+    void                  (* set_parent)           (EekElement  *self,
+                                                    EekElement  *parent);
+    EekElement           *(* get_parent)           (EekElement  *self);
+    void                  (* set_name)             (EekElement  *self,
+                                                    const gchar *name);
 
-    G_CONST_RETURN gchar *(* get_name)   (EekElement  *self);
+    G_CONST_RETURN gchar *(* get_name)             (EekElement  *self);
 
-    void                  (* set_bounds) (EekElement  *self,
-                                          EekBounds   *bounds);
+    void                  (* set_bounds)           (EekElement  *self,
+                                                    EekBounds   *bounds);
 
-    void                  (* get_bounds) (EekElement  *self,
-                                          EekBounds   *bounds);
+    void                  (* get_bounds)           (EekElement  *self,
+                                                    EekBounds   *bounds);
+
+    void                  (* set_symbol_index)     (EekElement  *self,
+                                                    gint         group,
+                                                    gint         level);
+    void                  (* get_symbol_index)     (EekElement  *self,
+                                                    gint        *group,
+                                                    gint        *level);
+
+    /* signals */
+    void                  (* symbol_index_changed) (EekElement  *self,
+                                                    gint         group,
+                                                    gint         level);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[21];
 };
 
 GType                 eek_element_get_type              (void) G_GNUC_CONST;
@@ -91,6 +103,19 @@ void                  eek_element_set_size              (EekElement  *element,
 void                  eek_element_get_absolute_position (EekElement  *element,
                                                          gdouble     *x,
                                                          gdouble     *y);
+
+void                  eek_element_set_symbol_index      (EekElement  *element,
+                                                         gint         group,
+                                                         gint         level);
+void                  eek_element_get_symbol_index      (EekElement  *element,
+                                                         gint        *group,
+                                                         gint        *level);
+void                  eek_element_set_group             (EekElement  *element,
+                                                         gint         group);
+void                  eek_element_set_level             (EekElement  *element,
+                                                         gint         level);
+gint                  eek_element_get_group             (EekElement  *element);
+gint                  eek_element_get_level             (EekElement  *element);
 
 G_END_DECLS
 #endif  /* EEK_ELEMENT_H */

@@ -35,13 +35,10 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-symbol.h"
-#include "eek-marshalers.h"
 #include "eek-serializable.h"
 
 enum {
     PROP_0,
-    PROP_GROUP,
-    PROP_LEVEL,
     PROP_LAYOUT,
     PROP_MODIFIER_BEHAVIOR,
     PROP_LAST
@@ -50,7 +47,6 @@ enum {
 enum {
     KEY_PRESSED,
     KEY_RELEASED,
-    SYMBOL_INDEX_CHANGED,
     LAST_SIGNAL
 };
 
@@ -68,8 +64,6 @@ G_DEFINE_TYPE_WITH_CODE (EekKeyboard, eek_keyboard, EEK_TYPE_CONTAINER,
 
 struct _EekKeyboardPrivate
 {
-    gint group;
-    gint level;
     EekLayout *layout;
     EekModifierBehavior modifier_behavior;
     EekModifierType modifiers;
@@ -185,35 +179,6 @@ eek_serializable_iface_init (EekSerializableIface *iface)
 }
 
 static void
-eek_keyboard_real_set_symbol_index (EekKeyboard *self,
-                                    gint         group,
-                                    gint         level)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-
-    if (priv->group != group || priv->level != level) {
-        priv->group = group;
-        priv->level = level;
-
-        g_signal_emit_by_name (self, "symbol-index-changed", group, level);
-    }
-}
-
-void
-eek_keyboard_real_get_symbol_index (EekKeyboard *self,
-                                    gint        *group,
-                                    gint        *level)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-
-    g_return_if_fail (group || level);
-    if (group)
-        *group = priv->group;
-    if (level)
-        *level = priv->level;
-}
-
-static void
 on_key_pressed (EekSection  *section,
                 EekKey      *key,
                 EekKeyboard *keyboard)
@@ -283,12 +248,6 @@ eek_keyboard_set_property (GObject      *object,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
 
     switch (prop_id) {
-    case PROP_GROUP:
-        eek_keyboard_set_group (EEK_KEYBOARD(object), g_value_get_int (value));
-        break;
-    case PROP_LEVEL:
-        eek_keyboard_set_level (EEK_KEYBOARD(object), g_value_get_int (value));
-        break;
     case PROP_LAYOUT:
         priv->layout = g_value_get_object (value);
         if (priv->layout)
@@ -315,14 +274,6 @@ eek_keyboard_get_property (GObject    *object,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
 
     switch (prop_id) {
-    case PROP_GROUP:
-        g_value_set_int (value,
-                         eek_keyboard_get_group (EEK_KEYBOARD(object)));
-        break;
-    case PROP_LEVEL:
-        g_value_set_int (value,
-                         eek_keyboard_get_level (EEK_KEYBOARD(object)));
-        break;
     case PROP_LAYOUT:
         g_value_set_object (value, priv->layout);
         break;
@@ -339,24 +290,16 @@ eek_keyboard_get_property (GObject    *object,
 }
 
 static void
-eek_keyboard_real_symbol_index_changed (EekKeyboard *self,
-                                        gint         group,
-                                        gint         level)
-{
-    /* g_debug ("symbol-index-changed"); */
-}
-
-static void
 set_level_from_modifiers (EekKeyboard *self)
 {
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    guint level = 0;
+    gint level = 0;
 
     if (priv->modifiers & EEK_MOD5_MASK)
         level |= 2;
     if (priv->modifiers & EEK_SHIFT_MASK)
         level |= 1;
-    eek_keyboard_set_level (self, level);
+    eek_element_set_level (EEK_ELEMENT(self), level);
 }
 
 static void
@@ -366,12 +309,10 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     EekSymbol *symbol;
     EekModifierType modifier;
+    gint group, level;
 
-    symbol = eek_key_get_symbol_at_index (key,
-                                          priv->group,
-                                          priv->level,
-                                          0,
-                                          0);
+    eek_element_get_symbol_index (EEK_ELEMENT(self), &group, &level);
+    symbol = eek_key_get_symbol_at_index (key, group, level, 0, 0);
     if (!symbol)
         return;
 
@@ -397,12 +338,10 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     EekSymbol *symbol;
     EekModifierType modifier;
+    gint group, level;
 
-    symbol = eek_key_get_symbol_at_index (key,
-                                          priv->group,
-                                          priv->level,
-                                          0,
-                                          0);
+    eek_element_get_symbol_index (EEK_ELEMENT(self), &group, &level);
+    symbol = eek_key_get_symbol_at_index (key, group, level, 0, 0);
     if (!symbol)
         return;
 
@@ -473,15 +412,12 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     g_type_class_add_private (gobject_class,
                               sizeof (EekKeyboardPrivate));
 
-    klass->set_symbol_index = eek_keyboard_real_set_symbol_index;
-    klass->get_symbol_index = eek_keyboard_real_get_symbol_index;
     klass->create_section = eek_keyboard_real_create_section;
     klass->find_key_by_keycode = eek_keyboard_real_find_key_by_keycode;
 
     /* signals */
     klass->key_pressed = eek_keyboard_real_key_pressed;
     klass->key_released = eek_keyboard_real_key_released;
-    klass->symbol_index_changed = eek_keyboard_real_symbol_index_changed;
 
     container_class->child_added = eek_keyboard_real_child_added;
     container_class->child_removed = eek_keyboard_real_child_removed;
@@ -490,34 +426,6 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     gobject_class->set_property = eek_keyboard_set_property;
     gobject_class->dispose = eek_keyboard_dispose;
     gobject_class->finalize = eek_keyboard_finalize;
-
-    /**
-     * EekKeyboard:group:
-     *
-     * The group (row) index of symbol matrix of #EekKeyboard.
-     */
-    pspec = g_param_spec_int ("group",
-                              "Group",
-                              "Group index of symbol matrix of the keyboard",
-                              0, G_MAXINT, 0,
-                              G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class,
-                                     PROP_GROUP,
-                                     pspec);
-
-    /**
-     * EekKeyboard:level:
-     *
-     * The level (row) index of symbol matrix of #EekKeyboard.
-     */
-    pspec = g_param_spec_int ("level",
-                              "Level",
-                              "Level index of symbol matrix of the keyboard",
-                              0, G_MAXINT, 0,
-                              G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class,
-                                     PROP_LEVEL,
-                                     pspec);
 
     /**
      * EekKeyboard:layout:
@@ -586,28 +494,6 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                       G_TYPE_NONE,
                       1,
                       EEK_TYPE_KEY);
-
-    /**
-     * EekKeyboard::symbol-index-changed:
-     * @keyboard: an #EekKeyboard
-     * @group: row index of the symbol matrix of keys on @keyboard
-     * @level: column index of the symbol matrix of keys on @keyboard
-     *
-     * The ::symbol-index-changed signal is emitted each time the
-     * global configuration of group/level index changes.
-     */
-    signals[SYMBOL_INDEX_CHANGED] =
-        g_signal_new (I_("symbol-index-changed"),
-                      G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET(EekKeyboardClass, symbol_index_changed),
-                      NULL,
-                      NULL,
-                      _eek_marshal_VOID__INT_INT,
-                      G_TYPE_NONE,
-                      2,
-                      G_TYPE_INT,
-                      G_TYPE_INT);
 }
 
 static void
@@ -616,11 +502,11 @@ eek_keyboard_init (EekKeyboard *self)
     EekKeyboardPrivate *priv;
 
     priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    priv->group = priv->level = 0;
     priv->layout = NULL;
     priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
     priv->modifiers = 0;
     priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
+    eek_element_set_symbol_index (EEK_ELEMENT(self), 0, 0);
 }
 
 /**
@@ -629,7 +515,10 @@ eek_keyboard_init (EekKeyboard *self)
  * @group: row index of the symbol matrix of keys on @keyboard
  * @level: column index of the symbol matrix of keys on @keyboard
  *
- * Select a cell of the symbol matrix of each key on @keyboard.
+ * Set the default index of the symbol matrices of keys in @keyboard.
+ * To unset, pass -1 as group/level.
+ *
+ * Deprecated: 1.0: Use eek_element_set_symbol_index()
  */
 void
 eek_keyboard_set_symbol_index (EekKeyboard *keyboard,
@@ -637,18 +526,19 @@ eek_keyboard_set_symbol_index (EekKeyboard *keyboard,
                                gint         level)
 {
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    EEK_KEYBOARD_GET_CLASS(keyboard)->set_symbol_index (keyboard, group, level);
+    eek_element_set_symbol_index (EEK_ELEMENT(keyboard), group, level);
 }
 
 /**
  * eek_keyboard_get_symbol_index:
  * @keyboard: an #EekKeyboard
- * @group: a pointer where row index of the symbol matrix of keys on
- * @keyboard will be stored
- * @level: a pointer where column index of the symbol matrix of keys
- * on @keyboard will be stored
+ * @group: a pointer where the group value of the symbol index will be stored
+ * @level: a pointer where the level value of the symbol index will be stored
  *
- * Get the current cell position of the symbol matrix of each key on @keyboard.
+ * Get the default index of the symbol matrices of keys in @keyboard.
+ * If the index is not set, -1 will be returned.
+ *
+ * Deprecated: 1.0: Use eek_element_get_symbol_index()
  */
 void
 eek_keyboard_get_symbol_index (EekKeyboard *keyboard,
@@ -656,7 +546,7 @@ eek_keyboard_get_symbol_index (EekKeyboard *keyboard,
                                gint        *level)
 {
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    EEK_KEYBOARD_GET_CLASS(keyboard)->get_symbol_index (keyboard, group, level);
+    eek_element_get_symbol_index(EEK_ELEMENT(keyboard), group, level);
 }
 
 /**
@@ -664,14 +554,17 @@ eek_keyboard_get_symbol_index (EekKeyboard *keyboard,
  * @keyboard: an #EekKeyboard
  * @group: group index of @keyboard
  *
- * Set the group index of symbol matrix of @keyboard.
+ * Set the group value of the default symbol index of @keyboard.  To
+ * unset, pass -1 as @group.
+ *
+ * See also: eek_keyboard_set_symbol_index()
+ * Deprecated: 1.0: Use eek_element_set_group()
  */
 void
 eek_keyboard_set_group (EekKeyboard *keyboard,
                         gint         group)
 {
-    gint level = eek_keyboard_get_level (keyboard);
-    eek_keyboard_set_symbol_index (keyboard, group, level);
+    eek_element_set_group (EEK_ELEMENT(keyboard), group);
 }
 
 /**
@@ -679,42 +572,49 @@ eek_keyboard_set_group (EekKeyboard *keyboard,
  * @keyboard: an #EekKeyboard
  * @level: level index of @keyboard
  *
- * Set the level index of symbol matrix of @keyboard.
+ * Set the level value of the default symbol index of @keyboard.  To
+ * unset, pass -1 as @level.
+ *
+ * See also: eek_keyboard_set_symbol_index()
+ * Deprecated: 1.0: Use eek_element_set_level()
  */
 void
 eek_keyboard_set_level (EekKeyboard *keyboard,
                         gint         level)
 {
-    gint group = eek_keyboard_get_group (keyboard);
-    eek_keyboard_set_symbol_index (keyboard, group, level);
+    eek_element_set_level (EEK_ELEMENT(keyboard), level);
 }
 
 /**
  * eek_keyboard_get_group:
  * @keyboard: an #EekKeyboard
  *
- * Return the group index of @keyboard.
+ * Return the group value of the default symbol index of @keyboard.
+ * If the value is not set, -1 will be returned.
+ *
+ * See also: eek_keyboard_get_symbol_index()
+ * Deprecated: 1.0: Use eek_element_get_group()
  */
 gint
 eek_keyboard_get_group (EekKeyboard *keyboard)
 {
-    gint group;
-    eek_keyboard_get_symbol_index (keyboard, &group, NULL);
-    return group;
+    return eek_element_get_group (EEK_ELEMENT(keyboard));
 }
 
 /**
  * eek_keyboard_get_level:
  * @keyboard: an #EekKeyboard
  *
- * Return the level index of @keyboard.
+ * Return the level value of the default symbol index of @keyboard.
+ * If the value is not set, -1 will be returned.
+ *
+ * See also: eek_keyboard_get_symbol_index()
+ * Deprecated: 1.0: Use eek_element_get_level()
  */
 gint
 eek_keyboard_get_level (EekKeyboard *keyboard)
 {
-    gint level;
-    eek_keyboard_get_symbol_index (keyboard, NULL, &level);
-    return level;
+    return eek_element_get_level (EEK_ELEMENT(keyboard));
 }
 
 /**

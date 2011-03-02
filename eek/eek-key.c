@@ -550,20 +550,6 @@ eek_key_get_symbol_matrix (EekKey *key)
     return EEK_KEY_GET_CLASS(key)->get_symbol_matrix (key);
 }
 
-static EekKeyboard *
-get_keyboard (EekKey *key)
-{
-    EekElement *parent;
-
-    parent = eek_element_get_parent (EEK_ELEMENT(key));
-    g_return_val_if_fail (EEK_IS_SECTION(parent), NULL);
-
-    parent = eek_element_get_parent (parent);
-    g_return_val_if_fail (EEK_IS_KEYBOARD(parent), NULL);
-
-    return EEK_KEYBOARD(parent);
-}
-
 /**
  * eek_key_get_symbol:
  * @key: an #EekKey
@@ -592,14 +578,38 @@ eek_key_get_symbol_with_fallback (EekKey *key,
                                   gint    fallback_level)
 {
     gint group, level;
-    EekKeyboard *keyboard;
 
     g_return_val_if_fail (EEK_IS_KEY (key), NULL);
+    g_return_val_if_fail (fallback_group >= 0, NULL);
+    g_return_val_if_fail (fallback_level >= 0, NULL);
 
-    keyboard = get_keyboard (key);
-    g_return_val_if_fail (keyboard, NULL);
+    eek_element_get_symbol_index (EEK_ELEMENT(key), &group, &level);
 
-    eek_keyboard_get_symbol_index (keyboard, &group, &level);
+    if (group < 0 || level < 0) {
+        EekElement *section;
+
+        section = eek_element_get_parent (EEK_ELEMENT(key));
+        g_return_val_if_fail (EEK_IS_SECTION (section), NULL);
+
+        if (group < 0)
+            group = eek_element_get_group (section);
+
+        if (level < 0)
+            level = eek_element_get_level (section);
+
+        if (group < 0 || level < 0) {
+            EekElement *keyboard;
+
+            keyboard = eek_element_get_parent (section);
+            g_return_val_if_fail (EEK_IS_KEYBOARD (keyboard), NULL);
+
+            if (group < 0)
+                group = eek_element_get_group (keyboard);
+            if (level < 0)
+                level = eek_element_get_level (keyboard);
+        }
+    }
+
     return eek_key_get_symbol_at_index (key,
                                         group,
                                         level,
@@ -628,8 +638,13 @@ eek_key_get_symbol_at_index (EekKey *key,
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(key);
     gint num_symbols;
 
-    g_return_val_if_fail (group >= 0, NULL);
-    g_return_val_if_fail (level >= 0, NULL);
+    g_return_val_if_fail (fallback_group >= 0, NULL);
+    g_return_val_if_fail (fallback_level >= 0, NULL);
+
+    if (group < 0)
+        group = fallback_group;
+    if (level < 0)
+        level = fallback_level;
 
     if (!priv->symbol_matrix)
         return NULL;

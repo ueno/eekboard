@@ -504,7 +504,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
     EekboardDesktopClient *client = user_data;
 
     if (type == GROUP_CHANGED && client->keyboard) {
-        gint group = eek_keyboard_get_group (client->keyboard);
+        gint group = eek_element_get_group (EEK_ELEMENT(client->keyboard));
         if (group != value) {
             eekboard_context_set_group (client->context, value, NULL);
         }

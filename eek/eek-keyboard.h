@@ -53,30 +53,22 @@ struct _EekKeyboard
 
 /**
  * EekKeyboardClass:
- * @set_symbol_index: virtual function for setting group and level of
- * the entire keyboard
- * @get_symbol_index: virtual function for getting group and level of
- * the entire keyboard
  * @create_section: virtual function for creating a section
  * @find_key_by_keycode: virtual function for finding a key in the
  * keyboard by keycode
  * @key_pressed: class handler for #EekKeyboard::key-pressed signal
  * @key_released: class handler for #EekKeyboard::key-released signal
- * @symbol_index_changed: class handler for #EekKeyboard::symbol-index-changed signal
  */
 struct _EekKeyboardClass
 {
     /*< private >*/
     EekContainerClass parent_class;
 
-    /*< public >*/
-    void        (* set_symbol_index)     (EekKeyboard *self,
-                                          gint         group,
-                                          gint         level);
-    void        (* get_symbol_index)     (EekKeyboard *self,
-                                          gint        *group,
-                                          gint        *level);
+    /* obsolete members moved to EekElement */
+    gpointer set_symbol_index;
+    gpointer get_symbol_index;
 
+    /*< public >*/
     EekSection *(* create_section)       (EekKeyboard *self);
 
     EekKey     *(* find_key_by_keycode)  (EekKeyboard *self,
@@ -87,11 +79,11 @@ struct _EekKeyboardClass
                                           EekKey      *key);
     void        (* key_released)         (EekKeyboard *self,
                                           EekKey      *key);
-    void        (* symbol_index_changed) (EekKeyboard *self,
-                                          gint         group,
-                                          gint         level);
 
     /*< private >*/
+    /* obsolete members moved to EekElement */
+    gpointer symbol_index_changed;
+
     /* padding */
     gpointer pdummy[24];
 };

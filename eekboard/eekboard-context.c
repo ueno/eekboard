@@ -501,9 +501,8 @@ eekboard_context_set_group (EekboardContext *context,
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
 
     g_return_if_fail (priv->keyboard);
-    g_return_if_fail (group >= 0);
 
-    eek_keyboard_set_group (priv->keyboard, group);
+    eek_element_set_group (EEK_ELEMENT(priv->keyboard), group);
     g_dbus_proxy_call (G_DBUS_PROXY(context),
                        "SetGroup",
                        g_variant_new ("(i)", group),

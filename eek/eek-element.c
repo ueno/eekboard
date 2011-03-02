@@ -34,14 +34,24 @@
 
 #include "eek-element.h"
 #include "eek-container.h"
+#include "eek-marshalers.h"
 #include "eek-serializable.h"
 
 enum {
     PROP_0,
     PROP_NAME,
     PROP_BOUNDS,
+    PROP_GROUP,
+    PROP_LEVEL,
     PROP_LAST
 };
+
+enum {
+    SYMBOL_INDEX_CHANGED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
 
 static void eek_serializable_iface_init (EekSerializableIface *iface);
 
@@ -58,6 +68,8 @@ struct _EekElementPrivate
     gchar *name;
     EekBounds bounds;
     EekElement *parent;
+    gint group;
+    gint level;
 };
 
 static GVariant *
@@ -183,6 +195,41 @@ eek_element_real_get_bounds (EekElement *self,
 }
 
 static void
+eek_element_real_set_symbol_index (EekElement *self,
+                                   gint        group,
+                                   gint        level)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    if (priv->group != group || priv->level != level) {
+        priv->group = group;
+        priv->level = level;
+        g_signal_emit_by_name (self, "symbol-index-changed", group, level);
+    }
+}
+
+static void
+eek_element_real_get_symbol_index (EekElement *self,
+                                   gint       *group,
+                                   gint       *level)
+{
+    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
+
+    if (group)
+        *group = priv->group;
+    if (level)
+        *level = priv->level;
+}
+
+static void
+eek_element_real_symbol_index_changed (EekElement *self,
+                                       gint        group,
+                                       gint        level)
+{
+    // g_debug ("symbol-index-changed");
+}
+
+static void
 eek_element_finalize (GObject *object)
 {
     EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(object);
@@ -206,6 +253,13 @@ eek_element_set_property (GObject      *object,
         eek_element_set_bounds (EEK_ELEMENT(object),
                                 g_value_get_boxed (value));
         break;
+    case PROP_GROUP:
+        eek_element_set_group (EEK_ELEMENT(object),
+                               g_value_get_int (value));
+        break;
+    case PROP_LEVEL:
+        eek_element_set_level (EEK_ELEMENT(object),
+                               g_value_get_int (value));
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -228,6 +282,12 @@ eek_element_get_property (GObject    *object,
         eek_element_get_bounds (EEK_ELEMENT(object), &bounds);
         g_value_set_boxed (value, &bounds);
         break;
+    case PROP_GROUP:
+        g_value_set_int (value, eek_element_get_group (EEK_ELEMENT(object)));
+        break;
+    case PROP_LEVEL:
+        g_value_set_int (value, eek_element_get_level (EEK_ELEMENT(object)));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -249,6 +309,11 @@ eek_element_class_init (EekElementClass *klass)
     klass->get_name = eek_element_real_get_name;
     klass->set_bounds = eek_element_real_set_bounds;
     klass->get_bounds = eek_element_real_get_bounds;
+    klass->set_symbol_index = eek_element_real_set_symbol_index;
+    klass->get_symbol_index = eek_element_real_get_symbol_index;
+
+    /* signals */
+    klass->symbol_index_changed = eek_element_real_symbol_index_changed;
 
     gobject_class->set_property = eek_element_set_property;
     gobject_class->get_property = eek_element_get_property;
@@ -281,6 +346,56 @@ eek_element_class_init (EekElementClass *klass)
     g_object_class_install_property (gobject_class,
                                      PROP_BOUNDS,
                                      pspec);
+
+    /**
+     * EekElement:group:
+     *
+     * The group value of the symbol index of #EekElement.
+     */
+    pspec = g_param_spec_int ("group",
+                              "Group",
+                              "Group value of the symbol index",
+                              -1, G_MAXINT, -1,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_GROUP,
+                                     pspec);
+
+    /**
+     * EekElement:level:
+     *
+     * The level value of the symbol index of #EekElement.
+     */
+    pspec = g_param_spec_int ("level",
+                              "Level",
+                              "Level value of the symbol index",
+                              -1, G_MAXINT, -1,
+                              G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_LEVEL,
+                                     pspec);
+
+    /**
+     * EekElement::symbol-index-changed:
+     * @element: an #EekElement
+     * @group: row index of the symbol matrix of keys on @element
+     * @level: column index of the symbol matrix of keys on @element
+     *
+     * The ::symbol-index-changed signal is emitted each time the
+     * global configuration of group/level index changes.
+     */
+    signals[SYMBOL_INDEX_CHANGED] =
+        g_signal_new (I_("symbol-index-changed"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekElementClass, symbol_index_changed),
+                      NULL,
+                      NULL,
+                      _eek_marshal_VOID__INT_INT,
+                      G_TYPE_NONE,
+                      2,
+                      G_TYPE_INT,
+                      G_TYPE_INT);
 }
 
 static void
@@ -291,6 +406,8 @@ eek_element_init (EekElement *self)
     priv = self->priv = EEK_ELEMENT_GET_PRIVATE(self);
     priv->name = NULL;
     memset (&priv->bounds, 0, sizeof priv->bounds);
+    priv->group = -1;
+    priv->level = -1;
 }
 
 /**
@@ -451,4 +568,118 @@ eek_element_set_size (EekElement  *element,
     bounds.width = width;
     bounds.height = height;
     eek_element_set_bounds (element, &bounds);
+}
+
+/**
+ * eek_element_set_symbol_index:
+ * @element: an #EekElement
+ * @group: row index of the symbol matrix
+ * @level: column index of the symbol matrix
+ *
+ * Set the default index of the symbol matrices of @element.  The
+ * setting affects the child, if child does not have the index set, as
+ * well as this element.  To unset, pass -1 as group/level.
+ */
+void
+eek_element_set_symbol_index (EekElement *element,
+                              gint        group,
+                              gint        level)
+{
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    EEK_ELEMENT_GET_CLASS(element)->set_symbol_index (element, group, level);
+}
+
+/**
+ * eek_element_get_symbol_index:
+ * @element: an #EekElement
+ * @group: a pointer where the group value of the symbol index will be stored
+ * @level: a pointer where the level value of the symbol index will be stored
+ *
+ * Get the default index of the symbol matrices of @element.
+ * If the index is not set, -1 will be returned.
+ */
+void
+eek_element_get_symbol_index (EekElement *element,
+                              gint       *group,
+                              gint       *level)
+{
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    g_return_if_fail (group || level);
+    EEK_ELEMENT_GET_CLASS(element)->get_symbol_index (element, group, level);
+}
+
+/**
+ * eek_element_set_group:
+ * @element: an #EekElement
+ * @group: group index of @element
+ *
+ * Set the group value of the default symbol index of @element.  To
+ * unset, pass -1 as @group.
+ *
+ * See also: eek_element_set_symbol_index()
+ */
+void
+eek_element_set_group (EekElement *element,
+                       gint        group)
+{
+    gint level;
+
+    level = eek_element_get_level (element);
+    eek_element_set_symbol_index (element, group, level);
+}
+
+/**
+ * eek_element_set_level:
+ * @element: an #EekElement
+ * @level: level index of @element
+ *
+ * Set the level value of the default symbol index of @element.  To
+ * unset, pass -1 as @level.
+ *
+ * See also: eek_element_set_symbol_index()
+ */
+void
+eek_element_set_level (EekElement *element,
+                       gint        level)
+{
+    gint group;
+
+    group = eek_element_get_group (element);
+    eek_element_set_symbol_index (element, group, level);
+}
+
+/**
+ * eek_element_get_group:
+ * @element: an #EekElement
+ *
+ * Return the group value of the default symbol index of @element.
+ * If the value is not set, -1 will be returned.
+ *
+ * See also: eek_element_get_symbol_index()
+ */
+gint
+eek_element_get_group (EekElement *element)
+{
+    gint group;
+
+    eek_element_get_symbol_index (element, &group, NULL);
+    return group;
+}
+
+/**
+ * eek_element_get_level:
+ * @element: an #EekElement
+ *
+ * Return the level value of the default symbol index of @element.
+ * If the value is not set, -1 will be returned.
+ *
+ * See also: eek_element_get_symbol_index()
+ */
+gint
+eek_element_get_level (EekElement *element)
+{
+    gint level;
+
+    eek_element_get_symbol_index (element, NULL, &level);
+    return level;
 }

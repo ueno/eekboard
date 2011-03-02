@@ -113,7 +113,7 @@ main (int argc, char **argv)
         keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
 
-        eek_keyboard_set_group (keyboard, opt_group);
+        eek_element_set_group (EEK_ELEMENT(keyboard), opt_group);
 
         widget = eek_gtk_keyboard_new (keyboard);
         g_object_unref (keyboard);
