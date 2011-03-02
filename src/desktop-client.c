@@ -512,23 +512,6 @@ on_xkl_state_changed (XklEngine           *xklengine,
 }
 
 #ifdef HAVE_FAKEKEY
-G_INLINE_FUNC FakeKeyModifier
-get_fakekey_modifiers (EekModifierType modifiers)
-{
-    FakeKeyModifier retval = 0;
-
-    if (modifiers & EEK_SHIFT_MASK)
-        retval |= FAKEKEYMOD_SHIFT;
-    if (modifiers & EEK_CONTROL_MASK)
-        retval |= FAKEKEYMOD_CONTROL;
-    if (modifiers & EEK_MOD1_MASK)
-        retval |= FAKEKEYMOD_ALT;
-    if (modifiers & EEK_META_MASK)
-        retval |= FAKEKEYMOD_META;
-
-    return retval;
-}
-
 static void
 on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key,
@@ -536,19 +519,15 @@ on_key_pressed (EekKeyboard *keyboard,
 {
     EekboardDesktopClient *client = user_data;
     EekSymbol *symbol;
-    EekModifierType modifiers;
-    FakeKeyModifier fakekey_modifiers;
-    guint keycode;
 
     g_assert (client->fakekey);
 
-    modifiers = eek_keyboard_get_modifiers (client->keyboard);
-    fakekey_modifiers = get_fakekey_modifiers (modifiers);
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    keycode = eek_key_get_keycode (key);
     if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
-        fakekey_send_keyevent (client->fakekey, keycode, True, fakekey_modifiers);
-        fakekey_send_keyevent (client->fakekey, keycode, False, fakekey_modifiers);
+        fakekey_press_keysym (client->fakekey,
+                              eek_keysym_get_xkeysym (EEK_KEYSYM(symbol)),
+                              0);
+        fakekey_release (client->fakekey);
     }
 }
 

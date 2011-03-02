@@ -202,9 +202,13 @@ create_key (EekXkbLayout *layout,
         matrix = eek_symbol_matrix_new (num_groups, num_levels);
         for (i = 0; i < num_groups; i++)
             for (j = 0; j < num_levels; j++) {
+                EekModifierType modifier;
+
                 keysym = XkbKeySymEntry (priv->xkb, keycode, j, i);
+                modifier = XkbKeysymToModifiers (priv->display, keysym);
                 matrix->data[i * num_levels + j] =
-                    EEK_SYMBOL(eek_keysym_new (keysym));
+                    EEK_SYMBOL(eek_keysym_new_with_modifier (keysym,
+                                                             modifier));
             }
     }
 
@@ -319,6 +323,10 @@ eek_xkb_layout_real_create_keyboard (EekLayout *self,
     bounds.width = initial_width;
     bounds.height = initial_height;
     eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
+
+    eek_keyboard_set_num_lock_mask (keyboard,
+                                    XkbKeysymToModifiers (priv->display,
+                                                          XK_Num_Lock));
 
     if (priv->shape_oref_hash)
         g_hash_table_destroy (priv->shape_oref_hash);

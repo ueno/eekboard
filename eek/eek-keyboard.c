@@ -68,6 +68,7 @@ struct _EekKeyboardPrivate
     EekModifierBehavior modifier_behavior;
     EekModifierType modifiers;
     GArray *outline_array;
+    EekModifierType num_lock_mask;
 };
 
 static EekSerializableIface *eek_keyboard_parent_serializable_iface;
@@ -142,6 +143,7 @@ eek_keyboard_real_serialize (EekSerializable *self,
                                _g_variant_new_outline (outline));
     }
     g_variant_builder_add (builder, "v", g_variant_builder_end (&array));
+    g_variant_builder_add (builder, "u", priv->num_lock_mask);
 }
 
 static gsize
@@ -164,6 +166,7 @@ eek_keyboard_real_deserialize (EekSerializable *self,
         EekOutline *_outline = _g_variant_get_outline (outline);
         g_array_append_val (priv->outline_array, *_outline);
     }
+    g_variant_get_child (variant, index++, "u", &priv->num_lock_mask);
 
     return index;
 }
@@ -192,6 +195,15 @@ on_key_released (EekSection  *section,
                  EekKeyboard *keyboard)
 {
     g_signal_emit_by_name (keyboard, "key-released", key);
+}
+
+static void
+on_symbol_index_changed (EekSection *section,
+                         gint group,
+                         gint level,
+                         EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "symbol-index-changed", group, level);
 }
 
 static EekSection *
@@ -309,10 +321,8 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     EekSymbol *symbol;
     EekModifierType modifier;
-    gint group, level;
 
-    eek_element_get_symbol_index (EEK_ELEMENT(self), &group, &level);
-    symbol = eek_key_get_symbol_at_index (key, group, level, 0, 0);
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
         return;
 
@@ -338,10 +348,8 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     EekSymbol *symbol;
     EekModifierType modifier;
-    gint group, level;
 
-    eek_element_get_symbol_index (EEK_ELEMENT(self), &group, &level);
-    symbol = eek_key_get_symbol_at_index (key, group, level, 0, 0);
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
         return;
 
@@ -392,6 +400,8 @@ eek_keyboard_real_child_added (EekContainer *self,
                       G_CALLBACK(on_key_pressed), self);
     g_signal_connect (element, "key-released",
                       G_CALLBACK(on_key_released), self);
+    g_signal_connect (element, "symbol-index-changed",
+                      G_CALLBACK(on_symbol_index_changed), self);
 }
 
 static void
@@ -506,6 +516,7 @@ eek_keyboard_init (EekKeyboard *self)
     priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
     priv->modifiers = 0;
     priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
+    priv->num_lock_mask = 0;
     eek_element_set_symbol_index (EEK_ELEMENT(self), 0, 0);
 }
 
@@ -788,4 +799,27 @@ eek_keyboard_get_outline (EekKeyboard *keyboard,
         return NULL;
 
     return &g_array_index (priv->outline_array, EekOutline, oref - 1);
+}
+
+void
+eek_keyboard_set_num_lock_mask (EekKeyboard    *keyboard,
+                                EekModifierType num_lock_mask)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    priv->num_lock_mask = num_lock_mask;
+}
+
+EekModifierType
+eek_keyboard_get_num_lock_mask (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->num_lock_mask;
 }

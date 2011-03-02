@@ -451,7 +451,7 @@ eek_key_class_init (EekKeyClass *klass)
     signals[PRESSED] =
         g_signal_new (I_("pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
+                      G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyClass, pressed),
                       NULL,
                       NULL,
@@ -468,7 +468,7 @@ eek_key_class_init (EekKeyClass *klass)
    signals[RELEASED] =
         g_signal_new (I_("released"),
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
+                      G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyClass, released),
                       NULL,
                       NULL,

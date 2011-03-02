@@ -20,6 +20,7 @@
 #ifndef EEK_KEYSYM_H
 #define EEK_KEYSYM_H 1
 
+#include <X11/XKBlib.h>
 #include "eek-symbol.h"
 
 G_BEGIN_DECLS
@@ -53,11 +54,13 @@ struct _EekKeysymClass {
     EekSymbolClass parent_class;
 };
 
-GType      eek_keysym_get_type      (void) G_GNUC_CONST;
-EekKeysym *eek_keysym_new           (guint        xkeysym);
-guint      eek_keysym_get_xkeysym   (EekKeysym   *keysym);
+GType      eek_keysym_get_type          (void) G_GNUC_CONST;
+EekKeysym *eek_keysym_new               (guint           xkeysym);
+guint      eek_keysym_get_xkeysym       (EekKeysym      *keysym);
 
-EekKeysym *eek_keysym_new_from_name (const gchar *name);
+EekKeysym *eek_keysym_new_from_name     (const gchar    *name);
+EekKeysym *eek_keysym_new_with_modifier (guint           xkeysym,
+                                         EekModifierType modifier);
 
 G_END_DECLS
 

@@ -81,9 +81,15 @@ struct _EekSectionClass
     EekKey *(* find_key_by_keycode) (EekSection     *self,
                                      guint           keycode);
 
+    /* signals */
+    void    (* key_pressed)         (EekSection     *self,
+                                     EekKey         *key);
+    void    (* key_released)        (EekSection     *self,
+                                     EekKey         *key);
+
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[22];
 };
 
 GType   eek_section_get_type             (void) G_GNUC_CONST;

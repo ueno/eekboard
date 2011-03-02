@@ -215,7 +215,7 @@ eek_keysym_init (EekKeysym *self)
 }
 
 EekKeysym *
-eek_keysym_new (guint xkeysym)
+eek_keysym_new_with_modifier (guint xkeysym, EekModifierType modifier_mask)
 {
     EekKeysym *keysym;
     EekKeysymPrivate *priv;
@@ -223,7 +223,6 @@ eek_keysym_new (guint xkeysym)
         *unichar_entry;
     gchar *name, *label;
     EekSymbolCategory category;
-    EekModifierType modifier_mask;
     gunichar uc;
 
     special_entry =
@@ -272,8 +271,6 @@ eek_keysym_new (guint xkeysym)
     else
         label = g_strdup (name);
 
-    modifier_mask = get_modifier_mask (xkeysym);
-
     keysym = g_object_new (EEK_TYPE_KEYSYM,
                            "name", name,
                            "label", label,
@@ -292,6 +289,12 @@ eek_keysym_new (guint xkeysym)
     priv->xkeysym = xkeysym;
 
     return keysym;
+}
+
+EekKeysym *
+eek_keysym_new (guint xkeysym)
+{
+    return eek_keysym_new_with_modifier (xkeysym, get_modifier_mask (xkeysym));
 }
 
 EekKeysym *

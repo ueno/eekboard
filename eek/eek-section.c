@@ -32,8 +32,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+#include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"
+#include "eek-symbol.h"
 #include "eek-serializable.h"
 
 enum {
@@ -71,6 +73,7 @@ struct _EekSectionPrivate
 {
     gint angle;
     GSList *rows;
+    EekModifierType modifiers;
 };
 
 static EekSerializableIface *eek_section_parent_serializable_iface;
@@ -263,6 +266,71 @@ eek_section_real_find_key_by_keycode (EekSection *self,
 }
 
 static void
+eek_section_real_key_pressed (EekSection *self, EekKey *key)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    EekSymbol *symbol;
+    EekKeyboard *keyboard;
+    EekModifierBehavior behavior;
+    EekModifierType modifier;
+    EekModifierType num_lock_mask;
+    gint level = -1;
+
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
+    if (!symbol)
+        return;
+
+    keyboard = EEK_KEYBOARD(eek_element_get_parent (EEK_ELEMENT(self)));
+    behavior = eek_keyboard_get_modifier_behavior (keyboard);
+    modifier = eek_symbol_get_modifier_mask (symbol);
+    switch (behavior) {
+    case EEK_MODIFIER_BEHAVIOR_NONE:
+        priv->modifiers |= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LOCK:
+        priv->modifiers ^= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LATCH:
+        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+        break;
+    }
+
+    num_lock_mask = eek_keyboard_get_num_lock_mask (keyboard);
+    if (priv->modifiers & num_lock_mask)
+        level = 1;
+    eek_element_set_level (EEK_ELEMENT(self), level);
+}
+
+static void
+eek_section_real_key_released (EekSection *self, EekKey *key)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    EekSymbol *symbol;
+    EekKeyboard *keyboard;
+    EekModifierBehavior behavior;
+    EekModifierType modifier;
+    EekModifierType num_lock_mask;
+    gint level = -1;
+
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
+    if (!symbol)
+        return;
+
+    keyboard = EEK_KEYBOARD(eek_element_get_parent (EEK_ELEMENT(self)));
+    behavior = eek_keyboard_get_modifier_behavior (keyboard);
+    modifier = eek_symbol_get_modifier_mask (symbol);
+    if (modifier != 0) {
+        if (behavior == EEK_MODIFIER_BEHAVIOR_NONE)
+            priv->modifiers &= ~modifier;
+    }
+
+    num_lock_mask = eek_keyboard_get_num_lock_mask (keyboard);
+    if (priv->modifiers & num_lock_mask)
+        level = 1;
+    eek_element_set_level (EEK_ELEMENT(self), level);
+}
+
+static void
 eek_section_finalize (GObject *object)
 {
     EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(object);
@@ -346,6 +414,9 @@ eek_section_class_init (EekSectionClass *klass)
     klass->find_key_by_keycode = eek_section_real_find_key_by_keycode;
 
     /* signals */
+    klass->key_pressed = eek_section_real_key_pressed;
+    klass->key_released = eek_section_real_key_released;
+
     container_class->child_added = eek_section_real_child_added;
     container_class->child_removed = eek_section_real_child_removed;
 
@@ -378,8 +449,8 @@ eek_section_class_init (EekSectionClass *klass)
     signals[KEY_PRESSED] =
         g_signal_new (I_("key-pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekSectionClass, key_pressed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__OBJECT,
@@ -398,8 +469,8 @@ eek_section_class_init (EekSectionClass *klass)
     signals[KEY_RELEASED] =
         g_signal_new (I_("key-released"),
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_FIRST,
-                      0,
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekSectionClass, key_released),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__OBJECT,
@@ -416,6 +487,7 @@ eek_section_init (EekSection *self)
     priv = self->priv = EEK_SECTION_GET_PRIVATE (self);
     priv->angle = 0;
     priv->rows = NULL;
+    priv->modifiers = 0;
 }
 
 /**
