@@ -108,23 +108,6 @@ EEK_CONTAINER_GET_CLASS
 </SECTION>
 
 <SECTION>
-<FILE>eek-clutter-keyboard</FILE>
-<TITLE>EekClutterKeyboard</TITLE>
-EekClutterKeyboard
-EekClutterKeyboardClass
-EekClutterKeyboardPrivate
-eek_clutter_keyboard_new
-<SUBSECTION Standard>
-EEK_CLUTTER_KEYBOARD
-EEK_IS_CLUTTER_KEYBOARD
-EEK_TYPE_CLUTTER_KEYBOARD
-eek_clutter_keyboard_get_type
-EEK_CLUTTER_KEYBOARD_CLASS
-EEK_IS_CLUTTER_KEYBOARD_CLASS
-EEK_CLUTTER_KEYBOARD_GET_CLASS
-</SECTION>
-
-<SECTION>
 <FILE>eek-symbol</FILE>
 <TITLE>EekSymbol</TITLE>
 EekSymbolCategory
@@ -141,6 +124,8 @@ eek_symbol_get_category
 eek_symbol_get_modifier_mask
 eek_symbol_set_modifier_mask
 eek_symbol_is_modifier
+eek_symbol_set_icon_name
+eek_symbol_get_icon_name
 <SUBSECTION Standard>
 EEK_SYMBOL
 EEK_IS_SYMBOL
@@ -265,6 +250,12 @@ eek_element_get_bounds
 eek_element_set_position
 eek_element_set_size
 eek_element_get_absolute_position
+eek_element_set_symbol_index
+eek_element_get_symbol_index
+eek_element_set_group
+eek_element_set_level
+eek_element_get_group
+eek_element_get_level
 <SUBSECTION Standard>
 EEK_ELEMENT
 EEK_IS_ELEMENT
