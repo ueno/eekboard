@@ -434,6 +434,8 @@ eekboard_context_add_keyboard (EekboardContext *context,
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
 
     variant = eek_serializable_serialize (EEK_SERIALIZABLE(keyboard));
+    if (g_variant_is_floating (variant))
+        g_variant_ref_sink (variant);
 
     error = NULL;
     result = g_dbus_proxy_call_sync (G_DBUS_PROXY(context),
