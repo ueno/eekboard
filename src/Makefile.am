@@ -73,13 +73,13 @@ eekboard_server_LDADD = \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS)
 
-eekboard_server_headers = server-server.h server-context.h
-eekboard_server_SOURCES = server-server.c server-context.c server-main.c
-
 if ENABLE_CLUTTER
 eekboard_server_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
 eekboard_server_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif
+
+eekboard_server_headers = server-server.h server-context.h
+eekboard_server_SOURCES = server-server.c server-context.c server-main.c
 
 eekboard_client_CFLAGS = \
 	-I$(top_srcdir) \
@@ -106,6 +106,11 @@ eekboard_xml_LDADD = \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
 	$(LIBXKLAVIER_LIBS)
+
+if ENABLE_CLUTTER
+eekboard_xml_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
+eekboard_xml_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
+endif
 
 eekboard_xml_SOURCES = xml-main.c
 

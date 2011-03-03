@@ -28,7 +28,13 @@
 
 #include "eek/eek-xml.h"
 #include "eek/eek-xkl.h"
+
+#if HAVE_CLUTTER_GTK
+#include <clutter-gtk/clutter-gtk.h>
+#include "eek/eek-clutter.h"
+#else  /* HAVE_CLUTTER_GTK */
 #include "eek/eek-gtk.h"
+#endif  /* !HAVE_CLUTTER_GTK */
 
 #include "xklutil.h"
 
@@ -60,6 +66,20 @@ static const GOptionEntry options[] = {
     {NULL}
 };
 
+#if HAVE_CLUTTER_GTK
+static void
+on_allocation_changed (ClutterActor          *stage,
+                       ClutterActorBox       *box,
+                       ClutterAllocationFlags flags,
+                       gpointer               user_data)
+{
+    ClutterActor *actor = user_data;
+    clutter_actor_set_size (actor,
+                            box->x2 - box->x1,
+                            box->y2 - box->y1);
+}
+#endif
+
 static void
 on_destroy (gpointer user_data)
 {
@@ -80,10 +100,17 @@ main (int argc, char **argv)
 {
     GOptionContext *context;
 
+#if HAVE_CLUTTER_GTK
+    if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        g_printerr ("Can't init GTK with Clutter\n");
+        exit (1);
+    }
+#else
     if (!gtk_init_check (&argc, &argv)) {
         g_printerr ("Can't init GTK\n");
         exit (1);
     }
+#endif
 
     context = g_option_context_new ("eek-example-xml");
     g_option_context_add_main_entries (context, options, NULL);
@@ -98,6 +125,10 @@ main (int argc, char **argv)
         EekBounds bounds;
         GtkWidget *widget, *window;
         GError *error;
+#if HAVE_CLUTTER_GTK
+        ClutterActor *stage, *actor;
+        ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
+#endif
 
         file = g_file_new_for_path (opt_load);
 
@@ -114,11 +145,28 @@ main (int argc, char **argv)
         g_object_unref (layout);
 
         eek_element_set_group (EEK_ELEMENT(keyboard), opt_group);
+        eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
 
+#if HAVE_CLUTTER_GTK
+        widget = gtk_clutter_embed_new ();
+        stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(widget));
+        actor = eek_clutter_keyboard_new (keyboard);
+        clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
+
+        clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
+        clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
+        clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
+                                        bounds.width / 3,
+                                        bounds.height / 3);
+        g_signal_connect (stage,
+                          "allocation-changed",
+                          G_CALLBACK(on_allocation_changed),
+                          actor);
+#else
         widget = eek_gtk_keyboard_new (keyboard);
+#endif
         g_object_unref (keyboard);
 
-        eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
         gtk_widget_set_size_request (widget, bounds.width, bounds.height);
 
         window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
