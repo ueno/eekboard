@@ -49,7 +49,10 @@ struct _EekRendererPrivate
     EekColor *background;
     gdouble border_width;
 
+    gdouble allocation_width;
+    gdouble allocation_height;
     gdouble scale;
+
     PangoFontDescription *font;
     GHashTable *outline_surface_cache;
     cairo_surface_t *keyboard_surface;
@@ -533,8 +536,25 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
 
+    g_return_if_fail (priv->keyboard);
+    g_return_if_fail (priv->allocation_width > 0.0);
+    g_return_if_fail (priv->allocation_height > 0.0);
+
     if (!priv->keyboard_surface)
         priv->keyboard_surface = create_keyboard_surface (self);
+
+    /* blank background */
+    cairo_set_source_rgba (cr,
+                           priv->background->red,
+                           priv->background->green,
+                           priv->background->blue,
+                           priv->background->alpha);
+    cairo_rectangle (cr,
+                     0.0,
+                     0.0,
+                     priv->allocation_width,
+                     priv->allocation_height);
+    cairo_fill (cr);
 
     cairo_set_source_surface (cr, priv->keyboard_surface, 0.0, 0.0);
     cairo_paint (cr);
@@ -674,6 +694,8 @@ eek_renderer_init (EekRenderer *self)
     priv->foreground = eek_color_new (0.3, 0.3, 0.3, 1.0);
     priv->background = eek_color_new (1.0, 1.0, 1.0, 1.0);
     priv->border_width = 1.0;
+    priv->allocation_width = 0.0;
+    priv->allocation_height = 0.0;
     priv->scale = 1.0;
     priv->font = NULL;
     priv->outline_surface_cache =
@@ -736,6 +758,9 @@ eek_renderer_set_allocation_size (EekRenderer *renderer,
     g_return_if_fail (width > 0.0 && height > 0.0);
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
+
+    priv->allocation_width = width;
+    priv->allocation_height = height;
 
     eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
     scale = width > height ? height / bounds.height :
