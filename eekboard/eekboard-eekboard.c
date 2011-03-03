@@ -155,6 +155,7 @@ eekboard_eekboard_new (GDBusConnection *connection,
             return NULL;
         }
 
+        /* the vanished callback is called when the server is disconnected */
         g_bus_watch_name_on_connection (connection,
                                         name_owner,
                                         G_BUS_NAME_WATCHER_FLAGS_NONE,

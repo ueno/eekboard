@@ -287,6 +287,8 @@ handle_method_call (GDBusConnection       *connection,
         g_hash_table_insert (server->context_hash,
                              object_path,
                              context);
+
+        /* the vanished callback is called when clients are disconnected */
         g_bus_watch_name_on_connection (server->connection,
                                         sender,
                                         G_BUS_NAME_WATCHER_FLAGS_NONE,
