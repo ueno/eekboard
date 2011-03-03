@@ -280,16 +280,21 @@ server_name_vanished_callback (GDBusConnection *connection,
             g_hash_table_iter_remove (&iter);
     }
 
-    for (head = server->context_stack; head; head = server->context_stack) {
+    for (head = server->context_stack; head; ) {
         const gchar *client_connection =
             server_context_get_client_connection (head->data);
+        GSList *next = g_slist_next (head);
+
         if (g_strcmp0 (client_connection, name) == 0) {
             server->context_stack = g_slist_remove_link (server->context_stack,
                                                          head);
             g_object_unref (head->data);
             g_slist_free1 (head);
         }
+
+        head = next;
     }
+
     if (server->context_stack)
         server_context_set_enabled (server->context_stack->data, TRUE);
 }
