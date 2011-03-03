@@ -153,6 +153,7 @@ EekOutline *
 eek_outline_copy (const EekOutline *outline)
 {
     EekOutline *_outline = g_slice_dup (EekOutline, outline);
+    _outline->corner_radius = outline->corner_radius;
     _outline->num_points = outline->num_points;
     _outline->points = g_slice_alloc0 (sizeof (EekPoint) * outline->num_points);
     memcpy (_outline->points, outline->points, sizeof (EekPoint) * outline->num_points);

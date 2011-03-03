@@ -62,6 +62,7 @@ struct _ParseCallbackData {
     EekKey *key;
     gint num_columns;
     EekOrientation orientation;
+    gdouble corner_radius;
     GSList *points;
     GSList *symbols;
     gchar *label;
@@ -70,6 +71,7 @@ struct _ParseCallbackData {
     gint groups, levels;
     EekOutline outline;
     gchar *oref;
+
     GHashTable *key_oref_hash;
     GHashTable *oref_outline_hash;
 };
@@ -97,7 +99,8 @@ static const gchar *valid_path_list[] = {
     "icon/symbols/key/section/keyboard",
     "invalid/symbols/key/section/keyboard",
     "index/key/section/keyboard",
-    "point/outline/keyboard"
+    "point/outline/keyboard",
+    "corner-radius/outline/keyboard",
 };
 
 static gchar *
@@ -298,7 +301,10 @@ end_element_callback (GMarkupParseContext *pcontext,
 
     if (g_strcmp0 (element_name, "outline") == 0) {
         EekOutline *outline = g_slice_new (EekOutline);
-        
+
+        outline->corner_radius = data->corner_radius;
+        data->corner_radius = 0.0;
+
         outline->num_points = g_slist_length (data->points);
         outline->points = g_slice_alloc0 (sizeof (EekPoint) *
                                           outline->num_points);
@@ -315,6 +321,11 @@ end_element_callback (GMarkupParseContext *pcontext,
                              g_strdup (data->oref),
                              outline);
         g_free (data->oref);
+        goto out;
+    }
+
+    if (g_strcmp0 (element_name, "corner-radius") == 0) {
+        data->corner_radius = g_strtod (text, NULL);
         goto out;
     }
 

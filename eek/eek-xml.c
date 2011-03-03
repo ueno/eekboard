@@ -273,6 +273,9 @@ eek_keyboard_output (EekKeyboard *keyboard, GString *output, gint indent)
         outline = eek_keyboard_get_outline (keyboard, oref);
         g_string_append_indent (output, indent + 1);
         g_string_markup_printf (output, "<outline id=\"outline%u\">\n", oref);
+        g_string_append_indent (output, indent + 2);
+        g_string_markup_printf (output, "<corner-radius>%lf</corner-radius>\n",
+                                outline->corner_radius);
         for (j = 0; j < outline->num_points; j++) {
             g_string_append_indent (output, indent + 2);
             g_string_markup_printf (output, "<point>%lf,%lf</point>\n",
