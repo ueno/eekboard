@@ -60,6 +60,15 @@ on_name_lost (GDBusConnection *connection,
   exit (1);
 }
 
+static void
+on_destroyed (ServerServer *server,
+              gpointer      user_data)
+{
+    GMainLoop *loop = user_data;
+
+    g_main_loop_quit (loop);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -147,6 +156,9 @@ main (int argc, char **argv)
     }
 
     loop = g_main_loop_new (NULL, FALSE);
+
+    g_signal_connect (server, "destroyed", G_CALLBACK(on_destroyed), loop);
+
     g_main_loop_run (loop);
 
     g_bus_unown_name (owner_id);

@@ -22,12 +22,21 @@
 #include "server-server.h"
 #include "server-context.h"
 
+#define I_(string) g_intern_static_string (string)
+
 enum {
     PROP_0,
     PROP_OBJECT_PATH,
     PROP_CONNECTION,
     PROP_LAST
 };
+
+enum {
+    DESTROYED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
 
 static const gchar introspection_xml[] =
     "<node>"
@@ -43,6 +52,7 @@ static const gchar introspection_xml[] =
     "    <method name='DestroyContext'>"
     "      <arg direction='in' type='s' name='object_path'/>"
     "    </method>"
+    "    <method name='Destroy'/>"
     /* signals */
     "  </interface>"
     "</node>";
@@ -148,6 +158,16 @@ server_server_dispose (GObject *object)
 }
 
 static void
+server_server_finalize (GObject *object)
+{
+    ServerServer *server = SERVER_SERVER(object);
+
+    g_free (server->object_path);
+
+    G_OBJECT_CLASS (server_server_parent_class)->dispose (object);
+}
+
+static void
 server_server_constructed (GObject *object)
 {
     ServerServer *server = SERVER_SERVER (object);
@@ -174,6 +194,18 @@ server_server_class_init (ServerServerClass *klass)
     gobject_class->constructed = server_server_constructed;
     gobject_class->set_property = server_server_set_property;
     gobject_class->dispose = server_server_dispose;
+    gobject_class->finalize = server_server_finalize;
+
+    signals[DESTROYED] =
+        g_signal_new (I_("destroyed"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      0,
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0);
 
     pspec = g_param_spec_string ("object-path",
                                  "Object-path",
@@ -356,6 +388,12 @@ handle_method_call (GDBusConnection       *connection,
         }
         remove_context_from_stack (server, context);
         g_hash_table_remove (server->context_hash, object_path);
+        g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "Destroy") == 0) {
+        g_signal_emit_by_name (server, "destroyed", NULL);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }

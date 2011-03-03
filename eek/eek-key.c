@@ -157,6 +157,7 @@ eek_key_real_deserialize (EekSerializable *self,
 
     g_variant_get_child (variant, index++, "u", &priv->keycode);
     g_variant_get_child (variant, index++, "v", &symbol_matrix);
+    eek_symbol_matrix_free (priv->symbol_matrix);
     priv->symbol_matrix = _g_variant_get_symbol_matrix (symbol_matrix);
     g_variant_get_child (variant, index++, "i", &priv->column);
     g_variant_get_child (variant, index++, "i", &priv->row);

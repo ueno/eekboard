@@ -329,6 +329,7 @@ server_context_finalize (GObject *object)
 {
     ServerContext *context = SERVER_CONTEXT(object);
 
+    g_free (context->object_path);
     g_free (context->client_connection);
 
     G_OBJECT_CLASS (server_context_parent_class)->finalize (object);
@@ -502,7 +503,7 @@ handle_method_call (GDBusConnection       *connection,
 
         g_hash_table_insert (context->keyboard_hash,
                              GUINT_TO_POINTER(++keyboard_id),
-                             g_object_ref (serializable));
+                             serializable);
         g_dbus_method_invocation_return_value (invocation,
                                                g_variant_new ("(u)",
                                                               keyboard_id));

@@ -165,6 +165,8 @@ eek_keyboard_real_deserialize (EekSerializable *self,
     while (g_variant_iter_next (&iter, "v", &outline)) {
         EekOutline *_outline = _g_variant_get_outline (outline);
         g_array_append_val (priv->outline_array, *_outline);
+        /* don't use eek_outline_free here, so as to keep _outline->points */
+        g_slice_free (EekOutline, _outline);
     }
     g_variant_get_child (variant, index++, "u", &priv->num_lock_mask);
 
