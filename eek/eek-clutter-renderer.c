@@ -78,12 +78,22 @@ cairo_pixels_to_pixbuf (guint8 *pixels,
 }
 
 static void
+eek_clutter_renderer_finalize (GObject *object)
+{
+    EekClutterRendererPrivate *priv = EEK_CLUTTER_RENDERER_GET_PRIVATE(object);
+    g_hash_table_destroy (priv->outline_texture_cache);
+    G_OBJECT_CLASS (eek_clutter_renderer_parent_class)->finalize (object);
+}
+
+static void
 eek_clutter_renderer_class_init (EekClutterRendererClass *klass)
 {
     GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekClutterRendererPrivate));
+
+    gobject_class->finalize = eek_clutter_renderer_finalize;
 }
 
 static void
