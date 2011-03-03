@@ -77,10 +77,29 @@ on_notify_keyboard_visible (GObject    *object,
         g_main_loop_quit (loop);
 }
 
+static void
+on_context_destroyed (EekboardContext *context,
+                      gpointer         user_data)
+{
+    GMainLoop *loop = user_data;
+
+    g_main_loop_quit (loop);
+}
+
+static void
+on_destroyed (EekboardEekboard *eekboard,
+              gpointer          user_data)
+{
+    GMainLoop *loop = user_data;
+
+    g_main_loop_quit (loop);
+}
+
 int
 main (int argc, char **argv)
 {
     EekboardDesktopClient *client;
+    EekboardEekboard *eekboard;
     EekboardContext *context;
     GBusType bus_type;
     GDBusConnection *connection;
@@ -136,6 +155,10 @@ main (int argc, char **argv)
     }
 
     client = eekboard_desktop_client_new (connection);
+    if (client == NULL) {
+        g_printerr ("Can't create a client\n");
+        exit (1);
+    }
 
     gconfc = gconf_client_get_default ();
 
@@ -196,8 +219,14 @@ main (int argc, char **argv)
         g_object_get (client, "context", &context, NULL);
         g_signal_connect (context, "notify::keyboard-visible",
                           G_CALLBACK(on_notify_keyboard_visible), loop);
+        g_signal_connect (context, "destroyed",
+                          G_CALLBACK(on_context_destroyed), loop);
         g_object_unref (context);
     }
+
+    g_object_get (client, "eekboard", &eekboard, NULL);
+    g_signal_connect (eekboard, "destroyed",
+                      G_CALLBACK(on_destroyed), loop);
 
     g_main_loop_run (loop);
     g_main_loop_unref (loop);

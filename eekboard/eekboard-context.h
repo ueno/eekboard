@@ -66,10 +66,11 @@ struct _EekboardContextClass {
                           guint            keycode);
     void (*key_released) (EekboardContext *self,
                           guint            keycode);
+    void (*destroyed)    (EekboardContext *self);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[23];
 };
 
 GType            eekboard_context_get_type      (void) G_GNUC_CONST;

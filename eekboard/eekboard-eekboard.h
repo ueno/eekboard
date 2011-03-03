@@ -45,9 +45,12 @@ struct _EekboardEekboardClass {
     /*< private >*/
     GDBusProxyClass parent_class;
 
+    /* signals */
+    void (* destroyed) (EekboardEekboard *self);
+
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[23];
 };
 
 GType             eekboard_eekboard_get_type    (void) G_GNUC_CONST;

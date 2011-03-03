@@ -43,6 +43,7 @@
 enum {
     PROP_0,
     PROP_CONNECTION,
+    PROP_EEKBOARD,
     PROP_CONTEXT,
     PROP_LAST
 };
@@ -124,15 +125,19 @@ eekboard_desktop_client_set_property (GObject      *object,
         connection = g_value_get_object (value);
 
         client->eekboard = eekboard_eekboard_new (connection, NULL);
-        g_assert (client->eekboard);
-
-        client->context =
-            eekboard_eekboard_create_context (client->eekboard,
-                                            "eekboard-desktop-client",
-                                            NULL);
-        g_assert (client->context);
-
-        eekboard_eekboard_push_context (client->eekboard, client->context, NULL);
+        if (client->eekboard != NULL) {
+            client->context =
+                eekboard_eekboard_create_context (client->eekboard,
+                                                  "eekboard-desktop-client",
+                                                  NULL);
+            if (client->context == NULL) {
+                g_object_unref (client->eekboard);
+                client->eekboard = NULL;
+            } else
+                eekboard_eekboard_push_context (client->eekboard,
+                                                client->context,
+                                                NULL);
+        }
         break;
     default:
         g_object_set_property (object,
@@ -151,6 +156,9 @@ eekboard_desktop_client_get_property (GObject    *object,
     EekboardDesktopClient *client = EEKBOARD_DESKTOP_CLIENT(object);
 
     switch (prop_id) {
+    case PROP_EEKBOARD:
+        g_value_set_object (value, client->eekboard);
+        break;
     case PROP_CONTEXT:
         g_value_set_object (value, client->context);
         break;
@@ -228,6 +236,15 @@ eekboard_desktop_client_class_init (EekboardDesktopClientClass *klass)
                                  G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_CONNECTION,
+                                     pspec);
+
+    pspec = g_param_spec_object ("eekboard",
+                                 "Eekboard",
+                                 "Eekboard",
+                                 EEKBOARD_TYPE_EEKBOARD,
+                                 G_PARAM_READABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_EEKBOARD,
                                      pspec);
 
     pspec = g_param_spec_object ("context",
@@ -460,9 +477,12 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
 EekboardDesktopClient *
 eekboard_desktop_client_new (GDBusConnection *connection)
 {
-    return g_object_new (EEKBOARD_TYPE_DESKTOP_CLIENT,
-                         "connection", connection,
-                         NULL);
+    EekboardDesktopClient *client = g_object_new (EEKBOARD_TYPE_DESKTOP_CLIENT,
+                                                  "connection", connection,
+                                                  NULL);
+    if (client->context)
+        return client;
+    return NULL;
 }
 
 static GdkFilterReturn

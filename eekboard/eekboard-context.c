@@ -37,6 +37,7 @@ enum {
     DISABLED,
     KEY_PRESSED,
     KEY_RELEASED,
+    DESTROYED,
     LAST_SIGNAL
 };
 
@@ -147,6 +148,12 @@ eekboard_context_real_key_released (EekboardContext *self,
 }
 
 static void
+eekboard_context_real_destroyed (EekboardContext *self)
+{
+    // g_debug ("eekboard_context_real_destroyed");
+}
+
+static void
 eekboard_context_get_property (GObject    *object,
                                guint       prop_id,
                                GValue     *value,
@@ -195,6 +202,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
     klass->disabled = eekboard_context_real_disabled;
     klass->key_pressed = eekboard_context_real_key_pressed;
     klass->key_released = eekboard_context_real_key_released;
+    klass->destroyed = eekboard_context_real_destroyed;
 
     proxy_class->g_signal = eekboard_context_real_g_signal;
 
@@ -288,6 +296,24 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_UINT);
+
+    /**
+     * EekboardContext::destroyed:
+     * @context: an #EekboardContext
+     *
+     * The ::destroyed signal is emitted each time the name of remote
+     * end is vanished.
+     */
+    signals[DESTROYED] =
+        g_signal_new (I_("destroyed"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekboardContextClass, destroyed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0);
 }
 
 static void
@@ -304,6 +330,15 @@ eekboard_context_init (EekboardContext *self)
                                g_direct_equal,
                                NULL,
                                (GDestroyNotify)g_object_unref);
+}
+
+static void
+context_name_vanished_callback (GDBusConnection *connection,
+                                const gchar     *name,
+                                gpointer         user_data)
+{
+    EekboardContext *context = user_data;
+    g_signal_emit_by_name (context, "destroyed", NULL);
 }
 
 /**
@@ -337,8 +372,24 @@ eekboard_context_new (GDBusConnection *connection,
                         "g-interface-name", "com.redhat.Eekboard.Context",
                         "g-object-path", object_path,
                         NULL);
-    if (initable != NULL)
-        return EEKBOARD_CONTEXT (initable);
+    if (initable != NULL) {
+        EekboardContext *context = EEKBOARD_CONTEXT (initable);
+        gchar *name_owner = g_dbus_proxy_get_name_owner (G_DBUS_PROXY(context));
+
+        if (name_owner == NULL) {
+            g_object_unref (context);
+            return NULL;
+        }
+
+        g_bus_watch_name_on_connection (connection,
+                                        name_owner,
+                                        G_BUS_NAME_WATCHER_FLAGS_NONE,
+                                        NULL,
+                                        context_name_vanished_callback,
+                                        context,
+                                        NULL);
+        return context;
+    }
     return NULL;
 }
 

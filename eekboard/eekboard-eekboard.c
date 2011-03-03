@@ -29,6 +29,13 @@
 
 #include "eekboard/eekboard-eekboard.h"
 
+enum {
+    DESTROYED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
 G_DEFINE_TYPE (EekboardEekboard, eekboard_eekboard, G_TYPE_DBUS_PROXY);
 
 #define EEKBOARD_EEKBOARD_GET_PRIVATE(obj)                               \
@@ -38,6 +45,15 @@ struct _EekboardEekboardPrivate
 {
     GHashTable *context_hash;
 };
+
+static void
+eekboard_eekboard_real_destroyed (EekboardEekboard *self)
+{
+    EekboardEekboardPrivate *priv = EEKBOARD_EEKBOARD_GET_PRIVATE(self);
+
+    // g_debug ("eekboard_eekboard_real_destroyed");
+    g_hash_table_remove_all (priv->context_hash);
+}
 
 static void
 eekboard_eekboard_dispose (GObject *object)
@@ -60,7 +76,27 @@ eekboard_eekboard_class_init (EekboardEekboardClass *klass)
     g_type_class_add_private (gobject_class,
                               sizeof (EekboardEekboardPrivate));
 
+    klass->destroyed = eekboard_eekboard_real_destroyed;
+
     gobject_class->dispose = eekboard_eekboard_dispose;
+
+    /**
+     * EekboardEekboard::destroyed:
+     * @eekboard: an #EekboardEekboard
+     *
+     * The ::destroyed signal is emitted each time the name of remote
+     * end is vanished.
+     */
+    signals[DESTROYED] =
+        g_signal_new (I_("destroyed"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekboardEekboardClass, destroyed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0);
 }
 
 static void
@@ -74,6 +110,15 @@ eekboard_eekboard_init (EekboardEekboard *self)
                                g_str_equal,
                                (GDestroyNotify)g_free,
                                (GDestroyNotify)g_object_unref);
+}
+
+static void
+eekboard_name_vanished_callback (GDBusConnection *connection,
+                                 const gchar     *name,
+                                 gpointer         user_data)
+{
+    EekboardEekboard *eekboard = user_data;
+    g_signal_emit_by_name (eekboard, "destroyed", NULL);
 }
 
 /**
@@ -102,9 +147,36 @@ eekboard_eekboard_new (GDBusConnection *connection,
                         "g-interface-name", "com.redhat.Eekboard.Server",
                         "g-object-path", "/com/redhat/Eekboard/Server",
                         NULL);
-    if (initable != NULL)
-        return EEKBOARD_EEKBOARD (initable);
+    if (initable != NULL) {
+        EekboardEekboard *eekboard = EEKBOARD_EEKBOARD (initable);
+        gchar *name_owner = g_dbus_proxy_get_name_owner (G_DBUS_PROXY(eekboard));
+        if (name_owner == NULL) {
+            g_object_unref (eekboard);
+            return NULL;
+        }
+
+        g_bus_watch_name_on_connection (connection,
+                                        name_owner,
+                                        G_BUS_NAME_WATCHER_FLAGS_NONE,
+                                        NULL,
+                                        eekboard_name_vanished_callback,
+                                        eekboard,
+                                        NULL);
+
+        return eekboard;
+    }
     return NULL;
+}
+
+static void
+on_context_destroyed (EekboardContext *context,
+                      gpointer         user_data)
+{
+    EekboardEekboard *eekboard = user_data;
+    EekboardEekboardPrivate *priv = EEKBOARD_EEKBOARD_GET_PRIVATE(eekboard);
+
+    g_hash_table_remove (priv->context_hash,
+                         g_dbus_proxy_get_object_path (G_DBUS_PROXY(context)));
 }
 
 /**
@@ -153,6 +225,8 @@ eekboard_eekboard_create_context (EekboardEekboard *eekboard,
     g_hash_table_insert (priv->context_hash,
                          g_strdup (object_path),
                          g_object_ref (context));
+    g_signal_connect (context, "destroyed",
+                      G_CALLBACK(on_context_destroyed), eekboard);
     return context;
 }
 
