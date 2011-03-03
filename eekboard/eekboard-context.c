@@ -388,6 +388,8 @@ eekboard_context_new (GDBusConnection *connection,
                                         context_name_vanished_callback,
                                         context,
                                         NULL);
+        g_free (name_owner);
+
         return context;
     }
     return NULL;

@@ -162,6 +162,7 @@ eekboard_eekboard_new (GDBusConnection *connection,
                                         eekboard_name_vanished_callback,
                                         eekboard,
                                         NULL);
+        g_free (name_owner);
 
         return eekboard;
     }

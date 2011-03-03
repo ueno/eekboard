@@ -775,6 +775,8 @@ eek_keyboard_add_outline (EekKeyboard *keyboard,
 
     _outline = eek_outline_copy (outline);
     g_array_append_val (priv->outline_array, *_outline);
+    /* don't use eek_outline_free here, so as to keep _outline->points */
+    g_slice_free (EekOutline, _outline);
     return priv->outline_array->len;
 }
 

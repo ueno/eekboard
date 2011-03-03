@@ -180,13 +180,13 @@ eek_outline_get_type (void)
 }
 
 /* EekColor */
-static EekColor *
+EekColor *
 eek_color_copy (const EekColor *color)
 {
     return g_slice_dup (EekColor, color);
 }
 
-static void
+void
 eek_color_free (EekColor *color)
 {
     g_slice_free (EekColor, color);

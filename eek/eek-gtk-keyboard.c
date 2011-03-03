@@ -103,6 +103,7 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         GtkStyle *style;
         GtkStateType state;
         PangoContext *pcontext;
+        EekColor *color;
 
         pcontext = gtk_widget_get_pango_context (self);
         priv->renderer = eek_gtk_renderer_new (priv->keyboard, pcontext, self);
@@ -114,12 +115,13 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         style = gtk_widget_get_style (self);
         state = gtk_widget_get_state (self);
 
-        eek_renderer_set_foreground
-            (priv->renderer,
-             color_from_gdk_color (&style->fg[state]));
-        eek_renderer_set_background
-            (priv->renderer,
-             color_from_gdk_color (&style->bg[state]));
+        color = color_from_gdk_color (&style->fg[state]);
+        eek_renderer_set_foreground (priv->renderer, color);
+        eek_color_free (color);
+
+        color = color_from_gdk_color (&style->bg[state]);
+        eek_renderer_set_background (priv->renderer, color);
+        eek_color_free (color);
     }
 
     eek_renderer_render_keyboard (priv->renderer, cr);
@@ -336,14 +338,10 @@ eek_gtk_keyboard_new (EekKeyboard *keyboard)
 static EekColor *
 color_from_gdk_color (GdkColor *gdk_color)
 {
-    EekColor *color;
-
-    color = g_slice_new (EekColor);
-    color->red = gdk_color->red / (gdouble)0xFFFF;
-    color->green = gdk_color->green / (gdouble)0xFFFF;
-    color->blue = gdk_color->blue / (gdouble)0xFFFF;
-    color->alpha = 1.0;
-    return color;
+    return eek_color_new (gdk_color->red / (gdouble)0xFFFF,
+                          gdk_color->green / (gdouble)0xFFFF,
+                          gdk_color->blue / (gdouble)0xFFFF,
+                          1.0);
 }
 
 static void

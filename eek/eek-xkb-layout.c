@@ -176,6 +176,7 @@ create_key (EekXkbLayout *layout,
             }
         }
         oref = eek_keyboard_add_outline (keyboard, outline);
+        eek_outline_free (outline);
         g_hash_table_insert (priv->shape_oref_hash, xkbshape, (gpointer)oref);
     }
 

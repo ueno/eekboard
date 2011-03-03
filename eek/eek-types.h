@@ -246,10 +246,12 @@ struct _EekColor
 
 GType     eek_color_get_type (void) G_GNUC_CONST;
 
-EekColor *eek_color_new      (gdouble red,
-                              gdouble green,
-                              gdouble blue,
-                              gdouble alpha);
+EekColor *eek_color_new      (gdouble         red,
+                              gdouble         green,
+                              gdouble         blue,
+                              gdouble         alpha);
+EekColor *eek_color_copy     (const EekColor *color);
+void      eek_color_free     (EekColor       *color);
 
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

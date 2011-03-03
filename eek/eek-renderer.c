@@ -380,6 +380,7 @@ render_key (EekRenderer *self,
         cairo_fill (cr);
 
         eek_renderer_render_key_outline (self, cr, key, 1.0, 0);
+        cairo_destroy (cr);
 
         g_hash_table_insert (priv->outline_surface_cache,
                              outline,
@@ -493,6 +494,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
         }
     pango_font_description_set_size (font, size * priv->scale * scale);
     pango_layout_set_font_description (layout, font);
+    pango_font_description_free (font);
     pango_layout_set_text (layout, label, -1);
     pango_layout_set_width (layout,
                             PANGO_SCALE * bounds.width * priv->scale * scale);
@@ -617,6 +619,9 @@ eek_renderer_finalize (GObject *object)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
     g_hash_table_destroy (priv->outline_surface_cache);
+    eek_color_free (priv->foreground);
+    eek_color_free (priv->background);
+    pango_font_description_free (priv->font);
     G_OBJECT_CLASS (eek_renderer_parent_class)->finalize (object);
 }
 
@@ -659,12 +664,6 @@ eek_renderer_class_init (EekRendererClass *klass)
 }
 
 static void
-free_surface (gpointer data)
-{
-    cairo_surface_destroy (data);
-}
-
-static void
 eek_renderer_init (EekRenderer *self)
 {
     EekRendererPrivate *priv;
@@ -681,7 +680,7 @@ eek_renderer_init (EekRenderer *self)
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
-                               free_surface);
+                               (GDestroyNotify)cairo_surface_destroy);
     priv->keyboard_surface = NULL;
     priv->symbol_index_changed_handler = 0;
 }
@@ -941,7 +940,9 @@ eek_renderer_set_foreground (EekRenderer *renderer,
     g_return_if_fail (foreground);
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    priv->foreground = g_boxed_copy (EEK_TYPE_COLOR, foreground);
+    if (priv->foreground)
+        eek_color_free (priv->foreground);
+    priv->foreground = eek_color_copy (foreground);
 }
 
 void
@@ -954,7 +955,9 @@ eek_renderer_set_background (EekRenderer *renderer,
     g_return_if_fail (background);
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    priv->background = g_boxed_copy (EEK_TYPE_COLOR, background);
+    if (priv->background)
+        eek_color_free (priv->background);
+    priv->background = eek_color_copy (background);
 }
 
 void

@@ -99,6 +99,7 @@ eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
 
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
     surface = pixbuf_to_cairo_surface (pixbuf);
+    g_object_unref (pixbuf);
     cairo_set_source_surface (cr, surface, 0.0, 0.0);
     cairo_paint (cr);
     cairo_restore (cr);

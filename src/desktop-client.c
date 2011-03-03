@@ -574,6 +574,7 @@ set_keyboard (EekboardDesktopClient *client,
 
     keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
     eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
+    g_free (keyboard_name);
 
     keyboard_id = eekboard_context_add_keyboard (client->context,
                                                  client->keyboard,
