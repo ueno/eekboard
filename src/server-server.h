@@ -34,8 +34,8 @@ G_BEGIN_DECLS
 
 typedef struct _ServerServer ServerServer;
 
-ServerServer *server_server_new        (const gchar     *object_path,
-                                            GDBusConnection *connection);
+ServerServer *server_server_new (const gchar     *object_path,
+                                 GDBusConnection *connection);
 
 G_END_DECLS
 #endif  /* SERVER_SERVER_H */

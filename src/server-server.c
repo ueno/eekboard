@@ -365,7 +365,7 @@ handle_method_call (GDBusConnection       *connection,
 
 ServerServer *
 server_server_new (const gchar     *object_path,
-                     GDBusConnection *connection)
+                   GDBusConnection *connection)
 {
     return g_object_new (SERVER_TYPE_SERVER,
                          "object-path", object_path,
