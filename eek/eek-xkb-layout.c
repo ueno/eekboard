@@ -325,9 +325,13 @@ eek_xkb_layout_real_create_keyboard (EekLayout *self,
     bounds.height = initial_height;
     eek_element_set_bounds (EEK_ELEMENT(keyboard), &bounds);
 
+    /* resolve modifiers dynamically assigned at run time */
     eek_keyboard_set_num_lock_mask (keyboard,
                                     XkbKeysymToModifiers (priv->display,
                                                           XK_Num_Lock));
+    eek_keyboard_set_alt_gr_mask (keyboard,
+                                  XkbKeysymToModifiers (priv->display,
+                                                        XK_ISO_Level3_Shift));
 
     if (priv->shape_oref_hash)
         g_hash_table_destroy (priv->shape_oref_hash);

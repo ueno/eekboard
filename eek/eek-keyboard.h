@@ -153,5 +153,11 @@ void                eek_keyboard_set_num_lock_mask
 EekModifierType     eek_keyboard_get_num_lock_mask
                                      (EekKeyboard        *keyboard);
 
+void                eek_keyboard_set_alt_gr_mask
+                                     (EekKeyboard        *keyboard,
+                                      EekModifierType     alt_gr_mask);
+EekModifierType     eek_keyboard_get_alt_gr_mask
+                                     (EekKeyboard        *keyboard);
+
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

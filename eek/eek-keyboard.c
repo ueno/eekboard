@@ -68,7 +68,10 @@ struct _EekKeyboardPrivate
     EekModifierBehavior modifier_behavior;
     EekModifierType modifiers;
     GArray *outline_array;
+
+    /* modifiers dynamically assigned at run time */
     EekModifierType num_lock_mask;
+    EekModifierType alt_gr_mask;
 };
 
 static EekSerializableIface *eek_keyboard_parent_serializable_iface;
@@ -309,7 +312,7 @@ set_level_from_modifiers (EekKeyboard *self)
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     gint level = 0;
 
-    if (priv->modifiers & EEK_MOD5_MASK)
+    if (priv->modifiers & priv->alt_gr_mask)
         level |= 2;
     if (priv->modifiers & EEK_SHIFT_MASK)
         level |= 1;
@@ -805,6 +808,13 @@ eek_keyboard_get_outline (EekKeyboard *keyboard,
     return &g_array_index (priv->outline_array, EekOutline, oref - 1);
 }
 
+/**
+ * eek_keyboard_set_num_lock_mask:
+ * @keyboard: an #EekKeyboard
+ * @num_lock_mask: an #EekModifierType
+ *
+ * Set modifier mask used as Num_Lock.
+ */
 void
 eek_keyboard_set_num_lock_mask (EekKeyboard    *keyboard,
                                 EekModifierType num_lock_mask)
@@ -817,6 +827,13 @@ eek_keyboard_set_num_lock_mask (EekKeyboard    *keyboard,
     priv->num_lock_mask = num_lock_mask;
 }
 
+/**
+ * eek_keyboard_get_num_lock_mask:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get modifier mask used as Num_Lock.
+ * Returns: an #EekModifierType
+ */
 EekModifierType
 eek_keyboard_get_num_lock_mask (EekKeyboard *keyboard)
 {
@@ -826,4 +843,41 @@ eek_keyboard_get_num_lock_mask (EekKeyboard *keyboard)
     priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
 
     return priv->num_lock_mask;
+}
+
+/**
+ * eek_keyboard_set_alt_gr_mask:
+ * @keyboard: an #EekKeyboard
+ * @alt_gr_mask: an #EekModifierType
+ *
+ * Set modifier mask used as Alt_Gr.
+ */
+void
+eek_keyboard_set_alt_gr_mask (EekKeyboard    *keyboard,
+                              EekModifierType alt_gr_mask)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    priv->alt_gr_mask = alt_gr_mask;
+}
+
+/**
+ * eek_keyboard_get_alt_gr_mask:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get modifier mask used as Alt_Gr.
+ * Returns: an #EekModifierType
+ */
+EekModifierType
+eek_keyboard_get_alt_gr_mask (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->alt_gr_mask;
 }
