@@ -22,12 +22,13 @@
  * SECTION:eek-clutter-keyboard
  * @short_description: a #ClutterActor displaying #EekKeyboard
  */
-#include <string.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "eek-clutter-keyboard.h"
 #include "eek-clutter-section.h"

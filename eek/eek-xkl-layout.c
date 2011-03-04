@@ -26,13 +26,13 @@
  * to use Libxklavier configuration.
  */
 
-#include <libxklavier/xklavier.h>
-#include <gdk/gdkx.h>
-#include <string.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <libxklavier/xklavier.h>
+#include <gdk/gdkx.h>
+#include <string.h>
 
 #include "eek-xkl-layout.h"
 

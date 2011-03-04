@@ -18,15 +18,15 @@
  * 02110-1301 USA
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include <string.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cogl/cogl.h>
 #include <cogl/cogl-pango.h>
 #include <clutter/clutter.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif  /* HAVE_CONFIG_H */
 
 #include "eek-clutter-renderer.h"
 #include "eek-key.h"

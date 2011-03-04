@@ -27,11 +27,12 @@
  * of one or more keys of the #EekKeyClass class.
  */
 
-#include <string.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
+
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"

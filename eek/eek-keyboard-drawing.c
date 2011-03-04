@@ -17,12 +17,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <pango/pangocairo.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <math.h>
+#include <pango/pangocairo.h>
 
 #include "eek-types.h"
 

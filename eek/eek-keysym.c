@@ -23,12 +23,12 @@
  * @short_description: an #EekSymbol represents an X keysym
  */
 
-#include <string.h>
-#include <stdlib.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
+#include <stdlib.h>
 
 #include "eek-keysym.h"
 #include "eek-serializable.h"

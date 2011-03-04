@@ -22,11 +22,12 @@
  * SECTION:eek-gtk-keyboard
  * @short_description: a #GtkWidget displaying #EekKeyboard
  */
-#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
 
 #include "eek-gtk-keyboard.h"
 #include "eek-gtk-renderer.h"

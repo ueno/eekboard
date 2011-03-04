@@ -21,13 +21,13 @@
  * @short_description: #EekKeyboard to XML conversion utilities
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <glib/gprintf.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <glib/gprintf.h>
 
 #include "eek-section.h"
 #include "eek-key.h"

@@ -27,15 +27,15 @@
  * elements using XKB.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include <gdk/gdkx.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBgeom.h>
 #include <string.h>
 #include <stdarg.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif  /* HAVE_CONFIG_H */
 
 #include "eek-xkb-layout.h"
 #include "eek-keyboard.h"

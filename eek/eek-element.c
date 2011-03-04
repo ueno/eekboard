@@ -26,11 +26,11 @@
  * shall be used to implement #EekKeyboard, #EekSection, or #EekKey.
  */
 
-#include <string.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
+
+#include <string.h>
 
 #include "eek-element.h"
 #include "eek-container.h"
