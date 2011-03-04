@@ -39,6 +39,7 @@ libeek_public_headers =				\
 	$(srcdir)/eek-xml.h			\
 	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-serializable.h		\
+	$(srcdir)/eek-theme.h			\
 	$(srcdir)/eek.h
 
 libeek_private_headers =			\
@@ -46,7 +47,8 @@ libeek_private_headers =			\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
 	$(srcdir)/eek-xkeysym-keysym-entries.h	\
-	$(srcdir)/eek-marshalers.h
+	$(srcdir)/eek-marshalers.h \
+	$(srcdir)/eek-theme-node.h
 
 libeek_sources =				\
 	$(srcdir)/eek-layout.c			\
@@ -62,7 +64,9 @@ libeek_sources =				\
 	$(srcdir)/eek-xml.c			\
 	$(srcdir)/eek-xml-layout.c		\
 	$(srcdir)/eek-renderer.c		\
-	$(srcdir)/eek-keyboard-drawing.c
+	$(srcdir)/eek-keyboard-drawing.c	\
+	$(srcdir)/eek-theme.c			\
+	$(srcdir)/eek-theme-node.c
 
 libeek_keysym_sources =				\
 	$(srcdir)/eek-special-keysym-entries.h	\
@@ -85,8 +89,8 @@ libeek_la_SOURCES =				\
 	$(libeek_sources)			\
 	$(srcdir)/eek-marshalers.c
 
-libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS)
-libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) -lm
+libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS) $(LIBCROCO_CFLAGS)
+libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) $(LIBCROCO_LIBS) -lm
 
 if ENABLE_CLUTTER
 libeek_clutter_public_headers =			\

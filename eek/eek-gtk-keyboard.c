@@ -61,6 +61,7 @@ struct _EekGtkKeyboardPrivate
     gulong key_pressed_handler;
     gulong key_released_handler;
     gulong symbol_index_changed_handler;
+    EekTheme *theme;
 };
 
 static EekColor * color_from_gdk_color    (GdkColor    *gdk_color);
@@ -108,6 +109,8 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
 
         pcontext = gtk_widget_get_pango_context (self);
         priv->renderer = eek_gtk_renderer_new (priv->keyboard, pcontext, self);
+        if (priv->theme)
+            eek_renderer_set_theme (priv->renderer, priv->theme);
 
         eek_renderer_set_allocation_size (priv->renderer,
                                           allocation.width,
@@ -117,11 +120,11 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         state = gtk_widget_get_state (self);
 
         color = color_from_gdk_color (&style->fg[state]);
-        eek_renderer_set_foreground (priv->renderer, color);
+        eek_renderer_set_default_foreground_color (priv->renderer, color);
         eek_color_free (color);
 
         color = color_from_gdk_color (&style->bg[state]);
-        eek_renderer_set_background (priv->renderer, color);
+        eek_renderer_set_default_background_color (priv->renderer, color);
         eek_color_free (color);
     }
 
@@ -273,7 +276,12 @@ eek_gtk_keyboard_dispose (GObject *object)
         g_object_unref (priv->keyboard);
         priv->keyboard = NULL;
     }
-        
+
+    if (priv->theme) {
+        g_object_unref (priv->theme);
+        priv->theme = NULL;
+    }
+
     G_OBJECT_CLASS (eek_gtk_keyboard_parent_class)->dispose (object);
 }
 
@@ -427,4 +435,17 @@ on_symbol_index_changed (EekKeyboard *keyboard,
     GtkWidget *widget = user_data;
 
     gtk_widget_queue_draw (widget);
+}
+
+void
+eek_gtk_keyboard_set_theme (EekGtkKeyboard *keyboard,
+                            EekTheme       *theme)
+{
+    EekGtkKeyboardPrivate *priv;
+
+    g_return_if_fail (EEK_IS_GTK_KEYBOARD(keyboard));
+    g_return_if_fail (EEK_IS_THEME(theme));
+
+    priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+    priv->theme = g_object_ref (theme);
 }

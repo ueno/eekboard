@@ -54,7 +54,9 @@ struct _EekClutterKeyboardClass
 };
 
 GType         eek_clutter_keyboard_get_type  (void) G_GNUC_CONST;
-ClutterActor *eek_clutter_keyboard_new       (EekKeyboard *keyboard);
+ClutterActor *eek_clutter_keyboard_new       (EekKeyboard        *keyboard);
+void          eek_clutter_keyboard_set_theme (EekClutterKeyboard *keyboard,
+                                              EekTheme           *theme);
 
 G_END_DECLS
 #endif  /* EEK_CLUTTER_KEYBOARD_H */

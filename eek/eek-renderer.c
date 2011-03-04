@@ -45,8 +45,8 @@ struct _EekRendererPrivate
     EekKeyboard *keyboard;
     PangoContext *pcontext;
 
-    EekColor *foreground;
-    EekColor *background;
+    EekColor *default_foreground;
+    EekColor *default_background;
     gdouble border_width;
 
     gdouble allocation_width;
@@ -57,6 +57,10 @@ struct _EekRendererPrivate
     GHashTable *outline_surface_cache;
     cairo_surface_t *keyboard_surface;
     gulong symbol_index_changed_handler;
+
+    EekTheme *theme;
+    /* a mapping from EekElement to EekThemeNode */
+    GHashTable *theme_node_hash;
 };
 
 struct {
@@ -147,6 +151,14 @@ create_keyboard_surface (EekRenderer *renderer)
     EekBounds bounds;
     cairo_surface_t *keyboard_surface;
     CreateKeyboardSurfaceCallbackData data;
+    EekColor *foreground, *background;
+
+    foreground =
+        eek_renderer_get_foreground_color (renderer,
+                                           EEK_ELEMENT(priv->keyboard));
+    background =
+        eek_renderer_get_background_color (renderer,
+                                           EEK_ELEMENT(priv->keyboard));
 
     eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
     keyboard_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
@@ -159,10 +171,10 @@ create_keyboard_surface (EekRenderer *renderer)
 
     /* blank background */
     cairo_set_source_rgba (data.cr,
-                           priv->background->red,
-                           priv->background->green,
-                           priv->background->blue,
-                           priv->background->alpha);
+                           background->red,
+                           background->green,
+                           background->blue,
+                           background->alpha);
     cairo_rectangle (data.cr,
                      0.0,
                      0.0,
@@ -170,11 +182,21 @@ create_keyboard_surface (EekRenderer *renderer)
                      cairo_image_surface_get_height (keyboard_surface));
     cairo_fill (data.cr);
 
+    cairo_set_source_rgba (data.cr,
+                           foreground->red,
+                           foreground->green,
+                           foreground->blue,
+                           foreground->alpha);
+
     /* draw sections */
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
                                  create_keyboard_surface_section_callback,
                                  &data);
     cairo_destroy (data.cr);
+
+    eek_color_free (foreground);
+    eek_color_free (background);
+
     return keyboard_surface;
 }
 
@@ -190,6 +212,8 @@ render_key_outline (EekRenderer *renderer,
     gdouble scale;
     gint i;
     gulong oref;
+    EekColor *foreground, *background;
+    EekGradient *gradient;
 
     /* need to rescale so that the border fit inside the clipping
        region */
@@ -212,25 +236,60 @@ render_key_outline (EekRenderer *renderer,
                      priv->border_width / 2 * priv->scale,
                      priv->border_width / 2 * priv->scale);
 
-    /* paint the background with gradient */
-    pat = cairo_pattern_create_linear (0.0,
-                                       0.0,
-                                       0.0,
-                                       bounds.height * priv->scale * 5.0);
-    cairo_pattern_add_color_stop_rgba (pat,
-                                       1,
-                                       priv->background->red * 0.5,
-                                       priv->background->green * 0.5,
-                                       priv->background->blue * 0.5,
-                                       priv->background->alpha);
-    cairo_pattern_add_color_stop_rgba (pat,
-                                       0,
-                                       priv->background->red,
-                                       priv->background->green,
-                                       priv->background->blue,
-                                       priv->background->alpha);
+    foreground = eek_renderer_get_foreground_color (renderer, EEK_ELEMENT(key));
+    background = eek_renderer_get_background_color (renderer, EEK_ELEMENT(key));
 
-    cairo_set_source (cr, pat);
+    gradient = eek_renderer_get_background_gradient (renderer,
+                                                     EEK_ELEMENT(key));
+
+    if (gradient) {
+        switch (gradient->type) {
+        case EEK_GRADIENT_VERTICAL:
+            pat = cairo_pattern_create_linear (bounds.width / 2 * priv->scale,
+                                               0.0,
+                                               bounds.width / 2 * priv->scale,
+                                               bounds.height * priv->scale);
+            break;
+        case EEK_GRADIENT_HORIZONTAL:
+            pat = cairo_pattern_create_linear (0.0,
+                                               bounds.height / 2 * priv->scale,
+                                               bounds.width * priv->scale,
+                                               bounds.height / 2 * priv->scale);
+            break;
+        case EEK_GRADIENT_RADIAL:
+            pat = cairo_pattern_create_radial (0.0,
+                                               0.0,
+                                               0,
+                                               0.0,
+                                               0.0,
+                                               MIN(bounds.width, bounds.height) * priv->scale);
+            break;
+        default:
+            g_assert_not_reached ();
+            break;
+        }
+
+        cairo_pattern_add_color_stop_rgba (pat,
+                                           1,
+                                           gradient->start->red * 0.5,
+                                           gradient->start->green * 0.5,
+                                           gradient->start->blue * 0.5,
+                                           gradient->start->alpha);
+        cairo_pattern_add_color_stop_rgba (pat,
+                                           0,
+                                           gradient->stop->red,
+                                           gradient->stop->green,
+                                           gradient->stop->blue,
+                                           gradient->stop->alpha);
+        cairo_set_source (cr, pat);
+    } else {
+        cairo_set_source_rgba (cr,
+                               background->red,
+                               background->green,
+                               background->blue,
+                               background->alpha);
+    }
+
     _eek_rounded_polygon (cr,
                           outline->corner_radius,
                           outline->points,
@@ -239,16 +298,16 @@ render_key_outline (EekRenderer *renderer,
 
     cairo_pattern_destroy (pat);
 
-    /* paint the border */
+    /* paint the border - FIXME: should be configured through theme */
     cairo_set_line_width (cr, priv->border_width);
     cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 
     cairo_set_source_rgba
         (cr, 
-         ABS(priv->background->red - priv->foreground->red) * 0.7,
-         ABS(priv->background->green - priv->foreground->green) * 0.7,
-         ABS(priv->background->blue - priv->foreground->blue) * 0.7,
-         priv->foreground->alpha);
+         ABS(background->red - foreground->red) * 0.7,
+         ABS(background->green - foreground->green) * 0.7,
+         ABS(background->blue - foreground->blue) * 0.7,
+         foreground->alpha);
 
     _eek_rounded_polygon (cr,
                           outline->corner_radius,
@@ -257,6 +316,12 @@ render_key_outline (EekRenderer *renderer,
     cairo_stroke (cr);
 
     eek_outline_free (outline);
+
+    eek_color_free (foreground);
+    eek_color_free (background);
+
+    if (gradient)
+        eek_gradient_free (gradient);
 }
 
 struct _CalculateFontSizeCallbackData {
@@ -400,6 +465,7 @@ render_key (EekRenderer *self,
     } else {
         PangoLayout *layout;
         PangoRectangle extents = { 0, };
+        EekColor *foreground;
 
         layout = pango_cairo_create_layout (cr);
         eek_renderer_render_key_label (self, layout, key);
@@ -410,11 +476,14 @@ render_key (EekRenderer *self,
             (cr,
              (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
              (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
+
+        foreground = eek_renderer_get_foreground_color (self, EEK_ELEMENT(key));
         cairo_set_source_rgba (cr,
-                               priv->foreground->red,
-                               priv->foreground->green,
-                               priv->foreground->blue,
-                               priv->foreground->alpha);
+                               foreground->red,
+                               foreground->green,
+                               foreground->blue,
+                               foreground->alpha);
+        eek_color_free (foreground);
 
         pango_cairo_show_layout (cr, layout);
         cairo_restore (cr);
@@ -535,6 +604,7 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
                                    cairo_t     *cr)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
+    EekColor *background;
 
     g_return_if_fail (priv->keyboard);
     g_return_if_fail (priv->allocation_width > 0.0);
@@ -544,11 +614,15 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
         priv->keyboard_surface = create_keyboard_surface (self);
 
     /* blank background */
+    background = eek_renderer_get_background_color (self,
+                                                    EEK_ELEMENT(priv->keyboard));
     cairo_set_source_rgba (cr,
-                           priv->background->red,
-                           priv->background->green,
-                           priv->background->blue,
-                           priv->background->alpha);
+                           background->red,
+                           background->green,
+                           background->blue,
+                           background->alpha);
+    eek_color_free (background);
+
     cairo_rectangle (cr,
                      0.0,
                      0.0,
@@ -639,9 +713,10 @@ eek_renderer_finalize (GObject *object)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
     g_hash_table_destroy (priv->outline_surface_cache);
-    eek_color_free (priv->foreground);
-    eek_color_free (priv->background);
+    eek_color_free (priv->default_foreground);
+    eek_color_free (priv->default_background);
     pango_font_description_free (priv->font);
+    g_hash_table_destroy (priv->theme_node_hash);
     G_OBJECT_CLASS (eek_renderer_parent_class)->finalize (object);
 }
 
@@ -691,8 +766,8 @@ eek_renderer_init (EekRenderer *self)
     priv = self->priv = EEK_RENDERER_GET_PRIVATE(self);
     priv->keyboard = NULL;
     priv->pcontext = NULL;
-    priv->foreground = eek_color_new (0.3, 0.3, 0.3, 1.0);
-    priv->background = eek_color_new (1.0, 1.0, 1.0, 1.0);
+    priv->default_foreground = eek_color_new (0.3, 0.3, 0.3, 1.0);
+    priv->default_background = eek_color_new (1.0, 1.0, 1.0, 1.0);
     priv->border_width = 1.0;
     priv->allocation_width = 0.0;
     priv->allocation_height = 0.0;
@@ -705,6 +780,11 @@ eek_renderer_init (EekRenderer *self)
                                (GDestroyNotify)cairo_surface_destroy);
     priv->keyboard_surface = NULL;
     priv->symbol_index_changed_handler = 0;
+    priv->theme_node_hash =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               (GDestroyNotify)g_object_unref);
 }
 
 static void
@@ -956,8 +1036,8 @@ eek_renderer_render_keyboard (EekRenderer *renderer,
 }
 
 void
-eek_renderer_set_foreground (EekRenderer *renderer,
-                             EekColor    *foreground)
+eek_renderer_set_default_foreground_color (EekRenderer *renderer,
+                                           EekColor    *foreground)
 {
     EekRendererPrivate *priv;
 
@@ -965,14 +1045,14 @@ eek_renderer_set_foreground (EekRenderer *renderer,
     g_return_if_fail (foreground);
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    if (priv->foreground)
-        eek_color_free (priv->foreground);
-    priv->foreground = eek_color_copy (foreground);
+    if (priv->default_foreground)
+        eek_color_free (priv->default_foreground);
+    priv->default_foreground = eek_color_copy (foreground);
 }
 
 void
-eek_renderer_set_background (EekRenderer *renderer,
-                             EekColor    *background)
+eek_renderer_set_default_background_color (EekRenderer *renderer,
+                                           EekColor    *background)
 {
     EekRendererPrivate *priv;
 
@@ -980,35 +1060,66 @@ eek_renderer_set_background (EekRenderer *renderer,
     g_return_if_fail (background);
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    if (priv->background)
-        eek_color_free (priv->background);
-    priv->background = eek_color_copy (background);
+    if (priv->default_background)
+        eek_color_free (priv->default_background);
+    priv->default_background = eek_color_copy (background);
 }
 
-void
-eek_renderer_get_foreground (EekRenderer *renderer,
-                             EekColor    *foreground)
+EekColor *
+eek_renderer_get_foreground_color (EekRenderer *renderer, EekElement *element)
 {
     EekRendererPrivate *priv;
+    EekThemeNode *theme_node;
 
-    g_return_if_fail (EEK_IS_RENDERER(renderer));
-    g_return_if_fail (foreground);
+    g_assert (EEK_IS_RENDERER(renderer));
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    *foreground = *priv->foreground;
+
+    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    if (theme_node) {
+        EekColor *color = eek_theme_node_get_foreground_color (theme_node);
+        if (color)
+            return color;
+    }
+
+    return eek_color_copy (priv->default_foreground);
 }
 
-void
-eek_renderer_get_background (EekRenderer *renderer,
-                             EekColor    *background)
+EekColor *
+eek_renderer_get_background_color (EekRenderer *renderer, EekElement *element)
 {
     EekRendererPrivate *priv;
+    EekThemeNode *theme_node;
 
-    g_return_if_fail (EEK_IS_RENDERER(renderer));
-    g_return_if_fail (background);
+    g_assert (EEK_IS_RENDERER(renderer));
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
-    *background = *priv->background;
+
+    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    if (theme_node) {
+        EekColor *color = eek_theme_node_get_background_color (theme_node);
+        if (color)
+            return color;
+    }
+
+    return eek_color_copy (priv->default_background);
+}
+
+EekGradient *
+eek_renderer_get_background_gradient (EekRenderer *renderer, EekElement *element)
+{
+    EekRendererPrivate *priv;
+    EekThemeNode *theme_node;
+
+    g_assert (EEK_IS_RENDERER(renderer));
+
+    priv = EEK_RENDERER_GET_PRIVATE(renderer);
+
+    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    if (theme_node)
+        return eek_theme_node_get_background_gradient (theme_node);
+
+    return NULL;
 }
 
 struct _FindKeyByPositionCallbackData {
@@ -1135,4 +1246,92 @@ eek_renderer_find_key_by_position (EekRenderer *renderer,
                         find_key_by_position_section_callback,
                         &data);
     return data.key;
+}
+
+struct _CreateThemeNodeData {
+    EekThemeNode *parent;
+    EekRenderer *renderer;
+};
+typedef struct _CreateThemeNodeData CreateThemeNodeData;
+
+void
+create_theme_node_key_callback (EekElement *element,
+                                    gpointer    user_data)
+{
+    CreateThemeNodeData *data = user_data;
+    EekRendererPrivate *priv;
+    EekThemeNode *node;
+
+    priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
+
+    node = eek_theme_node_new (data->parent,
+                               priv->theme,
+                               EEK_TYPE_KEY,
+                               eek_element_get_name (element),
+                               "key",
+                               NULL,
+                               NULL);
+    g_hash_table_insert (priv->theme_node_hash, element, node);
+}
+
+void
+create_theme_node_section_callback (EekElement *element,
+                                    gpointer    user_data)
+{
+    CreateThemeNodeData *data = user_data;
+    EekRendererPrivate *priv;
+    EekThemeNode *node, *parent;
+
+    priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
+
+    node = eek_theme_node_new (data->parent,
+                               priv->theme,
+                               EEK_TYPE_SECTION,
+                               eek_element_get_name (element),
+                               "section",
+                               NULL,
+                               NULL);
+    g_hash_table_insert (priv->theme_node_hash, element, node);
+
+    parent = data->parent;
+    data->parent = node;
+    eek_container_foreach_child (EEK_CONTAINER(element),
+                                 create_theme_node_key_callback,
+                                 data);
+    data->parent = parent;
+}
+
+void
+eek_renderer_set_theme (EekRenderer *renderer,
+                        EekTheme    *theme)
+{
+    EekRendererPrivate *priv;
+    EekThemeNode *node;
+    CreateThemeNodeData data;
+
+    g_assert (EEK_IS_RENDERER(renderer));
+    g_assert (EEK_IS_THEME(theme));
+
+    priv = EEK_RENDERER_GET_PRIVATE(renderer);
+
+    if (priv->theme)
+        g_object_unref (priv->theme);
+    priv->theme = g_object_ref (theme);
+
+    g_hash_table_remove_all (priv->theme_node_hash);
+
+    node = eek_theme_node_new (NULL,
+                               priv->theme,
+                               EEK_TYPE_KEYBOARD,
+                               "keyboard",
+                               "keyboard",
+                               NULL,
+                               NULL);
+    g_hash_table_insert (priv->theme_node_hash, priv->keyboard, node);
+
+    data.parent = node;
+    data.renderer = renderer;
+    eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
+                                 create_theme_node_section_callback,
+                                 &data);
 }

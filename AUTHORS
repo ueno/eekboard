@@ -1,6 +1,34 @@
-eekboard is written by Daiki Ueno <ueno@unixuser.org>
+eekboard is written by Daiki Ueno <ueno@unixuser.org>.  The following
+files contain code derived from other free software packages:
 
-Cairo keyboard drawing functions are borrowed from the libgnomekbd
-library by Sergey V. Udaltsov <svu@gnome.org>.  See the comments in
-eek/eek-drawing.c for detail.
+eek/eek-keyboard-drawing.h
+eek/eek-keyboard-drawing.c
 
+  These files contain code derived from the libgnomekbd library.
+  Copyright (C) 2006 Sergey V. Udaltsov <svu@gnome.org>
+
+eek/eek-theme-node.h
+eek/eek-theme-node.c
+eek/eek-theme.h
+eek/eek-theme.c
+
+  These files contain code derived from gnome-shell.
+
+  Copyright 2008-2010 Red Hat, Inc.
+  Copyright 2009 Steve Frécinaux
+  Copyright 2009, 2010 Florian Müllner
+  Copyright 2010 Adel Gadllah
+  Copyright 2010 Giovanni Campagna
+  Copyright 2003-2004 Dodji Seketeli
+
+data/icons/8x8/Makefile.am
+data/icons/16x16/Makefile.am
+data/icons/22x22/Makefile.am
+data/icons/24x24/Makefile.am
+data/icons/32x32/Makefile.am
+data/icons/48x48/Makefile.am
+data/icons/scalable/Makefile.am
+
+  These files contain code derived from im-chooser.
+
+  Copyright (C) 2006-2008 Red Hat, Inc. All rights reserved.

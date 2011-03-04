@@ -101,6 +101,8 @@ PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
+PKG_CHECK_MODULES([LIBCROCO], [libcroco-0.6], ,
+  [AC_MSG_ERROR([libcroco not found])])
 
 dnl use libfakekey to generate key events
 AC_MSG_CHECKING([whether you enable fakekey])

@@ -50,6 +50,7 @@ struct _EekClutterKeyboardPrivate
 {
     EekKeyboard *keyboard;
     EekClutterRenderer *renderer;
+    EekTheme *theme;
 };
 
 struct _CreateSectionCallbackData {
@@ -77,6 +78,9 @@ eek_clutter_keyboard_real_realize (ClutterActor *self)
     gdouble scale;
 
     priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
+
+    if (priv->theme)
+        eek_renderer_set_theme (EEK_RENDERER(priv->renderer), priv->theme);
 
     scale = eek_renderer_get_scale (EEK_RENDERER(priv->renderer));
     clutter_actor_set_position (CLUTTER_ACTOR(self),
@@ -126,7 +130,6 @@ eek_clutter_keyboard_real_allocate (ClutterActor          *self,
 {
     EekClutterKeyboardPrivate *priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(self);
 
-    g_assert (priv->renderer);
     eek_renderer_set_allocation_size (EEK_RENDERER(priv->renderer),
                                       box->x2 - box->x1,
                                       box->y2 - box->y1);
@@ -193,6 +196,11 @@ eek_clutter_keyboard_dispose (GObject *object)
         priv->keyboard = NULL;
     }
 
+    if (priv->theme) {
+        g_object_unref (priv->theme);
+        priv->keyboard = NULL;
+    }
+
     G_OBJECT_CLASS (eek_clutter_keyboard_parent_class)->dispose (object);
 }
 
@@ -248,4 +256,17 @@ ClutterActor *
 eek_clutter_keyboard_new (EekKeyboard *keyboard)
 {
     return g_object_new (EEK_TYPE_CLUTTER_KEYBOARD, "keyboard", keyboard, NULL);
+}
+
+void
+eek_clutter_keyboard_set_theme (EekClutterKeyboard *keyboard,
+                                EekTheme           *theme)
+{
+    EekClutterKeyboardPrivate *priv;
+
+    g_return_if_fail (EEK_IS_CLUTTER_KEYBOARD(keyboard));
+    g_return_if_fail (EEK_IS_THEME(theme));
+
+    priv = EEK_CLUTTER_KEYBOARD_GET_PRIVATE(keyboard);
+    priv->theme = g_object_ref (theme);
 }

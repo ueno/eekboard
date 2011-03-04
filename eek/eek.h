@@ -28,5 +28,6 @@
 #include "eek-keysym.h"
 #include "eek-xml.h"
 #include "eek-serializable.h"
+#include "eek-theme.h"
 
 #endif  /* EEK_H */

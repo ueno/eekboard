@@ -222,3 +222,46 @@ eek_color_new (gdouble red,
 
     return color;
 }
+
+GType
+eek_gradient_get_type (void)
+{
+    static GType our_type = 0;
+
+    if (our_type == 0)
+        our_type =
+            g_boxed_type_register_static ("EekGradient",
+                                          (GBoxedCopyFunc)eek_gradient_copy,
+                                          (GBoxedFreeFunc)eek_gradient_free);
+    return our_type;
+}
+
+EekGradient *
+eek_gradient_new (EekGradientType type,
+                  EekColor       *start,
+                  EekColor       *stop)
+{
+    EekGradient *gradient;
+
+    gradient = g_slice_new (EekGradient);
+    gradient->type = type;
+    gradient->start = eek_color_copy (start);
+    gradient->stop = eek_color_copy (stop);
+
+    return gradient;
+}
+
+EekGradient *
+eek_gradient_copy (const EekGradient *gradient)
+{
+    return eek_gradient_new (gradient->type, gradient->start, gradient->stop);
+}
+
+void
+eek_gradient_free (EekGradient *gradient)
+{
+    if (gradient->start)
+        eek_color_free (gradient->start);
+    if (gradient->stop)
+        eek_color_free (gradient->stop);
+}

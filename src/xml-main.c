@@ -47,6 +47,7 @@ static gchar *opt_layouts = NULL;
 static gchar *opt_options = NULL;
 static gchar *opt_list = NULL;
 static guint opt_group = 0;
+static gchar *opt_theme = NULL;
 
 static const GOptionEntry options[] = {
     {"load", 'l', 0, G_OPTION_ARG_STRING, &opt_load,
@@ -63,6 +64,8 @@ static const GOptionEntry options[] = {
      N_("Specify options")},
     {"group", 'g', 0, G_OPTION_ARG_INT, &opt_group,
      N_("Specify group")},
+    {"theme", 't', 0, G_OPTION_ARG_STRING, &opt_theme,
+     N_("Specify theme")},
     {NULL}
 };
 
@@ -112,6 +115,8 @@ main (int argc, char **argv)
     }
 #endif
 
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+
     context = g_option_context_new ("eek-example-xml");
     g_option_context_add_main_entries (context, options, NULL);
     g_option_context_parse (context, &argc, &argv, NULL);
@@ -151,6 +156,12 @@ main (int argc, char **argv)
         widget = gtk_clutter_embed_new ();
         stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(widget));
         actor = eek_clutter_keyboard_new (keyboard);
+        if (opt_theme) {
+            EekTheme *theme = eek_theme_new (opt_theme, NULL, NULL);
+
+            eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
+            g_object_unref (theme);
+        }
         clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
         clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
@@ -164,6 +175,12 @@ main (int argc, char **argv)
                           actor);
 #else
         widget = eek_gtk_keyboard_new (keyboard);
+        if (opt_theme) {
+            EekTheme *theme = eek_theme_new (opt_theme, NULL, NULL);
+
+            eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(widget), theme);
+            g_object_unref (theme);
+        }
 #endif
         g_object_unref (keyboard);
 

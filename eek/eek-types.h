@@ -136,6 +136,8 @@ typedef struct _EekSection EekSection;
 typedef struct _EekKeyboard EekKeyboard;
 typedef struct _EekSymbol EekSymbol;
 typedef struct _EekKeysym EekKeysym;
+typedef struct _EekTheme EekTheme;
+typedef struct _EekThemeNode EekThemeNode;
 
 typedef struct _EekSymbolMatrix EekSymbolMatrix;
 typedef struct _EekPoint EekPoint;
@@ -252,6 +254,29 @@ EekColor *eek_color_new      (gdouble         red,
                               gdouble         alpha);
 EekColor *eek_color_copy     (const EekColor *color);
 void      eek_color_free     (EekColor       *color);
+
+typedef enum {
+  EEK_GRADIENT_NONE,
+  EEK_GRADIENT_VERTICAL,
+  EEK_GRADIENT_HORIZONTAL,
+  EEK_GRADIENT_RADIAL
+} EekGradientType;
+
+struct _EekGradient
+{
+    EekGradientType type;
+    EekColor *start;
+    EekColor *stop;
+};
+typedef struct _EekGradient EekGradient;
+
+GType        eek_gradient_get_type (void) G_GNUC_CONST;
+
+EekGradient *eek_gradient_new      (EekGradientType    type,
+                                    EekColor          *start,
+                                    EekColor          *stop);
+EekGradient *eek_gradient_copy     (const EekGradient *gradient);
+void         eek_gradient_free     (EekGradient       *gradient);
 
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

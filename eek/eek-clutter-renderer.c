@@ -119,7 +119,8 @@ eek_clutter_renderer_render_key (EekClutterRenderer *renderer,
     CoglHandle *outline_texture;
     PangoLayout *layout;
     PangoRectangle extents = { 0, };
-    CoglColor color = { 0x00, 0x00, 0x00, 0xFF };
+    const EekColor *foreground;
+    CoglColor color;
     ClutterGeometry geom;
     gulong oref;
     EekKeyboard *keyboard;
@@ -200,6 +201,17 @@ eek_clutter_renderer_render_key (EekClutterRenderer *renderer,
     layout = eek_renderer_create_pango_layout (EEK_RENDERER(renderer));
     eek_renderer_render_key_label (EEK_RENDERER(renderer), layout, key);
     pango_layout_get_extents (layout, NULL, &extents);
+
+    foreground = eek_renderer_get_foreground_color (EEK_RENDERER(renderer),
+                                                    EEK_ELEMENT(key));
+
+    cogl_color_set_from_4f (&color,
+                            foreground->red,
+                            foreground->green,
+                            foreground->blue,
+                            foreground->alpha);
+    eek_color_free (foreground);
+
     cogl_pango_render_layout (layout,
                               (geom.width - extents.width / PANGO_SCALE) / 2,
                               (geom.height - extents.height / PANGO_SCALE) / 2,
