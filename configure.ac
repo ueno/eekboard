@@ -244,6 +244,7 @@ data/icons/24x24/Makefile
 data/icons/32x32/Makefile
 data/icons/48x48/Makefile
 data/icons/scalable/Makefile
+data/themes/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc

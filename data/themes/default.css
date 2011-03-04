@@ -1,0 +1,11 @@
+.key {
+    color: #ffffff;
+    background-gradient-direction: radial;
+    background-gradient-start: #000000;
+    background-gradient-end: #232323;
+}
+
+.keyboard {
+    background-color: #000000;
+    color: #ffffff;
+}

@@ -64,7 +64,8 @@ eekboard_desktop_client_SOURCES = desktop-client.c desktop-client-main.c
 eekboard_server_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
-	$(GTK_CFLAGS)
+	$(GTK_CFLAGS) \
+	-DTHEMEDIR=\"$(pkgdatadir)/themes\"
 
 eekboard_server_LDADD = \
 	$(top_builddir)/eekboard/libeekboard.la \

@@ -191,6 +191,8 @@ on_realize (GtkWidget *widget,
                               GDK_FUNC_CLOSE);
 }
 
+#define DEFAULT_THEME (THEMEDIR "/default.css")
+
 static void
 update_widget (ServerContext *context)
 {
@@ -199,6 +201,7 @@ update_widget (ServerContext *context)
     gint monitor;
     GdkRectangle rect;
     EekBounds bounds;
+    EekTheme *theme;
 #if HAVE_CLUTTER_GTK
     ClutterActor *stage, *actor;
     ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
@@ -207,11 +210,14 @@ update_widget (ServerContext *context)
     if (context->widget)
         gtk_widget_destroy (context->widget);
 
+    theme = eek_theme_new (DEFAULT_THEME, NULL, NULL);
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
 #if HAVE_CLUTTER_GTK
     context->widget = gtk_clutter_embed_new ();
     stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
     actor = eek_clutter_keyboard_new (context->keyboard);
+    if (theme)
+        eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
@@ -225,6 +231,8 @@ update_widget (ServerContext *context)
                       actor);
 #else
     context->widget = eek_gtk_keyboard_new (context->keyboard);
+    if (theme)
+        eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget), theme);
 #endif
     gtk_widget_set_size_request (context->widget, bounds.width, bounds.height);
 
