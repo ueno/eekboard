@@ -208,7 +208,6 @@ render_key_outline (EekRenderer *renderer,
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
     EekOutline *outline;
     EekBounds bounds;
-    cairo_pattern_t *pat;
     gdouble scale;
     gint i;
     gulong oref;
@@ -243,6 +242,8 @@ render_key_outline (EekRenderer *renderer,
                                                      EEK_ELEMENT(key));
 
     if (gradient) {
+        cairo_pattern_t *pat;
+
         switch (gradient->type) {
         case EEK_GRADIENT_VERTICAL:
             pat = cairo_pattern_create_linear (bounds.width / 2 * priv->scale,
@@ -277,11 +278,13 @@ render_key_outline (EekRenderer *renderer,
                                            gradient->start->alpha);
         cairo_pattern_add_color_stop_rgba (pat,
                                            0,
-                                           gradient->stop->red,
-                                           gradient->stop->green,
-                                           gradient->stop->blue,
-                                           gradient->stop->alpha);
+                                           gradient->end->red,
+                                           gradient->end->green,
+                                           gradient->end->blue,
+                                           gradient->end->alpha);
+        eek_gradient_free (gradient);
         cairo_set_source (cr, pat);
+        cairo_pattern_destroy (pat);
     } else {
         cairo_set_source_rgba (cr,
                                background->red,
@@ -295,8 +298,6 @@ render_key_outline (EekRenderer *renderer,
                           outline->points,
                           outline->num_points);
     cairo_fill (cr);
-
-    cairo_pattern_destroy (pat);
 
     /* paint the border - FIXME: should be configured through theme */
     cairo_set_line_width (cr, priv->border_width);
@@ -319,9 +320,6 @@ render_key_outline (EekRenderer *renderer,
 
     eek_color_free (foreground);
     eek_color_free (background);
-
-    if (gradient)
-        eek_gradient_free (gradient);
 }
 
 struct _CalculateFontSizeCallbackData {

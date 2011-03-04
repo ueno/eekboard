@@ -239,14 +239,14 @@ eek_gradient_get_type (void)
 EekGradient *
 eek_gradient_new (EekGradientType type,
                   EekColor       *start,
-                  EekColor       *stop)
+                  EekColor       *end)
 {
     EekGradient *gradient;
 
     gradient = g_slice_new (EekGradient);
     gradient->type = type;
     gradient->start = eek_color_copy (start);
-    gradient->stop = eek_color_copy (stop);
+    gradient->end = eek_color_copy (end);
 
     return gradient;
 }
@@ -254,14 +254,13 @@ eek_gradient_new (EekGradientType type,
 EekGradient *
 eek_gradient_copy (const EekGradient *gradient)
 {
-    return eek_gradient_new (gradient->type, gradient->start, gradient->stop);
+    return eek_gradient_new (gradient->type, gradient->start, gradient->end);
 }
 
 void
 eek_gradient_free (EekGradient *gradient)
 {
-    if (gradient->start)
-        eek_color_free (gradient->start);
-    if (gradient->stop)
-        eek_color_free (gradient->stop);
+    eek_color_free (gradient->start);
+    eek_color_free (gradient->end);
+    g_slice_free (EekGradient, gradient);
 }
