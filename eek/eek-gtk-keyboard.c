@@ -138,12 +138,7 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
                            background.green,
                            background.blue,
                            background.alpha);
-    cairo_rectangle (cr,
-                     0.0,
-                     0.0,
-                     allocation.width,
-                     allocation.height);
-    cairo_fill (cr);
+    cairo_paint (cr);
 
     eek_renderer_render_keyboard (priv->renderer, cr);
 

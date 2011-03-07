@@ -177,12 +177,7 @@ create_keyboard_surface (EekRenderer *renderer)
                            background.green,
                            background.blue,
                            background.alpha);
-    cairo_rectangle (data.cr,
-                     0.0,
-                     0.0,
-                     cairo_image_surface_get_width (keyboard_surface),
-                     cairo_image_surface_get_height (keyboard_surface));
-    cairo_fill (data.cr);
+    cairo_paint (data.cr);
 
     cairo_set_source_rgba (data.cr,
                            foreground.red,
@@ -464,14 +459,8 @@ render_key (EekRenderer *self,
         cr = cairo_create (outline_surface);
 
         /* blank background */
-        eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
         cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 0.0);
-        cairo_rectangle (cr,
-                         0.0,
-                         0.0,
-                         bounds.width * priv->scale,
-                         bounds.height * priv->scale);
-        cairo_fill (cr);
+        cairo_paint (cr);
 
         eek_renderer_render_key_outline (self, cr, key, 1.0, 0);
         cairo_destroy (cr);
