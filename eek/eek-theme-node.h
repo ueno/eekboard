@@ -67,16 +67,6 @@ typedef enum {
 typedef struct _EekThemeNodeClass EekThemeNodeClass;
 typedef struct _EekThemeNodePrivate EekThemeNodePrivate;
 
-struct _EekThemeNode {
-    GObject parent;
-
-    EekThemeNodePrivate *priv;
-};
-
-struct _EekThemeNodeClass {
-  GObjectClass parent_class;
-};
-
 GType         eek_theme_node_get_type
                                  (void) G_GNUC_CONST;
 

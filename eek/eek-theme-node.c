@@ -34,13 +34,9 @@
 #include "eek-theme-node.h"
 #include "eek-theme-private.h"
 
-G_DEFINE_TYPE (EekThemeNode, eek_theme_node, G_TYPE_OBJECT);
+struct _EekThemeNode {
+  GObject parent;
 
-#define EEK_THEME_NODE_GET_PRIVATE(obj)                                 \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_THEME_NODE, EekThemeNodePrivate))
-
-struct _EekThemeNodePrivate
-{
   EekThemeNode *parent_node;
   EekTheme *theme;
 
@@ -73,6 +69,15 @@ struct _EekThemeNodePrivate
   guint foreground_computed : 1;
 };
 
+struct _EekThemeNodeClass {
+  GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE (EekThemeNode, eek_theme_node, G_TYPE_OBJECT);
+
+#define EEK_THEME_NODE_GET_PRIVATE(obj)                                 \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_THEME_NODE, EekThemeNodePrivate))
+
 static void eek_theme_node_init               (EekThemeNode          *node);
 static void eek_theme_node_class_init         (EekThemeNodeClass     *klass);
 static void eek_theme_node_dispose           (GObject                 *object);
@@ -87,18 +92,12 @@ static const EekColor DEFAULT_ERROR_COLOR = { 0xcc, 0x00, 0x00, 0xff };
 static void
 eek_theme_node_init (EekThemeNode *self)
 {
-  EekThemeNodePrivate *priv;
-
-  priv = self->priv = EEK_THEME_NODE_GET_PRIVATE(self);
 }
 
 static void
 eek_theme_node_class_init (EekThemeNodeClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  g_type_class_add_private (object_class,
-                            sizeof (EekThemeNodePrivate));
 
   object_class->dispose = eek_theme_node_dispose;
   object_class->finalize = eek_theme_node_finalize;
@@ -107,18 +106,18 @@ eek_theme_node_class_init (EekThemeNodeClass *klass)
 static void
 eek_theme_node_dispose (GObject *gobject)
 {
-  EekThemeNodePrivate *priv = EEK_THEME_NODE_GET_PRIVATE (gobject);
+  EekThemeNode *node = EEK_THEME_NODE (gobject);
 
-  if (priv->theme)
+  if (node->theme)
     {
-      g_object_unref (priv->theme);
-      priv->theme = NULL;
+      g_object_unref (node->theme);
+      node->theme = NULL;
     }
 
-  if (priv->parent_node)
+  if (node->parent_node)
     {
-      g_object_unref (priv->parent_node);
-      priv->parent_node = NULL;
+      g_object_unref (node->parent_node);
+      node->parent_node = NULL;
     }
 
   G_OBJECT_CLASS (eek_theme_node_parent_class)->dispose (gobject);
@@ -127,24 +126,24 @@ eek_theme_node_dispose (GObject *gobject)
 static void
 eek_theme_node_finalize (GObject *object)
 {
-  EekThemeNodePrivate *priv = EEK_THEME_NODE_GET_PRIVATE (object);
+  EekThemeNode *node = EEK_THEME_NODE (object);
 
-  g_free (priv->element_id);
-  g_free (priv->element_class);
-  g_free (priv->pseudo_class);
-  g_free (priv->inline_style);
+  g_free (node->element_id);
+  g_free (node->element_class);
+  g_free (node->pseudo_class);
+  g_free (node->inline_style);
 
-  if (priv->properties)
+  if (node->properties)
     {
-      g_free (priv->properties);
-      priv->properties = NULL;
-      priv->n_properties = 0;
+      g_free (node->properties);
+      node->properties = NULL;
+      node->n_properties = 0;
     }
 
-  if (priv->inline_properties)
+  if (node->inline_properties)
     {
       /* This destroys the list, not just the head of the list */
-      cr_declaration_destroy (priv->inline_properties);
+      cr_declaration_destroy (node->inline_properties);
     }
 
   G_OBJECT_CLASS (eek_theme_node_parent_class)->finalize (object);
@@ -181,29 +180,27 @@ eek_theme_node_new (EekThemeNode *parent_node,
                     const char   *inline_style)
 {
   EekThemeNode *node;
-  EekThemeNodePrivate *priv;
 
   g_return_val_if_fail (parent_node == NULL || EEK_IS_THEME_NODE (parent_node), NULL);
 
   node = g_object_new (EEK_TYPE_THEME_NODE, NULL);
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
 
   if (parent_node != NULL)
-    priv->parent_node = g_object_ref (parent_node);
+    node->parent_node = g_object_ref (parent_node);
   else
-    priv->parent_node = NULL;
+    node->parent_node = NULL;
 
   if (theme == NULL && parent_node != NULL)
     theme = eek_theme_node_get_theme (parent_node);
 
   if (theme != NULL)
-    priv->theme = g_object_ref (theme);
+    node->theme = g_object_ref (theme);
 
-  priv->element_type = element_type;
-  priv->element_id = g_strdup (element_id);
-  priv->element_class = g_strdup (element_class);
-  priv->pseudo_class = g_strdup (pseudo_class);
-  priv->inline_style = g_strdup (inline_style);
+  node->element_type = element_type;
+  node->element_id = g_strdup (element_id);
+  node->element_class = g_strdup (element_class);
+  node->pseudo_class = g_strdup (pseudo_class);
+  node->inline_style = g_strdup (inline_style);
 
   return node;
 }
@@ -220,12 +217,9 @@ eek_theme_node_new (EekThemeNode *parent_node,
 EekThemeNode *
 eek_theme_node_get_parent (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), NULL);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->parent_node;
+  return node->parent_node;
 }
 
 /**
@@ -239,82 +233,65 @@ eek_theme_node_get_parent (EekThemeNode *node)
 EekTheme *
 eek_theme_node_get_theme (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), NULL);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->theme;
+  return node->theme;
 }
 
 GType
 eek_theme_node_get_element_type (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), G_TYPE_NONE);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->element_type;
+  return node->element_type;
 }
 
 const char *
 eek_theme_node_get_element_id (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), NULL);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->element_id;
+  return node->element_id;
 }
 
 const char *
 eek_theme_node_get_element_class (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), NULL);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->element_class;
+  return node->element_class;
 }
 
 const char *
 eek_theme_node_get_pseudo_class (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), NULL);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  return priv->pseudo_class;
+  return node->pseudo_class;
 }
 
 static void
 ensure_properties (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
-  if (!priv->properties_computed)
+  if (!node->properties_computed)
     {
       GPtrArray *properties = NULL;
 
-      priv->properties_computed = TRUE;
+      node->properties_computed = TRUE;
 
-      if (priv->theme)
-        properties = _eek_theme_get_matched_properties (priv->theme, node);
+      if (node->theme)
+        properties = _eek_theme_get_matched_properties (node->theme, node);
 
-      if (priv->inline_style)
+      if (node->inline_style)
         {
           CRDeclaration *cur_decl;
 
           if (!properties)
             properties = g_ptr_array_new ();
 
-          priv->inline_properties =
-            _eek_theme_parse_declaration_list (priv->inline_style);
-          for (cur_decl = priv->inline_properties;
+          node->inline_properties =
+            _eek_theme_parse_declaration_list (node->inline_style);
+          for (cur_decl = node->inline_properties;
                cur_decl;
                cur_decl = cur_decl->next)
             g_ptr_array_add (properties, cur_decl);
@@ -322,8 +299,8 @@ ensure_properties (EekThemeNode *node)
 
       if (properties)
         {
-          priv->n_properties = properties->len;
-          priv->properties = (CRDeclaration **)g_ptr_array_free (properties,
+          node->n_properties = properties->len;
+          node->properties = (CRDeclaration **)g_ptr_array_free (properties,
                                                                  FALSE);
         }
     }
@@ -508,18 +485,15 @@ eek_theme_node_lookup_color (EekThemeNode *node,
                              gboolean      inherit,
                              EekColor     *color)
 {
-  EekThemeNodePrivate *priv;
   int i;
 
   g_return_val_if_fail (EEK_IS_THEME_NODE(node), FALSE);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   ensure_properties (node);
 
-  for (i = priv->n_properties - 1; i >= 0; i--)
+  for (i = node->n_properties - 1; i >= 0; i--)
     {
-      CRDeclaration *decl = priv->properties[i];
+      CRDeclaration *decl = node->properties[i];
 
       if (strcmp (decl->property->stryng->str, property_name) == 0)
         {
@@ -530,16 +504,16 @@ eek_theme_node_lookup_color (EekThemeNode *node,
             }
           else if (result == VALUE_INHERIT)
             {
-              if (priv->parent_node)
-                return eek_theme_node_lookup_color (priv->parent_node, property_name, inherit, color);
+              if (node->parent_node)
+                return eek_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
               else
                 break;
             }
         }
     }
 
-  if (inherit && priv->parent_node)
-    return eek_theme_node_lookup_color (priv->parent_node, property_name, inherit, color);
+  if (inherit && node->parent_node)
+    return eek_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
 
   return FALSE;
 }
@@ -601,19 +575,16 @@ eek_theme_node_lookup_double (EekThemeNode *node,
                               gboolean      inherit,
                               double       *value)
 {
-  EekThemeNodePrivate *priv;
   gboolean result = FALSE;
   int i;
 
   g_return_val_if_fail (EEK_IS_THEME_NODE(node), FALSE);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   ensure_properties (node);
 
-  for (i = priv->n_properties - 1; i >= 0; i--)
+  for (i = node->n_properties - 1; i >= 0; i--)
     {
-      CRDeclaration *decl = priv->properties[i];
+      CRDeclaration *decl = node->properties[i];
 
       if (strcmp (decl->property->stryng->str, property_name) == 0)
         {
@@ -628,8 +599,8 @@ eek_theme_node_lookup_double (EekThemeNode *node,
         }
     }
 
-  if (!result && inherit && priv->parent_node)
-    result = eek_theme_node_lookup_double (priv->parent_node, property_name, inherit, value);
+  if (!result && inherit && node->parent_node)
+    result = eek_theme_node_lookup_double (node->parent_node, property_name, inherit, value);
 
   return result;
 }
@@ -841,18 +812,15 @@ get_length_internal (EekThemeNode *node,
                      const char  *suffixed,
                      gdouble     *length)
 {
-  EekThemeNodePrivate *priv;
   int i;
 
   g_return_val_if_fail (EEK_IS_THEME_NODE(node), FALSE);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   ensure_properties (node);
 
-  for (i = priv->n_properties - 1; i >= 0; i--)
+  for (i = node->n_properties - 1; i >= 0; i--)
     {
-      CRDeclaration *decl = priv->properties[i];
+      CRDeclaration *decl = node->properties[i];
 
       if (strcmp (decl->property->stryng->str, property_name) == 0 ||
           (suffixed != NULL && strcmp (decl->property->stryng->str, suffixed) == 0))
@@ -896,12 +864,9 @@ eek_theme_node_lookup_length (EekThemeNode *node,
                              gboolean     inherit,
                              gdouble     *length)
 {
-  EekThemeNodePrivate *priv;
   GetFromTermResult result;
 
   g_return_val_if_fail (EEK_IS_THEME_NODE(node), FALSE);
-
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
 
   result = get_length_internal (node, property_name, NULL, length);
   if (result == VALUE_FOUND)
@@ -909,8 +874,8 @@ eek_theme_node_lookup_length (EekThemeNode *node,
   else if (result == VALUE_INHERIT)
     inherit = TRUE;
 
-  if (inherit && priv->parent_node &&
-      eek_theme_node_lookup_length (priv->parent_node, property_name, inherit, length))
+  if (inherit && node->parent_node &&
+      eek_theme_node_lookup_length (node->parent_node, property_name, inherit, length))
     return TRUE;
   else
     return FALSE;
@@ -954,24 +919,21 @@ do_border_radius_term (EekThemeNode *node,
                        gboolean     bottomright,
                        gboolean     bottomleft)
 {
-  EekThemeNodePrivate *priv;
   int value;
 
   g_return_if_fail (EEK_IS_THEME_NODE (node));
-
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
 
   if (get_length_from_term_int (node, term, FALSE, &value) != VALUE_FOUND)
     return;
 
   if (topleft)
-    priv->border_radius[EEK_CORNER_TOPLEFT] = value;
+    node->border_radius[EEK_CORNER_TOPLEFT] = value;
   if (topright)
-    priv->border_radius[EEK_CORNER_TOPRIGHT] = value;
+    node->border_radius[EEK_CORNER_TOPRIGHT] = value;
   if (bottomright)
-    priv->border_radius[EEK_CORNER_BOTTOMRIGHT] = value;
+    node->border_radius[EEK_CORNER_BOTTOMRIGHT] = value;
   if (bottomleft)
-    priv->border_radius[EEK_CORNER_BOTTOMLEFT] = value;
+    node->border_radius[EEK_CORNER_BOTTOMLEFT] = value;
 }
 
 static void
@@ -1037,7 +999,6 @@ static void
 do_border_property (EekThemeNode   *node,
                     CRDeclaration *decl)
 {
-  EekThemeNodePrivate *priv;
   const char *property_name = decl->property->stryng->str + 6; /* Skip 'border' */
   EekSide side = (EekSide)-1;
   EekColor color;
@@ -1047,8 +1008,6 @@ do_border_property (EekThemeNode   *node,
   int j;
 
   g_return_if_fail (EEK_IS_THEME_NODE (node));
-
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
 
   if (g_str_has_prefix (property_name, "-radius"))
     {
@@ -1158,46 +1117,43 @@ do_border_property (EekThemeNode   *node,
       for (j = 0; j < 4; j++)
         {
           if (color_set)
-            priv->border_color[j] = color;
+            node->border_color[j] = color;
           if (width_set)
-            priv->border_width[j] = width;
+            node->border_width[j] = width;
         }
     }
   else
     {
       if (color_set)
-        priv->border_color[side] = color;
+        node->border_color[side] = color;
       if (width_set)
-        priv->border_width[side] = width;
+        node->border_width[side] = width;
     }
 }
 
 void
 _eek_theme_node_ensure_geometry (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv;
   int i, j;
 
   g_return_if_fail (EEK_IS_THEME_NODE (node));
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
-  if (priv->geometry_computed)
+  if (node->geometry_computed)
     return;
 
-  priv->geometry_computed = TRUE;
+  node->geometry_computed = TRUE;
 
   ensure_properties (node);
 
   for (j = 0; j < 4; j++)
     {
-      priv->border_width[j] = 0;
-      priv->border_color[j] = TRANSPARENT_COLOR;
+      node->border_width[j] = 0;
+      node->border_color[j] = TRANSPARENT_COLOR;
     }
 
-  for (i = 0; i < priv->n_properties; i++)
+  for (i = 0; i < node->n_properties; i++)
     {
-      CRDeclaration *decl = priv->properties[i];
+      CRDeclaration *decl = node->properties[i];
       const char *property_name = decl->property->stryng->str;
 
       if (g_str_has_prefix (property_name, "border"))
@@ -1209,32 +1165,24 @@ int
 eek_theme_node_get_border_width (EekThemeNode *node,
                                  EekSide       side)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), 0.);
   g_return_val_if_fail (side >= EEK_SIDE_TOP && side <= EEK_SIDE_LEFT, 0.);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   _eek_theme_node_ensure_geometry (node);
 
-  return priv->border_width[side];
+  return node->border_width[side];
 }
 
 int
 eek_theme_node_get_border_radius (EekThemeNode *node,
                                   EekCorner     corner)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_val_if_fail (EEK_IS_THEME_NODE (node), 0.);
   g_return_val_if_fail (corner >= EEK_CORNER_TOPLEFT && corner <= EEK_CORNER_BOTTOMLEFT, 0.);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   _eek_theme_node_ensure_geometry (node);
 
-  return priv->border_radius[corner];
+  return node->border_radius[corner];
 }
 
 static GetFromTermResult
@@ -1258,21 +1206,20 @@ get_background_color_from_term (EekThemeNode *node,
 void
 _eek_theme_node_ensure_background (EekThemeNode *node)
 {
-  EekThemeNodePrivate *priv = EEK_THEME_NODE_GET_PRIVATE(node);
   int i;
 
-  if (priv->background_computed)
+  if (node->background_computed)
     return;
 
-  priv->background_computed = TRUE;
-  priv->background_color = TRANSPARENT_COLOR;
-  priv->background_gradient_type = EEK_GRADIENT_NONE;
+  node->background_computed = TRUE;
+  node->background_color = TRANSPARENT_COLOR;
+  node->background_gradient_type = EEK_GRADIENT_NONE;
 
   ensure_properties (node);
 
-  for (i = 0; i < priv->n_properties; i++)
+  for (i = 0; i < node->n_properties; i++)
     {
-      CRDeclaration *decl = priv->properties[i];
+      CRDeclaration *decl = node->properties[i];
       const char *property_name = decl->property->stryng->str;
 
       if (g_str_has_prefix (property_name, "background"))
@@ -1290,25 +1237,25 @@ _eek_theme_node_ensure_background (EekThemeNode *node)
 
           CRTerm *term;
           /* background: property sets all terms to specified or default values */
-          priv->background_color = TRANSPARENT_COLOR;
+          node->background_color = TRANSPARENT_COLOR;
 
           for (term = decl->value; term; term = term->next)
             {
-              GetFromTermResult result = get_background_color_from_term (node, term, &priv->background_color);
+              GetFromTermResult result = get_background_color_from_term (node, term, &node->background_color);
               if (result == VALUE_FOUND)
                 {
                   /* color stored in node->background_color */
                 }
               else if (result == VALUE_INHERIT)
                 {
-                  if (priv->parent_node)
+                  if (node->parent_node)
                     {
-                      eek_theme_node_get_background_color (priv->parent_node, &priv->background_color);
+                      eek_theme_node_get_background_color (node->parent_node, &node->background_color);
                     }
                 }
               else if (term_is_none (term))
                 {
-                  /* leave priv->background_color as transparent */
+                  /* leave node->background_color as transparent */
                 }
             }
         }
@@ -1319,15 +1266,15 @@ _eek_theme_node_ensure_background (EekThemeNode *node)
           if (decl->value == NULL || decl->value->next != NULL)
             continue;
 
-          result = get_background_color_from_term (node, decl->value, &priv->background_color);
+          result = get_background_color_from_term (node, decl->value, &node->background_color);
           if (result == VALUE_FOUND)
             {
               /* color stored in node->background_color */
             }
           else if (result == VALUE_INHERIT)
             {
-              if (priv->parent_node)
-                eek_theme_node_get_background_color (priv->parent_node, &priv->background_color);
+              if (node->parent_node)
+                eek_theme_node_get_background_color (node->parent_node, &node->background_color);
             }
         }
       else if (strcmp (property_name, "-gradient-direction") == 0)
@@ -1335,19 +1282,19 @@ _eek_theme_node_ensure_background (EekThemeNode *node)
           CRTerm *term = decl->value;
           if (strcmp (term->content.str->stryng->str, "vertical") == 0)
             {
-              priv->background_gradient_type = EEK_GRADIENT_VERTICAL;
+              node->background_gradient_type = EEK_GRADIENT_VERTICAL;
             }
           else if (strcmp (term->content.str->stryng->str, "horizontal") == 0)
             {
-              priv->background_gradient_type = EEK_GRADIENT_HORIZONTAL;
+              node->background_gradient_type = EEK_GRADIENT_HORIZONTAL;
             }
           else if (strcmp (term->content.str->stryng->str, "radial") == 0)
             {
-              priv->background_gradient_type = EEK_GRADIENT_RADIAL;
+              node->background_gradient_type = EEK_GRADIENT_RADIAL;
             }
           else if (strcmp (term->content.str->stryng->str, "none") == 0)
             {
-              priv->background_gradient_type = EEK_GRADIENT_NONE;
+              node->background_gradient_type = EEK_GRADIENT_NONE;
             }
           else
             {
@@ -1357,11 +1304,11 @@ _eek_theme_node_ensure_background (EekThemeNode *node)
         }
       else if (strcmp (property_name, "-gradient-start") == 0)
         {
-          get_color_from_term (node, decl->value, &priv->background_color);
+          get_color_from_term (node, decl->value, &node->background_color);
         }
       else if (strcmp (property_name, "-gradient-end") == 0)
         {
-          get_color_from_term (node, decl->value, &priv->background_gradient_end);
+          get_color_from_term (node, decl->value, &node->background_gradient_end);
         }
     }
 }
@@ -1370,14 +1317,11 @@ void
 eek_theme_node_get_background_color (EekThemeNode *node,
                                      EekColor     *color)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_if_fail (EEK_IS_THEME_NODE (node));
 
   _eek_theme_node_ensure_background (node);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-  *color = priv->background_color;
+  *color = node->background_color;
 }
 
 void
@@ -1385,43 +1329,35 @@ eek_theme_node_get_border_color (EekThemeNode  *node,
                                  EekSide        side,
                                  EekColor *color)
 {
-  EekThemeNodePrivate *priv;
-
   g_return_if_fail (EEK_IS_THEME_NODE (node));
   g_return_if_fail (side >= EEK_SIDE_TOP && side <= EEK_SIDE_LEFT);
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
   _eek_theme_node_ensure_geometry (node);
 
-  *color = priv->border_color[side];
+  *color = node->border_color[side];
 }
 
 void
 eek_theme_node_get_foreground_color (EekThemeNode *node,
                                      EekColor     *color)
 {
-  EekThemeNodePrivate *priv;
-
   g_assert (EEK_IS_THEME_NODE (node));
 
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
-
-  if (!priv->foreground_computed)
+  if (!node->foreground_computed)
     {
       int i;
 
-      priv->foreground_computed = TRUE;
+      node->foreground_computed = TRUE;
 
       ensure_properties (node);
 
-      for (i = priv->n_properties - 1; i >= 0; i--)
+      for (i = node->n_properties - 1; i >= 0; i--)
         {
-          CRDeclaration *decl = priv->properties[i];
+          CRDeclaration *decl = node->properties[i];
 
           if (strcmp (decl->property->stryng->str, "color") == 0)
             {
-              GetFromTermResult result = get_color_from_term (node, decl->value, &priv->foreground_color);
+              GetFromTermResult result = get_color_from_term (node, decl->value, &node->foreground_color);
               if (result == VALUE_FOUND)
                 goto out;
               else if (result == VALUE_INHERIT)
@@ -1429,14 +1365,14 @@ eek_theme_node_get_foreground_color (EekThemeNode *node,
             }
         }
 
-      if (priv->parent_node)
-        eek_theme_node_get_foreground_color (priv->parent_node, &priv->foreground_color);
+      if (node->parent_node)
+        eek_theme_node_get_foreground_color (node->parent_node, &node->foreground_color);
       else
-        priv->foreground_color = BLACK_COLOR; /* default to black */
+        node->foreground_color = BLACK_COLOR; /* default to black */
     }
 
  out:
-  *color = priv->foreground_color;
+  *color = node->foreground_color;
 }
 
 void
@@ -1445,18 +1381,14 @@ eek_theme_node_get_background_gradient (EekThemeNode    *node,
                                         EekColor        *start,
                                         EekColor        *end)
 {
-  EekThemeNodePrivate *priv;
-
   g_assert (EEK_IS_THEME_NODE (node));
-
-  priv = EEK_THEME_NODE_GET_PRIVATE(node);
 
   _eek_theme_node_ensure_background (node);
 
-  *type = priv->background_gradient_type;
+  *type = node->background_gradient_type;
   if (*type != EEK_GRADIENT_NONE)
     {
-      *start = priv->background_color;
-      *end = priv->background_gradient_end;
+      *start = node->background_color;
+      *end = node->background_gradient_end;
     }
 }
