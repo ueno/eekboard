@@ -448,12 +448,14 @@ eek_key_class_init (EekKeyClass *klass)
      * @key: an #EekKey
      *
      * The ::pressed signal is emitted each time @key is shifted to
-     * the pressed state.
+     * the pressed state.  The class handler runs before signal
+     * handlers to allow signal handlers to read the status of @key
+     * with eek_key_is_pressed().
      */
     signals[PRESSED] =
         g_signal_new (I_("pressed"),
                       G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET(EekKeyClass, pressed),
                       NULL,
                       NULL,
