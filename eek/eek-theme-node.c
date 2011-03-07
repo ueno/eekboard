@@ -273,6 +273,25 @@ eek_theme_node_get_element_class (EekThemeNode *node)
     return priv->element_class;
 }
 
+void
+eek_theme_node_set_pseudo_class (EekThemeNode *node,
+                                 const gchar  *pseudo_class)
+{
+    EekThemeNodePrivate *priv;
+
+    g_return_if_fail (EEK_IS_THEME_NODE (node));
+
+    priv = EEK_THEME_NODE_GET_PRIVATE(node);
+
+    if (g_strcmp0 (pseudo_class, priv->pseudo_class)) {
+        g_free (priv->pseudo_class);
+        priv->pseudo_class = g_strdup (pseudo_class);
+        priv->properties_computed = 0;
+        priv->background_computed = 0;
+        priv->foreground_computed = 0;
+    }
+}
+
 const char *
 eek_theme_node_get_pseudo_class (EekThemeNode *node)
 {

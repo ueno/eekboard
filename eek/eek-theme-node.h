@@ -63,51 +63,54 @@ struct _EekThemeNodeClass {
   GObjectClass parent_class;
 };
 
-GType           eek_theme_node_get_type
-                                   (void) G_GNUC_CONST;
+GType         eek_theme_node_get_type
+                                 (void) G_GNUC_CONST;
 
-EekThemeNode   *eek_theme_node_new (EekThemeNode               *parent_node,
-                                    /* can be null */ EekTheme *theme,
-                                    /* can be null */ GType     element_type,
-                                    const char                 *element_id,
-                                    const char                 *element_class,
-                                    const char                 *pseudo_class,
-                                    const char                 *inline_style);
+EekThemeNode *eek_theme_node_new (EekThemeNode               *parent_node,
+                                  /* can be null */ EekTheme *theme,
+                                  /* can be null */ GType     element_type,
+                                  const char                 *element_id,
+                                  const char                 *element_class,
+                                  const char                 *pseudo_class,
+                                  const char                 *inline_style);
 
-EekThemeNode   *eek_theme_node_get_parent
-                                   (EekThemeNode               *node);
+EekThemeNode *eek_theme_node_get_parent
+                                 (EekThemeNode               *node);
 
-EekTheme       *eek_theme_node_get_theme
-                                   (EekThemeNode               *node);
+EekTheme     *eek_theme_node_get_theme
+                                 (EekThemeNode               *node);
 
-GType           eek_theme_node_get_element_type
-                                   (EekThemeNode               *node);
-const char     *eek_theme_node_get_element_id
-                                   (EekThemeNode               *node);
-const char     *eek_theme_node_get_element_class
-                                   (EekThemeNode               *node);
-const char     *eek_theme_node_get_pseudo_class
-                                   (EekThemeNode               *node);
+GType         eek_theme_node_get_element_type
+                                 (EekThemeNode               *node);
+const char   *eek_theme_node_get_element_id
+                                 (EekThemeNode               *node);
+const char   *eek_theme_node_get_element_class
+                                 (EekThemeNode               *node);
+void          eek_theme_node_set_pseudo_class
+                                 (EekThemeNode               *node,
+                                  const gchar                *pseudo_class);
+const char   *eek_theme_node_get_pseudo_class
+                                 (EekThemeNode               *node);
 
 /* Generic getters ... these are not cached so are less efficient. The other
  * reason for adding the more specific version is that we can handle the
  * details of the actual CSS rules, which can be complicated, especially
  * for fonts
  */
-gboolean        eek_theme_node_get_color
-                                   (EekThemeNode               *node,
-                                    const char                 *property_name,
-                                    gboolean                    inherit,
-                                    EekColor                  **color);
+gboolean      eek_theme_node_get_color
+                                 (EekThemeNode               *node,
+                                  const char                 *property_name,
+                                  gboolean                    inherit,
+                                  EekColor                  **color);
 
 /* Specific getters for particular properties: cached
  */
-EekColor       *eek_theme_node_get_background_color
-                                   (EekThemeNode               *node);
-EekColor       *eek_theme_node_get_foreground_color
-                                   (EekThemeNode               *node);
-EekGradient    *eek_theme_node_get_background_gradient
-                                   (EekThemeNode               *node);
+EekColor     *eek_theme_node_get_background_color
+                                 (EekThemeNode               *node);
+EekColor     *eek_theme_node_get_foreground_color
+                                 (EekThemeNode               *node);
+EekGradient  *eek_theme_node_get_background_gradient
+                                 (EekThemeNode               *node);
 
 G_END_DECLS
 
