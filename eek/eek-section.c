@@ -267,6 +267,21 @@ eek_section_real_find_key_by_keycode (EekSection *self,
 }
 
 static void
+set_level_from_modifiers (EekSection *self)
+{
+    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
+    EekKeyboard *keyboard;
+    EekModifierType num_lock_mask;
+    gint level = -1;
+
+    keyboard = EEK_KEYBOARD(eek_element_get_parent (EEK_ELEMENT(self)));
+    num_lock_mask = eek_keyboard_get_num_lock_mask (keyboard);
+    if (priv->modifiers & num_lock_mask)
+        level = 1;
+    eek_element_set_level (EEK_ELEMENT(self), level);
+}
+
+static void
 eek_section_real_key_pressed (EekSection *self, EekKey *key)
 {
     EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
@@ -274,8 +289,6 @@ eek_section_real_key_pressed (EekSection *self, EekKey *key)
     EekKeyboard *keyboard;
     EekModifierBehavior behavior;
     EekModifierType modifier;
-    EekModifierType num_lock_mask;
-    gint level = -1;
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
@@ -284,22 +297,10 @@ eek_section_real_key_pressed (EekSection *self, EekKey *key)
     keyboard = EEK_KEYBOARD(eek_element_get_parent (EEK_ELEMENT(self)));
     behavior = eek_keyboard_get_modifier_behavior (keyboard);
     modifier = eek_symbol_get_modifier_mask (symbol);
-    switch (behavior) {
-    case EEK_MODIFIER_BEHAVIOR_NONE:
+    if (behavior == EEK_MODIFIER_BEHAVIOR_NONE) {
         priv->modifiers |= modifier;
-        break;
-    case EEK_MODIFIER_BEHAVIOR_LOCK:
-        priv->modifiers ^= modifier;
-        break;
-    case EEK_MODIFIER_BEHAVIOR_LATCH:
-        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
-        break;
+        set_level_from_modifiers (self);
     }
-
-    num_lock_mask = eek_keyboard_get_num_lock_mask (keyboard);
-    if (priv->modifiers & num_lock_mask)
-        level = 1;
-    eek_element_set_level (EEK_ELEMENT(self), level);
 }
 
 static void
@@ -310,8 +311,6 @@ eek_section_real_key_released (EekSection *self, EekKey *key)
     EekKeyboard *keyboard;
     EekModifierBehavior behavior;
     EekModifierType modifier;
-    EekModifierType num_lock_mask;
-    gint level = -1;
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
@@ -320,15 +319,18 @@ eek_section_real_key_released (EekSection *self, EekKey *key)
     keyboard = EEK_KEYBOARD(eek_element_get_parent (EEK_ELEMENT(self)));
     behavior = eek_keyboard_get_modifier_behavior (keyboard);
     modifier = eek_symbol_get_modifier_mask (symbol);
-    if (modifier != 0) {
-        if (behavior == EEK_MODIFIER_BEHAVIOR_NONE)
-            priv->modifiers &= ~modifier;
+    switch (behavior) {
+    case EEK_MODIFIER_BEHAVIOR_NONE:
+        priv->modifiers &= ~modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LOCK:
+        priv->modifiers ^= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LATCH:
+        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+        break;
     }
-
-    num_lock_mask = eek_keyboard_get_num_lock_mask (keyboard);
-    if (priv->modifiers & num_lock_mask)
-        level = 1;
-    eek_element_set_level (EEK_ELEMENT(self), level);
+    set_level_from_modifiers (self);
 }
 
 static void

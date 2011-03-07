@@ -332,18 +332,10 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
         return;
 
     modifier = eek_symbol_get_modifier_mask (symbol);
-    switch (priv->modifier_behavior) {
-    case EEK_MODIFIER_BEHAVIOR_NONE:
+    if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE) {
         priv->modifiers |= modifier;
-        break;
-    case EEK_MODIFIER_BEHAVIOR_LOCK:
-        priv->modifiers ^= modifier;
-        break;
-    case EEK_MODIFIER_BEHAVIOR_LATCH:
-        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
-        break;
+        set_level_from_modifiers (self);
     }
-    set_level_from_modifiers (self);
 }
 
 static void
@@ -359,9 +351,16 @@ eek_keyboard_real_key_released (EekKeyboard *self,
         return;
 
     modifier = eek_symbol_get_modifier_mask (symbol);
-    if (modifier != 0) {
-        if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE)
-            priv->modifiers &= ~modifier;
+    switch (priv->modifier_behavior) {
+    case EEK_MODIFIER_BEHAVIOR_NONE:
+        priv->modifiers &= ~modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LOCK:
+        priv->modifiers ^= modifier;
+        break;
+    case EEK_MODIFIER_BEHAVIOR_LATCH:
+        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+        break;
     }
     set_level_from_modifiers (self);
 }
