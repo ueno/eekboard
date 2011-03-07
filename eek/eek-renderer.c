@@ -59,8 +59,6 @@ struct _EekRendererPrivate
     gulong symbol_index_changed_handler;
 
     EekTheme *theme;
-    /* a mapping from EekElement to EekThemeNode */
-    GHashTable *theme_node_hash;
 };
 
 struct {
@@ -714,7 +712,6 @@ eek_renderer_finalize (GObject *object)
     eek_color_free (priv->default_foreground);
     eek_color_free (priv->default_background);
     pango_font_description_free (priv->font);
-    g_hash_table_destroy (priv->theme_node_hash);
     G_OBJECT_CLASS (eek_renderer_parent_class)->finalize (object);
 }
 
@@ -778,11 +775,6 @@ eek_renderer_init (EekRenderer *self)
                                (GDestroyNotify)cairo_surface_destroy);
     priv->keyboard_surface = NULL;
     priv->symbol_index_changed_handler = 0;
-    priv->theme_node_hash =
-        g_hash_table_new_full (g_direct_hash,
-                               g_direct_equal,
-                               NULL,
-                               (GDestroyNotify)g_object_unref);
 }
 
 static void
@@ -1073,7 +1065,8 @@ eek_renderer_get_foreground_color (EekRenderer *renderer, EekElement *element)
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
 
-    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    theme_node = g_object_get_qdata (G_OBJECT(element),
+                                     g_quark_from_static_string ("theme-node"));
     if (theme_node) {
         EekColor *color = eek_theme_node_get_foreground_color (theme_node);
         if (color)
@@ -1093,7 +1086,8 @@ eek_renderer_get_background_color (EekRenderer *renderer, EekElement *element)
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
 
-    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    theme_node = g_object_get_qdata (G_OBJECT(element),
+                                     g_quark_from_static_string ("theme-node"));
     if (theme_node) {
         EekColor *color = eek_theme_node_get_background_color (theme_node);
         if (color)
@@ -1113,7 +1107,8 @@ eek_renderer_get_background_gradient (EekRenderer *renderer, EekElement *element
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
 
-    theme_node = g_hash_table_lookup (priv->theme_node_hash, element);
+    theme_node = g_object_get_qdata (G_OBJECT(element),
+                                     g_quark_from_static_string ("theme-node"));
     if (theme_node)
         return eek_theme_node_get_background_gradient (theme_node);
 
@@ -1258,18 +1253,21 @@ create_theme_node_key_callback (EekElement *element,
 {
     CreateThemeNodeData *data = user_data;
     EekRendererPrivate *priv;
-    EekThemeNode *node;
+    EekThemeNode *theme_node;
 
     priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
 
-    node = eek_theme_node_new (data->parent,
-                               priv->theme,
-                               EEK_TYPE_KEY,
-                               eek_element_get_name (element),
-                               "key",
-                               NULL,
-                               NULL);
-    g_hash_table_insert (priv->theme_node_hash, element, node);
+    theme_node = eek_theme_node_new (data->parent,
+                                     priv->theme,
+                                     EEK_TYPE_KEY,
+                                     eek_element_get_name (element),
+                                     "key",
+                                     NULL,
+                                     NULL);
+    g_object_set_qdata_full (G_OBJECT(element),
+                             g_quark_from_static_string ("theme-node"),
+                             theme_node,
+                             (GDestroyNotify)g_object_unref);
 }
 
 void
@@ -1278,21 +1276,24 @@ create_theme_node_section_callback (EekElement *element,
 {
     CreateThemeNodeData *data = user_data;
     EekRendererPrivate *priv;
-    EekThemeNode *node, *parent;
+    EekThemeNode *theme_node, *parent;
 
     priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
 
-    node = eek_theme_node_new (data->parent,
-                               priv->theme,
-                               EEK_TYPE_SECTION,
-                               eek_element_get_name (element),
-                               "section",
-                               NULL,
-                               NULL);
-    g_hash_table_insert (priv->theme_node_hash, element, node);
+    theme_node = eek_theme_node_new (data->parent,
+                                     priv->theme,
+                                     EEK_TYPE_SECTION,
+                                     eek_element_get_name (element),
+                                     "section",
+                                     NULL,
+                                     NULL);
+    g_object_set_qdata_full (G_OBJECT(element),
+                             g_quark_from_static_string ("theme-node"),
+                             theme_node,
+                             (GDestroyNotify)g_object_unref);
 
     parent = data->parent;
-    data->parent = node;
+    data->parent = theme_node;
     eek_container_foreach_child (EEK_CONTAINER(element),
                                  create_theme_node_key_callback,
                                  data);
@@ -1304,30 +1305,32 @@ eek_renderer_set_theme (EekRenderer *renderer,
                         EekTheme    *theme)
 {
     EekRendererPrivate *priv;
-    EekThemeNode *node;
+    EekThemeNode *theme_node;
     CreateThemeNodeData data;
 
     g_assert (EEK_IS_RENDERER(renderer));
     g_assert (EEK_IS_THEME(theme));
 
     priv = EEK_RENDERER_GET_PRIVATE(renderer);
+    g_assert (priv->keyboard);
 
     if (priv->theme)
         g_object_unref (priv->theme);
     priv->theme = g_object_ref (theme);
 
-    g_hash_table_remove_all (priv->theme_node_hash);
+    theme_node = eek_theme_node_new (NULL,
+                                     priv->theme,
+                                     EEK_TYPE_KEYBOARD,
+                                     "keyboard",
+                                     "keyboard",
+                                     NULL,
+                                     NULL);
+    g_object_set_qdata_full (G_OBJECT(priv->keyboard),
+                             g_quark_from_static_string ("theme-node"),
+                             theme_node,
+                             (GDestroyNotify)g_object_unref);
 
-    node = eek_theme_node_new (NULL,
-                               priv->theme,
-                               EEK_TYPE_KEYBOARD,
-                               "keyboard",
-                               "keyboard",
-                               NULL,
-                               NULL);
-    g_hash_table_insert (priv->theme_node_hash, priv->keyboard, node);
-
-    data.parent = node;
+    data.parent = theme_node;
     data.renderer = renderer;
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
                                  create_theme_node_section_callback,
