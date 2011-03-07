@@ -55,6 +55,7 @@ struct _EekRendererPrivate
 
     PangoFontDescription *font;
     GHashTable *outline_surface_cache;
+    GHashTable *active_outline_surface_cache;
     cairo_surface_t *keyboard_surface;
     gulong symbol_index_changed_handler;
 
@@ -211,6 +212,7 @@ render_key_outline (EekRenderer *renderer,
     gulong oref;
     EekColor *foreground, *background;
     EekGradient *gradient;
+    EekThemeNode *theme_node;
 
     /* need to rescale so that the border fit inside the clipping
        region */
@@ -232,6 +234,14 @@ render_key_outline (EekRenderer *renderer,
     cairo_translate (cr,
                      priv->border_width / 2 * priv->scale,
                      priv->border_width / 2 * priv->scale);
+
+    theme_node = g_object_get_qdata (G_OBJECT(key),
+                                     g_quark_from_static_string ("theme-node"));
+    if (theme_node) {
+        eek_theme_node_set_pseudo_class (theme_node,
+                                         eek_key_is_pressed (key) ?
+                                         "active" : NULL);
+    }
 
     foreground = eek_renderer_get_foreground_color (renderer, EEK_ELEMENT(key));
     background = eek_renderer_get_background_color (renderer, EEK_ELEMENT(key));
@@ -415,15 +425,20 @@ render_key (EekRenderer *self,
     EekBounds bounds;
     gulong oref;
     EekSymbol *symbol;
+    GHashTable *outline_surface_cache;
 
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     oref = eek_key_get_oref (key);
     if (oref == 0)
         return;
 
+    if (eek_key_is_pressed (key))
+        outline_surface_cache = priv->active_outline_surface_cache;
+    else
+        outline_surface_cache = priv->outline_surface_cache;
+
     outline = eek_keyboard_get_outline (priv->keyboard, oref);
-    outline_surface = g_hash_table_lookup (priv->outline_surface_cache,
-                                           outline);
+    outline_surface = g_hash_table_lookup (outline_surface_cache, outline);
     if (!outline_surface) {
         cairo_t *cr;
 
@@ -446,7 +461,7 @@ render_key (EekRenderer *self,
         eek_renderer_render_key_outline (self, cr, key, 1.0, 0);
         cairo_destroy (cr);
 
-        g_hash_table_insert (priv->outline_surface_cache,
+        g_hash_table_insert (outline_surface_cache,
                              outline,
                              outline_surface);
     }
@@ -462,6 +477,7 @@ render_key (EekRenderer *self,
         PangoLayout *layout;
         PangoRectangle extents = { 0, };
         EekColor *foreground;
+        EekThemeNode *theme_node;
 
         layout = pango_cairo_create_layout (cr);
         eek_renderer_render_key_label (self, layout, key);
@@ -472,6 +488,14 @@ render_key (EekRenderer *self,
             (cr,
              (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
              (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
+
+        theme_node = g_object_get_qdata (G_OBJECT(key),
+                                         g_quark_from_static_string ("theme-node"));
+        if (theme_node) {
+            eek_theme_node_set_pseudo_class (theme_node,
+                                             eek_key_is_pressed (key) ?
+                                             "active" : NULL);
+        }
 
         foreground = eek_renderer_get_foreground_color (self, EEK_ELEMENT(key));
         cairo_set_source_rgba (cr,
@@ -709,6 +733,7 @@ eek_renderer_finalize (GObject *object)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(object);
     g_hash_table_destroy (priv->outline_surface_cache);
+    g_hash_table_destroy (priv->active_outline_surface_cache);
     eek_color_free (priv->default_foreground);
     eek_color_free (priv->default_background);
     pango_font_description_free (priv->font);
@@ -773,6 +798,11 @@ eek_renderer_init (EekRenderer *self)
                                g_direct_equal,
                                NULL,
                                (GDestroyNotify)cairo_surface_destroy);
+    priv->active_outline_surface_cache =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               (GDestroyNotify)cairo_surface_destroy);
     priv->keyboard_surface = NULL;
     priv->symbol_index_changed_handler = 0;
 }
@@ -784,6 +814,9 @@ invalidate (EekRenderer *renderer)
 
     if (priv->outline_surface_cache)
         g_hash_table_remove_all (priv->outline_surface_cache);
+
+    if (priv->active_outline_surface_cache)
+        g_hash_table_remove_all (priv->active_outline_surface_cache);
 
     if (priv->keyboard_surface) {
         cairo_surface_destroy (priv->keyboard_surface);
