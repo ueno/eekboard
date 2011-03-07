@@ -20,6 +20,7 @@
 #ifndef __EEK_THEME_NODE_H__
 #define __EEK_THEME_NODE_H__
 
+#include <pango/pango.h>
 #include "eek-types.h"
 
 G_BEGIN_DECLS
@@ -70,7 +71,8 @@ typedef struct _EekThemeNodePrivate EekThemeNodePrivate;
 GType         eek_theme_node_get_type
                                  (void) G_GNUC_CONST;
 
-EekThemeNode *eek_theme_node_new (EekThemeNode               *parent_node,
+EekThemeNode *eek_theme_node_new (EekThemeContext            *context,
+                                  EekThemeNode               *parent_node,
                                   /* can be null */ EekTheme *theme,
                                   /* can be null */ GType     element_type,
                                   const char                 *element_id,
@@ -126,6 +128,13 @@ void          eek_theme_node_get_border_color
                                  (EekThemeNode               *node,
                                   EekSide                     side,
                                   EekColor                   *color);
+
+/* Font rule processing is pretty complicated, so we just hardcode it
+ * under the standard font/font-family/font-size/etc names. This means
+ * you can't have multiple separate styled fonts for a single item,
+ * but that should be OK.
+ */
+const PangoFontDescription *eek_theme_node_get_font (EekThemeNode *node);
 
 G_END_DECLS
 

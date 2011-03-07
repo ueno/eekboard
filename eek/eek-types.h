@@ -137,6 +137,7 @@ typedef struct _EekKeyboard EekKeyboard;
 typedef struct _EekSymbol EekSymbol;
 typedef struct _EekKeysym EekKeysym;
 typedef struct _EekTheme EekTheme;
+typedef struct _EekThemeContext EekThemeContext;
 typedef struct _EekThemeNode EekThemeNode;
 
 typedef struct _EekSymbolMatrix EekSymbolMatrix;

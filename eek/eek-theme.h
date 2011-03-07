@@ -4,7 +4,7 @@
 
 #include <glib-object.h>
 
-#include "eek-theme-node.h"
+#include "eek-types.h"
 
 G_BEGIN_DECLS
 

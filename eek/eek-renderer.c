@@ -1256,6 +1256,7 @@ eek_renderer_find_key_by_position (EekRenderer *renderer,
 }
 
 struct _CreateThemeNodeData {
+    EekThemeContext *context;
     EekThemeNode *parent;
     EekRenderer *renderer;
 };
@@ -1263,7 +1264,7 @@ typedef struct _CreateThemeNodeData CreateThemeNodeData;
 
 void
 create_theme_node_key_callback (EekElement *element,
-                                    gpointer    user_data)
+                                gpointer    user_data)
 {
     CreateThemeNodeData *data = user_data;
     EekRendererPrivate *priv;
@@ -1271,7 +1272,8 @@ create_theme_node_key_callback (EekElement *element,
 
     priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
 
-    theme_node = eek_theme_node_new (data->parent,
+    theme_node = eek_theme_node_new (data->context,
+                                     data->parent,
                                      priv->theme,
                                      EEK_TYPE_KEY,
                                      eek_element_get_name (element),
@@ -1283,7 +1285,8 @@ create_theme_node_key_callback (EekElement *element,
                             theme_node,
                             (GDestroyNotify)g_object_unref);
 
-    theme_node = eek_theme_node_new (data->parent,
+    theme_node = eek_theme_node_new (data->context,
+                                     data->parent,
                                      priv->theme,
                                      EEK_TYPE_KEY,
                                      eek_element_get_name (element),
@@ -1306,7 +1309,8 @@ create_theme_node_section_callback (EekElement *element,
 
     priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
 
-    theme_node = eek_theme_node_new (data->parent,
+    theme_node = eek_theme_node_new (data->context,
+                                     data->parent,
                                      priv->theme,
                                      EEK_TYPE_SECTION,
                                      eek_element_get_name (element),
@@ -1331,6 +1335,7 @@ eek_renderer_set_theme (EekRenderer *renderer,
                         EekTheme    *theme)
 {
     EekRendererPrivate *priv;
+    EekThemeContext *theme_context;
     EekThemeNode *theme_node;
     CreateThemeNodeData data;
 
@@ -1344,7 +1349,9 @@ eek_renderer_set_theme (EekRenderer *renderer,
         g_object_unref (priv->theme);
     priv->theme = g_object_ref (theme);
 
-    theme_node = eek_theme_node_new (NULL,
+    theme_context = eek_theme_context_new ();
+    theme_node = eek_theme_node_new (theme_context,
+                                     NULL,
                                      priv->theme,
                                      EEK_TYPE_KEYBOARD,
                                      "keyboard",
@@ -1356,6 +1363,7 @@ eek_renderer_set_theme (EekRenderer *renderer,
                             theme_node,
                             (GDestroyNotify)g_object_unref);
 
+    data.context = theme_context;
     data.parent = theme_node;
     data.renderer = renderer;
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),

@@ -26,6 +26,7 @@
 #include "eek-keysym.h"
 #include "eek-types.h"
 #include "eek-theme.h"
+#include "eek-theme-context.h"
 
 G_BEGIN_DECLS
 

@@ -31,14 +31,18 @@
 #include <string.h>
 #include <libcroco/libcroco.h>
 
+#include "eek-theme-context.h"
 #include "eek-theme-node.h"
 #include "eek-theme-private.h"
 
 struct _EekThemeNode {
   GObject parent;
 
+  EekThemeContext *context;
   EekThemeNode *parent_node;
   EekTheme *theme;
+
+  PangoFontDescription *font_desc;
 
   EekGradientType background_gradient_type;
 
@@ -108,6 +112,12 @@ eek_theme_node_dispose (GObject *gobject)
 {
   EekThemeNode *node = EEK_THEME_NODE (gobject);
 
+  if (node->context)
+    {
+      g_object_unref (node->context);
+      node->context = NULL;
+    }
+
   if (node->theme)
     {
       g_object_unref (node->theme);
@@ -146,6 +156,12 @@ eek_theme_node_finalize (GObject *object)
       cr_declaration_destroy (node->inline_properties);
     }
 
+  if (node->font_desc)
+    {
+      pango_font_description_free (node->font_desc);
+      node->font_desc = NULL;
+    }
+
   G_OBJECT_CLASS (eek_theme_node_parent_class)->finalize (object);
 }
 
@@ -171,20 +187,23 @@ eek_theme_node_finalize (GObject *object)
  * Return value: (transfer full): the theme node
  */
 EekThemeNode *
-eek_theme_node_new (EekThemeNode *parent_node,
-                    EekTheme     *theme,
-                    GType         element_type,
-                    const char   *element_id,
-                    const char   *element_class,
-                    const char   *pseudo_class,
-                    const char   *inline_style)
+eek_theme_node_new (EekThemeContext *context,
+                    EekThemeNode    *parent_node,
+                    EekTheme        *theme,
+                    GType            element_type,
+                    const char      *element_id,
+                    const char      *element_class,
+                    const char      *pseudo_class,
+                    const char      *inline_style)
 {
   EekThemeNode *node;
 
+  g_return_val_if_fail (EEK_IS_THEME_CONTEXT (context), NULL);
   g_return_val_if_fail (parent_node == NULL || EEK_IS_THEME_NODE (parent_node), NULL);
 
   node = g_object_new (EEK_TYPE_THEME_NODE, NULL);
 
+  node->context = g_object_ref (context);
   if (parent_node != NULL)
     node->parent_node = g_object_ref (parent_node);
   else
@@ -635,6 +654,15 @@ eek_theme_node_get_double (EekThemeNode *node,
     }
 }
 
+static const PangoFontDescription *
+get_parent_font (EekThemeNode *node)
+{
+  if (node->parent_node)
+    return eek_theme_node_get_font (node->parent_node);
+  else
+    return eek_theme_context_get_font (node->context);
+}
+
 static GetFromTermResult
 get_length_from_term (EekThemeNode *node,
                       CRTerm      *term,
@@ -750,16 +778,11 @@ get_length_from_term (EekThemeNode *node,
       *length = num->val * multiplier;
       break;
     case POINTS:
-#if 0
       {
         double resolution = eek_theme_context_get_resolution (node->context);
         *length = num->val * multiplier * (resolution / 72.);
       }
-#else
-      *length = num->val * multiplier;
-#endif
       break;
-#if 0
     case FONT_RELATIVE:
       {
         const PangoFontDescription *desc;
@@ -783,7 +806,7 @@ get_length_from_term (EekThemeNode *node,
           }
       }
       break;
-#endif
+
     default:
       g_assert_not_reached ();
     }
@@ -1391,4 +1414,456 @@ eek_theme_node_get_background_gradient (EekThemeNode    *node,
       *start = node->background_color;
       *end = node->background_gradient_end;
     }
+}
+
+static gboolean
+font_family_from_terms (CRTerm *term,
+                        char  **family)
+{
+  GString *family_string;
+  gboolean result = FALSE;
+  gboolean last_was_quoted = FALSE;
+
+  if (!term)
+    return FALSE;
+
+  family_string = g_string_new (NULL);
+
+  while (term)
+    {
+      if (term->type != TERM_STRING && term->type != TERM_IDENT)
+        {
+          goto out;
+        }
+
+      if (family_string->len > 0)
+        {
+          if (term->the_operator != COMMA && term->the_operator != NO_OP)
+            goto out;
+          /* Can concatenate two bare words, but not two quoted strings */
+          if ((term->the_operator == NO_OP && last_was_quoted) || term->type == TERM_STRING)
+            goto out;
+
+          if (term->the_operator == NO_OP)
+            g_string_append (family_string, " ");
+          else
+            g_string_append (family_string, ", ");
+        }
+      else
+        {
+          if (term->the_operator != NO_OP)
+            goto out;
+        }
+
+      g_string_append (family_string, term->content.str->stryng->str);
+
+      term = term->next;
+    }
+
+  result = TRUE;
+
+ out:
+  if (result)
+    {
+      *family = g_string_free (family_string, FALSE);
+      return TRUE;
+    }
+  else
+    {
+      *family = g_string_free (family_string, TRUE);
+      return FALSE;
+    }
+}
+
+/* In points */
+static int font_sizes[] = {
+  6 * 1024,   /* xx-small */
+  8 * 1024,   /* x-small */
+  10 * 1024,  /* small */
+  12 * 1024,  /* medium */
+  16 * 1024,  /* large */
+  20 * 1024,  /* x-large */
+  24 * 1024,  /* xx-large */
+};
+
+static gboolean
+font_size_from_term (EekThemeNode *node,
+                     CRTerm      *term,
+                     double      *size)
+{
+  if (term->type == TERM_IDENT)
+    {
+      double resolution = eek_theme_context_get_resolution (node->context);
+      /* We work in integers to avoid double comparisons when converting back
+       * from a size in pixels to a logical size.
+       */
+      int size_points = (int)(0.5 + *size * (72. / resolution));
+
+      if (strcmp (term->content.str->stryng->str, "xx-small") == 0)
+        size_points = font_sizes[0];
+      else if (strcmp (term->content.str->stryng->str, "x-small") == 0)
+        size_points = font_sizes[1];
+      else if (strcmp (term->content.str->stryng->str, "small") == 0)
+        size_points = font_sizes[2];
+      else if (strcmp (term->content.str->stryng->str, "medium") == 0)
+        size_points = font_sizes[3];
+      else if (strcmp (term->content.str->stryng->str, "large") == 0)
+        size_points = font_sizes[4];
+      else if (strcmp (term->content.str->stryng->str, "x-large") == 0)
+        size_points = font_sizes[5];
+      else if (strcmp (term->content.str->stryng->str, "xx-large") == 0)
+        size_points = font_sizes[6];
+      else if (strcmp (term->content.str->stryng->str, "smaller") == 0)
+        {
+          /* Find the standard size equal to or smaller than the current size */
+          int i = 0;
+
+          while (i <= 6 && font_sizes[i] < size_points)
+            i++;
+
+          if (i > 6)
+            {
+              /* original size greater than any standard size */
+              size_points = (int)(0.5 + size_points / 1.2);
+            }
+          else
+            {
+              /* Go one smaller than that, if possible */
+              if (i > 0)
+                i--;
+
+              size_points = font_sizes[i];
+            }
+        }
+      else if (strcmp (term->content.str->stryng->str, "larger") == 0)
+        {
+          /* Find the standard size equal to or larger than the current size */
+          int i = 6;
+
+          while (i >= 0 && font_sizes[i] > size_points)
+            i--;
+
+          if (i < 0) /* original size smaller than any standard size */
+            i = 0;
+
+          /* Go one larger than that, if possible */
+          if (i < 6)
+            i++;
+
+          size_points = font_sizes[i];
+        }
+      else
+        {
+          return FALSE;
+        }
+
+      *size = size_points * (resolution / 72.);
+      return TRUE;
+
+    }
+  else if (term->type == TERM_NUMBER && term->content.num->type == NUM_PERCENTAGE)
+    {
+      *size *= term->content.num->val / 100.;
+      return TRUE;
+    }
+  else if (get_length_from_term (node, term, TRUE, size) == VALUE_FOUND)
+    {
+      /* Convert from pixels to Pango units */
+      *size *= 1024;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+font_weight_from_term (CRTerm      *term,
+                       PangoWeight *weight,
+                       gboolean    *weight_absolute)
+{
+  if (term->type == TERM_NUMBER)
+    {
+      int weight_int;
+
+      /* The spec only allows numeric weights from 100-900, though Pango
+       * will handle any number. We just let anything through.
+       */
+      if (term->content.num->type != NUM_GENERIC)
+        return FALSE;
+
+      weight_int = (int)(0.5 + term->content.num->val);
+
+      *weight = weight_int;
+      *weight_absolute = TRUE;
+
+    }
+  else if (term->type == TERM_IDENT)
+    {
+      /* FIXME: handle INHERIT */
+
+      if (strcmp (term->content.str->stryng->str, "bold") == 0)
+        {
+          *weight = PANGO_WEIGHT_BOLD;
+          *weight_absolute = TRUE;
+        }
+      else if (strcmp (term->content.str->stryng->str, "normal") == 0)
+        {
+          *weight = PANGO_WEIGHT_NORMAL;
+          *weight_absolute = TRUE;
+        }
+      else if (strcmp (term->content.str->stryng->str, "bolder") == 0)
+        {
+          *weight = PANGO_WEIGHT_BOLD;
+          *weight_absolute = FALSE;
+        }
+      else if (strcmp (term->content.str->stryng->str, "lighter") == 0)
+        {
+          *weight = PANGO_WEIGHT_LIGHT;
+          *weight_absolute = FALSE;
+        }
+      else
+        {
+          return FALSE;
+        }
+
+    }
+  else
+    {
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+font_style_from_term (CRTerm     *term,
+                      PangoStyle *style)
+{
+  if (term->type != TERM_IDENT)
+    return FALSE;
+
+  /* FIXME: handle INHERIT */
+
+  if (strcmp (term->content.str->stryng->str, "normal") == 0)
+    *style = PANGO_STYLE_NORMAL;
+  else if (strcmp (term->content.str->stryng->str, "oblique") == 0)
+    *style = PANGO_STYLE_OBLIQUE;
+  else if (strcmp (term->content.str->stryng->str, "italic") == 0)
+    *style = PANGO_STYLE_ITALIC;
+  else
+    return FALSE;
+
+  return TRUE;
+}
+
+static gboolean
+font_variant_from_term (CRTerm       *term,
+                        PangoVariant *variant)
+{
+  if (term->type != TERM_IDENT)
+    return FALSE;
+
+  /* FIXME: handle INHERIT */
+
+  if (strcmp (term->content.str->stryng->str, "normal") == 0)
+    *variant = PANGO_VARIANT_NORMAL;
+  else if (strcmp (term->content.str->stryng->str, "small-caps") == 0)
+    *variant = PANGO_VARIANT_SMALL_CAPS;
+  else
+    return FALSE;
+
+  return TRUE;
+}
+
+const PangoFontDescription *
+eek_theme_node_get_font (EekThemeNode *node)
+{
+  /* Initialized despite _set flags to suppress compiler warnings */
+  PangoStyle font_style = PANGO_STYLE_NORMAL;
+  gboolean font_style_set = FALSE;
+  PangoVariant variant = PANGO_VARIANT_NORMAL;
+  gboolean variant_set = FALSE;
+  PangoWeight weight = PANGO_WEIGHT_NORMAL;
+  gboolean weight_absolute = TRUE;
+  gboolean weight_set = FALSE;
+  double size = 0.;
+  gboolean size_set = FALSE;
+
+  char *family = NULL;
+  double parent_size;
+  int i;
+
+  if (node->font_desc)
+    return node->font_desc;
+
+  node->font_desc = pango_font_description_copy (get_parent_font (node));
+  parent_size = pango_font_description_get_size (node->font_desc);
+  if (!pango_font_description_get_size_is_absolute (node->font_desc))
+    {
+      double resolution = eek_theme_context_get_resolution (node->context);
+      parent_size *= (resolution / 72.);
+    }
+
+  ensure_properties (node);
+
+  for (i = 0; i < node->n_properties; i++)
+    {
+      CRDeclaration *decl = node->properties[i];
+
+      if (strcmp (decl->property->stryng->str, "font") == 0)
+        {
+          PangoStyle tmp_style = PANGO_STYLE_NORMAL;
+          PangoVariant tmp_variant = PANGO_VARIANT_NORMAL;
+          PangoWeight tmp_weight = PANGO_WEIGHT_NORMAL;
+          gboolean tmp_weight_absolute = TRUE;
+          double tmp_size;
+          CRTerm *term = decl->value;
+
+          /* A font specification starts with node/variant/weight
+           * in any order. Each is allowed to be specified only once,
+           * but we don't enforce that.
+           */
+          for (; term; term = term->next)
+            {
+              if (font_style_from_term (term, &tmp_style))
+                continue;
+              if (font_variant_from_term (term, &tmp_variant))
+                continue;
+              if (font_weight_from_term (term, &tmp_weight, &tmp_weight_absolute))
+                continue;
+
+              break;
+            }
+
+          /* The size is mandatory */
+
+          if (term == NULL || term->type != TERM_NUMBER)
+            {
+              g_warning ("Size missing from font property");
+              continue;
+            }
+
+          tmp_size = parent_size;
+          if (!font_size_from_term (node, term, &tmp_size))
+            {
+              g_warning ("Couldn't parse size in font property");
+              continue;
+            }
+
+          term = term->next;
+
+          if (term != NULL && term->type && TERM_NUMBER && term->the_operator == DIVIDE)
+            {
+              /* Ignore line-height specification */
+              term = term->next;
+            }
+
+          /* the font family is mandatory - it is a comma-separated list of
+           * names.
+           */
+          if (!font_family_from_terms (term, &family))
+            {
+              g_warning ("Couldn't parse family in font property");
+              continue;
+            }
+
+          font_style = tmp_style;
+          font_style_set = TRUE;
+          weight = tmp_weight;
+          weight_absolute = tmp_weight_absolute;
+          weight_set = TRUE;
+          variant = tmp_variant;
+          variant_set = TRUE;
+
+          size = tmp_size;
+          size_set = TRUE;
+
+        }
+      else if (strcmp (decl->property->stryng->str, "font-family") == 0)
+        {
+          if (!font_family_from_terms (decl->value, &family))
+            {
+              g_warning ("Couldn't parse family in font property");
+              continue;
+            }
+        }
+      else if (strcmp (decl->property->stryng->str, "font-weight") == 0)
+        {
+          if (decl->value == NULL || decl->value->next != NULL)
+            continue;
+
+          if (font_weight_from_term (decl->value, &weight, &weight_absolute))
+            weight_set = TRUE;
+        }
+      else if (strcmp (decl->property->stryng->str, "font-style") == 0)
+        {
+          if (decl->value == NULL || decl->value->next != NULL)
+            continue;
+
+          if (font_style_from_term (decl->value, &font_style))
+            font_style_set = TRUE;
+        }
+      else if (strcmp (decl->property->stryng->str, "font-variant") == 0)
+        {
+          if (decl->value == NULL || decl->value->next != NULL)
+            continue;
+
+          if (font_variant_from_term (decl->value, &variant))
+            variant_set = TRUE;
+        }
+      else if (strcmp (decl->property->stryng->str, "font-size") == 0)
+        {
+          gdouble tmp_size;
+          if (decl->value == NULL || decl->value->next != NULL)
+            continue;
+
+          tmp_size = parent_size;
+          if (font_size_from_term (node, decl->value, &tmp_size))
+            {
+              size = tmp_size;
+              size_set = TRUE;
+            }
+        }
+    }
+
+  if (family)
+    {
+      pango_font_description_set_family (node->font_desc, family);
+      g_free (family);
+    }
+
+  if (size_set)
+    pango_font_description_set_absolute_size (node->font_desc, size);
+
+  if (weight_set)
+    {
+      if (!weight_absolute)
+        {
+          /* bolder/lighter are supposed to switch between available styles, but with
+           * font substitution, that gets to be a pretty fuzzy concept. So we use
+           * a fixed step of 200. (The spec says 100, but that might not take us from
+           * normal to bold.
+           */
+
+          PangoWeight old_weight = pango_font_description_get_weight (node->font_desc);
+          if (weight == PANGO_WEIGHT_BOLD)
+            weight = old_weight + 200;
+          else
+            weight = old_weight - 200;
+
+          if (weight < 100)
+            weight = 100;
+          if (weight > 900)
+            weight = 900;
+        }
+
+      pango_font_description_set_weight (node->font_desc, weight);
+    }
+
+  if (font_style_set)
+    pango_font_description_set_style (node->font_desc, font_style);
+  if (variant_set)
+    pango_font_description_set_variant (node->font_desc, variant);
+
+  return node->font_desc;
 }

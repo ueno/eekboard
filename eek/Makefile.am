@@ -47,7 +47,8 @@ libeek_private_headers =			\
 	$(srcdir)/eek-special-keysym-entries.h	\
 	$(srcdir)/eek-unicode-keysym-entries.h	\
 	$(srcdir)/eek-xkeysym-keysym-entries.h	\
-	$(srcdir)/eek-marshalers.h \
+	$(srcdir)/eek-marshalers.h		\
+	$(srcdir)/eek-theme-context.h		\
 	$(srcdir)/eek-theme-node.h
 
 libeek_sources =				\
@@ -66,6 +67,7 @@ libeek_sources =				\
 	$(srcdir)/eek-renderer.c		\
 	$(srcdir)/eek-keyboard-drawing.c	\
 	$(srcdir)/eek-theme.c			\
+	$(srcdir)/eek-theme-context.c		\
 	$(srcdir)/eek-theme-node.c
 
 libeek_keysym_sources =				\
