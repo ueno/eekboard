@@ -47,11 +47,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libcroco/libcroco.h>
 #include <gio/gio.h>
 
 #include "eek-theme.h"
 #include "eek-theme-node.h"
-#include "eek-theme-private.h"
 
 static GObject *eek_theme_constructor (GType                  type,
                                       guint                  n_construct_properties,
@@ -59,13 +59,16 @@ static GObject *eek_theme_constructor (GType                  type,
 
 static void eek_theme_finalize     (GObject      *object);
 static void eek_theme_set_property (GObject      *object,
-                                   guint         prop_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec);
+                                    guint         prop_id,
+                                    const GValue *value,
+                                    GParamSpec   *pspec);
 static void eek_theme_get_property (GObject      *object,
-                                   guint         prop_id,
-                                   GValue       *value,
-                                   GParamSpec   *pspec);
+                                    guint         prop_id,
+                                    GValue       *value,
+                                    GParamSpec   *pspec);
+static char *eek_theme_resolve_url (EekTheme     *theme,
+                                    CRStyleSheet *base_stylesheet,
+                                    const char   *url);
 
 struct _EekTheme
 {
@@ -921,7 +924,7 @@ add_matched_properties (EekTheme      *a_this,
                 char *filename = NULL;
 
                 if (import_rule->url->stryng && import_rule->url->stryng->str)
-                  filename = _eek_theme_resolve_url (a_this,
+                  filename = eek_theme_resolve_url (a_this,
                                                     a_nodesheet,
                                                     import_rule->url->stryng->str);
 
@@ -1072,8 +1075,8 @@ _eek_theme_get_matched_properties (EekTheme        *theme,
  * local filename, if possible. The resolution here is distinctly lame and
  * will fail on many examples.
  */
-char *
-_eek_theme_resolve_url (EekTheme      *theme,
+static char *
+eek_theme_resolve_url (EekTheme     *theme,
                        CRStyleSheet *base_stylesheet,
                        const char   *url)
 {
