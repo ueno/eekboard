@@ -344,6 +344,7 @@ struct _CalculateFontSizeCallbackData {
     gdouble size;
     gdouble em_size;
     EekRenderer *renderer;
+    PangoFontDescription *base_font;
 };
 typedef struct _CalculateFontSizeCallbackData CalculateFontSizeCallbackData;
 
@@ -354,7 +355,6 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
     gdouble sx, sy;
     PangoFontDescription *font;
-    const PangoFontDescription *base_font;
     PangoRectangle extents = { 0, };
     PangoLayout *layout;
     gdouble size;
@@ -369,8 +369,7 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
     if (!label)
         label = "M";
 
-    base_font = pango_context_get_font_description (priv->pcontext);
-    font = pango_font_description_copy (base_font);
+    font = pango_font_description_copy (data->base_font);
 
     eek_element_get_bounds (element, &bounds);
     size = eek_bounds_long_side (&bounds) * PANGO_SCALE;
@@ -391,7 +390,7 @@ calculate_font_size_key_callback (EekElement *element, gpointer user_data)
         sy = bounds.height * PANGO_SCALE / extents.height;
 
     size *= MIN(sx, sy);
-    if (size >= pango_font_description_get_size (base_font)) {
+    if (size >= pango_font_description_get_size (data->base_font)) {
         if (size < data->size)
             data->size = size;
         if (size < data->em_size)
@@ -408,16 +407,15 @@ calculate_font_size_section_callback (EekElement *element, gpointer user_data)
 }
 
 static gdouble
-calculate_font_size (EekRenderer *renderer)
+calculate_font_size (EekRenderer *renderer, PangoFontDescription *base_font)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
     CalculateFontSizeCallbackData data;
-    PangoFontDescription *base_font;
 
-    base_font = pango_context_get_font_description (priv->pcontext);
     data.size = G_MAXDOUBLE;
     data.em_size = G_MAXDOUBLE;
     data.renderer = renderer;
+    data.base_font = base_font;
     eek_container_foreach_child (EEK_CONTAINER(priv->keyboard),
                                  calculate_font_size_section_callback,
                                  &data);
@@ -566,8 +564,8 @@ eek_renderer_real_render_key_label (EekRenderer *self,
         PangoFontDescription *base_font;
         gdouble size;
 
-        size = calculate_font_size (self);
         base_font = pango_context_get_font_description (priv->pcontext);
+        size = calculate_font_size (self, base_font);
         priv->font = pango_font_description_copy (base_font);
         pango_font_description_set_size (priv->font, size);
     }
