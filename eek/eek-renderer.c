@@ -251,27 +251,30 @@ render_key_outline (EekRenderer *renderer,
 
     if (gradient) {
         cairo_pattern_t *pat;
+        gdouble cx, cy;
 
         switch (gradient->type) {
         case EEK_GRADIENT_VERTICAL:
-            pat = cairo_pattern_create_linear (bounds.width / 2 * priv->scale,
+            pat = cairo_pattern_create_linear (0.0,
                                                0.0,
-                                               bounds.width / 2 * priv->scale,
+                                               0.0,
                                                bounds.height * priv->scale);
             break;
         case EEK_GRADIENT_HORIZONTAL:
             pat = cairo_pattern_create_linear (0.0,
-                                               bounds.height / 2 * priv->scale,
+                                               0.0,
                                                bounds.width * priv->scale,
-                                               bounds.height / 2 * priv->scale);
+                                               0.0);
             break;
         case EEK_GRADIENT_RADIAL:
-            pat = cairo_pattern_create_radial (0.0,
-                                               0.0,
+            cx = bounds.width / 2 * priv->scale;
+            cy = bounds.height / 2 * priv->scale;
+            pat = cairo_pattern_create_radial (cx,
+                                               cy,
                                                0,
-                                               0.0,
-                                               0.0,
-                                               MIN(bounds.width, bounds.height) * priv->scale);
+                                               cx,
+                                               cy,
+                                               MIN(cx, cy));
             break;
         default:
             g_assert_not_reached ();
