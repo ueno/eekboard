@@ -98,6 +98,7 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     GtkAllocation allocation;
+    EekColor background;
 
     gtk_widget_get_allocation (self, &allocation);
 
@@ -127,6 +128,22 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         eek_renderer_set_default_background_color (priv->renderer, color);
         eek_color_free (color);
     }
+
+    /* blank background */
+    eek_renderer_get_background_color (priv->renderer,
+                                       EEK_ELEMENT(priv->keyboard),
+                                       &background);
+    cairo_set_source_rgba (cr,
+                           background.red,
+                           background.green,
+                           background.blue,
+                           background.alpha);
+    cairo_rectangle (cr,
+                     0.0,
+                     0.0,
+                     allocation.width,
+                     allocation.height);
+    cairo_fill (cr);
 
     eek_renderer_render_keyboard (priv->renderer, cr);
 
@@ -423,6 +440,7 @@ on_key_released (EekKeyboard *keyboard,
                      large_bounds.height);
     cairo_clip (cr);
     eek_renderer_render_keyboard (priv->renderer, cr);
+    cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
     cairo_destroy (cr);
 }
 

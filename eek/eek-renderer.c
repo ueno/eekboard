@@ -635,7 +635,6 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
                                    cairo_t     *cr)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
-    EekColor background;
 
     g_return_if_fail (priv->keyboard);
     g_return_if_fail (priv->allocation_width > 0.0);
@@ -643,23 +642,6 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
 
     if (!priv->keyboard_surface)
         priv->keyboard_surface = create_keyboard_surface (self);
-
-    /* blank background */
-    eek_renderer_get_background_color (self,
-                                       EEK_ELEMENT(priv->keyboard),
-                                       &background);
-    cairo_set_source_rgba (cr,
-                           background.red,
-                           background.green,
-                           background.blue,
-                           background.alpha);
-
-    cairo_rectangle (cr,
-                     0.0,
-                     0.0,
-                     priv->allocation_width,
-                     priv->allocation_height);
-    cairo_fill (cr);
 
     cairo_set_source_surface (cr, priv->keyboard_surface, 0.0, 0.0);
     cairo_paint (cr);
