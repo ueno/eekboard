@@ -262,21 +262,5 @@ typedef enum {
   EEK_GRADIENT_RADIAL
 } EekGradientType;
 
-struct _EekGradient
-{
-    EekGradientType type;
-    EekColor *start;
-    EekColor *end;
-};
-typedef struct _EekGradient EekGradient;
-
-GType        eek_gradient_get_type (void) G_GNUC_CONST;
-
-EekGradient *eek_gradient_new      (EekGradientType    type,
-                                    EekColor          *start,
-                                    EekColor          *end);
-EekGradient *eek_gradient_copy     (const EekGradient *gradient);
-void         eek_gradient_free     (EekGradient       *gradient);
-
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

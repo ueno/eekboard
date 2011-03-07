@@ -80,74 +80,80 @@ struct _EekRendererClass
     gpointer pdummy[23];
 };
 
-GType        eek_renderer_get_type                (void) G_GNUC_CONST;
-EekRenderer *eek_renderer_new                     (EekKeyboard  *keyboard,
-                                                   PangoContext *pcontext);
-void         eek_renderer_set_allocation_size     (EekRenderer  *renderer,
-                                                   gdouble       width,
-                                                   gdouble       height);
-void         eek_renderer_get_size                (EekRenderer  *renderer,
-                                                   gdouble      *width,
-                                                   gdouble      *height);
-void         eek_renderer_get_key_bounds          (EekRenderer  *renderer,
-                                                   EekKey       *key,
-                                                   EekBounds    *bounds,
-                                                   gboolean      rotate);
+GType        eek_renderer_get_type             (void) G_GNUC_CONST;
+EekRenderer *eek_renderer_new                  (EekKeyboard     *keyboard,
+                                                PangoContext    *pcontext);
+void         eek_renderer_set_allocation_size  (EekRenderer     *renderer,
+                                                gdouble          width,
+                                                gdouble          height);
+void         eek_renderer_get_size             (EekRenderer     *renderer,
+                                                gdouble         *width,
+                                                gdouble         *height);
+void         eek_renderer_get_key_bounds       (EekRenderer     *renderer,
+                                                EekKey          *key,
+                                                EekBounds       *bounds,
+                                                gboolean         rotate);
 
-gdouble      eek_renderer_get_scale               (EekRenderer  *renderer);
+gdouble      eek_renderer_get_scale            (EekRenderer     *renderer);
 
-PangoLayout *eek_renderer_create_pango_layout     (EekRenderer  *renderer);
-void         eek_renderer_render_key_label        (EekRenderer  *renderer,
-                                                   PangoLayout  *layout,
-                                                   EekKey       *key);
+PangoLayout *eek_renderer_create_pango_layout  (EekRenderer     *renderer);
+void         eek_renderer_render_key_label     (EekRenderer     *renderer,
+                                                PangoLayout     *layout,
+                                                EekKey          *key);
 
-void         eek_renderer_render_key_outline      (EekRenderer  *renderer,
-                                                   cairo_t      *cr,
-                                                   EekKey       *key,
-                                                   gdouble       scale,
-                                                   gboolean      rotate);
+void         eek_renderer_render_key_outline   (EekRenderer     *renderer,
+                                                cairo_t         *cr,
+                                                EekKey          *key,
+                                                gdouble          scale,
+                                                gboolean         rotate);
 
-void         eek_renderer_render_key              (EekRenderer  *renderer,
-                                                   cairo_t      *cr,
-                                                   EekKey       *key,
-                                                   gdouble       scale,
-                                                   gboolean      rotate);
+void         eek_renderer_render_key           (EekRenderer     *renderer,
+                                                cairo_t         *cr,
+                                                EekKey          *key,
+                                                gdouble          scale,
+                                                gboolean         rotate);
 
-void         eek_renderer_render_key_icon         (EekRenderer  *renderer,
-                                                   cairo_t      *cr,
-                                                   EekKey       *key,
-                                                   gdouble       scale,
-                                                   gboolean      rotate);
+void         eek_renderer_render_key_icon      (EekRenderer     *renderer,
+                                                cairo_t         *cr,
+                                                EekKey          *key,
+                                                gdouble          scale,
+                                                gboolean         rotate);
 
-void         eek_renderer_render_keyboard         (EekRenderer  *renderer,
-                                                   cairo_t      *cr);
+void         eek_renderer_render_keyboard      (EekRenderer     *renderer,
+                                                cairo_t         *cr);
 
 void         eek_renderer_set_default_foreground_color
-                                                  (EekRenderer  *renderer,
-                                                   EekColor     *foreground);
+                                               (EekRenderer     *renderer,
+                                                const EekColor  *color);
 void         eek_renderer_set_default_background_color
-                                                  (EekRenderer  *renderer,
-                                                   EekColor     *background);
-EekColor    *eek_renderer_get_foreground_color    (EekRenderer  *renderer,
-                                                   EekElement   *element);
-EekColor    *eek_renderer_get_background_color    (EekRenderer  *renderer,
-                                                   EekElement   *element);
-EekGradient *eek_renderer_get_background_gradient (EekRenderer  *renderer,
-                                                   EekElement   *element);
-void         eek_renderer_set_border_width        (EekRenderer  *renderer,
-                                                   gdouble       border_width);
-EekKey      *eek_renderer_find_key_by_position    (EekRenderer  *renderer,
-                                                   gdouble       x,
-                                                   gdouble       y);
+                                               (EekRenderer     *renderer,
+                                                const EekColor  *color);
+void         eek_renderer_get_foreground_color (EekRenderer     *renderer,
+                                                EekElement      *element,
+                                                EekColor        *color);
+void         eek_renderer_get_background_color (EekRenderer     *renderer,
+                                                EekElement      *element,
+                                                EekColor        *color);
+void         eek_renderer_get_background_gradient
+                                               (EekRenderer     *renderer,
+                                                EekElement      *element,
+                                                EekGradientType *type,
+                                                EekColor        *start,
+                                                EekColor        *end);
+void         eek_renderer_set_border_width     (EekRenderer     *renderer,
+                                                gdouble          border_width);
+EekKey      *eek_renderer_find_key_by_position (EekRenderer     *renderer,
+                                                gdouble          x,
+                                                gdouble          y);
 void         eek_renderer_apply_transformation_for_key
-                                                  (EekRenderer  *renderer,
-                                                   cairo_t      *cr,
-                                                   EekKey       *key,
-                                                   gdouble       scale,
-                                                   gboolean      rotate);
+                                               (EekRenderer     *renderer,
+                                                cairo_t         *cr,
+                                                EekKey          *key,
+                                                gdouble          scale,
+                                                gboolean         rotate);
 
-void         eek_renderer_set_theme               (EekRenderer  *renderer,
-                                                   EekTheme     *theme);
+void         eek_renderer_set_theme            (EekRenderer     *renderer,
+                                                EekTheme        *theme);
 
 G_END_DECLS
 #endif  /* EEK_RENDERER_H */

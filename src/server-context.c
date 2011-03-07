@@ -189,6 +189,8 @@ on_realize (GtkWidget *widget,
                               GDK_FUNC_MOVE |
                               GDK_FUNC_MINIMIZE |
                               GDK_FUNC_CLOSE);
+
+    gtk_window_set_opacity (GTK_WINDOW(context->window), 0.9);
 }
 
 #define DEFAULT_THEME (THEMEDIR "/default.css")
@@ -249,6 +251,7 @@ update_widget (ServerContext *context)
         gtk_window_set_title (GTK_WINDOW(context->window), _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
+        gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
 
         g_signal_connect (context->window, "realize",
                           G_CALLBACK(on_realize), context);

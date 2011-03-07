@@ -43,6 +43,20 @@ G_BEGIN_DECLS
  * borders and padding.
  */
 
+typedef enum {
+    EEK_SIDE_TOP,
+    EEK_SIDE_RIGHT,
+    EEK_SIDE_BOTTOM,
+    EEK_SIDE_LEFT
+} EekSide;
+
+typedef enum {
+    EEK_CORNER_TOPLEFT,
+    EEK_CORNER_TOPRIGHT,
+    EEK_CORNER_BOTTOMRIGHT,
+    EEK_CORNER_BOTTOMLEFT
+} EekCorner;
+
 #define EEK_TYPE_THEME_NODE (eek_theme_node_get_type())
 #define EEK_THEME_NODE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEK_TYPE_THEME_NODE, EekThemeNode))
 #define EEK_THEME_NODE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEK_TYPE_THEME_NODE, EekThemeNodeClass))
@@ -86,9 +100,6 @@ const char   *eek_theme_node_get_element_id
                                  (EekThemeNode               *node);
 const char   *eek_theme_node_get_element_class
                                  (EekThemeNode               *node);
-void          eek_theme_node_set_pseudo_class
-                                 (EekThemeNode               *node,
-                                  const gchar                *pseudo_class);
 const char   *eek_theme_node_get_pseudo_class
                                  (EekThemeNode               *node);
 
@@ -97,20 +108,34 @@ const char   *eek_theme_node_get_pseudo_class
  * details of the actual CSS rules, which can be complicated, especially
  * for fonts
  */
-gboolean      eek_theme_node_get_color
+void          eek_theme_node_get_color
                                  (EekThemeNode               *node,
                                   const char                 *property_name,
-                                  gboolean                    inherit,
-                                  EekColor                  **color);
+                                  EekColor                   *color);
 
 /* Specific getters for particular properties: cached
  */
-EekColor     *eek_theme_node_get_background_color
-                                 (EekThemeNode               *node);
-EekColor     *eek_theme_node_get_foreground_color
-                                 (EekThemeNode               *node);
-EekGradient  *eek_theme_node_get_background_gradient
-                                 (EekThemeNode               *node);
+void          eek_theme_node_get_background_color
+                                 (EekThemeNode               *node,
+                                  EekColor                   *color);
+void          eek_theme_node_get_foreground_color
+                                 (EekThemeNode               *node,
+                                  EekColor                   *color);
+void          eek_theme_node_get_background_gradient
+                                 (EekThemeNode               *node,
+                                  EekGradientType            *type,
+                                  EekColor                   *start,
+                                  EekColor                   *end);
+int           eek_theme_node_get_border_width
+                                 (EekThemeNode               *node,
+                                  EekSide                     side);
+int           eek_theme_node_get_border_radius
+                                 (EekThemeNode               *node,
+                                  EekCorner                   corner);
+void          eek_theme_node_get_border_color
+                                 (EekThemeNode               *node,
+                                  EekSide                     side,
+                                  EekColor                   *color);
 
 G_END_DECLS
 

@@ -1,8 +1,17 @@
 .key {
     color: #ffffff;
-    background-gradient-direction: radial;
+    background-gradient-direction: vertical;
     background-gradient-start: #000000;
-    background-gradient-end: #232323;
+    background-gradient-end: #555555;
+    border-width: 2px;
+    border-color: #777777;
+    border-radius: 3px;
+}
+
+.key:active {
+    background-gradient-direction: vertical;
+    background-gradient-start: #FF0000;
+    background-gradient-end: #FF0000;
 }
 
 .keyboard {
