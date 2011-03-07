@@ -1361,7 +1361,7 @@ _eek_theme_node_ensure_background (EekThemeNode *node)
         }
       else if (strcmp (property_name, "-gradient-end") == 0)
         {
-          get_color_from_term (node, decl->value, &priv->background_color);
+          get_color_from_term (node, decl->value, &priv->background_gradient_end);
         }
     }
 }
