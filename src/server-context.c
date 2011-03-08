@@ -214,6 +214,7 @@ set_geometry (ServerContext *context)
 
     if (context->fullscreen) {
         gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
+        gtk_window_set_resizable (GTK_WINDOW(context->window), FALSE);
         gtk_widget_set_size_request (context->widget,
                                      rect.width,
                                      rect.height / 2);
@@ -632,7 +633,8 @@ handle_method_call (GDBusConnection       *connection,
             return;
         }
         context->fullscreen = fullscreen;
-        set_geometry (context);
+        if (context->window)
+            set_geometry (context);
 
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
