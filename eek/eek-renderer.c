@@ -344,7 +344,7 @@ struct _CalculateFontSizeCallbackData {
     gdouble size;
     gdouble em_size;
     EekRenderer *renderer;
-    PangoFontDescription *base_font;
+    const PangoFontDescription *base_font;
 };
 typedef struct _CalculateFontSizeCallbackData CalculateFontSizeCallbackData;
 
@@ -407,7 +407,7 @@ calculate_font_size_section_callback (EekElement *element, gpointer user_data)
 }
 
 static gdouble
-calculate_font_size (EekRenderer *renderer, PangoFontDescription *base_font)
+calculate_font_size (EekRenderer *renderer, const PangoFontDescription *base_font)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
     CalculateFontSizeCallbackData data;
@@ -561,10 +561,15 @@ eek_renderer_real_render_key_label (EekRenderer *self,
         return;
 
     if (!priv->font) {
-        PangoFontDescription *base_font;
+        const PangoFontDescription *base_font;
         gdouble size;
+        EekThemeNode *theme_node;
 
-        base_font = pango_context_get_font_description (priv->pcontext);
+        theme_node = g_object_get_data (G_OBJECT(key), "theme-node");
+        if (theme_node)
+            base_font = eek_theme_node_get_font (theme_node);
+        else
+            base_font = pango_context_get_font_description (priv->pcontext);
         size = calculate_font_size (self, base_font);
         priv->font = pango_font_description_copy (base_font);
         pango_font_description_set_size (priv->font, size);
