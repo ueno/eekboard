@@ -748,6 +748,14 @@ eekboard_context_is_enabled (EekboardContext *context)
     return priv->enabled;
 }
 
+/**
+ * eekboard_context_set_fullscreen:
+ * @context: an #EekboardContext
+ * @fullscreen: a flag to indicate fullscreen mode
+ * @cancellable: a #GCancellable
+ *
+ * Set the fullscreen mode of @context.
+ */
 void
 eekboard_context_set_fullscreen (EekboardContext *context,
                                  gboolean         fullscreen,
@@ -768,5 +776,4 @@ eekboard_context_set_fullscreen (EekboardContext *context,
                            context_async_ready_callback,
                            NULL);
     }
-    return priv->enabled;
 }
