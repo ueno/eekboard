@@ -188,6 +188,8 @@ on_context_destroyed (EekboardContext *context,
  * @cancellable: a #GCancellable
  *
  * Create a new input context.
+ *
+ * Return value: (transfer full): a newly created #EekboardContext.
  */
 EekboardContext *
 eekboard_eekboard_create_context (EekboardEekboard *eekboard,
