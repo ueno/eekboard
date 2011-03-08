@@ -367,6 +367,17 @@ handle_method_call (GDBusConnection       *connection,
         if (server->context_stack) {
             ServerContext *context = server->context_stack->data;
 
+            if (g_strcmp0 (server_context_get_client_connection (context),
+                           sender) != 0) {
+                g_dbus_method_invocation_return_error
+                    (invocation,
+                     G_IO_ERROR,
+                     G_IO_ERROR_FAILED_HANDLED,
+                     "the current context not owned by %s",
+                     sender);
+                return;
+            }
+                
             server_context_set_enabled (context, FALSE);
             server->context_stack = g_slist_next (server->context_stack);
             g_object_unref (context);
