@@ -49,6 +49,7 @@ libeek_private_headers =			\
 	$(srcdir)/eek-xkeysym-keysym-entries.h	\
 	$(srcdir)/eek-marshalers.h		\
 	$(srcdir)/eek-theme-context.h		\
+	$(srcdir)/eek-theme-private.h		\
 	$(srcdir)/eek-theme-node.h
 
 libeek_sources =				\
