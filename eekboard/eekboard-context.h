@@ -73,39 +73,41 @@ struct _EekboardContextClass {
     gpointer pdummy[23];
 };
 
-GType            eekboard_context_get_type      (void) G_GNUC_CONST;
+GType            eekboard_context_get_type       (void) G_GNUC_CONST;
 
-EekboardContext *eekboard_context_new           (GDBusConnection *connection,
-                                                 const gchar     *object_path,
-                                                 GCancellable    *cancellable);
-guint            eekboard_context_add_keyboard  (EekboardContext *context,
-                                                 EekKeyboard     *keyboard,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_remove_keyboard
-                                                (EekboardContext *context,
-                                                 guint            keyboard_id,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_set_keyboard  (EekboardContext *context,
-                                                 guint            keyboard_id,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_show_keyboard (EekboardContext *context,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_hide_keyboard (EekboardContext *context,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_set_group     (EekboardContext *context,
-                                                 gint             group,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_press_key     (EekboardContext *context,
-                                                 guint            keycode,
-                                                 GCancellable    *cancellable);
-void             eekboard_context_release_key   (EekboardContext *context,
-                                                 guint            keycode,
-                                                 GCancellable    *cancellable);
+EekboardContext *eekboard_context_new            (GDBusConnection *connection,
+                                                  const gchar     *object_path,
+                                                  GCancellable    *cancellable);
+guint            eekboard_context_add_keyboard   (EekboardContext *context,
+                                                  EekKeyboard     *keyboard,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_remove_keyboard (EekboardContext *context,
+                                                   guint            keyboard_id,
+                                                   GCancellable    *cancellable);
+void             eekboard_context_set_keyboard   (EekboardContext *context,
+                                                  guint            keyboard_id,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_show_keyboard  (EekboardContext *context,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_hide_keyboard  (EekboardContext *context,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_set_group      (EekboardContext *context,
+                                                  gint             group,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_press_key      (EekboardContext *context,
+                                                  guint            keycode,
+                                                  GCancellable    *cancellable);
+void             eekboard_context_release_key    (EekboardContext *context,
+                                                  guint            keycode,
+                                                  GCancellable    *cancellable);
 gboolean         eekboard_context_is_keyboard_visible
-                                                (EekboardContext *context);
-void             eekboard_context_set_enabled   (EekboardContext *context,
-                                                 gboolean         enabled);
-gboolean         eekboard_context_is_enabled    (EekboardContext *context);
+                                                 (EekboardContext *context);
+void             eekboard_context_set_enabled    (EekboardContext *context,
+                                                  gboolean         enabled);
+gboolean         eekboard_context_is_enabled     (EekboardContext *context);
+void             eekboard_context_set_fullscreen (EekboardContext *context,
+                                                  gboolean         fullscreen,
+                                                  GCancellable    *cancellable);
 
 G_END_DECLS
 #endif  /* EEKBOARD_CONTEXT_H */

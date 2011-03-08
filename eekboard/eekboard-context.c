@@ -60,6 +60,7 @@ struct _EekboardContextPrivate
     GHashTable *keyboard_hash;
     gboolean keyboard_visible;
     gboolean enabled;
+    gboolean fullscreen;
 };
 
 static void
@@ -558,15 +559,17 @@ eekboard_context_set_group (EekboardContext *context,
 
     g_return_if_fail (priv->keyboard);
 
-    eek_element_set_group (EEK_ELEMENT(priv->keyboard), group);
-    g_dbus_proxy_call (G_DBUS_PROXY(context),
-                       "SetGroup",
-                       g_variant_new ("(i)", group),
-                       G_DBUS_CALL_FLAGS_NONE,
-                       -1,
-                       cancellable,
-                       context_async_ready_callback,
-                       NULL);
+    if (eek_element_get_group (EEK_ELEMENT(priv->keyboard)) != group) {
+        eek_element_set_group (EEK_ELEMENT(priv->keyboard), group);
+        g_dbus_proxy_call (G_DBUS_PROXY(context),
+                           "SetGroup",
+                           g_variant_new ("(i)", group),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           cancellable,
+                           context_async_ready_callback,
+                           NULL);
+    }
 }
 
 /**
@@ -742,5 +745,28 @@ eekboard_context_is_enabled (EekboardContext *context)
     g_assert (EEKBOARD_IS_CONTEXT(context));
 
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+    return priv->enabled;
+}
+
+void
+eekboard_context_set_fullscreen (EekboardContext *context,
+                                 gboolean         fullscreen,
+                                 GCancellable    *cancellable)
+{
+    EekboardContextPrivate *priv;
+
+    g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
+
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+    if (priv->fullscreen != fullscreen) {
+        g_dbus_proxy_call (G_DBUS_PROXY(context),
+                           "SetFullscreen",
+                           g_variant_new ("(b)", fullscreen),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           cancellable,
+                           context_async_ready_callback,
+                           NULL);
+    }
     return priv->enabled;
 }

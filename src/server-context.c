@@ -56,6 +56,9 @@ static const gchar introspection_xml[] =
     "    <method name='SetKeyboard'>"
     "      <arg type='u' name='keyboard_id'/>"
     "    </method>"
+    "    <method name='SetFullscreen'>"
+    "      <arg type='b' name='fullscreen'/>"
+    "    </method>"
     "    <method name='ShowKeyboard'/>"
     "    <method name='HideKeyboard'/>"
     "    <method name='SetGroup'>"
@@ -94,6 +97,7 @@ struct _ServerContext {
 
     gboolean enabled;
     gboolean last_keyboard_visible;
+    gboolean fullscreen;
 
     GtkWidget *window;
     GtkWidget *widget;
@@ -189,19 +193,60 @@ on_realize (GtkWidget *widget,
                               GDK_FUNC_MOVE |
                               GDK_FUNC_MINIMIZE |
                               GDK_FUNC_CLOSE);
-
-    gtk_window_set_opacity (GTK_WINDOW(context->window), 0.9);
 }
 
 #define DEFAULT_THEME (THEMEDIR "/default.css")
 
 static void
-update_widget (ServerContext *context)
+set_geometry (ServerContext *context)
 {
     GdkScreen *screen;
     GdkWindow *root;
     gint monitor;
     GdkRectangle rect;
+    EekBounds bounds;
+
+    screen = gdk_screen_get_default ();
+    root = gtk_widget_get_root_window (context->window);
+    monitor = gdk_screen_get_monitor_at_window (screen, root);
+    gdk_screen_get_monitor_geometry (screen, monitor, &rect);
+    eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
+
+    if (context->fullscreen) {
+        gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
+        gtk_widget_set_size_request (context->widget,
+                                     rect.width,
+                                     rect.height / 2);
+        gtk_window_move (GTK_WINDOW(context->window),
+                         0,
+                         rect.height / 2);
+        gtk_window_set_opacity (GTK_WINDOW(context->window), 0.8);
+    } else {
+#if HAVE_CLUTTER_GTK
+        ClutterActor *stage =
+            gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
+        clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
+        clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
+                                        bounds.width / 3,
+                                        bounds.height / 3);
+        g_signal_connect (stage,
+                          "allocation-changed",
+                          G_CALLBACK(on_allocation_changed),
+                          actor);
+#else
+        gtk_widget_set_size_request (context->widget,
+                                     bounds.width,
+                                     bounds.height);
+#endif
+        gtk_window_move (GTK_WINDOW(context->window),
+                         MAX(rect.width - 20 - bounds.width, 0),
+                         MAX(rect.height - 40 - bounds.height, 0));
+    }
+}
+
+static void
+update_widget (ServerContext *context)
+{
     EekBounds bounds;
     EekTheme *theme;
 #if HAVE_CLUTTER_GTK
@@ -223,20 +268,11 @@ update_widget (ServerContext *context)
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
     clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
-    clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
-    clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
-                                    bounds.width / 3,
-                                    bounds.height / 3);
-    g_signal_connect (stage,
-                      "allocation-changed",
-                      G_CALLBACK(on_allocation_changed),
-                      actor);
 #else
     context->widget = eek_gtk_keyboard_new (context->keyboard);
     if (theme)
         eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget), theme);
 #endif
-    gtk_widget_set_size_request (context->widget, bounds.width, bounds.height);
 
     if (!context->window) {
         context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -251,18 +287,11 @@ update_widget (ServerContext *context)
         gtk_window_set_title (GTK_WINDOW(context->window), _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
-        gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
 
         g_signal_connect (context->window, "realize",
                           G_CALLBACK(on_realize), context);
 
-        screen = gdk_screen_get_default ();
-        root = gtk_widget_get_root_window (context->window);
-        monitor = gdk_screen_get_monitor_at_window (screen, root);
-        gdk_screen_get_monitor_geometry (screen, monitor, &rect);
-        gtk_window_move (GTK_WINDOW(context->window),
-                         MAX(rect.width - 20 - bounds.width, 0),
-                         MAX(rect.height - 40 - bounds.height, 0));
+        set_geometry (context);
     }
     gtk_container_add (GTK_CONTAINER(context->window), context->widget);
 }
@@ -588,6 +617,22 @@ handle_method_call (GDBusConnection       *connection,
             g_signal_handler_unblock (context->window,
                                       context->notify_visible_handler);
         }
+
+        g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "SetFullscreen") == 0) {
+        gboolean fullscreen;
+
+        g_variant_get (parameters, "(b)", &fullscreen);
+
+        if (context->fullscreen == fullscreen) {
+            g_dbus_method_invocation_return_value (invocation, NULL);
+            return;
+        }
+        context->fullscreen = fullscreen;
+        set_geometry (context);
 
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;

@@ -40,6 +40,8 @@ static gchar *opt_model = NULL;
 static gchar *opt_layouts = NULL;
 static gchar *opt_options = NULL;
 
+static gboolean opt_fullscreen = FALSE;
+
 static const GOptionEntry options[] = {
     {"system", 'y', 0, G_OPTION_ARG_NONE, &opt_system,
      N_("Connect to the system bus")},
@@ -59,6 +61,8 @@ static const GOptionEntry options[] = {
      N_("Specify layouts")},
     {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
      N_("Specify options")},
+    {"fullscreen", 'F', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
+     N_("Create window in fullscreen mode")},
     {NULL}
 };
 
@@ -221,6 +225,12 @@ main (int argc, char **argv)
                           G_CALLBACK(on_notify_keyboard_visible), loop);
         g_signal_connect (context, "destroyed",
                           G_CALLBACK(on_context_destroyed), loop);
+        g_object_unref (context);
+    }
+
+    if (opt_fullscreen) {
+        g_object_get (client, "context", &context, NULL);
+        eekboard_context_set_fullscreen (context, TRUE, NULL);
         g_object_unref (context);
     }
 
