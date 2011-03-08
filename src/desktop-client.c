@@ -68,6 +68,7 @@ struct _EekboardDesktopClient {
     gulong key_released_handler;
 
 #ifdef HAVE_CSPI
+    Accessible *acc;
     AccessibleEventListener *focus_listener;
     AccessibleEventListener *keystroke_listener;
 #endif  /* HAVE_CSPI */
@@ -433,10 +434,24 @@ focus_listener_cb (const AccessibleEvent *event,
         case SPI_ROLE_PARAGRAPH:
         case SPI_ROLE_PASSWORD_TEXT:
         case SPI_ROLE_TERMINAL:
-        case SPI_ROLE_ENTRY:
-            if (g_strcmp0 (event->type, "focus") == 0 || event->detail1 == 1) {
+            if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
+                client->acc = accessible;
                 eekboard_context_show_keyboard (client->context, NULL);
+            } else if (event->detail1 == 0 && accessible == client->acc) {
+                client->acc = NULL;
+                eekboard_context_hide_keyboard (client->context, NULL);
             }
+            break;
+        case SPI_ROLE_ENTRY:
+            if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
+                client->acc = accessible;
+                eekboard_context_show_keyboard (client->context, NULL);
+            } else if (event->detail1 == 0) {
+                client->acc = NULL;
+                eekboard_context_hide_keyboard (client->context, NULL);
+            }
+            break;
+            
         default:
             ;
         }
