@@ -7,10 +7,12 @@ eek/eek-keyboard-drawing.c
   These files contain code derived from the libgnomekbd library.
   Copyright (C) 2006 Sergey V. Udaltsov <svu@gnome.org>
 
-eek/eek-theme-node.h
-eek/eek-theme-node.c
 eek/eek-theme.h
 eek/eek-theme.c
+eek/eek-theme-context.h
+eek/eek-theme-context.c
+eek/eek-theme-node.h
+eek/eek-theme-node.c
 
   These files contain code derived from gnome-shell.
 
