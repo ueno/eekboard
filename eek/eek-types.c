@@ -32,58 +32,6 @@
 
 #include "eek-types.h"
 
-/* EekSymbolMatrix */
-EekSymbolMatrix *
-eek_symbol_matrix_new (gint num_groups, gint num_levels)
-{
-    EekSymbolMatrix *matrix = g_slice_new (EekSymbolMatrix);
-
-    matrix->num_groups = num_groups;
-    matrix->num_levels = num_levels;
-    matrix->data = g_slice_alloc0 (sizeof (EekSymbol *) *
-                                   num_groups * num_levels);
-    return matrix;
-}
-
-EekSymbolMatrix *
-eek_symbol_matrix_copy (const EekSymbolMatrix *matrix)
-{
-    EekSymbolMatrix *retval;
-    gint i, num_symbols = matrix->num_groups * matrix->num_levels;
-
-    retval = g_slice_dup (EekSymbolMatrix, matrix);
-    retval->data = g_slice_copy (sizeof (EekSymbol *) * num_symbols,
-                                 matrix->data);
-    for (i = 0; i < num_symbols; i++)
-        if (retval->data[i])
-            g_object_ref (retval->data[i]);
-    return retval;
-}
-
-void
-eek_symbol_matrix_free (EekSymbolMatrix *matrix)
-{
-    gint i, num_symbols = matrix->num_groups * matrix->num_levels;
-    for (i = 0; i < num_symbols; i++)
-        if (matrix->data[i])
-            g_object_unref (matrix->data[i]);
-    g_slice_free1 (sizeof (EekSymbol *) * num_symbols, matrix->data);
-    g_slice_free (EekSymbolMatrix, matrix);
-}
-
-GType
-eek_symbol_matrix_get_type (void)
-{
-    static GType our_type = 0;
-
-    if (our_type == 0)
-        our_type =
-            g_boxed_type_register_static ("EekSymbolMatrix",
-                                          (GBoxedCopyFunc)eek_symbol_matrix_copy,
-                                          (GBoxedFreeFunc)eek_symbol_matrix_free);
-    return our_type;
-}
-
 /* EekPoint */
 static EekPoint *
 eek_point_copy (const EekPoint *point)

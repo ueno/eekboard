@@ -147,28 +147,6 @@ typedef struct _EekOutline EekOutline;
 typedef struct _EekColor EekColor;
 
 /**
- * EekSymbolMatrix:
- * @data: array of symbols
- * @num_groups: the number of groups (rows)
- * @num_levels: the number of levels (columns)
- *
- * Symbol matrix of a key.
- */
-struct _EekSymbolMatrix
-{
-    gint num_groups;
-    gint num_levels;
-    EekSymbol **data;
-};
-
-GType             eek_symbol_matrix_get_type
-                                         (void) G_GNUC_CONST;
-EekSymbolMatrix * eek_symbol_matrix_new  (gint                   num_groups,
-                                          gint                   num_levels);
-EekSymbolMatrix  *eek_symbol_matrix_copy (const EekSymbolMatrix *matrix);
-void              eek_symbol_matrix_free (EekSymbolMatrix       *matrix);
-
-/**
  * EekPoint:
  * @x: X coordinate of the point
  * @y: Y coordinate of the point

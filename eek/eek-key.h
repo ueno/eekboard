@@ -20,9 +20,8 @@
 #ifndef EEK_KEY_H
 #define EEK_KEY_H 1
 
-#include <glib-object.h>
 #include "eek-element.h"
-#include "eek-types.h"
+#include "eek-symbol-matrix.h"
 
 G_BEGIN_DECLS
 

@@ -20,7 +20,6 @@
 #ifndef EEK_SYMBOL_H
 #define EEK_SYMBOL_H 1
 
-#include <glib-object.h>
 #include "eek-types.h"
 
 G_BEGIN_DECLS
