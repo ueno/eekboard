@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-import eekboard, virtkey
+import gtk, eekboard, virtkey
 
 GROUPS = (
     "as-inscript2",
@@ -56,6 +56,10 @@ class InscriptKeyboard(object):
         self.__keyboard.connect('key-released', self.__key_released_cb)
         self.__virtkey = virtkey.virtkey()
         self.__english = False
+        self.__eekboard.connect('destroyed', self.__destroyed_cb)
+
+    def __destroyed_cb(self, eekboard):
+        gtk.main_quit()
 
     def enable(self):
         self.__eekboard.push_context(self.__context)
@@ -96,7 +100,6 @@ class InscriptKeyboard(object):
             self.__virtkey.release_keysym(xkeysym)
 
 if __name__ == "__main__":
-    import gtk
     from optparse import OptionParser
     import sys
 
