@@ -321,6 +321,7 @@ handle_method_call (GDBusConnection       *connection,
         object_path = g_strdup_printf (SERVER_CONTEXT_PATH, context_id++);
         context = server_context_new (object_path, server->connection);
         server_context_set_client_connection (context, sender);
+        server_context_set_client_name (context, client_name);
         g_hash_table_insert (server->context_hash,
                              object_path,
                              context);

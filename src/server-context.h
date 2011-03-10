@@ -43,6 +43,9 @@ void           server_context_set_client_connection
                                            const gchar     *client_connection);
 const gchar   *server_context_get_client_connection
                                           (ServerContext   *context);
+void           server_context_set_client_name
+                                          (ServerContext   *context,
+                                           const gchar     *client_name);
 
 G_END_DECLS
 #endif  /* SERVER_CONTEXT_H */

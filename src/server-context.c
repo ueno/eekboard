@@ -94,6 +94,7 @@ struct _ServerContext {
     guint registration_id;
     char *object_path;
     char *client_connection;
+    char *client_name;
 
     gboolean enabled;
     gboolean last_keyboard_visible;
@@ -285,7 +286,10 @@ update_widget (ServerContext *context)
 
         gtk_widget_set_can_focus (context->window, FALSE);
         g_object_set (G_OBJECT(context->window), "accept_focus", FALSE, NULL);
-        gtk_window_set_title (GTK_WINDOW(context->window), _("Keyboard"));
+        gtk_window_set_title (GTK_WINDOW(context->window),
+                              context->client_name ?
+                              context->client_name :
+                              _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
 
@@ -372,6 +376,7 @@ server_context_finalize (GObject *object)
 
     g_free (context->object_path);
     g_free (context->client_connection);
+    g_free (context->client_name);
 
     G_OBJECT_CLASS (server_context_parent_class)->finalize (object);
 }
@@ -797,6 +802,7 @@ void
 server_context_set_client_connection (ServerContext *context,
                                       const gchar   *client_connection)
 {
+    g_free (context->client_connection);
     context->client_connection = g_strdup (client_connection);
 }
 
@@ -804,4 +810,12 @@ const gchar *
 server_context_get_client_connection (ServerContext *context)
 {
     return context->client_connection;
+}
+
+void
+server_context_set_client_name (ServerContext *context,
+                                const gchar   *client_name)
+{
+    g_free (context->client_name);
+    context->client_name = g_strdup (client_name);
 }
