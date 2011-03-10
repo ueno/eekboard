@@ -41,6 +41,7 @@ def XmlKeyboard(path, modifier_behavior=MODIFIER_BEHAVIOR_NONE):
     layout = Eek.XmlLayout.new(_file.read())
     keyboard = Eek.Keyboard.new(layout, CSW, CSH)
     keyboard.set_modifier_behavior(modifier_behavior)
+    keyboard.set_alt_gr_mask(Eek.ModifierType.MOD5_MASK)
     return keyboard
 
 def XklKeyboard(modifier_behavior=MODIFIER_BEHAVIOR_NONE):
