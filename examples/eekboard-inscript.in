@@ -76,7 +76,10 @@ class InscriptKeyboard(object):
         symbol = key.get_symbol()
         if isinstance(symbol, eekboard.Keysym):
             xkeysym = symbol.get_xkeysym()
+            modifiers = self.__keyboard.get_modifiers()
+            self.__virtkey.latch_mod(modifiers)
             self.__virtkey.press_keysym(xkeysym)
+            self.__virtkey.unlatch_mod(modifiers)
 
     def __key_released_cb(self, keyboard, key):
         if key.get_keycode() == 37:
