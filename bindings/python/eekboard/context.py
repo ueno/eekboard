@@ -36,7 +36,15 @@ class Context(gobject.GObject):
         'key-released': (
             gobject.SIGNAL_RUN_LAST,
             gobject.TYPE_NONE,
-            (gobject.TYPE_UINT,))
+            (gobject.TYPE_UINT,)),
+        'destroyed': (
+            gobject.SIGNAL_RUN_LAST,
+            gobject.TYPE_NONE,
+            ()),
+        }
+
+    __gproperties__ = {
+        'keyboard-visible': (bool, None, None, False, gobject.PARAM_READABLE),
         }
 
     def __init__(self, giobject):
@@ -47,6 +55,7 @@ class Context(gobject.GObject):
         self.__giobject.connect('disabled', lambda *args: self.emit('disabled'))
         self.__giobject.connect('key-pressed', lambda *args: self.emit('key-pressed', args[1]))
         self.__giobject.connect('key-released', lambda *args: self.emit('key-released', args[1]))
+        self.__giobject.connect('destroyed', lambda *args: self.emit('destroyed'))
 
     def get_giobject(self):
         return self.__giobject

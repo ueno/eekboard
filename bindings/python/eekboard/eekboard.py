@@ -22,11 +22,18 @@ from context import Context
 
 class Eekboard(gobject.GObject):
     __gtype_name__ = "PYEekboardEekboard"
+    __gsignals__ = {
+        'destroyed': (
+            gobject.SIGNAL_RUN_LAST,
+            gobject.TYPE_NONE,
+            ())
+        }
 
     def __init__(self):
         super(Eekboard, self).__init__()
         self.__connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self.__eekboard = gi.repository.Eekboard.Eekboard.new(self.__connection, None);
+        self.__eekboard.connect('destroyed', lambda *args: self.emit('destroyed'))
 
     def create_context(self, client_name):
         context = self.__eekboard.create_context(client_name, None)
