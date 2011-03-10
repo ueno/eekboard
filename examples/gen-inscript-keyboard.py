@@ -134,7 +134,10 @@ keyboard = eekboard.XmlKeyboard(os.path.abspath(sys.argv[1]))
 
 def each_key(element, data):
     keycode = element.get_keycode()
-    matrix = Eek.SymbolMatrix.new(len(files), 4)
+    matrix = Eek.SymbolMatrix.new(len(files) + 1, 4)
+    for l in xrange(4):
+        keysym = element.get_symbol_at_index(0, l, 0, 0)
+        matrix.set_symbol(0, l, keysym)
     for g, f in enumerate(files):
         entry = f.get_entry_for_keycode(keycode)
         for l in xrange(4):
@@ -146,8 +149,8 @@ def each_key(element, data):
                 except:
                     pass
             if not keysym:
-                keysym = element.get_symbol_at_index(g, l, 0, 0)
-            matrix.set_symbol(g, l, keysym)
+                keysym = element.get_symbol_at_index(g + 1, l, 0, 0)
+            matrix.set_symbol(g + 1, l, keysym)
     element.set_symbol_matrix(matrix)
 
 def each_section(element, data):

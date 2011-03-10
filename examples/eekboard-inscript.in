@@ -55,6 +55,7 @@ class InscriptKeyboard(object):
         self.__keyboard.connect('key-pressed', self.__key_pressed_cb)
         self.__keyboard.connect('key-released', self.__key_released_cb)
         self.__virtkey = virtkey.virtkey()
+        self.__english = False
 
     def enable(self):
         self.__eekboard.push_context(self.__context)
@@ -66,15 +67,26 @@ class InscriptKeyboard(object):
         self.__context.show_keyboard()
 
     def set_group(self, group):
-        self.__context.set_group(group)
+        self.__group = group
+        self.__context.set_group(self.__group)
 
     def __key_pressed_cb(self, keyboard, key):
+        if key.get_keycode() == 37:
+            return
         symbol = key.get_symbol()
         if isinstance(symbol, eekboard.Keysym):
             xkeysym = symbol.get_xkeysym()
             self.__virtkey.press_keysym(xkeysym)
 
     def __key_released_cb(self, keyboard, key):
+        if key.get_keycode() == 37:
+            if self.__english:
+                self.__context.set_group(self.__group)
+                self.__english = False
+            else:
+                self.__context.set_group(0)
+                self.__english = True
+            return
         symbol = key.get_symbol()
         if isinstance(symbol, eekboard.Keysym):
             xkeysym = symbol.get_xkeysym()
@@ -90,12 +102,13 @@ if __name__ == "__main__":
                       help="Specify language code to LANGCODE",
                       metavar="LANGCODE")
     (options, args) = parser.parse_args()
-    group = 0
+    group = 1
     if options.langcode:
         group = None
         for index, langcode in enumerate(GROUPS):
             if langcode.startswith(options.langcode):
-                group = index
+                group = index + 1
+                break
         if group is None:
             print >> sys.stderr, "Unknown langcode %s" % options.langcode
             exit(1)

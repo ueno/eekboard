@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <keyboard version="0.90">
     <bounds>0.000000,0.000000,640.000000,296.585366</bounds>
-    <section name="Function">
+    <section>
         <bounds>15.609756,15.609756,640.000000,39.024390</bounds>
         <angle>0</angle>
         <row>
@@ -11,7 +11,11 @@
         <key id="keycode9" name="keycode9" column="0" row="0">
             <bounds>3.121951,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65307">Escape</keysym>
+                <keysym keyval="65307">Escape</keysym>
+                <keysym keyval="65307">Escape</keysym>
+                <keysym keyval="65307">Escape</keysym>
                 <keysym keyval="65307">Escape</keysym>
                 <keysym keyval="65307">Escape</keysym>
                 <keysym keyval="65307">Escape</keysym>
@@ -105,7 +109,11 @@
         <key id="keycode67" name="keycode67" column="1" row="0">
             <bounds>84.292683,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65470">F1</keysym>
+                <keysym keyval="269024769">(null)</keysym>
+                <keysym keyval="65470">F1</keysym>
+                <keysym keyval="65470">F1</keysym>
                 <keysym keyval="65470">F1</keysym>
                 <keysym keyval="269024769">(null)</keysym>
                 <keysym keyval="65470">F1</keysym>
@@ -199,7 +207,11 @@
         <key id="keycode68" name="keycode68" column="2" row="0">
             <bounds>124.878049,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65471">F2</keysym>
+                <keysym keyval="269024770">(null)</keysym>
+                <keysym keyval="65471">F2</keysym>
+                <keysym keyval="65471">F2</keysym>
                 <keysym keyval="65471">F2</keysym>
                 <keysym keyval="269024770">(null)</keysym>
                 <keysym keyval="65471">F2</keysym>
@@ -293,7 +305,11 @@
         <key id="keycode69" name="keycode69" column="3" row="0">
             <bounds>165.463415,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65472">F3</keysym>
+                <keysym keyval="269024771">(null)</keysym>
+                <keysym keyval="65472">F3</keysym>
+                <keysym keyval="65472">F3</keysym>
                 <keysym keyval="65472">F3</keysym>
                 <keysym keyval="269024771">(null)</keysym>
                 <keysym keyval="65472">F3</keysym>
@@ -387,7 +403,11 @@
         <key id="keycode70" name="keycode70" column="4" row="0">
             <bounds>206.048780,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65473">F4</keysym>
+                <keysym keyval="269024772">(null)</keysym>
+                <keysym keyval="65473">F4</keysym>
+                <keysym keyval="65473">F4</keysym>
                 <keysym keyval="65473">F4</keysym>
                 <keysym keyval="269024772">(null)</keysym>
                 <keysym keyval="65473">F4</keysym>
@@ -481,7 +501,11 @@
         <key id="keycode71" name="keycode71" column="5" row="0">
             <bounds>266.926829,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65474">F5</keysym>
+                <keysym keyval="269024773">(null)</keysym>
+                <keysym keyval="65474">F5</keysym>
+                <keysym keyval="65474">F5</keysym>
                 <keysym keyval="65474">F5</keysym>
                 <keysym keyval="269024773">(null)</keysym>
                 <keysym keyval="65474">F5</keysym>
@@ -575,7 +599,11 @@
         <key id="keycode72" name="keycode72" column="6" row="0">
             <bounds>307.512195,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65475">F6</keysym>
+                <keysym keyval="269024774">(null)</keysym>
+                <keysym keyval="65475">F6</keysym>
+                <keysym keyval="65475">F6</keysym>
                 <keysym keyval="65475">F6</keysym>
                 <keysym keyval="269024774">(null)</keysym>
                 <keysym keyval="65475">F6</keysym>
@@ -669,7 +697,11 @@
         <key id="keycode73" name="keycode73" column="7" row="0">
             <bounds>348.097561,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65476">F7</keysym>
+                <keysym keyval="269024775">(null)</keysym>
+                <keysym keyval="65476">F7</keysym>
+                <keysym keyval="65476">F7</keysym>
                 <keysym keyval="65476">F7</keysym>
                 <keysym keyval="269024775">(null)</keysym>
                 <keysym keyval="65476">F7</keysym>
@@ -763,7 +795,11 @@
         <key id="keycode74" name="keycode74" column="8" row="0">
             <bounds>388.682927,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65477">F8</keysym>
+                <keysym keyval="269024776">(null)</keysym>
+                <keysym keyval="65477">F8</keysym>
+                <keysym keyval="65477">F8</keysym>
                 <keysym keyval="65477">F8</keysym>
                 <keysym keyval="269024776">(null)</keysym>
                 <keysym keyval="65477">F8</keysym>
@@ -857,7 +893,11 @@
         <key id="keycode75" name="keycode75" column="9" row="0">
             <bounds>449.560976,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65478">F9</keysym>
+                <keysym keyval="269024777">(null)</keysym>
+                <keysym keyval="65478">F9</keysym>
+                <keysym keyval="65478">F9</keysym>
                 <keysym keyval="65478">F9</keysym>
                 <keysym keyval="269024777">(null)</keysym>
                 <keysym keyval="65478">F9</keysym>
@@ -951,7 +991,11 @@
         <key id="keycode76" name="keycode76" column="10" row="0">
             <bounds>490.146341,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65479">F10</keysym>
+                <keysym keyval="269024778">(null)</keysym>
+                <keysym keyval="65479">F10</keysym>
+                <keysym keyval="65479">F10</keysym>
                 <keysym keyval="65479">F10</keysym>
                 <keysym keyval="269024778">(null)</keysym>
                 <keysym keyval="65479">F10</keysym>
@@ -1045,7 +1089,11 @@
         <key id="keycode95" name="keycode95" column="11" row="0">
             <bounds>530.731707,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65480">F11</keysym>
+                <keysym keyval="269024779">(null)</keysym>
+                <keysym keyval="65480">F11</keysym>
+                <keysym keyval="65480">F11</keysym>
                 <keysym keyval="65480">F11</keysym>
                 <keysym keyval="269024779">(null)</keysym>
                 <keysym keyval="65480">F11</keysym>
@@ -1139,7 +1187,11 @@
         <key id="keycode96" name="keycode96" column="12" row="0">
             <bounds>571.317073,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65481">F12</keysym>
+                <keysym keyval="269024780">(null)</keysym>
+                <keysym keyval="65481">F12</keysym>
+                <keysym keyval="65481">F12</keysym>
                 <keysym keyval="65481">F12</keysym>
                 <keysym keyval="269024780">(null)</keysym>
                 <keysym keyval="65481">F12</keysym>
@@ -1231,7 +1283,7 @@
             </symbols>
         </key>
     </section>
-    <section name="Alpha">
+    <section>
         <bounds>15.609756,78.048780,608.780488,201.365854</bounds>
         <angle>0</angle>
         <row>
@@ -1257,7 +1309,11 @@
         <key id="keycode49" name="keycode49" column="0" row="0">
             <bounds>3.121951,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="96">quoteleft</keysym>
+                <keysym keyval="126">asciitilde</keysym>
+                <keysym keyval="96">quoteleft</keysym>
+                <keysym keyval="96">quoteleft</keysym>
                 <keysym keyval="96">quoteleft</keysym>
                 <keysym keyval="126">asciitilde</keysym>
                 <keysym keyval="96">quoteleft</keysym>
@@ -1351,7 +1407,11 @@
         <key id="keycode10" name="keycode10" column="1" row="0">
             <bounds>43.707317,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="49">1</keysym>
+                <keysym keyval="33">exclam</keysym>
+                <keysym keyval="49">1</keysym>
+                <keysym keyval="49">1</keysym>
                 <keysym keyval="16779751">১</keysym>
                 <keysym keyval="33">exclam</keysym>
                 <keysym keyval="49">1</keysym>
@@ -1445,7 +1505,11 @@
         <key id="keycode11" name="keycode11" column="2" row="0">
             <bounds>84.292683,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="50">2</keysym>
+                <keysym keyval="64">at</keysym>
+                <keysym keyval="50">2</keysym>
+                <keysym keyval="50">2</keysym>
                 <keysym keyval="16779752">২</keysym>
                 <keysym keyval="64">at</keysym>
                 <keysym keyval="50">2</keysym>
@@ -1539,7 +1603,11 @@
         <key id="keycode12" name="keycode12" column="3" row="0">
             <bounds>124.878049,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="51">3</keysym>
+                <keysym keyval="35">numbersign</keysym>
+                <keysym keyval="51">3</keysym>
+                <keysym keyval="51">3</keysym>
                 <keysym keyval="16779753">৩</keysym>
                 <keysym keyval="35">numbersign</keysym>
                 <keysym keyval="51">3</keysym>
@@ -1633,7 +1701,11 @@
         <key id="keycode13" name="keycode13" column="4" row="0">
             <bounds>165.463415,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="52">4</keysym>
+                <keysym keyval="36">dollar</keysym>
+                <keysym keyval="52">4</keysym>
+                <keysym keyval="52">4</keysym>
                 <keysym keyval="16779754">৪</keysym>
                 <keysym keyval="36">dollar</keysym>
                 <keysym keyval="16785593">(null)</keysym>
@@ -1727,7 +1799,11 @@
         <key id="keycode14" name="keycode14" column="5" row="0">
             <bounds>206.048780,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="53">5</keysym>
+                <keysym keyval="37">percent</keysym>
+                <keysym keyval="53">5</keysym>
+                <keysym keyval="53">5</keysym>
                 <keysym keyval="16779755">৫</keysym>
                 <keysym keyval="37">percent</keysym>
                 <keysym keyval="53">5</keysym>
@@ -1821,7 +1897,11 @@
         <key id="keycode15" name="keycode15" column="6" row="0">
             <bounds>245.073171,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="54">6</keysym>
+                <keysym keyval="94">asciicircum</keysym>
+                <keysym keyval="54">6</keysym>
+                <keysym keyval="54">6</keysym>
                 <keysym keyval="16779756">৬</keysym>
                 <keysym keyval="94">asciicircum</keysym>
                 <keysym keyval="54">6</keysym>
@@ -1915,7 +1995,11 @@
         <key id="keycode16" name="keycode16" column="7" row="0">
             <bounds>285.658537,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="55">7</keysym>
+                <keysym keyval="38">ampersand</keysym>
+                <keysym keyval="55">7</keysym>
+                <keysym keyval="55">7</keysym>
                 <keysym keyval="16779757">৭</keysym>
                 <keysym keyval="38">ampersand</keysym>
                 <keysym keyval="55">7</keysym>
@@ -2009,7 +2093,11 @@
         <key id="keycode17" name="keycode17" column="8" row="0">
             <bounds>326.243902,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="56">8</keysym>
+                <keysym keyval="42">asterisk</keysym>
+                <keysym keyval="56">8</keysym>
+                <keysym keyval="56">8</keysym>
                 <keysym keyval="16779758">৮</keysym>
                 <keysym keyval="42">asterisk</keysym>
                 <keysym keyval="56">8</keysym>
@@ -2103,7 +2191,11 @@
         <key id="keycode18" name="keycode18" column="9" row="0">
             <bounds>366.829268,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="57">9</keysym>
+                <keysym keyval="40">parenleft</keysym>
+                <keysym keyval="57">9</keysym>
+                <keysym keyval="57">9</keysym>
                 <keysym keyval="16779759">৯</keysym>
                 <keysym keyval="16785421">(null)</keysym>
                 <keysym keyval="57">9</keysym>
@@ -2197,7 +2289,11 @@
         <key id="keycode19" name="keycode19" column="10" row="0">
             <bounds>407.414634,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="48">0</keysym>
+                <keysym keyval="41">parenright</keysym>
+                <keysym keyval="48">0</keysym>
+                <keysym keyval="48">0</keysym>
                 <keysym keyval="16779750">০</keysym>
                 <keysym keyval="16785420">(null)</keysym>
                 <keysym keyval="48">0</keysym>
@@ -2291,7 +2387,11 @@
         <key id="keycode20" name="keycode20" column="11" row="0">
             <bounds>448.000000,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="45">minus</keysym>
+                <keysym keyval="95">underscore</keysym>
+                <keysym keyval="45">minus</keysym>
+                <keysym keyval="45">minus</keysym>
                 <keysym keyval="45">minus</keysym>
                 <keysym keyval="16779651">ঃ</keysym>
                 <keysym keyval="45">minus</keysym>
@@ -2385,7 +2485,11 @@
         <key id="keycode21" name="keycode21" column="12" row="0">
             <bounds>488.585366,1.560976,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="61">equal</keysym>
+                <keysym keyval="43">plus</keysym>
+                <keysym keyval="61">equal</keysym>
+                <keysym keyval="61">equal</keysym>
                 <keysym keyval="16779715">ৃ</keysym>
                 <keysym keyval="16779659">ঋ</keysym>
                 <keysym keyval="16779716">ৄ</keysym>
@@ -2479,7 +2583,11 @@
         <key id="keycode22" name="keycode22" column="13" row="0">
             <bounds>529.170732,1.560976,79.609756,37.463415</bounds>
             <oref>outline1</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65288">BackSpace</keysym>
+                <keysym keyval="65288">BackSpace</keysym>
+                <keysym keyval="65288">BackSpace</keysym>
+                <keysym keyval="65288">BackSpace</keysym>
                 <keysym keyval="65288">BackSpace</keysym>
                 <keysym keyval="65288">BackSpace</keysym>
                 <keysym keyval="65288">BackSpace</keysym>
@@ -2573,7 +2681,11 @@
         <key id="keycode23" name="keycode23" column="0" row="1">
             <bounds>3.121951,42.146341,59.317073,37.463415</bounds>
             <oref>outline6</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65289">Tab</keysym>
+                <keysym keyval="65056">ISO_Left_Tab</keysym>
+                <keysym keyval="65289">Tab</keysym>
+                <keysym keyval="65289">Tab</keysym>
                 <keysym keyval="65289">Tab</keysym>
                 <keysym keyval="65056">ISO_Left_Tab</keysym>
                 <keysym keyval="65289">Tab</keysym>
@@ -2667,7 +2779,11 @@
         <key id="keycode24" name="keycode24" column="1" row="1">
             <bounds>65.560976,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="113">q</keysym>
+                <keysym keyval="81">Q</keysym>
+                <keysym keyval="113">q</keysym>
+                <keysym keyval="113">q</keysym>
                 <keysym keyval="16779724">ৌ</keysym>
                 <keysym keyval="16779668">ঔ</keysym>
                 <keysym keyval="113">q</keysym>
@@ -2761,7 +2877,11 @@
         <key id="keycode25" name="keycode25" column="2" row="1">
             <bounds>106.146341,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="119">w</keysym>
+                <keysym keyval="87">W</keysym>
+                <keysym keyval="119">w</keysym>
+                <keysym keyval="119">w</keysym>
                 <keysym keyval="16779720">ৈ</keysym>
                 <keysym keyval="16779664">ঐ</keysym>
                 <keysym keyval="119">w</keysym>
@@ -2855,7 +2975,11 @@
         <key id="keycode26" name="keycode26" column="3" row="1">
             <bounds>145.170732,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="101">e</keysym>
+                <keysym keyval="69">E</keysym>
+                <keysym keyval="101">e</keysym>
+                <keysym keyval="101">e</keysym>
                 <keysym keyval="16779710">া</keysym>
                 <keysym keyval="16779654">আ</keysym>
                 <keysym keyval="101">e</keysym>
@@ -2949,7 +3073,11 @@
         <key id="keycode27" name="keycode27" column="4" row="1">
             <bounds>185.756098,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="114">r</keysym>
+                <keysym keyval="82">R</keysym>
+                <keysym keyval="114">r</keysym>
+                <keysym keyval="114">r</keysym>
                 <keysym keyval="16779712">ী</keysym>
                 <keysym keyval="16779656">ঈ</keysym>
                 <keysym keyval="16779747">ৣ</keysym>
@@ -3043,7 +3171,11 @@
         <key id="keycode28" name="keycode28" column="5" row="1">
             <bounds>226.341463,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="116">t</keysym>
+                <keysym keyval="84">T</keysym>
+                <keysym keyval="116">t</keysym>
+                <keysym keyval="116">t</keysym>
                 <keysym keyval="16779714">ূ</keysym>
                 <keysym keyval="16779658">ঊ</keysym>
                 <keysym keyval="116">t</keysym>
@@ -3137,7 +3269,11 @@
         <key id="keycode29" name="keycode29" column="6" row="1">
             <bounds>266.926829,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="121">y</keysym>
+                <keysym keyval="89">Y</keysym>
+                <keysym keyval="121">y</keysym>
+                <keysym keyval="121">y</keysym>
                 <keysym keyval="16779692">ব</keysym>
                 <keysym keyval="16779693">ভ</keysym>
                 <keysym keyval="121">y</keysym>
@@ -3231,7 +3367,11 @@
         <key id="keycode30" name="keycode30" column="7" row="1">
             <bounds>307.512195,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="117">u</keysym>
+                <keysym keyval="85">U</keysym>
+                <keysym keyval="117">u</keysym>
+                <keysym keyval="117">u</keysym>
                 <keysym keyval="16779705">হ</keysym>
                 <keysym keyval="16779673">ঙ</keysym>
                 <keysym keyval="117">u</keysym>
@@ -3325,7 +3465,11 @@
         <key id="keycode31" name="keycode31" column="8" row="1">
             <bounds>348.097561,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="105">i</keysym>
+                <keysym keyval="73">I</keysym>
+                <keysym keyval="105">i</keysym>
+                <keysym keyval="105">i</keysym>
                 <keysym keyval="16779671">গ</keysym>
                 <keysym keyval="16779672">ঘ</keysym>
                 <keysym keyval="105">i</keysym>
@@ -3419,7 +3563,11 @@
         <key id="keycode32" name="keycode32" column="9" row="1">
             <bounds>388.682927,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="111">o</keysym>
+                <keysym keyval="79">O</keysym>
+                <keysym keyval="111">o</keysym>
+                <keysym keyval="111">o</keysym>
                 <keysym keyval="16779686">দ</keysym>
                 <keysym keyval="16779687">ধ</keysym>
                 <keysym keyval="111">o</keysym>
@@ -3513,7 +3661,11 @@
         <key id="keycode33" name="keycode33" column="10" row="1">
             <bounds>429.268293,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="112">p</keysym>
+                <keysym keyval="80">P</keysym>
+                <keysym keyval="112">p</keysym>
+                <keysym keyval="112">p</keysym>
                 <keysym keyval="16779676">জ</keysym>
                 <keysym keyval="16779677">ঝ</keysym>
                 <keysym keyval="112">p</keysym>
@@ -3607,7 +3759,11 @@
         <key id="keycode34" name="keycode34" column="11" row="1">
             <bounds>468.292683,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="91">bracketleft</keysym>
+                <keysym keyval="123">braceleft</keysym>
+                <keysym keyval="91">bracketleft</keysym>
+                <keysym keyval="91">bracketleft</keysym>
                 <keysym keyval="16779681">ড</keysym>
                 <keysym keyval="16779682">ঢ</keysym>
                 <keysym keyval="16779740">ড়</keysym>
@@ -3701,7 +3857,11 @@
         <key id="keycode35" name="keycode35" column="12" row="1">
             <bounds>508.878049,42.146341,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="93">bracketright</keysym>
+                <keysym keyval="125">braceright</keysym>
+                <keysym keyval="93">bracketright</keysym>
+                <keysym keyval="93">bracketright</keysym>
                 <keysym keyval="16779708">়</keysym>
                 <keysym keyval="16779678">ঞ</keysym>
                 <keysym keyval="93">bracketright</keysym>
@@ -3795,7 +3955,11 @@
         <key id="keycode51" name="keycode51" column="13" row="1">
             <bounds>549.463415,42.146341,59.317073,37.463415</bounds>
             <oref>outline7</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="92">backslash</keysym>
+                <keysym keyval="124">bar</keysym>
+                <keysym keyval="92">backslash</keysym>
+                <keysym keyval="92">backslash</keysym>
                 <keysym keyval="92">backslash</keysym>
                 <keysym keyval="124">bar</keysym>
                 <keysym keyval="92">backslash</keysym>
@@ -3889,7 +4053,11 @@
         <key id="keycode66" name="keycode66" column="0" row="2">
             <bounds>3.121951,82.731707,68.682927,37.463415</bounds>
             <oref>outline8</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65507">Control_L</keysym>
+                <keysym keyval="65507">Control_L</keysym>
+                <keysym keyval="65507">Control_L</keysym>
+                <keysym keyval="65507">Control_L</keysym>
                 <keysym keyval="65507">Control_L</keysym>
                 <keysym keyval="65507">Control_L</keysym>
                 <keysym keyval="65507">Control_L</keysym>
@@ -3983,7 +4151,11 @@
         <key id="keycode38" name="keycode38" column="1" row="2">
             <bounds>76.487805,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="97">a</keysym>
+                <keysym keyval="65">A</keysym>
+                <keysym keyval="97">a</keysym>
+                <keysym keyval="97">a</keysym>
                 <keysym keyval="16779723">ো</keysym>
                 <keysym keyval="16779667">ও</keysym>
                 <keysym keyval="97">a</keysym>
@@ -4077,7 +4249,11 @@
         <key id="keycode39" name="keycode39" column="2" row="2">
             <bounds>115.512195,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="115">s</keysym>
+                <keysym keyval="83">S</keysym>
+                <keysym keyval="115">s</keysym>
+                <keysym keyval="115">s</keysym>
                 <keysym keyval="16779719">ে</keysym>
                 <keysym keyval="16779663">এ</keysym>
                 <keysym keyval="115">s</keysym>
@@ -4171,7 +4347,11 @@
         <key id="keycode40" name="keycode40" column="3" row="2">
             <bounds>156.097561,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="100">d</keysym>
+                <keysym keyval="68">D</keysym>
+                <keysym keyval="100">d</keysym>
+                <keysym keyval="100">d</keysym>
                 <keysym keyval="16779725">্</keysym>
                 <keysym keyval="16779653">অ</keysym>
                 <keysym keyval="100">d</keysym>
@@ -4265,7 +4445,11 @@
         <key id="keycode41" name="keycode41" column="4" row="2">
             <bounds>196.682927,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="102">f</keysym>
+                <keysym keyval="70">F</keysym>
+                <keysym keyval="102">f</keysym>
+                <keysym keyval="102">f</keysym>
                 <keysym keyval="16779711">ি</keysym>
                 <keysym keyval="16779655">ই</keysym>
                 <keysym keyval="16779746">ৢ</keysym>
@@ -4359,7 +4543,11 @@
         <key id="keycode42" name="keycode42" column="5" row="2">
             <bounds>237.268293,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="103">g</keysym>
+                <keysym keyval="71">G</keysym>
+                <keysym keyval="103">g</keysym>
+                <keysym keyval="103">g</keysym>
                 <keysym keyval="16779713">ু</keysym>
                 <keysym keyval="16779657">উ</keysym>
                 <keysym keyval="103">g</keysym>
@@ -4453,7 +4641,11 @@
         <key id="keycode43" name="keycode43" column="6" row="2">
             <bounds>277.853659,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="104">h</keysym>
+                <keysym keyval="72">H</keysym>
+                <keysym keyval="104">h</keysym>
+                <keysym keyval="104">h</keysym>
                 <keysym keyval="16779690">প</keysym>
                 <keysym keyval="16779691">ফ</keysym>
                 <keysym keyval="104">h</keysym>
@@ -4547,7 +4739,11 @@
         <key id="keycode44" name="keycode44" column="7" row="2">
             <bounds>318.439024,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="106">j</keysym>
+                <keysym keyval="74">J</keysym>
+                <keysym keyval="106">j</keysym>
+                <keysym keyval="106">j</keysym>
                 <keysym keyval="16779760">ৰ</keysym>
                 <keysym keyval="74">J</keysym>
                 <keysym keyval="106">j</keysym>
@@ -4641,7 +4837,11 @@
         <key id="keycode45" name="keycode45" column="8" row="2">
             <bounds>359.024390,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="107">k</keysym>
+                <keysym keyval="75">K</keysym>
+                <keysym keyval="107">k</keysym>
+                <keysym keyval="107">k</keysym>
                 <keysym keyval="16779669">ক</keysym>
                 <keysym keyval="16779670">খ</keysym>
                 <keysym keyval="107">k</keysym>
@@ -4735,7 +4935,11 @@
         <key id="keycode46" name="keycode46" column="9" row="2">
             <bounds>399.609756,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="108">l</keysym>
+                <keysym keyval="76">L</keysym>
+                <keysym keyval="108">l</keysym>
+                <keysym keyval="108">l</keysym>
                 <keysym keyval="16779684">ত</keysym>
                 <keysym keyval="16779685">থ</keysym>
                 <keysym keyval="16779726">ৎ</keysym>
@@ -4829,7 +5033,11 @@
         <key id="keycode47" name="keycode47" column="10" row="2">
             <bounds>438.634146,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="59">semicolon</keysym>
+                <keysym keyval="58">colon</keysym>
+                <keysym keyval="59">semicolon</keysym>
+                <keysym keyval="59">semicolon</keysym>
                 <keysym keyval="16779674">চ</keysym>
                 <keysym keyval="16779675">ছ</keysym>
                 <keysym keyval="59">semicolon</keysym>
@@ -4923,7 +5131,11 @@
         <key id="keycode48" name="keycode48" column="11" row="2">
             <bounds>479.219512,82.731707,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="39">quoteright</keysym>
+                <keysym keyval="34">quotedbl</keysym>
+                <keysym keyval="39">quoteright</keysym>
+                <keysym keyval="39">quoteright</keysym>
                 <keysym keyval="16779679">ট</keysym>
                 <keysym keyval="34">quotedbl</keysym>
                 <keysym keyval="39">quoteright</keysym>
@@ -5017,7 +5229,11 @@
         <key id="keycode36" name="keycode36" column="12" row="2">
             <bounds>519.804878,82.731707,88.975610,37.463415</bounds>
             <oref>outline9</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65293">Return</keysym>
+                <keysym keyval="65293">Return</keysym>
+                <keysym keyval="65293">Return</keysym>
+                <keysym keyval="65293">Return</keysym>
                 <keysym keyval="65293">Return</keysym>
                 <keysym keyval="65293">Return</keysym>
                 <keysym keyval="65293">Return</keysym>
@@ -5111,7 +5327,11 @@
         <key id="keycode50" name="keycode50" column="0" row="3">
             <bounds>3.121951,121.756098,88.975610,37.463415</bounds>
             <oref>outline10</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65505">Shift_L</keysym>
+                <keysym keyval="65505">Shift_L</keysym>
+                <keysym keyval="65505">Shift_L</keysym>
+                <keysym keyval="65505">Shift_L</keysym>
                 <keysym keyval="65505">Shift_L</keysym>
                 <keysym keyval="65505">Shift_L</keysym>
                 <keysym keyval="65505">Shift_L</keysym>
@@ -5205,7 +5425,11 @@
         <key id="keycode52" name="keycode52" column="1" row="3">
             <bounds>95.219512,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="122">z</keysym>
+                <keysym keyval="90">Z</keysym>
+                <keysym keyval="122">z</keysym>
+                <keysym keyval="122">z</keysym>
                 <keysym keyval="16777916">ʼ</keysym>
                 <keysym keyval="90">Z</keysym>
                 <keysym keyval="122">z</keysym>
@@ -5299,7 +5523,11 @@
         <key id="keycode53" name="keycode53" column="2" row="3">
             <bounds>135.804878,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="120">x</keysym>
+                <keysym keyval="88">X</keysym>
+                <keysym keyval="120">x</keysym>
+                <keysym keyval="120">x</keysym>
                 <keysym keyval="16779650">ং</keysym>
                 <keysym keyval="16779649">ঁ</keysym>
                 <keysym keyval="16779770">৺</keysym>
@@ -5393,7 +5621,11 @@
         <key id="keycode54" name="keycode54" column="3" row="3">
             <bounds>176.390244,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="99">c</keysym>
+                <keysym keyval="67">C</keysym>
+                <keysym keyval="99">c</keysym>
+                <keysym keyval="99">c</keysym>
                 <keysym keyval="16779683">ণ</keysym>
                 <keysym keyval="16779683">ণ</keysym>
                 <keysym keyval="99">c</keysym>
@@ -5487,7 +5719,11 @@
         <key id="keycode55" name="keycode55" column="4" row="3">
             <bounds>215.414634,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="118">v</keysym>
+                <keysym keyval="86">V</keysym>
+                <keysym keyval="118">v</keysym>
+                <keysym keyval="118">v</keysym>
                 <keysym keyval="16779688">ন</keysym>
                 <keysym keyval="86">V</keysym>
                 <keysym keyval="118">v</keysym>
@@ -5581,7 +5817,11 @@
         <key id="keycode56" name="keycode56" column="5" row="3">
             <bounds>256.000000,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="98">b</keysym>
+                <keysym keyval="66">B</keysym>
+                <keysym keyval="98">b</keysym>
+                <keysym keyval="98">b</keysym>
                 <keysym keyval="98">b</keysym>
                 <keysym keyval="66">B</keysym>
                 <keysym keyval="98">b</keysym>
@@ -5675,7 +5915,11 @@
         <key id="keycode57" name="keycode57" column="6" row="3">
             <bounds>296.585366,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="110">n</keysym>
+                <keysym keyval="78">N</keysym>
+                <keysym keyval="110">n</keysym>
+                <keysym keyval="110">n</keysym>
                 <keysym keyval="16779698">ল</keysym>
                 <keysym keyval="78">N</keysym>
                 <keysym keyval="110">n</keysym>
@@ -5769,7 +6013,11 @@
         <key id="keycode58" name="keycode58" column="7" row="3">
             <bounds>337.170732,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="109">m</keysym>
+                <keysym keyval="77">M</keysym>
+                <keysym keyval="109">m</keysym>
+                <keysym keyval="109">m</keysym>
                 <keysym keyval="16779704">স</keysym>
                 <keysym keyval="16779702">শ</keysym>
                 <keysym keyval="109">m</keysym>
@@ -5863,7 +6111,11 @@
         <key id="keycode59" name="keycode59" column="8" row="3">
             <bounds>377.756098,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="44">comma</keysym>
+                <keysym keyval="60">less</keysym>
+                <keysym keyval="44">comma</keysym>
+                <keysym keyval="44">comma</keysym>
                 <keysym keyval="44">comma</keysym>
                 <keysym keyval="16779703">ষ</keysym>
                 <keysym keyval="16779763">৳</keysym>
@@ -5957,7 +6209,11 @@
         <key id="keycode60" name="keycode60" column="9" row="3">
             <bounds>418.341463,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="46">period</keysym>
+                <keysym keyval="62">greater</keysym>
+                <keysym keyval="46">period</keysym>
+                <keysym keyval="46">period</keysym>
                 <keysym keyval="46">period</keysym>
                 <keysym keyval="16779620">।</keysym>
                 <keysym keyval="16779621">॥</keysym>
@@ -6051,7 +6307,11 @@
         <key id="keycode61" name="keycode61" column="10" row="3">
             <bounds>458.926829,121.756098,37.463415,37.463415</bounds>
             <oref>outline4</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="47">slash</keysym>
+                <keysym keyval="63">question</keysym>
+                <keysym keyval="47">slash</keysym>
+                <keysym keyval="47">slash</keysym>
                 <keysym keyval="16779743">য়</keysym>
                 <keysym keyval="16779695">য</keysym>
                 <keysym keyval="47">slash</keysym>
@@ -6145,7 +6405,11 @@
         <key id="keycode62" name="keycode62" column="11" row="3">
             <bounds>499.512195,121.756098,109.268293,37.463415</bounds>
             <oref>outline11</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65506">Shift_R</keysym>
+                <keysym keyval="65506">Shift_R</keysym>
+                <keysym keyval="65506">Shift_R</keysym>
+                <keysym keyval="65506">Shift_R</keysym>
                 <keysym keyval="65506">Shift_R</keysym>
                 <keysym keyval="65506">Shift_R</keysym>
                 <keysym keyval="65506">Shift_R</keysym>
@@ -6239,101 +6503,19 @@
         <key id="keycode37" name="keycode37" column="0" row="4">
             <bounds>3.121951,162.341463,56.195122,37.463415</bounds>
             <oref>outline12</oref>
-            <symbols groups="22" levels="4">
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
-                <keysym keyval="65507">Control_L</keysym>
+            <symbols groups="2" levels="1">
+                <keysym keyval="65507" label="Ind">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
             </symbols>
         </key>
         <key id="keycode133" name="keycode133" column="1" row="4">
             <bounds>62.439024,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65515">Super_L</keysym>
+                <keysym keyval="65515">Super_L</keysym>
+                <keysym keyval="65515">Super_L</keysym>
+                <keysym keyval="65515">Super_L</keysym>
                 <keysym keyval="65515">Super_L</keysym>
                 <keysym keyval="65515">Super_L</keysym>
                 <keysym keyval="65515">Super_L</keysym>
@@ -6427,7 +6609,11 @@
         <key id="keycode64" name="keycode64" column="2" row="4">
             <bounds>113.951220,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65513">Alt_L</keysym>
+                <keysym keyval="65511">Meta_L</keysym>
+                <keysym keyval="65513">Alt_L</keysym>
+                <keysym keyval="65513">Alt_L</keysym>
                 <keysym keyval="65513">Alt_L</keysym>
                 <keysym keyval="65511">Meta_L</keysym>
                 <keysym keyval="65513">Alt_L</keysym>
@@ -6521,7 +6707,11 @@
         <key id="keycode65" name="keycode65" column="3" row="4">
             <bounds>165.463415,162.341463,238.829268,37.463415</bounds>
             <oref>outline3</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="32">space</keysym>
+                <keysym keyval="32">space</keysym>
+                <keysym keyval="32">space</keysym>
+                <keysym keyval="32">space</keysym>
                 <keysym keyval="32">space</keysym>
                 <keysym keyval="32">space</keysym>
                 <keysym keyval="32">space</keysym>
@@ -6615,7 +6805,11 @@
         <key id="keycode108" name="keycode108" column="4" row="4">
             <bounds>407.414634,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
                 <keysym keyval="65027">ISO_Level3_Shift</keysym>
                 <keysym keyval="65027">ISO_Level3_Shift</keysym>
                 <keysym keyval="65027">ISO_Level3_Shift</keysym>
@@ -6709,7 +6903,11 @@
         <key id="keycode134" name="keycode134" column="5" row="4">
             <bounds>458.926829,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65516">Super_R</keysym>
+                <keysym keyval="65516">Super_R</keysym>
+                <keysym keyval="65516">Super_R</keysym>
+                <keysym keyval="65516">Super_R</keysym>
                 <keysym keyval="65516">Super_R</keysym>
                 <keysym keyval="65516">Super_R</keysym>
                 <keysym keyval="65516">Super_R</keysym>
@@ -6803,7 +7001,11 @@
         <key id="keycode135" name="keycode135" column="6" row="4">
             <bounds>508.878049,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65383">Menu</keysym>
+                <keysym keyval="65383">Menu</keysym>
+                <keysym keyval="65383">Menu</keysym>
+                <keysym keyval="65383">Menu</keysym>
                 <keysym keyval="65383">Menu</keysym>
                 <keysym keyval="65383">Menu</keysym>
                 <keysym keyval="65383">Menu</keysym>
@@ -6897,7 +7099,11 @@
         <key id="keycode105" name="keycode105" column="7" row="4">
             <bounds>560.390244,162.341463,48.390244,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="22" levels="4">
+            <symbols groups="23" levels="4">
+                <keysym keyval="65508">Control_R</keysym>
+                <keysym keyval="65508">Control_R</keysym>
+                <keysym keyval="65508">Control_R</keysym>
+                <keysym keyval="65508">Control_R</keysym>
                 <keysym keyval="65508">Control_R</keysym>
                 <keysym keyval="65508">Control_R</keysym>
                 <keysym keyval="65508">Control_R</keysym>
