@@ -1,0 +1,1 @@
+EXTRA_DIST = gen-inscript-keyboard.py

@@ -17,5 +17,5 @@
 # 02110-1301 USA
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = eek eekboard src tests bindings docs po data
+SUBDIRS = eek eekboard src tests bindings docs po data examples
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --enable-introspection
