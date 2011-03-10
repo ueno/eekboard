@@ -147,6 +147,7 @@ eek_keyboard_real_serialize (EekSerializable *self,
     }
     g_variant_builder_add (builder, "v", g_variant_builder_end (&array));
     g_variant_builder_add (builder, "u", priv->num_lock_mask);
+    g_variant_builder_add (builder, "u", priv->alt_gr_mask);
 }
 
 static gsize
@@ -172,6 +173,7 @@ eek_keyboard_real_deserialize (EekSerializable *self,
         g_slice_free (EekOutline, _outline);
     }
     g_variant_get_child (variant, index++, "u", &priv->num_lock_mask);
+    g_variant_get_child (variant, index++, "u", &priv->alt_gr_mask);
 
     return index;
 }
