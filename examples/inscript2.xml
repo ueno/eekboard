@@ -6503,8 +6503,29 @@
         <key id="keycode37" name="keycode37" column="0" row="4">
             <bounds>3.121951,162.341463,56.195122,37.463415</bounds>
             <oref>outline12</oref>
-            <symbols groups="2" levels="1">
+            <symbols groups="23" levels="1">
                 <keysym keyval="65507" label="Ind">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
+                <keysym keyval="65507" label="Eng">Control_L</keysym>
                 <keysym keyval="65507" label="Eng">Control_L</keysym>
             </symbols>
         </key>
