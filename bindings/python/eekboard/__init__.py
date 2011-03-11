@@ -34,6 +34,8 @@ MODIFIER_BEHAVIOR_LATCH = \
  Eek.ModifierBehavior.LOCK,
  Eek.ModifierBehavior.LATCH)
 
+SymbolCategory = Eek.SymbolCategory
+
 CSW = 640
 CSH = 480
 
