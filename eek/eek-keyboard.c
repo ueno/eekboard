@@ -361,7 +361,10 @@ eek_keyboard_real_key_released (EekKeyboard *self,
         priv->modifiers ^= modifier;
         break;
     case EEK_MODIFIER_BEHAVIOR_LATCH:
-        priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+        if (modifier == priv->alt_gr_mask || modifier == EEK_SHIFT_MASK)
+            priv->modifiers ^= modifier;
+        else
+            priv->modifiers = (priv->modifiers ^ modifier) & modifier;
         break;
     }
     set_level_from_modifiers (self);
