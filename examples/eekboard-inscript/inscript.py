@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-import gtk, eekboard, virtkey
+import gobject, gtk, eekboard, virtkey
 import sys, os.path, re
 
 KEYCODE_TABLE = {
@@ -77,7 +77,15 @@ class MapFile(object):
     def __add_text_entry(self, text, insert):
         self.__add_entry(text, 0, insert)
 
-class Keyboard(object):
+class Keyboard(gobject.GObject):
+    __gtype_name__ = "PYInscriptKeyboard"
+    __gsignals__ = {
+        'quit': (
+            gobject.SIGNAL_RUN_LAST,
+            gobject.TYPE_NONE,
+            ()),
+        }
+
     def __init__(self, client_name, map_path, kbd_path):
         self.__keyboard = self.__create_keyboard(map_path, kbd_path)
         self.__eekboard = eekboard.Eekboard()
@@ -89,6 +97,8 @@ class Keyboard(object):
         self.__virtkey = virtkey.virtkey()
         self.__english = False
         self.__eekboard.connect('destroyed', self.__destroyed_cb)
+        self.__context.connect('destroyed', self.__destroyed_cb)
+        self.__context.connect('notify::keyboard-visible', self.__notify_keyboard_visible_cb)
 
     def __create_keyboard(self, map_path, kbd_path):
         def __each_key(element, data):
@@ -96,11 +106,13 @@ class Keyboard(object):
             # keycode 37 is used to toggle English/Inscript
             if keycode == 37:
                 matrix = eekboard.SymbolMatrix.new(2, 1)
-                keysym = eekboard.Keysym.new(65507)
+                keysym = eekboard.Keysym.new(0)
                 keysym.set_label("Ind")
+                keysym.set_category(eekboard.SymbolCategory.FUNCTION)
                 matrix.set_symbol(0, 0, keysym)
-                keysym = eekboard.Keysym.new(65507)
+                keysym = eekboard.Keysym.new(0)
                 keysym.set_label("Eng")
+                keysym.set_category(eekboard.SymbolCategory.FUNCTION)
                 matrix.set_symbol(1, 0, keysym)
                 element.set_symbol_matrix(matrix)
                 return
@@ -134,8 +146,14 @@ class Keyboard(object):
         keyboard.foreach_child(__each_section, mapfile)
         return keyboard
 
-    def __destroyed_cb(self, eekboard):
+    def __destroyed_cb(self, *args):
+        # self.emit('quit')
         gtk.main_quit()
+
+    def __notify_keyboard_visible_cb(self, obj, pspec):
+        if not obj.get_property(pspec.name):
+            # self.emit('quit')
+            gtk.main_quit()
 
     def enable(self):
         self.__eekboard.push_context(self.__context)

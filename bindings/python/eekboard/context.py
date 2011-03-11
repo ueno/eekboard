@@ -44,18 +44,30 @@ class Context(gobject.GObject):
         }
 
     __gproperties__ = {
-        'keyboard-visible': (bool, None, None, False, gobject.PARAM_READABLE),
+        'keyboard-visible': (bool, None, None, False, gobject.PARAM_READWRITE),
         }
 
     def __init__(self, giobject):
         super(Context, self).__init__()
-        import sys
+        self.__properties = dict()
         self.__giobject = giobject
         self.__giobject.connect('enabled', lambda *args: self.emit('enabled'))
         self.__giobject.connect('disabled', lambda *args: self.emit('disabled'))
         self.__giobject.connect('key-pressed', lambda *args: self.emit('key-pressed', args[1]))
         self.__giobject.connect('key-released', lambda *args: self.emit('key-released', args[1]))
         self.__giobject.connect('destroyed', lambda *args: self.emit('destroyed'))
+        self.__giobject.connect('notify::keyboard-visible', self.__notify_keyboard_visible_cb)
+
+    def do_set_property(self, pspec, value):
+        self.__properties[pspec.name] = value
+
+    def do_get_property(self, pspec):
+        return self.__properties[pspec.name]
+
+    def __notify_keyboard_visible_cb(self, *args):
+        self.set_property('keyboard-visible',
+                          self.__giobject.get_property(args[1].name))
+        self.notify('keyboard-visible')
 
     def get_giobject(self):
         return self.__giobject
