@@ -42,6 +42,7 @@ if not os.path.exists(kbd_path):
     exit(1)
 
 keyboard = inscript.Keyboard("eekboard-inscript", map_path, kbd_path)
+keyboard.connect('quit', lambda *args: gtk.main_quit())
 keyboard.set_group(1)
 keyboard.enable()
 keyboard.show()

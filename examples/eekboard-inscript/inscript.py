@@ -87,6 +87,7 @@ class Keyboard(gobject.GObject):
         }
 
     def __init__(self, client_name, map_path, kbd_path):
+        super(Keyboard, self).__init__()
         self.__keyboard = self.__create_keyboard(map_path, kbd_path)
         self.__eekboard = eekboard.Eekboard()
         self.__context = self.__eekboard.create_context(client_name)
@@ -149,13 +150,11 @@ class Keyboard(gobject.GObject):
         return keyboard
 
     def __destroyed_cb(self, *args):
-        # self.emit('quit')
-        gtk.main_quit()
+        self.emit('quit')
 
     def __notify_keyboard_visible_cb(self, obj, pspec):
         if not obj.get_property(pspec.name):
-            # self.emit('quit')
-            gtk.main_quit()
+            self.emit('quit')
 
     def enable(self):
         self.__eekboard.push_context(self.__context)
