@@ -19,13 +19,24 @@
 import inscript
 import gtk
 from optparse import OptionParser
-import sys, os
+import sys, os, os.path, glob
 
 parser = OptionParser()
 parser.add_option("-n", "--name=LANGCODE", dest="langcode",
                   help="Specify language code to LANGCODE",
                   metavar="LANGCODE")
+parser.add_option("-l", "--list", dest="list", default=False,
+                  action="store_true",
+                  help="List available language codes")
 (options, args) = parser.parse_args()
+
+if options.list:
+    pat = os.path.join(os.getenv("M17N_DIR"), "*.mim")
+    for fname in sorted(glob.glob(pat)):
+        mname = os.path.basename(fname[:-4])
+        if mname in inscript.INSCRIPT_MAPS:
+            print mname
+    exit(0)
 
 if options.langcode is None:
     print >> sys.stderr, "Specify language code with -n"

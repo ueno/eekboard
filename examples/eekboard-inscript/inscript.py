@@ -33,6 +33,36 @@ KEYCODE_TABLE = {
 MARK_UPPER = '~!@#$%^&*()_+{}|:"<>?'
 MARK_LOWER = '`1234567890-=[]\\;\',./'
 
+INSCRIPT_MAPS = (
+    "as-inscript",
+    "bn-inscript",
+    "gu-inscript",
+    "hi-inscript",
+    "kn-inscript",
+    "ml-inscript",
+    "mr-inscript",
+    "or-inscript",
+    "pa-inscript",
+    "sd-inscript",
+    "ta-inscript",
+    "te-inscript",
+    "kn-inscript2",
+    "kok-inscript2-deva",
+    "mai-inscript2",
+    "ml-inscript2",
+    "mni-inscript2-beng",
+    "mni-inscript2-mtei",
+    "mr-inscript2",
+    "ne-inscript2-deva",
+    "or-inscript2",
+    "pa-inscript2-guru",
+    "sa-inscript2",
+    "sat-inscript2-deva",
+    "sat-inscript2-olck",
+    "sd-inscript2-deva",
+    "ta-inscript2",
+    "te-inscript2")
+
 class MapFile(object):
     MAPENTRY_PATTERN = re.compile(r'\A\s*\((?:\((.*?)\)|"(.*?)")\s*"(.*?)"\)')
 
