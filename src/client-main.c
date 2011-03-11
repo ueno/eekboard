@@ -36,6 +36,8 @@ static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
 #endif  /* HAVE_CSPI */
 
+static gchar *opt_keyboard = NULL;
+
 static gchar *opt_model = NULL;
 static gchar *opt_layouts = NULL;
 static gchar *opt_options = NULL;
@@ -55,6 +57,8 @@ static const GOptionEntry options[] = {
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_CSPI */
+    {"keyboard", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboard,
+     N_("Specify keyboard file")},
     {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
      N_("Specify model")},
     {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
@@ -198,11 +202,21 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_CSPI */
 
-    if (opt_model || opt_layouts || opt_options) {
+    if (opt_keyboard && (opt_model || opt_layouts || opt_options)) {
+        g_printerr ("Can't use --keyboard option with xklavier options\n");
+        exit (1);
+    }
+
+    if (opt_keyboard) {
+        if (!eekboard_client_load_keyboard_from_file (client, opt_keyboard)) {
+            g_printerr ("Can't load keyboard\n");
+            exit (1);
+        }
+    } else if (opt_model || opt_layouts || opt_options) {
         if (!eekboard_client_set_xkl_config (client,
-                                                     opt_model,
-                                                     opt_layouts,
-                                                     opt_options)) {
+                                             opt_model,
+                                             opt_layouts,
+                                             opt_options)) {
             g_printerr ("Can't set xklavier config\n");
             exit (1);
         }

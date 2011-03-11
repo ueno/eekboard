@@ -34,6 +34,14 @@ G_BEGIN_DECLS
 typedef struct _EekContainerClass EekContainerClass;
 typedef struct _EekContainerPrivate EekContainerPrivate;
 
+/**
+ * EekCallback:
+ * @element: an #EekElement
+ * @user_data: user-supplied data
+ *
+ * The type of the callback function used for iterating over the
+ * children of a container, see eek_container_foreach_child().
+ */
 typedef void (*EekCallback) (EekElement *element, gpointer user_data);
 typedef gint (*EekCompareFunc) (EekElement *element, gpointer user_data);
 

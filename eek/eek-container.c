@@ -249,7 +249,7 @@ eek_container_init (EekContainer *self)
 /**
  * eek_container_foreach_child:
  * @container: an #EekContainer
- * @callback: an #EekCallback
+ * @callback: (scope call): an #EekCallback
  * @user_data: additional data passed to @callback
  *
  * Enumerate children of @container and run @callback with each child.
