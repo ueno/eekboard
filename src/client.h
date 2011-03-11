@@ -33,6 +33,9 @@ typedef struct _EekboardClient EekboardClient;
 
 EekboardClient * eekboard_client_new             (GDBusConnection *connection);
 
+gboolean         eekboard_client_load_keyboard_from_file
+                                                 (EekboardClient  *client,
+                                                  const gchar     *file);
 gboolean         eekboard_client_set_xkl_config  (EekboardClient  *client,
                                                   const gchar     *model,
                                                   const gchar     *layouts,

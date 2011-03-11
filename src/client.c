@@ -106,7 +106,10 @@ static SPIBoolean      keystroke_listener_cb
                                          (const AccessibleKeystroke *stroke,
                                           void                      *user_data);
 #endif  /* HAVE_CSPI */
-static gboolean        set_keyboard      (EekboardClient     *client,
+static gboolean        set_keyboard      (EekboardClient            *client,
+                                          gboolean                   show,
+                                          EekLayout                 *layout);
+static gboolean        set_xkl_keyboard  (EekboardClient            *client,
                                           gboolean                   show,
                                           const gchar               *model,
                                           const gchar               *layouts,
@@ -287,17 +290,17 @@ eekboard_client_set_xkl_config (EekboardClient *client,
                                         const gchar *options)
 {
 #ifdef HAVE_CSPI
-    return set_keyboard (client,
-                         client->focus_listener ? FALSE : TRUE,
-                         model,
-                         layouts,
-                         options);
+    return set_xkl_keyboard (client,
+                             client->focus_listener ? FALSE : TRUE,
+                             model,
+                             layouts,
+                             options);
 #else
-    return set_keyboard (client,
-                         TRUE,
-                         model,
-                         layouts,
-                         options);
+    return set_xkl_keyboard (client,
+                             TRUE,
+                             model,
+                             layouts,
+                             options);
 #endif
 }
 
@@ -338,10 +341,13 @@ eekboard_client_enable_xkl (EekboardClient *client)
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
 #ifdef HAVE_CSPI
-    return set_keyboard (client, client->focus_listener ? FALSE : TRUE,
-                         NULL, NULL, NULL);
+    return set_xkl_keyboard (client,
+                             client->focus_listener ? FALSE : TRUE,
+                             NULL,
+                             NULL,
+                             NULL);
 #else
-    return set_keyboard (client, TRUE, NULL, NULL, NULL);
+    return set_xkl_keyboard (client, TRUE, NULL, NULL, NULL);
 #endif
 }
 
@@ -519,7 +525,7 @@ on_xkl_config_changed (XklEngine *xklengine,
     EekboardClient *client = user_data;
     gboolean retval;
 
-    retval = set_keyboard (client, FALSE, NULL, NULL, NULL);
+    retval = set_xkl_keyboard (client, FALSE, NULL, NULL, NULL);
     g_return_if_fail (retval);
 
 #ifdef HAVE_FAKEKEY
@@ -530,15 +536,39 @@ on_xkl_config_changed (XklEngine *xklengine,
 
 static gboolean
 set_keyboard (EekboardClient *client,
-              gboolean               show,
-              const gchar           *model,
-              const gchar           *layouts,
-              const gchar           *options)
+              gboolean        show,
+              EekLayout      *layout)
 {
-    EekLayout *layout;
     gchar *keyboard_name;
     static gint keyboard_serial = 0;
     guint keyboard_id;
+
+    client->keyboard = eek_keyboard_new (layout, CSW, CSH);
+    eek_keyboard_set_modifier_behavior (client->keyboard,
+                                        EEK_MODIFIER_BEHAVIOR_LATCH);
+
+    keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
+    eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
+    g_free (keyboard_name);
+
+    keyboard_id = eekboard_context_add_keyboard (client->context,
+                                                 client->keyboard,
+                                                 NULL);
+    eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
+    if (show)
+        eekboard_context_show_keyboard (client->context, NULL);
+    return TRUE;
+}
+
+static gboolean
+set_xkl_keyboard (EekboardClient *client,
+                  gboolean        show,
+                  const gchar    *model,
+                  const gchar    *layouts,
+                  const gchar    *options)
+{
+    EekLayout *layout;
+    gboolean retval;
 
     if (client->keyboard)
         g_object_unref (client->keyboard);
@@ -583,22 +613,9 @@ set_keyboard (EekboardClient *client,
         }
     }
 
-    client->keyboard = eek_keyboard_new (layout, CSW, CSH);
-    eek_keyboard_set_modifier_behavior (client->keyboard,
-                                        EEK_MODIFIER_BEHAVIOR_LATCH);
-
-    keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
-    eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
-    g_free (keyboard_name);
-
-    keyboard_id = eekboard_context_add_keyboard (client->context,
-                                                 client->keyboard,
-                                                 NULL);
-    eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
-    if (show)
-        eekboard_context_show_keyboard (client->context, NULL);
-
-    return TRUE;
+    retval = set_keyboard (client, show, layout);
+    g_object_unref (layout);
+    return retval;
 }
 
 static void
@@ -715,4 +732,31 @@ eekboard_client_disable_fakekey (EekboardClient *client)
         g_signal_handler_disconnect (client->keyboard,
                                      client->key_released_handler);
 }
+
+gboolean
+eekboard_client_load_keyboard_from_file (EekboardClient *client,
+                                         const gchar    *keyboard_file)
+{
+    GFile *file;
+    GFileInputStream *input;
+    GError *error;
+    EekLayout *layout;
+    EekKeyboard *keyboard;
+    guint keyboard_id;
+    gboolean retval;
+
+    file = g_file_new_for_path (keyboard_file);
+
+    error = NULL;
+    input = g_file_read (file, NULL, &error);
+    if (input == NULL)
+        return FALSE;
+
+    layout = eek_xml_layout_new (G_INPUT_STREAM(input));
+    g_object_unref (input);
+    retval = set_keyboard (client, TRUE, layout);
+    g_object_unref (layout);
+    return retval;
+}
+
 #endif  /* HAVE_FAKEKEY */
