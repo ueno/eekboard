@@ -24,7 +24,7 @@ OPTIONAL: fakekey, CSPI, Clutter, Clutter-Gtk, Vala, gobject-introspection
   $ make
   $ sudo make install
 
-* How to test
+* Using command-line tools
 
 eekboard currently includes 3 tools to implement your own virtual
 keyboard.
@@ -47,10 +47,15 @@ be started with:
 
   $ eekboard
 
+By default it renders current system keyboard layout.  To read custom
+keyboard layout, specify --keyboard option like:
+
+  $ eekboard --keyboard /usr/share/eekboard/keyboards/us-qwerty.xml
+
 ** eekboard-xml
 
-eekboard-xml is a tool to manipulate XML keyboard description used by
-eekboard-client tool and in the eekboard library.
+eekboard-xml is a tool to manipulate XML keyboard description read by
+eekboard if --keyboard option is specified.
 
 To dump the current system keyboard layout into an XML file:
 
@@ -60,6 +65,14 @@ You can display the dumped layout with:
 
   $ eekboard-xml --load keyboard.xml
 
-* Documentation
+* Using library
 
+eekboard currently includes two libraries.  One is to access
+eekboard-server via D-Bus and another is to manually render on-screen
+keyboards.
+
+For the former, see
+file:docs/reference/eekboard/html/index.html
+
+For the latter, see
 See file:docs/reference/eek/html/index.html
