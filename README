@@ -26,7 +26,7 @@ OPTIONAL: fakekey, CSPI, Clutter, Clutter-Gtk, Vala, gobject-introspection
 
 * How to test
 
-eekboard currently includes 4 tools to implement your own virtual
+eekboard currently includes 3 tools to implement your own virtual
 keyboard.
 
 ** eekboard-server
@@ -38,14 +38,14 @@ do that with:
 
   $ eekboard-server &
 
-** eekboard-desktop-client
+** eekboard
 
-eekboard-desktop-client is a client of eekboard-server.  It listens
-desktop events (keyboard change, focus in/out, and keystroke) and
-generates key events when some keys are pressed on the on-screen
-keyboard.  It can be started with:
+eekboard is a client of eekboard-server.  It listens desktop events
+(keyboard change, focus in/out, and keystroke) and generates key
+events when some keys are pressed on the on-screen keyboard.  It can
+be started with:
 
-  $ eekboard-desktop-client
+  $ eekboard
 
 ** eekboard-xml
 
@@ -59,16 +59,6 @@ To dump the current system keyboard layout into an XML file:
 You can display the dumped layout with:
 
   $ eekboard-xml --load keyboard.xml
-
-** eekboard-client
-
-eekboard-client is a simple test client of eekboard-server.  To upload
-the keyboard description to the server, display it, and listen
-key events.
-
-  $ eekboard-client --set-keyboard keyboard.xml --show-keyboard --listen
-  KeyPressed XXXXX
-  KeyReleased XXXXX
 
 * Documentation
 

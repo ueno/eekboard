@@ -248,6 +248,7 @@ data/themes/Makefile
 data/keyboards/Makefile
 examples/Makefile
 examples/eekboard-inscript/Makefile
+examples/simple-client/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc

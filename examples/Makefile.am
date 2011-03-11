@@ -1,1 +1,1 @@
-SUBDIRS = eekboard-inscript
+SUBDIRS = eekboard-inscript simple-client

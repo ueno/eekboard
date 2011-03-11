@@ -20,21 +20,27 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include <stdlib.h>
+#include <cspi/spi.h>
+#include <gtk/gtk.h>
 #include <glib/gi18n.h>
-
+#include <gconf/gconf-client.h>
 #include "eekboard/eekboard.h"
+#include "client.h"
 
 static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
-static gchar *opt_set_keyboard = NULL;
-static gint opt_set_group = -1;
-static gboolean opt_show_keyboard = FALSE;
-static gboolean opt_hide_keyboard = FALSE;
-static gint opt_press_key = -1;
-static gint opt_release_key = -1;
-static gboolean opt_listen = FALSE;
+#ifdef HAVE_CSPI
+static gboolean opt_focus = FALSE;
+static gboolean opt_keystroke = FALSE;
+#endif  /* HAVE_CSPI */
+
+static gchar *opt_model = NULL;
+static gchar *opt_layouts = NULL;
+static gchar *opt_options = NULL;
+
+static gboolean opt_fullscreen = FALSE;
 
 static const GOptionEntry options[] = {
     {"system", 'y', 0, G_OPTION_ARG_NONE, &opt_system,
@@ -43,51 +49,75 @@ static const GOptionEntry options[] = {
      N_("Connect to the session bus")},
     {"address", 'a', 0, G_OPTION_ARG_STRING, &opt_address,
      N_("Connect to the given D-Bus address")},
-    {"set-keyboard", '\0', 0, G_OPTION_ARG_STRING, &opt_set_keyboard,
-     N_("Upload keyboard description from an XML file")},
-    {"set-group", '\0', 0, G_OPTION_ARG_INT, &opt_set_group,
-     N_("Set group of the keyboard")},
-    {"show-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_show_keyboard,
-     N_("Show keyboard")},
-    {"hide-keyboard", '\0', 0, G_OPTION_ARG_NONE, &opt_hide_keyboard,
-     N_("Hide keyboard")},
-    {"press-key", '\0', 0, G_OPTION_ARG_INT, &opt_press_key,
-     N_("Press key")},
-    {"release-key", '\0', 0, G_OPTION_ARG_INT, &opt_release_key,
-     N_("Release key")},
-    {"listen", '\0', 0, G_OPTION_ARG_NONE, &opt_listen,
-     N_("Listen events")},
+#ifdef HAVE_CSPI
+    {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
+     N_("Listen focus change events with AT-SPI")},
+    {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
+     N_("Listen keystroke events with AT-SPI")},
+#endif  /* HAVE_CSPI */
+    {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
+     N_("Specify model")},
+    {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
+     N_("Specify layouts")},
+    {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
+     N_("Specify options")},
+    {"fullscreen", 'F', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
+     N_("Create window in fullscreen mode")},
     {NULL}
 };
 
 static void
-on_key_pressed (guint keycode, gpointer user_data)
+on_notify_keyboard_visible (GObject    *object,
+                            GParamSpec *spec,
+                            gpointer    user_data)
 {
-    g_print ("KeyPressed %u\n", keycode);
+    GMainLoop *loop = user_data;
+    gboolean visible;
+
+    g_object_get (object, "keyboard-visible", &visible, NULL);
+
+    /* user explicitly closed the window */
+    if (!visible && eekboard_context_is_enabled (EEKBOARD_CONTEXT(object)))
+        g_main_loop_quit (loop);
 }
 
 static void
-on_key_released (guint keycode, gpointer user_data)
+on_context_destroyed (EekboardContext *context,
+                      gpointer         user_data)
 {
-    g_print ("KeyReleased %u\n", keycode);
+    GMainLoop *loop = user_data;
+
+    g_main_loop_quit (loop);
+}
+
+static void
+on_destroyed (EekboardEekboard *eekboard,
+              gpointer          user_data)
+{
+    GMainLoop *loop = user_data;
+
+    g_main_loop_quit (loop);
 }
 
 int
 main (int argc, char **argv)
 {
-    EekboardEekboard *eekboard = NULL;
-    EekboardContext *context = NULL;
+    EekboardClient *client;
+    EekboardEekboard *eekboard;
+    EekboardContext *context;
     GBusType bus_type;
-    GDBusConnection *connection = NULL;
+    GDBusConnection *connection;
     GError *error;
+    GConfClient *gconfc;
     GOptionContext *option_context;
-    GMainLoop *loop = NULL;
-    gint retval = 0;
+    GMainLoop *loop;
 
-    g_type_init ();
-    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+    if (!gtk_init_check (&argc, &argv)) {
+        g_printerr ("Can't init GTK\n");
+        exit (1);
+    }
 
-    option_context = g_option_context_new ("eekboard-client");
+    option_context = g_option_context_new ("eekboard-desktop-client");
     g_option_context_add_main_entries (option_context, options, NULL);
     g_option_context_parse (option_context, &argc, &argv, NULL);
     g_option_context_free (option_context);
@@ -128,90 +158,88 @@ main (int argc, char **argv)
         break;
     }
 
-    eekboard = eekboard_eekboard_new (connection, NULL);
-    if (eekboard == NULL) {
-        g_printerr ("Can't create eekboard proxy\n");
-        retval = 1;
-        goto out;
+    client = eekboard_client_new (connection);
+    if (client == NULL) {
+        g_printerr ("Can't create a client\n");
+        exit (1);
     }
 
-    context = eekboard_eekboard_create_context (eekboard,
-                                                "eekboard-client",
-                                                NULL);
-    if (context == NULL) {
-        g_printerr ("Can't create context\n");
-        retval = 1;
-        goto out;
-    }
+    gconfc = gconf_client_get_default ();
 
-    eekboard_eekboard_push_context (eekboard, context, NULL);
+#ifdef HAVE_CSPI
+    error = NULL;
+    if (opt_focus || opt_keystroke) {
+        if (gconf_client_get_bool (gconfc,
+                                   "/desktop/gnome/interface/accessibility",
+                                   &error) ||
+            gconf_client_get_bool (gconfc,
+                                   "/desktop/gnome/interface/accessibility2",
+                                   &error)) {
+            if (SPI_init () != 0) {
+                g_printerr ("Can't init CSPI\n");
+                exit (1);
+            }
 
-    if (opt_set_keyboard) {
-        GFile *file;
-        GFileInputStream *input;
-        EekLayout *layout;
-        EekKeyboard *keyboard;
-        guint keyboard_id;
+            if (opt_focus &&
+                !eekboard_client_enable_cspi_focus (client)) {
+                g_printerr ("Can't register focus change event listeners\n");
+                exit (1);
+            }
 
-        file = g_file_new_for_path (opt_set_keyboard);
-
-        error = NULL;
-        input = g_file_read (file, NULL, &error);
-        if (error) {
-            g_printerr ("Can't read file %s: %s\n",
-                        opt_set_keyboard, error->message);
-            retval = 1;
-            goto out;
+            if (opt_keystroke &&
+                !eekboard_client_enable_cspi_keystroke (client)) {
+                g_printerr ("Can't register keystroke event listeners\n");
+                exit (1);
+            }
+        } else {
+            g_printerr ("Desktop accessibility support is disabled\n");
+            exit (1);
         }
+    }
+#endif  /* HAVE_CSPI */
 
-        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
-        g_object_unref (input);
-        keyboard = eek_keyboard_new (layout, 640, 480);
-        g_object_unref (layout);
-
-        keyboard_id = eekboard_context_add_keyboard (context, keyboard, NULL);
-        g_object_unref (keyboard);
-
-        eekboard_context_set_keyboard (context, keyboard_id, NULL);
+    if (opt_model || opt_layouts || opt_options) {
+        if (!eekboard_client_set_xkl_config (client,
+                                                     opt_model,
+                                                     opt_layouts,
+                                                     opt_options)) {
+            g_printerr ("Can't set xklavier config\n");
+            exit (1);
+        }
+    } else if (!eekboard_client_enable_xkl (client)) {
+        g_printerr ("Can't register xklavier event listeners\n");
+        exit (1);
     }
 
-    if (opt_set_group >= 0) {
-        eekboard_context_set_group (context, opt_set_group, NULL);
+#ifdef HAVE_FAKEKEY
+    if (!eekboard_client_enable_fakekey (client)) {
+        g_printerr ("Can't init fakekey\n");
+        exit (1);
     }
+#endif  /* HAVE_FAKEKEY */
 
-    if (opt_show_keyboard) {
-        eekboard_context_show_keyboard (context, NULL);
-    }
-
-    if (opt_hide_keyboard) {
-        eekboard_context_hide_keyboard (context, NULL);
-    }
-
-    if (opt_press_key >= 0) {
-        eekboard_context_press_key (context, opt_press_key, NULL);
-    }
-
-    if (opt_release_key >= 0) {
-        eekboard_context_release_key (context, opt_release_key, NULL);
-    }
-
-    if (opt_listen) {
-        g_signal_connect (context, "key-pressed",
-                          G_CALLBACK(on_key_pressed), NULL);
-        g_signal_connect (context, "key-released",
-                          G_CALLBACK(on_key_released), NULL);
-        loop = g_main_loop_new (NULL, FALSE);
-        g_main_loop_run (loop);
-    }
-
- out:
-    if (context)
+    loop = g_main_loop_new (NULL, FALSE);
+    if (!opt_focus) {
+        g_object_get (client, "context", &context, NULL);
+        g_signal_connect (context, "notify::keyboard-visible",
+                          G_CALLBACK(on_notify_keyboard_visible), loop);
+        g_signal_connect (context, "destroyed",
+                          G_CALLBACK(on_context_destroyed), loop);
         g_object_unref (context);
-    if (connection)
-        g_object_unref (connection);
-    if (loop)
-        g_main_loop_unref (loop);
+    }
 
-    return retval;
+    if (opt_fullscreen) {
+        g_object_get (client, "context", &context, NULL);
+        eekboard_context_set_fullscreen (context, TRUE, NULL);
+        g_object_unref (context);
+    }
+
+    g_object_get (client, "eekboard", &eekboard, NULL);
+    g_signal_connect (eekboard, "destroyed",
+                      G_CALLBACK(on_destroyed), loop);
+
+    g_main_loop_run (loop);
+    g_main_loop_unref (loop);
+
+    return 0;
 }
-

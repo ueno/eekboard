@@ -18,14 +18,13 @@
 
 if ENABLE_EEKBOARD
 bin_PROGRAMS = \
-	eekboard-desktop-client \
-	eekboard-client \
+	eekboard \
 	eekboard-server \
 	eekboard-xml
 
 noinst_LTLIBRARIES = libxklutil.la
 
-eekboard_desktop_client_CFLAGS = \
+eekboard_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
 	$(GTK_CFLAGS) \
@@ -33,7 +32,7 @@ eekboard_desktop_client_CFLAGS = \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS)
 
-eekboard_desktop_client_LDADD = \
+eekboard_LDADD = \
 	$(builddir)/libxklutil.la \
 	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
@@ -45,21 +44,21 @@ eekboard_desktop_client_LDADD = \
 	$(LIBXKLAVIER_LIBS)
 
 if ENABLE_FAKEKEY
-eekboard_desktop_client_CFLAGS += \
+eekboard_CFLAGS += \
 	$(FAKEKEY_CFLAGS)
-eekboard_desktop_client_LDADD += \
+eekboard_LDADD += \
 	$(FAKEKEY_LIBS)
 endif
 
 if ENABLE_CSPI
-eekboard_desktop_client_CFLAGS += \
+eekboard_CFLAGS += \
 	$(CSPI_CFLAGS)
-eekboard_desktop_client_LDADD += \
+eekboard_LDADD += \
 	$(CSPI_LIBS)
 endif
 
-eekboard_desktop_client_headers = desktop-client.h
-eekboard_desktop_client_SOURCES = desktop-client.c desktop-client-main.c
+eekboard_headers = client.h
+eekboard_SOURCES = client.c client-main.c
 
 eekboard_server_CFLAGS = \
 	-I$(top_srcdir) \
@@ -81,17 +80,6 @@ endif
 
 eekboard_server_headers = server-server.h server-context.h
 eekboard_server_SOURCES = server-server.c server-context.c server-main.c
-
-eekboard_client_CFLAGS = \
-	-I$(top_srcdir) \
-	$(GIO2_CFLAGS)
-
-eekboard_client_LDADD = \
-	$(top_builddir)/eekboard/libeekboard.la \
-	$(top_builddir)/eek/libeek.la \
-	$(GIO2_LIBS)
-
-eekboard_client_SOURCES = client-main.c
 
 eekboard_xml_CFLAGS = \
 	-I$(top_srcdir) \
@@ -125,8 +113,7 @@ eekboard_HEADERS =				\
 	$(libeekboard_headers)
 
 noinst_HEADERS = \
-	$(eekboard_desktop_client_headers) \
-	$(eekboard_client_headers) \
+	$(eekboard_headers) \
 	$(eekboard_server_headers) \
 	$(eekboard_xml_headers) \
 	$(libxklutil_la_headers)

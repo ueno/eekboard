@@ -1,7 +1,7 @@
 src/server-server.c
 src/server-context.c
-src/client-main.c
-src/desktop-client.c
-src/desktop-client-main.c
-src/xml-main.c
 src/server-main.c
+src/client.c
+src/client-main.c
+src/xml-main.c
+examples/simple-client/main.c
