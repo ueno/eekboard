@@ -25,6 +25,7 @@ Section = Eek.Section
 Key = Eek.Key
 Symbol = Eek.Symbol
 Keysym = Eek.Keysym
+SymbolMatrix = Eek.SymbolMatrix
 
 MODIFIER_BEHAVIOR_NONE, \
 MODIFIER_BEHAVIOR_LOCK, \
