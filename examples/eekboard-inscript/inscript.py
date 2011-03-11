@@ -125,14 +125,16 @@ class Keyboard(gobject.GObject):
             # group(1) is inscript keyboard
             entry = data.get_entry_for_keycode(keycode)
             for l in xrange(4):
-                keysym = None
                 if entry and entry[l]:
                     try:
                         keyval = gtk.gdk.unicode_to_keyval(ord(entry[l]))
                         keysym = eekboard.Keysym.new(keyval)
                     except:
-                        print >> sys.stderr, "can't convert %s to keyval" % entry[l]
-                if not keysym:
+                        keysym = eekboard.Keysym.new(0)
+                        keysym.set_label(entry[l].encode('UTF-8'))
+                        keysym.set_category(eekboard.SymbolCategory.LETTER)
+                        print >> sys.stderr, "can't convert %s (%d) to keyval" % (entry[l], keycode)
+                else:
                     keysym = element.get_symbol_at_index(1, l, 0, 0)
                 matrix.set_symbol(1, l, keysym)
             element.set_symbol_matrix(matrix)
