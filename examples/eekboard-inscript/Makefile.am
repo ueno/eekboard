@@ -2,7 +2,7 @@ bin_SCRIPTS = eekboard-inscript
 keyboarddir = $(pkgdatadir)/keyboards
 
 eekboard_inscript_datadir = $(datarootdir)/eekboard-inscript
-eekboard_inscript_data_DATA = inscript.py main.py
+eekboard_inscript_data_PYTHON = inscript.py main.py
 
 eekboard-inscript: eekboard-inscript.in
 	$(AM_V_GEN) sed -e 's!@''PYTHON@!'$(PYTHON)'!' \
@@ -11,3 +11,4 @@ eekboard-inscript: eekboard-inscript.in
 			-e 's!@EEKBOARD_INSCRIPT_DATADIR@!'$(eekboard_inscript_datadir)'!' < $< > $@
 
 CLEANFILES = eekboard-inscript
+EXTRA_DIST = eekboard-inscript.in
