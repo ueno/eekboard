@@ -20,7 +20,7 @@ AC_PREREQ(2.63)
 dnl AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_INIT([eekboard], [0.90.5], [ueno@unixuser.org])
+AC_INIT([eekboard], [0.90.6], [ueno@unixuser.org])
 
 dnl Init automake
 AM_INIT_AUTOMAKE
