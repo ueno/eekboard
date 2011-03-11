@@ -72,5 +72,3 @@ po/Makefile.in.in
 po/POTFILES
 po/stamp-it
 bindings/vala/*.vapi
-py-compile
-
