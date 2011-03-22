@@ -58,7 +58,7 @@ static const GOptionEntry options[] = {
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_CSPI */
     {"keyboard", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboard,
-     N_("Specify keyboard file")},
+     N_("Specify keyboard")},
     {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
      N_("Specify model")},
     {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
@@ -208,10 +208,18 @@ main (int argc, char **argv)
     }
 
     if (opt_keyboard) {
-        if (!eekboard_client_load_keyboard_from_file (client, opt_keyboard)) {
-            g_printerr ("Can't load keyboard\n");
+        gchar *file;
+
+        if (g_str_has_suffix (opt_keyboard, ".xml"))
+            file = g_strdup (opt_keyboard);
+        else
+            file = g_strdup_printf ("%s/%s.xml", KEYBOARDDIR, opt_keyboard);
+        if (!eekboard_client_load_keyboard_from_file (client, file)) {
+            g_printerr ("Can't load keyboard file %s\n", file);
+            g_free (file);
             exit (1);
         }
+        g_free (file);
     } else if (opt_model || opt_layouts || opt_options) {
         if (!eekboard_client_set_xkl_config (client,
                                              opt_model,

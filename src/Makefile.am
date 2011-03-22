@@ -30,7 +30,8 @@ eekboard_CFLAGS = \
 	$(GTK_CFLAGS) \
 	$(GCONF2_CFLAGS) \
 	$(XKB_CFLAGS) \
-	$(LIBXKLAVIER_CFLAGS)
+	$(LIBXKLAVIER_CFLAGS) \
+	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
 
 eekboard_LDADD = \
 	$(builddir)/libxklutil.la \
