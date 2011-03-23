@@ -88,10 +88,12 @@ libeek_marshalers_sources =			\
 
 BUILT_SOURCES =					\
 	$(libeek_keysym_sources)		\
+	$(libeek_enumtypes_sources)		\
 	$(libeek_marshalers_sources)
 
 libeek_la_SOURCES =				\
 	$(libeek_sources)			\
+	$(srcdir)/eek-enumtypes.c		\
 	$(srcdir)/eek-marshalers.c
 
 libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS) $(LIBCROCO_CFLAGS)
@@ -175,6 +177,16 @@ eek-unicode-keysym-entries.h: unicode-keysym-entries.txt
 eek-xkeysym-keysym-entries.h: xkeysym-keysym-entries.txt
 	$(PYTHON) ./gen-keysym-entries.py xkeysym_keysym_entries < $< > $@
 
+eek-enumtypes.h: $(libeek_public_headers) eek-enumtypes.h.template
+	$(AM_V_GEN) $(GLIB_MKENUMS) --template eek-enumtypes.h.template \
+		$(libeek_public_headers) > eek-enumtypes.h.tmp && \
+		mv eek-enumtypes.h.tmp eek-enumtypes.h
+
+eek-enumtypes.c: $(libeek_public_headers) eek-enumtypes.c.template
+	$(AM_V_GEN) $(GLIB_MKENUMS) --template eek-enumtypes.c.template \
+		$(libeek_public_headers) > eek-enumtypes.c.tmp && \
+		mv eek-enumtypes.c.tmp eek-enumtypes.c
+
 # gen marshal
 eek-marshalers.h: eek-marshalers.list
 	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=_eek_marshal $(srcdir)/eek-marshalers.list --header --internal > $@.tmp && \
@@ -207,6 +219,8 @@ EXTRA_DIST =					\
 	special-keysym-entries.txt		\
 	unicode-keysym-entries.txt		\
 	xkeysym-keysym-entries.txt		\
+	eek-enumtypes.h.template		\
+	eek-enumtypes.c.template		\
 	eek-marshalers.list
 
 -include $(INTROSPECTION_MAKEFILE)

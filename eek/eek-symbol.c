@@ -31,6 +31,7 @@
 
 #include "eek-symbol.h"
 #include "eek-serializable.h"
+#include "eek-enumtypes.h"
 
 enum {
     PROP_0,
@@ -110,11 +111,11 @@ eek_symbol_set_property (GObject      *object,
         eek_symbol_set_label (EEK_SYMBOL(object), g_value_get_string (value));
         break;
     case PROP_CATEGORY:
-        eek_symbol_set_category (EEK_SYMBOL(object), g_value_get_uint (value));
+        eek_symbol_set_category (EEK_SYMBOL(object), g_value_get_enum (value));
         break;
     case PROP_MODIFIER_MASK:
         eek_symbol_set_modifier_mask (EEK_SYMBOL(object),
-                                      g_value_get_uint (value));
+                                      g_value_get_flags (value));
         break;
     case PROP_ICON_NAME:
         eek_symbol_set_icon_name (EEK_SYMBOL(object),
@@ -142,11 +143,11 @@ eek_symbol_get_property (GObject    *object,
         g_value_set_string (value, eek_symbol_get_label (EEK_SYMBOL(object)));
         break;
     case PROP_CATEGORY:
-        g_value_set_uint (value, eek_symbol_get_category (EEK_SYMBOL(object)));
+        g_value_set_enum (value, eek_symbol_get_category (EEK_SYMBOL(object)));
         break;
     case PROP_MODIFIER_MASK:
-        g_value_set_uint (value,
-                          eek_symbol_get_modifier_mask (EEK_SYMBOL(object)));
+        g_value_set_flags (value,
+                           eek_symbol_get_modifier_mask (EEK_SYMBOL(object)));
         break;
     case PROP_ICON_NAME:
         g_value_set_string (value,
@@ -197,18 +198,20 @@ eek_symbol_class_init (EekSymbolClass *klass)
                                  G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_LABEL, pspec);
 
-    pspec = g_param_spec_uint ("category",
+    pspec = g_param_spec_enum ("category",
                                "Category",
                                "Category of the symbol",
-                               0, G_MAXUINT, 0,
+                               EEK_TYPE_SYMBOL_CATEGORY,
+                               EEK_SYMBOL_CATEGORY_UNKNOWN,
                                G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_CATEGORY, pspec);
 
-    pspec = g_param_spec_uint ("modifier-mask",
-                               "Modifier mask",
-                               "Modifier mask of the symbol",
-                               0, G_MAXUINT, 0,
-                               G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    pspec = g_param_spec_flags ("modifier-mask",
+                                "Modifier mask",
+                                "Modifier mask of the symbol",
+                                EEK_TYPE_MODIFIER_TYPE,
+                                0,
+                                G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_MODIFIER_MASK, pspec);
 
     pspec = g_param_spec_string ("icon-name",

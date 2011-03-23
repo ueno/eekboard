@@ -36,6 +36,7 @@
 #include "eek-key.h"
 #include "eek-symbol.h"
 #include "eek-serializable.h"
+#include "eek-enumtypes.h"
 
 enum {
     PROP_0,
@@ -274,7 +275,7 @@ eek_keyboard_set_property (GObject      *object,
         break;
     case PROP_MODIFIER_BEHAVIOR:
         eek_keyboard_set_modifier_behavior (EEK_KEYBOARD(object),
-                                            g_value_get_int (value));
+                                            g_value_get_enum (value));
         break;
     default:
         g_object_set_property (object,
@@ -297,8 +298,8 @@ eek_keyboard_get_property (GObject    *object,
         g_value_set_object (value, priv->layout);
         break;
     case PROP_MODIFIER_BEHAVIOR:
-        g_value_set_int (value,
-                         eek_keyboard_get_modifier_behavior (EEK_KEYBOARD(object)));
+        g_value_set_enum (value,
+                          eek_keyboard_get_modifier_behavior (EEK_KEYBOARD(object)));
         break;
     default:
         g_object_get_property (object,
@@ -465,11 +466,12 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
      *
      * The modifier handling mode of #EekKeyboard.
      */
-    pspec = g_param_spec_int ("modifier-behavior",
-                              "Modifier behavior",
-                              "Modifier handling mode of the keyboard",
-                              0, G_MAXINT, EEK_MODIFIER_BEHAVIOR_NONE,
-                              G_PARAM_READWRITE);
+    pspec = g_param_spec_enum ("modifier-behavior",
+                               "Modifier behavior",
+                               "Modifier handling mode of the keyboard",
+                               EEK_TYPE_MODIFIER_BEHAVIOR,
+                               EEK_MODIFIER_BEHAVIOR_NONE,
+                               G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class,
                                      PROP_MODIFIER_BEHAVIOR,
                                      pspec);
