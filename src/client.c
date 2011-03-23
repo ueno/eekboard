@@ -665,12 +665,19 @@ on_key_pressed (EekKeyboard *keyboard,
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
-        guint xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
-        guint keycode =
-            XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display), xkeysym);
-        EekModifierType modifiers =
-            eek_keyboard_get_modifiers (client->keyboard);
-        FakeKeyModifier fakekey_modifiers = get_fakekey_modifiers (modifiers);
+        guint xkeysym;
+        guint keycode;
+        EekModifierType modifiers;
+        FakeKeyModifier fakekey_modifiers;
+
+        xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
+        g_return_if_fail (xkeysym > 0);
+        keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display),
+                                    xkeysym);
+        g_return_if_fail (keycode > 0);
+
+        modifiers = eek_keyboard_get_modifiers (client->keyboard);
+        fakekey_modifiers = get_fakekey_modifiers (modifiers);
 
         fakekey_send_keyevent (client->fakekey,
                                keycode,
