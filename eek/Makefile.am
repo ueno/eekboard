@@ -37,6 +37,7 @@ libeek_public_headers =				\
 	$(srcdir)/eek-keysym.h			\
 	$(srcdir)/eek-symbol-matrix.h		\
 	$(srcdir)/eek-types.h			\
+	$(srcdir)/eek-enumtypes.h		\
 	$(srcdir)/eek-xml.h			\
 	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-serializable.h		\
