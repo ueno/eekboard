@@ -27,10 +27,13 @@
 #include "eekboard/eekboard.h"
 #include "client.h"
 
+#define DEFAULT_LAYOUT "us-qwerty"
+
 static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
+static gboolean opt_use_system_layout = FALSE;
 #ifdef HAVE_CSPI
 static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
@@ -51,6 +54,8 @@ static const GOptionEntry options[] = {
      N_("Connect to the session bus")},
     {"address", 'a', 0, G_OPTION_ARG_STRING, &opt_address,
      N_("Connect to the given D-Bus address")},
+    {"use-system-layout", 'x', 0, G_OPTION_ARG_NONE, &opt_use_system_layout,
+     N_("Use system keyboard layout")},
 #ifdef HAVE_CSPI
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events with AT-SPI")},
@@ -202,13 +207,29 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_CSPI */
 
-    if (opt_keyboard && (opt_model || opt_layouts || opt_options)) {
-        g_printerr ("Can't use --keyboard option with xklavier options\n");
+    if (opt_use_system_layout && (opt_keyboard || opt_model || opt_layouts || opt_options)) {
+        g_printerr ("Can't use --use-system-layout option with keyboard options\n");
         exit (1);
     }
 
-    if (opt_keyboard) {
+    if (opt_use_system_layout) {
+        if (!eekboard_client_enable_xkl (client)) {
+            g_printerr ("Can't register xklavier event listeners\n");
+            exit (1);
+        }
+    } else if (opt_model || opt_layouts || opt_options) {
+        if (!eekboard_client_set_xkl_config (client,
+                                             opt_model,
+                                             opt_layouts,
+                                             opt_options)) {
+            g_printerr ("Can't set xklavier config\n");
+            exit (1);
+        }
+    } else {
         gchar *file;
+
+        if (!opt_keyboard)
+            opt_keyboard = DEFAULT_LAYOUT;
 
         if (g_str_has_suffix (opt_keyboard, ".xml"))
             file = g_strdup (opt_keyboard);
@@ -220,17 +241,6 @@ main (int argc, char **argv)
             exit (1);
         }
         g_free (file);
-    } else if (opt_model || opt_layouts || opt_options) {
-        if (!eekboard_client_set_xkl_config (client,
-                                             opt_model,
-                                             opt_layouts,
-                                             opt_options)) {
-            g_printerr ("Can't set xklavier config\n");
-            exit (1);
-        }
-    } else if (!eekboard_client_enable_xkl (client)) {
-        g_printerr ("Can't register xklavier event listeners\n");
-        exit (1);
     }
 
 #ifdef HAVE_FAKEKEY
