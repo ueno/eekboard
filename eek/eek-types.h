@@ -159,9 +159,11 @@ struct _EekPoint
     gdouble y;
 };
 
-GType eek_point_get_type (void) G_GNUC_CONST;
-void  eek_point_rotate   (EekPoint *point,
-                          gint      angle);
+GType     eek_point_get_type (void) G_GNUC_CONST;
+EekPoint *eek_point_copy     (const EekPoint *point);
+void      eek_point_free     (EekPoint       *point);
+void      eek_point_rotate   (EekPoint       *point,
+                              gint            angle);
 
 /**
  * EekBounds:
@@ -181,7 +183,9 @@ struct _EekBounds
     gdouble height;
 };
 
-GType eek_bounds_get_type (void) G_GNUC_CONST;
+GType      eek_bounds_get_type (void) G_GNUC_CONST;
+EekBounds *eek_bounds_copy     (const EekBounds *bounds);
+void       eek_bounds_free     (EekBounds       *bounds);
 
 G_INLINE_FUNC gdouble
 eek_bounds_long_side (EekBounds *bounds)

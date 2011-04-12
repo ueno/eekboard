@@ -33,29 +33,18 @@
 #include "eek-types.h"
 
 /* EekPoint */
-static EekPoint *
+G_DEFINE_BOXED_TYPE(EekPoint, eek_point, eek_point_copy, eek_point_free);
+
+EekPoint *
 eek_point_copy (const EekPoint *point)
 {
     return g_slice_dup (EekPoint, point);
 }
 
-static void
+void
 eek_point_free (EekPoint *point)
 {
     g_slice_free (EekPoint, point);
-}
-
-GType
-eek_point_get_type (void)
-{
-    static GType our_type = 0;
-
-    if (our_type == 0)
-        our_type =
-            g_boxed_type_register_static ("EekPoint",
-                                          (GBoxedCopyFunc)eek_point_copy,
-                                          (GBoxedFreeFunc)eek_point_free);
-    return our_type;
 }
 
 void
@@ -71,32 +60,24 @@ eek_point_rotate (EekPoint *point, gint angle)
 }
 
 /* EekBounds */
-static EekBounds *
+G_DEFINE_BOXED_TYPE(EekBounds, eek_bounds, eek_bounds_copy, eek_bounds_free);
+
+EekBounds *
 eek_bounds_copy (const EekBounds *bounds)
 {
     return g_slice_dup (EekBounds, bounds);
 }
 
-static void
+void
 eek_bounds_free (EekBounds *bounds)
 {
     g_slice_free (EekBounds, bounds);
 }
 
-GType
-eek_bounds_get_type (void)
-{
-    static GType our_type = 0;
-
-    if (our_type == 0)
-        our_type =
-            g_boxed_type_register_static ("EekBounds",
-                                          (GBoxedCopyFunc)eek_bounds_copy,
-                                          (GBoxedFreeFunc)eek_bounds_free);
-    return our_type;
-}
-
 /* EekOutline */
+G_DEFINE_BOXED_TYPE(EekOutline, eek_outline,
+                    eek_outline_copy, eek_outline_free);
+
 EekOutline *
 eek_outline_copy (const EekOutline *outline)
 {
@@ -115,20 +96,9 @@ eek_outline_free (EekOutline *outline)
     g_slice_free (EekOutline, outline);
 }
 
-GType
-eek_outline_get_type (void)
-{
-    static GType our_type = 0;
-
-    if (our_type == 0)
-        our_type =
-            g_boxed_type_register_static ("EekOutline",
-                                          (GBoxedCopyFunc)eek_outline_copy,
-                                          (GBoxedFreeFunc)eek_outline_free);
-    return our_type;
-}
-
 /* EekColor */
+G_DEFINE_BOXED_TYPE(EekColor, eek_color, eek_color_copy, eek_color_free);
+
 EekColor *
 eek_color_copy (const EekColor *color)
 {
@@ -139,19 +109,6 @@ void
 eek_color_free (EekColor *color)
 {
     g_slice_free (EekColor, color);
-}
-
-GType
-eek_color_get_type (void)
-{
-    static GType our_type = 0;
-
-    if (our_type == 0)
-        our_type =
-            g_boxed_type_register_static ("EekColor",
-                                          (GBoxedCopyFunc)eek_color_copy,
-                                          (GBoxedFreeFunc)eek_color_free);
-    return our_type;
 }
 
 EekColor *

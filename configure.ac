@@ -85,7 +85,7 @@ AM_CONDITIONAL([HAVE_GTK_2],[test "$with_gtk" = "2.0"])
 AM_CONDITIONAL([HAVE_GTK_3],[test "$with_gtk" = "3.0"])
 
 AM_PATH_GLIB_2_0
-PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.25.4], ,
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.26.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
 PKG_CHECK_MODULES([GIO2], [gio-2.0], ,
   [AC_MSG_ERROR([Gio2 not found])])
