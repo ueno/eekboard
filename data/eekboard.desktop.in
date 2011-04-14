@@ -2,7 +2,7 @@
 Name=Eekboard
 GenericName=Eekboard Virtual Keyboard
 Comment=Virtual Keyboard
-Exec=eekboard-desktop-client
+Exec=eekboard
 Icon=eekboard
 Terminal=false
 Type=Application
