@@ -261,6 +261,10 @@ Build options:
   Build shared libs         $enable_shared
   Build static libs         $enable_static
   CFLAGS                    $CFLAGS
-  Build vala binding        $enable_vala
+  GTK version               $with_gtk
+  Build Clutter UI          $enable_clutter
+  Build Vala binding        $enable_vala
+  Build Python binding      $enable_python
   Build document            $enable_gtk_doc
+  Support accessibility     $enable_atspi
 ])
