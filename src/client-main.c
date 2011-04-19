@@ -20,10 +20,12 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include <stdlib.h>
+#ifdef HAVE_CSPI
 #include <cspi/spi.h>
+#include <gconf/gconf-client.h>
+#endif  /* HAVE_CSPI */
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf-client.h>
 #include "eekboard/eekboard.h"
 #include "client.h"
 
@@ -34,10 +36,8 @@ static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
 static gboolean opt_use_system_layout = FALSE;
-#ifdef HAVE_CSPI
 static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
-#endif  /* HAVE_CSPI */
 
 static gchar *opt_keyboard = NULL;
 
@@ -117,7 +117,9 @@ main (int argc, char **argv)
     GBusType bus_type;
     GDBusConnection *connection;
     GError *error;
+#ifdef HAVE_CSPI
     GConfClient *gconfc;
+#endif  /* HAVE_CSPI */
     GOptionContext *option_context;
     GMainLoop *loop;
 
@@ -173,9 +175,9 @@ main (int argc, char **argv)
         exit (1);
     }
 
+#ifdef HAVE_CSPI
     gconfc = gconf_client_get_default ();
 
-#ifdef HAVE_CSPI
     error = NULL;
     if (opt_focus || opt_keystroke) {
         if (gconf_client_get_bool (gconfc,
