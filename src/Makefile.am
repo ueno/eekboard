@@ -28,7 +28,6 @@ eekboard_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
 	$(GTK_CFLAGS) \
-	$(GCONF2_CFLAGS) \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
 	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
@@ -40,7 +39,6 @@ eekboard_LDADD = \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
-	$(GCONF2_LIBS) \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS)
 

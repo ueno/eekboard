@@ -95,8 +95,6 @@ PKG_CHECK_MODULES([GTK], [
   gtk+-$GTK_API_VERSION >= $GTK_REQUIRED
   gdk-$GTK_API_VERSION >= $GTK_REQUIRED], ,
   [AC_MSG_ERROR([GTK not found])])
-PKG_CHECK_MODULES([GCONF2], [gconf-2.0], ,
-  [AC_MSG_ERROR([GConf not found])])
 PKG_CHECK_MODULES([XKB], [x11], ,
   [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
@@ -123,11 +121,11 @@ dnl use AT-SPI to capture focus/keystroke events
 AC_MSG_CHECKING([whether you enable AT-SPI event handling])
 AC_ARG_ENABLE(cspi,
               AS_HELP_STRING([--enable-cspi=no/yes],
-                             [Enable AT-SPI event handling default=yes]),,
-              enable_cspi=yes)
+                             [Enable AT-SPI event handling default=no]),,
+              enable_cspi=no)
 
 if test x$enable_cspi = xyes; then
-  PKG_CHECK_MODULES([CSPI], [cspi-1.0], ,
+  PKG_CHECK_MODULES([CSPI], [cspi-1.0 gconf-2.0], ,
     [AC_MSG_ERROR([AT-SPI C not found])])
   AC_DEFINE([HAVE_CSPI], [1], [Define if CSPI is found])
 fi
