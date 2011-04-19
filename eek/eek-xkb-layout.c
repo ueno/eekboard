@@ -127,7 +127,7 @@ create_key (EekXkbLayout *layout,
     EekSymbolMatrix *matrix = NULL;
     gchar name[XkbKeyNameLength + 1];
     KeyCode keycode;
-    gint num_groups, num_levels, num_symbols;
+    gint num_groups, num_levels;
     gulong oref;
 
     xkbgeometry = priv->xkb->geom;
@@ -199,7 +199,6 @@ create_key (EekXkbLayout *layout,
 
         num_groups = XkbKeyNumGroups (priv->xkb, keycode);
         num_levels = XkbKeyGroupsWidth (priv->xkb, keycode);
-        num_symbols = num_groups * num_levels;
         matrix = eek_symbol_matrix_new (num_groups, num_levels);
         for (i = 0; i < num_groups; i++)
             for (j = 0; j < num_levels; j++) {

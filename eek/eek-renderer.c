@@ -482,7 +482,6 @@ render_key (EekRenderer *self,
         PangoLayout *layout;
         PangoRectangle extents = { 0, };
         EekColor foreground;
-        EekThemeNode *theme_node;
 
         layout = pango_cairo_create_layout (cr);
         eek_renderer_render_key_label (self, layout, key);
@@ -493,11 +492,6 @@ render_key (EekRenderer *self,
             (cr,
              (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
              (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
-
-        if (eek_key_is_pressed (key))
-            theme_node = g_object_get_data (G_OBJECT(key), "theme-node-pressed");
-        else
-            theme_node = g_object_get_data (G_OBJECT(key), "theme-node");
 
         eek_renderer_get_foreground_color (self, EEK_ELEMENT(key), &foreground);
         cairo_set_source_rgba (cr,
@@ -570,7 +564,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     EekBounds bounds;
     const TextProperty *prop;
     PangoFontDescription *font;
-    gdouble size, scale;
+    gdouble scale;
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
@@ -1141,7 +1135,6 @@ eek_renderer_get_background_gradient (EekRenderer     *renderer,
                                       EekColor        *start,
                                       EekColor        *end)
 {
-    EekRendererPrivate *priv;
     EekThemeNode *theme_node;
 
     g_return_if_fail (EEK_IS_RENDERER(renderer));
@@ -1149,8 +1142,6 @@ eek_renderer_get_background_gradient (EekRenderer     *renderer,
     g_return_if_fail (type);
     g_return_if_fail (start);
     g_return_if_fail (end);
-
-    priv = EEK_RENDERER_GET_PRIVATE(renderer);
 
     theme_node = g_object_get_data (G_OBJECT(element), "theme-node");
     if (theme_node)
@@ -1234,10 +1225,7 @@ find_key_by_position_section_callback (EekElement *element,
 {
     FindKeyByPositionCallbackData *data = user_data;
     EekBounds bounds;
-    EekRendererPrivate *priv;
     EekPoint origin;
-
-    priv = EEK_RENDERER_GET_PRIVATE(data->renderer);
 
     origin = data->origin;
     eek_element_get_bounds (element, &bounds);

@@ -748,8 +748,6 @@ eekboard_client_load_keyboard_from_file (EekboardClient *client,
     GFileInputStream *input;
     GError *error;
     EekLayout *layout;
-    EekKeyboard *keyboard;
-    guint keyboard_id;
     gboolean retval;
 
     file = g_file_new_for_path (keyboard_file);
