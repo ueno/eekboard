@@ -7,8 +7,8 @@ tools to implement desktop virtual keyboards.
 
 ** Dependencies
 
-REQUIRED: GLib2, GTK, GConf2, PangoCairo, libxklavier, libcroco
-OPTIONAL: fakekey, CSPI, Clutter, Clutter-Gtk, Vala, gobject-introspection
+REQUIRED: GLib2, GTK, PangoCairo, libxklavier, libcroco
+OPTIONAL: fakekey, at-spi2-core, Clutter, Clutter-Gtk, Python, Vala, gobject-introspection
 
 ** Build from git repo
 
