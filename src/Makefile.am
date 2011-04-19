@@ -49,11 +49,11 @@ eekboard_LDADD += \
 	$(FAKEKEY_LIBS)
 endif
 
-if ENABLE_CSPI
+if ENABLE_ATSPI
 eekboard_CFLAGS += \
-	$(CSPI_CFLAGS)
+	$(ATSPI2_CFLAGS)
 eekboard_LDADD += \
-	$(CSPI_LIBS)
+	$(ATSPI2_LIBS)
 endif
 
 eekboard_headers = client.h

@@ -117,20 +117,20 @@ fi
 AM_CONDITIONAL(ENABLE_FAKEKEY, [test x$enable_fakekey = xyes])
 AC_MSG_RESULT($enable_fakekey)
 
-dnl use AT-SPI to capture focus/keystroke events
-AC_MSG_CHECKING([whether you enable AT-SPI event handling])
-AC_ARG_ENABLE(cspi,
-              AS_HELP_STRING([--enable-cspi=no/yes],
-                             [Enable AT-SPI event handling default=no]),,
-              enable_cspi=no)
+dnl use AT-SPI 2 to capture focus/keystroke events
+AC_MSG_CHECKING([whether you enable AT-SPI 2 event handling])
+AC_ARG_ENABLE(atspi,
+              AS_HELP_STRING([--enable-atspi=no/yes],
+                             [Enable AT-SPI 2 event handling default=no]),,
+              enable_atspi=no)
 
-if test x$enable_cspi = xyes; then
-  PKG_CHECK_MODULES([CSPI], [cspi-1.0 gconf-2.0], ,
-    [AC_MSG_ERROR([AT-SPI C not found])])
-  AC_DEFINE([HAVE_CSPI], [1], [Define if CSPI is found])
+if test x$enable_atspi = xyes; then
+  PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], ,
+    [AC_MSG_ERROR([AT-SPI 2 not found])])
+  AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
 fi
-AC_MSG_RESULT($enable_cspi)
-AM_CONDITIONAL(ENABLE_CSPI, [test x$enable_cspi = xyes])
+AC_MSG_RESULT($enable_atspi)
+AM_CONDITIONAL(ENABLE_ATSPI, [test x$enable_atspi = xyes])
 
 dnl Python language binding
 AC_MSG_CHECKING([whether you enable Python language support])

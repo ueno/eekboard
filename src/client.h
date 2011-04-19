@@ -44,14 +44,14 @@ gboolean         eekboard_client_set_xkl_config  (EekboardClient  *client,
 gboolean         eekboard_client_enable_xkl      (EekboardClient  *client);
 void             eekboard_client_disable_xkl     (EekboardClient  *client);
 
-gboolean         eekboard_client_enable_cspi_focus
+gboolean         eekboard_client_enable_atspi_focus
                                                  (EekboardClient  *client);
-void             eekboard_client_disable_cspi_focus
+void             eekboard_client_disable_atspi_focus
                                                  (EekboardClient  *client);
 
-gboolean         eekboard_client_enable_cspi_keystroke
+gboolean         eekboard_client_enable_atspi_keystroke
                                                  (EekboardClient  *client);
-void             eekboard_client_disable_cspi_keystroke
+void             eekboard_client_disable_atspi_keystroke
                                                  (EekboardClient  *client);
 
 gboolean         eekboard_client_enable_fakekey  (EekboardClient  *client);

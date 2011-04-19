@@ -20,10 +20,10 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include <stdlib.h>
-#ifdef HAVE_CSPI
-#include <cspi/spi.h>
-#include <gconf/gconf-client.h>
-#endif  /* HAVE_CSPI */
+#ifdef HAVE_ATSPI
+#include <dbus/dbus.h>
+#include <atspi/atspi.h>
+#endif  /* HAVE_ATSPI */
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include "eekboard/eekboard.h"
@@ -56,12 +56,12 @@ static const GOptionEntry options[] = {
      N_("Connect to the given D-Bus address")},
     {"use-system-layout", 'x', 0, G_OPTION_ARG_NONE, &opt_use_system_layout,
      N_("Use system keyboard layout")},
-#ifdef HAVE_CSPI
+#ifdef HAVE_ATSPI
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events with AT-SPI")},
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
-#endif  /* HAVE_CSPI */
+#endif  /* HAVE_ATSPI */
     {"keyboard", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboard,
      N_("Specify keyboard")},
     {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
@@ -117,9 +117,6 @@ main (int argc, char **argv)
     GBusType bus_type;
     GDBusConnection *connection;
     GError *error;
-#ifdef HAVE_CSPI
-    GConfClient *gconfc;
-#endif  /* HAVE_CSPI */
     GOptionContext *option_context;
     GMainLoop *loop;
 
@@ -175,30 +172,24 @@ main (int argc, char **argv)
         exit (1);
     }
 
-#ifdef HAVE_CSPI
-    gconfc = gconf_client_get_default ();
-
-    error = NULL;
+#ifdef HAVE_ATSPI
     if (opt_focus || opt_keystroke) {
-        if (gconf_client_get_bool (gconfc,
-                                   "/desktop/gnome/interface/accessibility",
-                                   &error) ||
-            gconf_client_get_bool (gconfc,
-                                   "/desktop/gnome/interface/accessibility2",
-                                   &error)) {
-            if (SPI_init () != 0) {
-                g_printerr ("Can't init CSPI\n");
+        GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
+
+        if (g_settings_get_boolean (settings, "toolkit-accessibility")) {
+            if (atspi_init () != 0) {
+                g_printerr ("Can't init AT-SPI 2\n");
                 exit (1);
             }
 
             if (opt_focus &&
-                !eekboard_client_enable_cspi_focus (client)) {
+                !eekboard_client_enable_atspi_focus (client)) {
                 g_printerr ("Can't register focus change event listeners\n");
                 exit (1);
             }
 
             if (opt_keystroke &&
-                !eekboard_client_enable_cspi_keystroke (client)) {
+                !eekboard_client_enable_atspi_keystroke (client)) {
                 g_printerr ("Can't register keystroke event listeners\n");
                 exit (1);
             }
@@ -207,7 +198,7 @@ main (int argc, char **argv)
             exit (1);
         }
     }
-#endif  /* HAVE_CSPI */
+#endif  /* HAVE_ATSPI */
 
     if (opt_use_system_layout && (opt_keyboard || opt_model || opt_layouts || opt_options)) {
         g_printerr ("Can't use --use-system-layout option with keyboard options\n");

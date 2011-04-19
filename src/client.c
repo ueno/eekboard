@@ -21,9 +21,10 @@
 
 #include <libxklavier/xklavier.h>
 
-#ifdef HAVE_CSPI
-#include <cspi/spi.h>
-#endif  /* HAVE_CSPI */
+#ifdef HAVE_ATSPI
+#include <dbus/dbus.h>
+#include <atspi/atspi.h>
+#endif  /* HAVE_ATSPI */
 
 #include <gdk/gdkx.h>
 
@@ -67,11 +68,11 @@ struct _EekboardClient {
     gulong key_pressed_handler;
     gulong key_released_handler;
 
-#ifdef HAVE_CSPI
-    Accessible *acc;
-    AccessibleEventListener *focus_listener;
-    AccessibleEventListener *keystroke_listener;
-#endif  /* HAVE_CSPI */
+#ifdef HAVE_ATSPI
+    AtspiAccessible *acc;
+    gboolean follows_focus;
+    AtspiDeviceListener *keystroke_listener;
+#endif  /* HAVE_ATSPI */
 
 #ifdef HAVE_FAKEKEY
     FakeKey *fakekey;
@@ -84,36 +85,33 @@ struct _EekboardClientClass {
 
 G_DEFINE_TYPE (EekboardClient, eekboard_client, G_TYPE_OBJECT);
 
-static GdkFilterReturn filter_xkl_event  (GdkXEvent                 *xev,
-                                          GdkEvent                  *event,
-                                          gpointer                   user_data);
-static void            on_xkl_config_changed
-                                         (XklEngine                 *xklengine,
-                                          gpointer                   user_data);
+static GdkFilterReturn filter_xkl_event     (GdkXEvent              *xev,
+                                             GdkEvent               *event,
+                                             gpointer                user_data);
+static void            on_xkl_config_changed (XklEngine              *xklengine,
+                                              gpointer                user_data);
 
-static void            on_xkl_state_changed
-                                         (XklEngine                 *xklengine,
-                                          XklEngineStateChange       type,
-                                          gint                       value,
-                                          gboolean                   restore,
-                                          gpointer                   user_data);
+static void            on_xkl_state_changed (XklEngine              *xklengine,
+                                             XklEngineStateChange    type,
+                                             gint                    value,
+                                             gboolean                restore,
+                                             gpointer                user_data);
 
-#ifdef HAVE_CSPI
-static SPIBoolean      focus_listener_cb (const AccessibleEvent     *event,
-                                          void                      *user_data);
+#ifdef HAVE_ATSPI
+static void            focus_listener_cb    (const AtspiEvent       *event,
+                                             void                   *user_data);
 
-static SPIBoolean      keystroke_listener_cb
-                                         (const AccessibleKeystroke *stroke,
-                                          void                      *user_data);
-#endif  /* HAVE_CSPI */
-static gboolean        set_keyboard      (EekboardClient            *client,
-                                          gboolean                   show,
-                                          EekLayout                 *layout);
-static gboolean        set_xkl_keyboard  (EekboardClient            *client,
-                                          gboolean                   show,
-                                          const gchar               *model,
-                                          const gchar               *layouts,
-                                          const gchar               *options);
+static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
+                                              void                   *user_data);
+#endif  /* HAVE_ATSPI */
+static gboolean        set_keyboard         (EekboardClient         *client,
+                                             gboolean                show,
+                                             EekLayout              *layout);
+static gboolean        set_xkl_keyboard     (EekboardClient         *client,
+                                             gboolean                show,
+                                             const gchar            *model,
+                                             const gchar            *layouts,
+                                             const gchar            *options);
 
 static void
 eekboard_client_set_property (GObject      *object,
@@ -181,10 +179,10 @@ eekboard_client_dispose (GObject *object)
 
     eekboard_client_disable_xkl (client);
 
-#ifdef HAVE_CSPI
-    eekboard_client_disable_cspi_focus (client);
-    eekboard_client_disable_cspi_keystroke (client);
-#endif  /* HAVE_CSPI */
+#ifdef HAVE_ATSPI
+    eekboard_client_disable_atspi_focus (client);
+    eekboard_client_disable_atspi_keystroke (client);
+#endif  /* HAVE_ATSPI */
 
 #ifdef HAVE_FAKEKEY
     eekboard_client_disable_fakekey (client);
@@ -274,10 +272,10 @@ eekboard_client_init (EekboardClient *client)
     client->key_released_handler = 0;
     client->xkl_config_changed_handler = 0;
     client->xkl_state_changed_handler = 0;
-#ifdef HAVE_CSPI
-    client->focus_listener = NULL;
+#ifdef HAVE_ATSPI
+    client->follows_focus = FALSE;
     client->keystroke_listener = NULL;
-#endif  /* HAVE_CSPI */
+#endif  /* HAVE_ATSPI */
 #ifdef HAVE_FAKEKEY
     client->fakekey = NULL;
 #endif  /* HAVE_FAKEKEY */
@@ -289,9 +287,9 @@ eekboard_client_set_xkl_config (EekboardClient *client,
                                         const gchar *layouts,
                                         const gchar *options)
 {
-#ifdef HAVE_CSPI
+#ifdef HAVE_ATSPI
     return set_xkl_keyboard (client,
-                             client->focus_listener ? FALSE : TRUE,
+                             !client->follows_focus,
                              model,
                              layouts,
                              options);
@@ -340,9 +338,9 @@ eekboard_client_enable_xkl (EekboardClient *client)
 
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-#ifdef HAVE_CSPI
+#ifdef HAVE_ATSPI
     return set_xkl_keyboard (client,
-                             client->focus_listener ? FALSE : TRUE,
+                             !client->follows_focus,
                              NULL,
                              NULL,
                              NULL);
@@ -366,80 +364,135 @@ eekboard_client_disable_xkl (EekboardClient *client)
                                      client->xkl_state_changed_handler);
 }
 
-#ifdef HAVE_CSPI
+#ifdef HAVE_ATSPI
 gboolean
-eekboard_client_enable_cspi_focus (EekboardClient *client)
+eekboard_client_enable_atspi_focus (EekboardClient *client)
 {
-    client->focus_listener = SPI_createAccessibleEventListener
-        ((AccessibleEventListenerCB)focus_listener_cb,
-         client);
+    GError *error;
 
-    if (!SPI_registerGlobalEventListener (client->focus_listener,
-                                          "object:state-changed:focused"))
+    error = NULL;
+    if (!atspi_event_listener_register_from_callback
+        ((AtspiEventListenerCB)focus_listener_cb,
+         client,
+         NULL,
+         "object:state-changed:focused",
+         &error))
         return FALSE;
 
-    if (!SPI_registerGlobalEventListener (client->focus_listener,
-                                          "focus:"))
+    error = NULL;
+    if (!atspi_event_listener_register_from_callback
+        ((AtspiEventListenerCB)focus_listener_cb,
+         client,
+         NULL,
+         "focus:",
+         &error))
         return FALSE;
 
+    client->follows_focus = TRUE;
     return TRUE;
 }
 
 void
-eekboard_client_disable_cspi_focus (EekboardClient *client)
+eekboard_client_disable_atspi_focus (EekboardClient *client)
 {
-    if (client->focus_listener) {
-        SPI_deregisterGlobalEventListenerAll (client->focus_listener);
-        AccessibleEventListener_unref (client->focus_listener);
-        client->focus_listener = NULL;
-    }
+    GError *error;
+
+    client->follows_focus = FALSE;
+
+    error = NULL;
+    atspi_event_listener_deregister_from_callback
+        ((AtspiEventListenerCB)focus_listener_cb,
+         client,
+         "object:state-changed:focused",
+         &error);
+
+    error = NULL;
+    atspi_event_listener_deregister_from_callback
+        ((AtspiEventListenerCB)focus_listener_cb,
+         client,
+         "focus:",
+         &error);
 }
 
 gboolean
-eekboard_client_enable_cspi_keystroke (EekboardClient *client)
+eekboard_client_enable_atspi_keystroke (EekboardClient *client)
 {
+    GError *error;
+
     client->keystroke_listener =
-        SPI_createAccessibleKeystrokeListener (keystroke_listener_cb,
-                                               client);
+        atspi_device_listener_new ((AtspiDeviceListenerCB)keystroke_listener_cb,
+                                   NULL,
+                                   client);
 
-    if (!SPI_registerAccessibleKeystrokeListener
+    error = NULL;
+    if (!atspi_register_keystroke_listener
         (client->keystroke_listener,
-         SPI_KEYSET_ALL_KEYS,
+         NULL,
          0,
-         SPI_KEY_PRESSED |
-         SPI_KEY_RELEASED,
-         SPI_KEYLISTENER_NOSYNC))
+         ATSPI_KEY_PRESSED,
+         ATSPI_KEYLISTENER_NOSYNC,
+         &error))
+        return FALSE;
+
+    error = NULL;
+    if (!atspi_register_keystroke_listener
+        (client->keystroke_listener,
+         NULL,
+         0,
+         ATSPI_KEY_RELEASED,
+         ATSPI_KEYLISTENER_NOSYNC,
+         &error))
         return FALSE;
     return TRUE;
 }
 
 void
-eekboard_client_disable_cspi_keystroke (EekboardClient *client)
+eekboard_client_disable_atspi_keystroke (EekboardClient *client)
 {
     if (client->keystroke_listener) {
-        SPI_deregisterAccessibleKeystrokeListener (client->keystroke_listener,
-                                                   0);
-        AccessibleKeystrokeListener_unref (client->keystroke_listener);
+        GError *error;
+
+        error = NULL;
+        atspi_deregister_keystroke_listener (client->keystroke_listener,
+                                             NULL,
+                                             0,
+                                             ATSPI_KEY_PRESSED,
+                                             &error);
+
+        error = NULL;
+        atspi_deregister_keystroke_listener (client->keystroke_listener,
+                                             NULL,
+                                             0,
+                                             ATSPI_KEY_RELEASED,
+                                             &error);
+
+        g_object_unref (client->keystroke_listener);
         client->keystroke_listener = NULL;
     }
 }
 
-static SPIBoolean
-focus_listener_cb (const AccessibleEvent *event,
-                   void                  *user_data)
+static void
+focus_listener_cb (const AtspiEvent *event,
+                   void             *user_data)
 {
     EekboardClient *client = user_data;
-    Accessible *accessible = event->source;
-    AccessibleStateSet *state_set = Accessible_getStateSet (accessible);
-    AccessibleRole role = Accessible_getRole (accessible);
+    AtspiAccessible *accessible = event->source;
+    AtspiStateSet *state_set = atspi_accessible_get_state_set (accessible);
+    AtspiRole role;
+    GError *error;
 
-    if (AccessibleStateSet_contains (state_set, SPI_STATE_EDITABLE) ||
-        role == SPI_ROLE_TERMINAL) {
+    error = NULL;
+    role = atspi_accessible_get_role (accessible, &error);
+    if (error)
+        return;
+
+    if (atspi_state_set_contains (state_set, ATSPI_STATE_EDITABLE) ||
+        role == ATSPI_ROLE_TERMINAL) {
         switch (role) {
-        case SPI_ROLE_TEXT:
-        case SPI_ROLE_PARAGRAPH:
-        case SPI_ROLE_PASSWORD_TEXT:
-        case SPI_ROLE_TERMINAL:
+        case ATSPI_ROLE_TEXT:
+        case ATSPI_ROLE_PARAGRAPH:
+        case ATSPI_ROLE_PASSWORD_TEXT:
+        case ATSPI_ROLE_TERMINAL:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
                 eekboard_context_show_keyboard (client->context, NULL);
@@ -448,7 +501,7 @@ focus_listener_cb (const AccessibleEvent *event,
                 eekboard_context_hide_keyboard (client->context, NULL);
             }
             break;
-        case SPI_ROLE_ENTRY:
+        case ATSPI_ROLE_ENTRY:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
                 eekboard_context_show_keyboard (client->context, NULL);
@@ -464,13 +517,11 @@ focus_listener_cb (const AccessibleEvent *event,
     } else {
         eekboard_context_hide_keyboard (client->context, NULL);
     }
-
-    return FALSE;
 }
 
-static SPIBoolean
-keystroke_listener_cb (const AccessibleKeystroke *stroke,
-                       void                      *user_data)
+static gboolean
+keystroke_listener_cb (const AtspiDeviceEvent *stroke,
+                       void                   *user_data)
 {
     EekboardClient *client = user_data;
     EekKey *key;
@@ -478,22 +529,22 @@ keystroke_listener_cb (const AccessibleKeystroke *stroke,
     /* Ignore modifiers since the keystroke listener does not called
        when a modifier key is released. */
     key = eek_keyboard_find_key_by_keycode (client->keyboard,
-                                            stroke->keycode);
+                                            stroke->hw_code);
     if (key) {
         EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
         if (symbol && eek_symbol_is_modifier (symbol))
             return FALSE;
     }
 
-    if (stroke->type == SPI_KEY_PRESSED) {
-        eekboard_context_press_key (client->context, stroke->keycode, NULL);
+    if (stroke->type == ATSPI_KEY_PRESSED) {
+        eekboard_context_press_key (client->context, stroke->hw_code, NULL);
     } else {
-        eekboard_context_release_key (client->context, stroke->keycode, NULL);
+        eekboard_context_release_key (client->context, stroke->hw_code, NULL);
     }
 
     return TRUE;
 }
-#endif  /* HAVE_CSPI */
+#endif  /* HAVE_ATSPI */
 
 EekboardClient *
 eekboard_client_new (GDBusConnection *connection)
@@ -759,7 +810,7 @@ eekboard_client_load_keyboard_from_file (EekboardClient *client,
 
     layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     g_object_unref (input);
-    retval = set_keyboard (client, TRUE, layout);
+    retval = set_keyboard (client, !client->follows_focus, layout);
     g_object_unref (layout);
     return retval;
 }
