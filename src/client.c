@@ -810,7 +810,11 @@ eekboard_client_load_keyboard_from_file (EekboardClient *client,
 
     layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     g_object_unref (input);
+#ifdef HAVE_ATSPI
     retval = set_keyboard (client, !client->follows_focus, layout);
+#else
+    retval = set_keyboard (client, TRUE, layout);
+#endif
     g_object_unref (layout);
     return retval;
 }
