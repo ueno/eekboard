@@ -39,6 +39,7 @@ struct _EekSymbolMatrix
     EekSymbol **data;
 };
 
+#define EEK_TYPE_SYMBOL_MATRIX (eek_symbol_matrix_get_type ())
 GType            eek_symbol_matrix_get_type (void) G_GNUC_CONST;
 EekSymbolMatrix *eek_symbol_matrix_new      (gint                   num_groups,
                                              gint                   num_levels);

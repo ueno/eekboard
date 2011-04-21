@@ -660,9 +660,9 @@ eek_keyboard_create_section (EekKeyboard *keyboard)
  * eek_keyboard_find_key_by_keycode:
  * @keyboard: an #EekKeyboard
  * @keycode: a keycode
- * @returns: (transfer none): #EekKey whose keycode is @keycode
  *
  * Find an #EekKey whose keycode is @keycode.
+ * Return value: (transfer none): #EekKey whose keycode is @keycode
  */
 EekKey *
 eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,

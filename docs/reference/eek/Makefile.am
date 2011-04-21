@@ -47,7 +47,7 @@ SCANGOBJ_OPTIONS=
 
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
-SCAN_OPTIONS=--rebuild-types
+SCAN_OPTIONS=--rebuild-types --deprecated-guards="EEK_DISABLE_DEPRECATED"
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
@@ -82,7 +82,8 @@ IGNORE_HFILES = \
 	eek-clutter-renderer.h \
 	eek-clutter-section.h \
 	eek-clutter-key.h \
-	eek-gtk-renderer.h
+	eek-gtk-renderer.h \
+	eek-enumtypes.h
 if !ENABLE_CLUTTER
 IGNORE_HFILES += eek-clutter-keyboard.h eek-clutter.h
 endif

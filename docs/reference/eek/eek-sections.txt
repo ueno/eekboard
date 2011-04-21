@@ -1,9 +1,8 @@
 <SECTION>
 <FILE>eek-keyboard</FILE>
 <TITLE>EekKeyboard</TITLE>
-EekKeyboardClass
-EekKeyboardPrivate
 EekKeyboard
+EekKeyboardClass
 eek_keyboard_new
 eek_keyboard_get_layout
 eek_keyboard_get_size
@@ -21,6 +20,11 @@ eek_keyboard_create_section
 eek_keyboard_find_key_by_keycode
 eek_keyboard_add_outline
 eek_keyboard_get_outline
+eek_keyboard_set_num_lock_mask
+eek_keyboard_get_num_lock_mask
+eek_keyboard_set_alt_gr_mask
+eek_keyboard_get_alt_gr_mask
+EekKeyboardPrivate
 <SUBSECTION Standard>
 EEK_KEYBOARD
 EEK_IS_KEYBOARD
@@ -34,8 +38,8 @@ EEK_KEYBOARD_GET_CLASS
 <SECTION>
 <FILE>eek-layout</FILE>
 <TITLE>EekLayout</TITLE>
-EekLayoutClass
 EekLayout
+EekLayoutClass
 <SUBSECTION Standard>
 EEK_LAYOUT
 EEK_IS_LAYOUT
@@ -51,8 +55,9 @@ EEK_LAYOUT_GET_CLASS
 <TITLE>EekGtkKeyboard</TITLE>
 EekGtkKeyboard
 EekGtkKeyboardClass
-EekGtkKeyboardPrivate
 eek_gtk_keyboard_new
+eek_gtk_keyboard_set_theme
+EekGtkKeyboardPrivate
 <SUBSECTION Standard>
 EEK_GTK_KEYBOARD
 EEK_IS_GTK_KEYBOARD
@@ -64,11 +69,41 @@ EEK_GTK_KEYBOARD_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-theme-node</FILE>
+EekSide
+EekCorner
+eek_theme_node_new
+eek_theme_node_get_parent
+eek_theme_node_get_theme
+eek_theme_node_get_element_type
+eek_theme_node_get_element_id
+eek_theme_node_get_element_class
+eek_theme_node_get_pseudo_class
+eek_theme_node_get_color
+eek_theme_node_get_background_color
+eek_theme_node_get_foreground_color
+eek_theme_node_get_background_gradient
+eek_theme_node_get_border_width
+eek_theme_node_get_border_radius
+eek_theme_node_get_border_color
+eek_theme_node_get_font
+EekThemeNodePrivate
+EekThemeNodeClass
+<SUBSECTION Standard>
+EEK_THEME_NODE
+EEK_IS_THEME_NODE
+EEK_TYPE_THEME_NODE
+eek_theme_node_get_type
+EEK_THEME_NODE_CLASS
+EEK_IS_THEME_NODE_CLASS
+EEK_THEME_NODE_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-section</FILE>
 <TITLE>EekSection</TITLE>
-EekSectionClass
-EekSectionPrivate
 EekSection
+EekSectionClass
 eek_section_set_angle
 eek_section_get_angle
 eek_section_get_n_rows
@@ -76,6 +111,7 @@ eek_section_add_row
 eek_section_get_row
 eek_section_create_key
 eek_section_find_key_by_keycode
+EekSectionPrivate
 <SUBSECTION Standard>
 EEK_SECTION
 EEK_IS_SECTION
@@ -87,16 +123,38 @@ EEK_SECTION_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-theme-context</FILE>
+eek_theme_context_new
+eek_theme_context_set_theme
+eek_theme_context_get_theme
+eek_theme_context_set_resolution
+eek_theme_context_set_default_resolution
+eek_theme_context_get_resolution
+eek_theme_context_set_font
+eek_theme_context_get_font
+eek_theme_context_get_root_node
+EekThemeContextClass
+<SUBSECTION Standard>
+EEK_THEME_CONTEXT
+EEK_IS_THEME_CONTEXT
+EEK_TYPE_THEME_CONTEXT
+eek_theme_context_get_type
+EEK_THEME_CONTEXT_CLASS
+EEK_IS_THEME_CONTEXT_CLASS
+EEK_THEME_CONTEXT_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-container</FILE>
 <TITLE>EekContainer</TITLE>
-EekContainerClass
-EekContainerPrivate
 EekCallback
 EekCompareFunc
 EekContainer
+EekContainerClass
 eek_container_foreach_child
 eek_container_find
 eek_container_add_child
+EekContainerPrivate
 <SUBSECTION Standard>
 EEK_CONTAINER
 EEK_IS_CONTAINER
@@ -108,12 +166,29 @@ EEK_CONTAINER_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-clutter-keyboard</FILE>
+<TITLE>EekClutterKeyboard</TITLE>
+EekClutterKeyboard
+EekClutterKeyboardClass
+eek_clutter_keyboard_new
+eek_clutter_keyboard_set_theme
+EekClutterKeyboardPrivate
+<SUBSECTION Standard>
+EEK_CLUTTER_KEYBOARD
+EEK_IS_CLUTTER_KEYBOARD
+EEK_TYPE_CLUTTER_KEYBOARD
+eek_clutter_keyboard_get_type
+EEK_CLUTTER_KEYBOARD_CLASS
+EEK_IS_CLUTTER_KEYBOARD_CLASS
+EEK_CLUTTER_KEYBOARD_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-symbol</FILE>
 <TITLE>EekSymbol</TITLE>
 EekSymbolCategory
-EekSymbolClass
-EekSymbolPrivate
 EekSymbol
+EekSymbolClass
 eek_symbol_new
 eek_symbol_set_name
 eek_symbol_get_name
@@ -126,6 +201,7 @@ eek_symbol_set_modifier_mask
 eek_symbol_is_modifier
 eek_symbol_set_icon_name
 eek_symbol_get_icon_name
+EekSymbolPrivate
 <SUBSECTION Standard>
 EEK_SYMBOL
 EEK_IS_SYMBOL
@@ -141,7 +217,6 @@ EEK_SYMBOL_GET_CLASS
 <TITLE>EekXklLayout</TITLE>
 EekXklLayout
 EekXklLayoutClass
-EekXklLayoutPrivate
 eek_xkl_layout_new
 eek_xkl_layout_set_config
 eek_xkl_layout_set_config_full
@@ -156,6 +231,7 @@ eek_xkl_layout_get_layouts
 eek_xkl_layout_get_variants
 eek_xkl_layout_get_options
 eek_xkl_layout_get_option
+EekXklLayoutPrivate
 <SUBSECTION Standard>
 EEK_XKL_LAYOUT
 EEK_IS_XKL_LAYOUT
@@ -171,7 +247,6 @@ EEK_XKL_LAYOUT_GET_CLASS
 <TITLE>EekXkbLayout</TITLE>
 EekXkbLayout
 EekXkbLayoutClass
-EekXkbLayoutPrivate
 eek_xkb_layout_new
 eek_xkb_layout_set_names
 eek_xkb_layout_set_names_full
@@ -182,6 +257,7 @@ eek_xkb_layout_set_symbols
 eek_xkb_layout_get_keycodes
 eek_xkb_layout_get_geometry
 eek_xkb_layout_get_symbols
+EekXkbLayoutPrivate
 <SUBSECTION Standard>
 EEK_XKB_LAYOUT
 EEK_IS_XKB_LAYOUT
@@ -195,9 +271,8 @@ EEK_XKB_LAYOUT_GET_CLASS
 <SECTION>
 <FILE>eek-key</FILE>
 <TITLE>EekKey</TITLE>
-EekKeyClass
-EekKeyPrivate
 EekKey
+EekKeyClass
 eek_key_set_keycode
 eek_key_get_keycode
 eek_key_set_symbol_matrix
@@ -210,6 +285,7 @@ eek_key_get_index
 eek_key_set_oref
 eek_key_get_oref
 eek_key_is_pressed
+EekKeyPrivate
 <SUBSECTION Standard>
 EEK_KEY
 EEK_IS_KEY
@@ -223,7 +299,6 @@ EEK_KEY_GET_CLASS
 <SECTION>
 <FILE>eek-serializable</FILE>
 <TITLE>EekSerializable</TITLE>
-EekSerializable
 EekSerializableIface
 eek_serializable_serialize
 eek_serializable_deserialize
@@ -238,9 +313,8 @@ EEK_SERIALIZABLE_GET_IFACE
 <SECTION>
 <FILE>eek-element</FILE>
 <TITLE>EekElement</TITLE>
-EekElementClass
-EekElementPrivate
 EekElement
+EekElementClass
 eek_element_set_parent
 eek_element_get_parent
 eek_element_set_name
@@ -256,6 +330,7 @@ eek_element_set_group
 eek_element_set_level
 eek_element_get_group
 eek_element_get_level
+EekElementPrivate
 <SUBSECTION Standard>
 EEK_ELEMENT
 EEK_IS_ELEMENT
@@ -271,10 +346,10 @@ EEK_ELEMENT_GET_CLASS
 <TITLE>EekXmlLayout</TITLE>
 EekXmlLayout
 EekXmlLayoutClass
-EekXmlLayoutPrivate
 eek_xml_layout_new
 eek_xml_layout_set_source
 eek_xml_layout_get_source
+EekXmlLayoutPrivate
 <SUBSECTION Standard>
 EEK_XML_LAYOUT
 EEK_IS_XML_LAYOUT
@@ -286,15 +361,32 @@ EEK_XML_LAYOUT_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-theme</FILE>
+eek_theme_new
+eek_theme_load_stylesheet
+eek_theme_unload_stylesheet
+EekThemeClass
+<SUBSECTION Standard>
+EEK_THEME
+EEK_IS_THEME
+EEK_TYPE_THEME
+eek_theme_get_type
+EEK_THEME_CLASS
+EEK_IS_THEME_CLASS
+EEK_THEME_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-keysym</FILE>
 <TITLE>EekKeysym</TITLE>
 EEK_KEYSYM
-EekKeysymClass
-EekKeysymPrivate
 EekKeysym
+EekKeysymClass
 eek_keysym_new
 eek_keysym_get_xkeysym
 eek_keysym_new_from_name
+eek_keysym_new_with_modifier
+EekKeysymPrivate
 <SUBSECTION Standard>
 EEK_INVALID_KEYSYM
 EEK_IS_KEYSYM
@@ -314,7 +406,6 @@ eek_keyboard_output
 <SECTION>
 <FILE>eek-types</FILE>
 I_
-EEK_TYPE_SYMBOL_MATRIX
 EEK_TYPE_POINT
 EEK_TYPE_BOUNDS
 EEK_TYPE_OUTLINE
@@ -323,23 +414,40 @@ EekOrientation
 EekModifierBehavior
 EekModifierType
 EEK_INVALID_KEYCODE
-EekSymbolMatrix
 EekPoint
+eek_point_get_type
+eek_point_copy
+eek_point_free
+eek_point_rotate
 EekBounds
+eek_bounds_get_type
+eek_bounds_copy
+eek_bounds_free
+eek_bounds_long_side
 EekOutline
+eek_outline_get_type
+eek_outline_copy
+eek_outline_free
 EekColor
+eek_color_get_type
+eek_color_new
+eek_color_copy
+eek_color_free
+EekGradientType
+EekThemeNode
+EekThemeContext
+EekTheme
+</SECTION>
+
+<SECTION>
+<FILE>eek-symbol-matrix</FILE>
+EekSymbolMatrix
+EEK_TYPE_SYMBOL_MATRIX
 eek_symbol_matrix_get_type
 eek_symbol_matrix_new
 eek_symbol_matrix_copy
 eek_symbol_matrix_free
-eek_point_get_type
-eek_point_rotate
-eek_bounds_get_type
-eek_bounds_long_side
-eek_outline_get_type
-eek_outline_copy
-eek_outline_free
-eek_color_get_type
-eek_color_new
+eek_symbol_matrix_set_symbol
+eek_symbol_matrix_get_symbol
 </SECTION>
 

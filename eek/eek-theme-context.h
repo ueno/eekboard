@@ -28,7 +28,7 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION:EekThemeContext
+ * SECTION:eek-theme-context
  * @short_description: holds global information about a tree of styled objects
  *
  * #EekThemeContext is responsible for managing information global to

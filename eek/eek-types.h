@@ -26,7 +26,6 @@ G_BEGIN_DECLS
 
 #define I_(string) g_intern_static_string (string)
 
-#define EEK_TYPE_SYMBOL_MATRIX (eek_symbol_matrix_get_type ())
 #define EEK_TYPE_POINT (eek_point_get_type ())
 #define EEK_TYPE_BOUNDS (eek_bounds_get_type ())
 #define EEK_TYPE_OUTLINE (eek_outline_get_type ())
@@ -141,7 +140,6 @@ typedef struct _EekThemeContext EekThemeContext;
 typedef struct _EekThemeNode EekThemeNode;
 
 typedef struct _EekSymbolMatrix EekSymbolMatrix;
-typedef struct _EekPoint EekPoint;
 typedef struct _EekBounds EekBounds;
 typedef struct _EekOutline EekOutline;
 typedef struct _EekColor EekColor;
@@ -153,6 +151,7 @@ typedef struct _EekColor EekColor;
  *
  * 2D vertex
  */
+typedef struct _EekPoint EekPoint;
 struct _EekPoint
 {
     gdouble x;
@@ -176,7 +175,6 @@ void      eek_point_rotate   (EekPoint       *point,
  */
 struct _EekBounds
 {
-    /*< public >*/
     gdouble x;
     gdouble y;
     gdouble width;

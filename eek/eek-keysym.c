@@ -223,7 +223,8 @@ eek_keysym_init (EekKeysym *self)
  * modifier @modifier_mask.
  */
 EekKeysym *
-eek_keysym_new_with_modifier (guint xkeysym, EekModifierType modifier_mask)
+eek_keysym_new_with_modifier (guint           xkeysym,
+                              EekModifierType modifier_mask)
 {
     EekKeysym *keysym;
     EekKeysymPrivate *priv;

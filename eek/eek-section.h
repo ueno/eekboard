@@ -54,6 +54,8 @@ struct _EekSection
  * @create_key: virtual function for creating key in the section
  * @find_key_by_keycode: virtual function for accessing a key in the
  * section by keycode
+ * @key_pressed: class handler for #EekSection::key-pressed signal
+ * @key_released: class handler for #EekSection::key-released signal
  */
 struct _EekSectionClass
 {

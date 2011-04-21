@@ -26,12 +26,12 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION:EekThemeNode
+ * SECTION:eek-theme-node
  * @short_description: style information for one node in a tree of
  * themed objects
  *
- * A #EekThemeNode represents the CSS style information (the set of
- * CSS properties) for one node in a tree of themed objects. In
+ * The #EekThemeNode class represents the CSS style information (the
+ * set of CSS properties) for one node in a tree of themed objects. In
  * typical usage, it represents the style information for a single
  * #EekElement. A #EekThemeNode is immutable: attributes such as the
  * CSS classes for the node are passed in at construction. If the

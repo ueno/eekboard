@@ -121,7 +121,8 @@ eek_theme_context_changed (EekThemeContext *context)
 
 /**
  * eek_theme_context_set_theme:
- * @context: a #EekThemeContext
+ * @context: an #EekThemeContext
+ * @theme: an #EekTheme
  *
  * Sets the default set of theme stylesheets for the context. This theme will
  * be used for the root node and for nodes descending from it, unless some other

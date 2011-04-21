@@ -364,8 +364,9 @@ eek_symbol_get_category (EekSymbol *symbol)
 /**
  * eek_symbol_set_modifier_mask:
  * @symbol: an #EekSymbol
+ * @mask: an #EekModifierType
  *
- * Set modifier mask @symbol can trigger.
+ * Set modifier mask that @symbol can trigger.
  */
 void
 eek_symbol_set_modifier_mask (EekSymbol      *symbol,
@@ -383,7 +384,7 @@ eek_symbol_set_modifier_mask (EekSymbol      *symbol,
  * eek_symbol_get_modifier_mask:
  * @symbol: an #EekSymbol
  *
- * Get modifier mask @symbol can trigger.
+ * Get modifier mask that @symbol can trigger.
  */
 EekModifierType
 eek_symbol_get_modifier_mask (EekSymbol *symbol)
