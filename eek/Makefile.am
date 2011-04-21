@@ -37,7 +37,6 @@ libeek_public_headers =				\
 	$(srcdir)/eek-keysym.h			\
 	$(srcdir)/eek-symbol-matrix.h		\
 	$(srcdir)/eek-types.h			\
-	$(srcdir)/eek-enumtypes.h		\
 	$(srcdir)/eek-xml.h			\
 	$(srcdir)/eek-xml-layout.h		\
 	$(srcdir)/eek-serializable.h		\
@@ -159,6 +158,7 @@ libeek_xkl_la_LIBADD = libeek-xkb.la $(LIBXKLAVIER_LIBS) $(GTK_LIBS)
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
 eek_HEADERS =					\
 	$(libeek_public_headers)		\
+	$(srcdir)/eek-enumtypes.h		\
 	$(libeek_clutter_public_headers)	\
 	$(libeek_gtk_public_headers)		\
 	$(libeek_xkb_public_headers)		\
@@ -236,7 +236,7 @@ Eek@EEK_LIBRARY_SUFFIX_U@_gir_SCANNERFLAGS = --strip-prefix=Eek --pkg=glib-2.0
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GLib-2.0 GObject-2.0 Gio-2.0
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_CFLAGS = $(libeek_la_CFLAGS)
 Eek@EEK_LIBRARY_SUFFIX_U@_gir_LIBS = libeek.la
-Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_sources) $(libeek_public_headers)
+Eek@EEK_LIBRARY_SUFFIX_U@_gir_FILES = $(libeek_sources) $(libeek_public_headers) $(srcdir)/eek-enumtypes.h
 
 EekGtk@EEK_LIBRARY_SUFFIX@.gir: libeek-gtk.la Eek@EEK_LIBRARY_SUFFIX@.gir
 EekGtk@EEK_LIBRARY_SUFFIX_U@_gir_INCLUDES = GObject-2.0 Gtk-@GTK_API_VERSION@ Eek@EEK_LIBRARY_SUFFIX@

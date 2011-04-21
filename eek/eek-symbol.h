@@ -36,6 +36,7 @@ G_BEGIN_DECLS
  * @EEK_SYMBOL_CATEGORY_USER3: reserved for future use
  * @EEK_SYMBOL_CATEGORY_USER4: reserved for future use
  * @EEK_SYMBOL_CATEGORY_UNKNOWN: used for error reporting
+ * @EEK_SYMBOL_CATEGORY_LAST: the last symbol category
  *
  * Category of the key symbols.
  */
@@ -49,7 +50,6 @@ typedef enum {
     EEK_SYMBOL_CATEGORY_USER3,
     EEK_SYMBOL_CATEGORY_USER4,
     EEK_SYMBOL_CATEGORY_UNKNOWN,
-    /*< private >*/
     EEK_SYMBOL_CATEGORY_LAST = EEK_SYMBOL_CATEGORY_UNKNOWN
 } EekSymbolCategory;
 
