@@ -33,6 +33,7 @@ gtk-doc.make
 eek/eek-special-keysym-entries.h
 eek/eek-unicode-keysym-entries.h
 eek/eek-xkeysym-keysym-entries.h
+eek/eek-enumtypes.[ch]
 eek/eek-marshalers.[ch]
 eek/*.pc
 eek/*.gir
@@ -43,12 +44,13 @@ eekboard/*.typelib
 tests/eek-simple-test
 tests/eek-xkb-test
 tests/eek-xml-test
+src/eekboard
 src/eekboard-server
-src/eekboard-client
-src/eekboard-system-client
 src/eekboard-xml
+src/eekboard-server.service
 docs/reference/eek/*.stamp
 docs/reference/eek/*.txt
+docs/reference/eek/eek.types
 !/docs/reference/eek/eek-sections.txt
 docs/reference/eek/xml
 docs/reference/eek/html
@@ -71,6 +73,9 @@ po/*.gmo
 po/Makefile.in.in
 po/POTFILES
 po/stamp-it
+po/.intltool-merge-cache
 bindings/vala/*.vapi
 py-compile
-
+data/*.desktop
+examples/eekboard-inscript/eekboard-inscript
+examples/simple-client/simple-client
