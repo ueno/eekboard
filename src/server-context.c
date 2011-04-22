@@ -141,7 +141,10 @@ on_allocation_changed (ClutterActor          *stage,
                        ClutterAllocationFlags flags,
                        gpointer               user_data)
 {
-    ClutterActor *actor = user_data;
+    ClutterActor *actor =
+        clutter_container_find_child_by_name (CLUTTER_CONTAINER(stage),
+                                              "keyboard");
+
     clutter_actor_set_size (actor,
                             box->x2 - box->x1,
                             box->y2 - box->y1);
@@ -234,12 +237,11 @@ set_geometry (ServerContext *context)
         g_signal_connect (stage,
                           "allocation-changed",
                           G_CALLBACK(on_allocation_changed),
-                          actor);
-#else
+                          NULL);
+#endif
         gtk_widget_set_size_request (context->widget,
                                      bounds.width,
                                      bounds.height);
-#endif
         gtk_window_move (GTK_WINDOW(context->window),
                          MAX(rect.width - 20 - bounds.width, 0),
                          MAX(rect.height - 40 - bounds.height, 0));
@@ -265,6 +267,7 @@ update_widget (ServerContext *context)
     context->widget = gtk_clutter_embed_new ();
     stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
     actor = eek_clutter_keyboard_new (context->keyboard);
+    clutter_actor_set_name (actor, "keyboard");
     if (theme)
         eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
     clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
