@@ -27,9 +27,8 @@
 #if HAVE_CLUTTER_GTK
 #include <clutter-gtk/clutter-gtk.h>
 #include "eek/eek-clutter.h"
-#else  /* HAVE_CLUTTER_GTK */
+#endif
 #include "eek/eek-gtk.h"
-#endif  /* !HAVE_CLUTTER_GTK */
 
 #include "server-context.h"
 
@@ -40,6 +39,7 @@ enum {
     PROP_0,
     PROP_OBJECT_PATH,
     PROP_CONNECTION,
+    PROP_UI_TOOLKIT,
     PROP_LAST
 };
 
@@ -85,6 +85,12 @@ static const gchar introspection_xml[] =
     "  </interface>"
     "</node>";
 
+typedef enum {
+    UI_TOOLKIT_GTK,
+    UI_TOOLKIT_CLUTTER,
+    UI_TOOLKIT_DEFAULT = UI_TOOLKIT_GTK
+} ServerContextUIToolkitType;
+
 typedef struct _ServerContextClass ServerContextClass;
 
 struct _ServerContext {
@@ -109,6 +115,8 @@ struct _ServerContext {
     gulong key_pressed_handler;
     gulong key_released_handler;
     gulong notify_visible_handler;
+
+    ServerContextUIToolkitType ui_toolkit;
 };
 
 struct _ServerContextClass {
@@ -227,18 +235,22 @@ set_geometry (ServerContext *context)
                          rect.height / 2);
         gtk_window_set_opacity (GTK_WINDOW(context->window), 0.8);
     } else {
+        if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
 #if HAVE_CLUTTER_GTK
-        ClutterActor *stage =
-            gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
-        clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
-        clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
-                                        bounds.width / 3,
-                                        bounds.height / 3);
-        g_signal_connect (stage,
-                          "allocation-changed",
-                          G_CALLBACK(on_allocation_changed),
-                          NULL);
+            ClutterActor *stage =
+                gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
+            clutter_stage_set_user_resizable (CLUTTER_STAGE(stage), TRUE);
+            clutter_stage_set_minimum_size (CLUTTER_STAGE(stage),
+                                            bounds.width / 3,
+                                            bounds.height / 3);
+            g_signal_connect (stage,
+                              "allocation-changed",
+                              G_CALLBACK(on_allocation_changed),
+                              NULL);
+#else
+            g_return_if_reached ();
 #endif
+        }
         gtk_widget_set_size_request (context->widget,
                                      bounds.width,
                                      bounds.height);
@@ -263,21 +275,26 @@ update_widget (ServerContext *context)
 
     theme = eek_theme_new (DEFAULT_THEME, NULL, NULL);
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
+    if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
 #if HAVE_CLUTTER_GTK
-    context->widget = gtk_clutter_embed_new ();
-    stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
-    actor = eek_clutter_keyboard_new (context->keyboard);
-    clutter_actor_set_name (actor, "keyboard");
-    if (theme)
-        eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
-    clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
+        context->widget = gtk_clutter_embed_new ();
+        stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
+        actor = eek_clutter_keyboard_new (context->keyboard);
+        clutter_actor_set_name (actor, "keyboard");
+        if (theme)
+            eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
+        clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
-    clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
+        clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
 #else
-    context->widget = eek_gtk_keyboard_new (context->keyboard);
-    if (theme)
-        eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget), theme);
+        g_return_if_reached ();
 #endif
+    } else {
+        context->widget = eek_gtk_keyboard_new (context->keyboard);
+        if (theme)
+            eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget),
+                                        theme);
+    }
 
     if (!context->window) {
         context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -312,6 +329,7 @@ server_context_set_property (GObject      *object,
 {
     ServerContext *context = SERVER_CONTEXT(object);
     GDBusConnection *connection;
+    const gchar *ui_toolkit;
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
@@ -324,6 +342,17 @@ server_context_set_property (GObject      *object,
         if (context->connection)
             g_object_unref (context->connection);
         context->connection = g_object_ref (connection);
+        break;
+    case PROP_UI_TOOLKIT:
+        ui_toolkit = g_value_get_string (value);
+        if (g_strcmp0 (ui_toolkit, "gtk") == 0)
+            context->ui_toolkit = UI_TOOLKIT_GTK;
+#if HAVE_CLUTTER_GTK
+        else if (g_strcmp0 (ui_toolkit, "clutter") == 0)
+            context->ui_toolkit = UI_TOOLKIT_CLUTTER;
+#endif  /* HAVE_CLUTTER_GTK */
+        else
+            g_warning ("unknown UI toolkit %s", ui_toolkit);
         break;
     default:
         g_object_set_property (object,
@@ -430,11 +459,21 @@ server_context_class_init (ServerContextClass *klass)
     g_object_class_install_property (gobject_class,
                                      PROP_CONNECTION,
                                      pspec);
+
+    pspec = g_param_spec_string ("ui-toolkit",
+                                 "UI toolkit",
+                                 "UI toolkit",
+                                 NULL,
+                                 G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_UI_TOOLKIT,
+                                     pspec);
 }
 
 static void
 server_context_init (ServerContext *context)
 {
+    GSettings *settings;
     GError *error;
 
     context->connection = NULL;
@@ -459,6 +498,13 @@ server_context_init (ServerContext *context)
     context->window = NULL;
     context->key_pressed_handler = 0;
     context->key_released_handler = 0;
+
+    context->ui_toolkit = UI_TOOLKIT_DEFAULT;
+
+    settings = g_settings_new ("org.fedorahosted.eekboard");
+    g_settings_bind (settings, "ui-toolkit",
+                     context, "ui-toolkit",
+                     G_SETTINGS_BIND_GET);
 }
 
 static void

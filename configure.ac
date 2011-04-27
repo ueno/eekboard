@@ -89,6 +89,8 @@ PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.26.0], ,
   [AC_MSG_ERROR([GLib2 not found])])
 PKG_CHECK_MODULES([GIO2], [gio-2.0], ,
   [AC_MSG_ERROR([Gio2 not found])])
+GLIB_GSETTINGS
+
 PKG_CHECK_MODULES([PANGOCAIRO], [pangocairo], ,
   [AC_MSG_ERROR([PangoCairo not found])])
 PKG_CHECK_MODULES([GTK], [
