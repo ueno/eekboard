@@ -47,7 +47,6 @@ tests/eek-xml-test
 src/eekboard
 src/eekboard-server
 src/eekboard-xml
-src/eekboard-server.service
 docs/reference/eek/*.stamp
 docs/reference/eek/*.txt
 docs/reference/eek/eek.types
@@ -76,6 +75,8 @@ po/stamp-it
 po/.intltool-merge-cache
 bindings/vala/*.vapi
 py-compile
+data/org.fedorahosted.eekboard.gschema.xml
+data/eekboard-server.service
 data/*.desktop
 examples/eekboard-inscript/eekboard-inscript
 examples/simple-client/simple-client

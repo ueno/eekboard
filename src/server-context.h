@@ -22,8 +22,8 @@
 
 G_BEGIN_DECLS
 
-#define SERVER_CONTEXT_PATH "/com/redhat/Eekboard/Context_%d"
-#define SERVER_CONTEXT_INTERFACE "com.redhat.Eekboard.Context"
+#define SERVER_CONTEXT_PATH "/org/fedorahosted/Eekboard/Context_%d"
+#define SERVER_CONTEXT_INTERFACE "org.fedorahosted.Eekboard.Context"
 
 #define SERVER_TYPE_CONTEXT (server_context_get_type())
 #define SERVER_CONTEXT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SERVER_TYPE_CONTEXT, ServerContext))

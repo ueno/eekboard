@@ -143,9 +143,9 @@ eekboard_eekboard_new (GDBusConnection *connection,
                         cancellable,
                         &error,
                         "g-connection", connection,
-                        "g-name", "com.redhat.Eekboard.Server",
-                        "g-interface-name", "com.redhat.Eekboard.Server",
-                        "g-object-path", "/com/redhat/Eekboard/Server",
+                        "g-name", "org.fedorahosted.Eekboard.Server",
+                        "g-interface-name", "org.fedorahosted.Eekboard.Server",
+                        "g-object-path", "/org/fedorahosted/Eekboard/Server",
                         NULL);
     if (initable != NULL) {
         EekboardEekboard *eekboard = EEKBOARD_EEKBOARD (initable);

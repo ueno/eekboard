@@ -16,7 +16,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-if ENABLE_EEKBOARD
 bin_PROGRAMS = \
 	eekboard \
 	eekboard-server \
@@ -116,14 +115,3 @@ noinst_HEADERS = \
 	$(eekboard_server_headers) \
 	$(eekboard_xml_headers) \
 	$(libxklutil_la_headers)
-
-EXTRA_DIST = $(service_in_files)
-DISTCLEANFILES = $(service_DATA)
-
-servicedir       = $(datadir)/dbus-1/services
-service_in_files = eekboard-server.service.in
-service_DATA     = $(service_in_files:.service.in=.service)
-
-$(service_DATA): $(service_in_files) Makefile
-	$(AM_V_GEN) sed -e "s|\@bindir\@|$(bindir)|" $< > $@
-endif

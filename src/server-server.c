@@ -40,7 +40,7 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 static const gchar introspection_xml[] =
     "<node>"
-    "  <interface name='com.redhat.Eekboard.Server'>"
+    "  <interface name='org.fedorahosted.Eekboard.Server'>"
     "    <method name='CreateContext'>"
     "      <arg direction='in' type='s' name='client_name'/>"
     "      <arg direction='out' type='s' name='object_path'/>"

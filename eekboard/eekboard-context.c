@@ -368,9 +368,9 @@ eekboard_context_new (GDBusConnection *connection,
         g_initable_new (EEKBOARD_TYPE_CONTEXT,
                         cancellable,
                         &error,
-                        "g-name", "com.redhat.Eekboard.Server",
+                        "g-name", "org.fedorahosted.Eekboard.Server",
                         "g-connection", connection,
-                        "g-interface-name", "com.redhat.Eekboard.Context",
+                        "g-interface-name", "org.fedorahosted.Eekboard.Context",
                         "g-object-path", object_path,
                         NULL);
     if (initable != NULL) {

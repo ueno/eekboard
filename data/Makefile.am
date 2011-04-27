@@ -5,6 +5,13 @@ SUBDIRS = icons themes keyboards
 gsettings_schemas_in_files = org.fedorahosted.eekboard.gschema.xml.in
 gsettings_SCHEMAS = $(gsettings_schemas_in_files:.gschema.xml.in=.gschema.xml)
 
+servicedir       = $(datadir)/dbus-1/services
+service_in_files = eekboard-server.service.in
+service_DATA     = $(service_in_files:.service.in=.service)
+
+$(service_DATA): $(service_in_files) Makefile
+	$(AM_V_GEN) sed -e "s|\@bindir\@|$(bindir)|" $< > $@
+
 desktopdir = $(datadir)/applications
 desktop_in_files = eekboard.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
@@ -17,8 +24,8 @@ endif
 
 @INTLTOOL_DESKTOP_RULE@
 
-CLEANFILES = $(desktop_DATA) $(gsettings_SCHEMAS)
-EXTRA_DIST = $(desktop_in_files) $(gsettings_schemas_in_files)
+CLEANFILES = $(service_DATA) $(desktop_DATA) $(gsettings_SCHEMAS)
+EXTRA_DIST = $(service_in_files) $(desktop_in_files) $(gsettings_schemas_in_files)
 
 if ENABLE_ATSPI
 CLEANFILES += $(autostart_DATA)

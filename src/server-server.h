@@ -22,8 +22,8 @@
 
 G_BEGIN_DECLS
 
-#define SERVER_SERVER_PATH "/com/redhat/Eekboard/Server"
-#define SERVER_SERVER_INTERFACE "com.redhat.Eekboard.Server"
+#define SERVER_SERVER_PATH "/org/fedorahosted/Eekboard/Server"
+#define SERVER_SERVER_INTERFACE "org.fedorahosted.Eekboard.Server"
 
 #define SERVER_TYPE_SERVER (server_server_get_type())
 #define SERVER_SERVER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SERVER_TYPE_SERVER, ServerServer))

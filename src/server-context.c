@@ -45,7 +45,7 @@ enum {
 
 static const gchar introspection_xml[] =
     "<node>"
-    "  <interface name='com.redhat.Eekboard.Context'>"
+    "  <interface name='org.fedorahosted.Eekboard.Context'>"
     "    <method name='AddKeyboard'>"
     "      <arg direction='in' type='v' name='keyboard'/>"
     "      <arg direction='out' type='u' name='keyboard_id'/>"
