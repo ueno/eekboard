@@ -18,6 +18,8 @@
 #ifndef EEKBOARD_H
 #define EEKBOARD_H 1
 
+#define __EEKBOARD_H_INSIDE__ 1
+
 #include "eekboard/eekboard-eekboard.h"
 #include "eekboard/eekboard-context.h"
 
