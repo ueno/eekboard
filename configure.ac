@@ -112,9 +112,10 @@ AC_ARG_ENABLE(fakekey,
               enable_fakekey=yes)
 
 if test x$enable_fakekey = xyes; then
-  PKG_CHECK_MODULES([FAKEKEY], [libfakekey], ,
-    [AC_MSG_ERROR([fakekey not found])])
-  AC_DEFINE([HAVE_FAKEKEY], [1], [Define if fakekey is found])
+  PKG_CHECK_MODULES([FAKEKEY], [libfakekey], , enable_fakekey=no)
+  if test x$enable_fakekey = xyes; then
+    AC_DEFINE([HAVE_FAKEKEY], [1], [Define if fakekey is found])
+  fi
 fi
 AM_CONDITIONAL(ENABLE_FAKEKEY, [test x$enable_fakekey = xyes])
 AC_MSG_RESULT($enable_fakekey)
@@ -124,12 +125,13 @@ AC_MSG_CHECKING([whether you enable AT-SPI 2 event handling])
 AC_ARG_ENABLE(atspi,
               AS_HELP_STRING([--enable-atspi=no/yes],
                              [Enable AT-SPI 2 event handling default=no]),,
-              enable_atspi=no)
+              enable_atspi=yes)
 
 if test x$enable_atspi = xyes; then
-  PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], ,
-    [AC_MSG_ERROR([AT-SPI 2 not found])])
-  AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
+  PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], , enable_atspi=no)
+  if test x$enable_atspi = xyes; then
+    AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
+  fi
 fi
 AC_MSG_RESULT($enable_atspi)
 AM_CONDITIONAL(ENABLE_ATSPI, [test x$enable_atspi = xyes])
@@ -140,30 +142,32 @@ AC_ARG_ENABLE(python,
               AS_HELP_STRING([--enable-python=no/yes],
                              [Enable Python language binding default=yes]),,
               enable_python=yes)
-AC_MSG_RESULT($enable_python)
-AM_CONDITIONAL(ENABLE_PYTHON, [test x$enable_python = xyes])
+
+dnl check python unconditionally to re-generate
+dnl eek/*-keysym-labels.txt when maintainer-mode enabled
+AM_PATH_PYTHON([2.5], , enable_python=no)
 
 if test x"$enable_python" = x"yes"; then
-    # check python
-    AM_PATH_PYTHON([2.5])
-    AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
-    if test x"$PYTHON_CONFIG" = x""; then
-        AC_PATH_PROG(PYTHON_CONFIG, python-config)
-    fi
+  if test x$enable_python = xyes; then
+    AC_PATH_PROGS(PYTHON_CONFIG, [python$PYTHON_VERSION-config python-config])
     if test x"$PYTHON_CONFIG" != x""; then
-        PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
-        PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+      PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
+      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
     else
-        PYTHON_CFLAGS=`$PYTHON $srcdir/python-config.py --includes`
-        PYTHON_LIBS=`$PYTHON $srcdir/python-config.py --libs`
+      PYTHON_CFLAGS=`$PYTHON $srcdir/python-config.py --includes`
+      PYTHON_LIBS=`$PYTHON $srcdir/python-config.py --libs`
     fi
     PYTHON_INCLUDES="$PYTHON_CFLAGS"
     AC_SUBST(PYTHON_CFLAGS)
     AC_SUBST(PYTHON_INCLUDES)
     AC_SUBST(PYTHON_LIBS)
-else
-    enable_python="no (disabled, use --enable-python to enable)"
+  fi
 fi
+
+AC_MSG_RESULT($enable_python)
+AM_CONDITIONAL(ENABLE_PYTHON, [test x$enable_python = xyes])
+
+GOBJECT_INTROSPECTION_CHECK([0.9.0])
 
 dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
@@ -171,46 +175,65 @@ AC_ARG_ENABLE(vala,
               AS_HELP_STRING([--enable-vala=no/yes],
                              [Enable Vala language binding default=yes]),,
               enable_vala=yes)
+if test x$enable_vala = xyes; then
+  if test "x$INTROSPECTION_SCANNER" = x; then
+    enable_vala=no
+    AC_MSG_WARN([GObject-Introspection must be enabled for Vala bindings])
+  fi
+
+  AM_PROG_VALAC([0.10.0])
+  have_vala=yes
+
+  AC_PATH_PROG(VALAC, valac, valac)
+  AC_SUBST(VALAC)
+  AC_SUBST(VALAFLAGS)
+
+  AC_PATH_PROG([VAPIGEN], [vapigen], [false])
+
+  if test "x$VAPIGEN" = "xfalse"; then
+    enable_vala=no
+    AC_MSG_WARN([vapigen not found. Was vala compiled with --enable-vapigen?])
+  fi
+
+  AC_SUBST(VAPIGEN)
+fi
 AC_MSG_RESULT($enable_vala)
 AM_CONDITIONAL(ENABLE_VALA, [test x$enable_vala = xyes])
 
-dnl standalone application
-AC_MSG_CHECKING([whether you enable eekboard])
-AC_ARG_ENABLE(eekboard,
-              AS_HELP_STRING([--enable-eekboard=no/yes],
-                             [Build standalone application "ekboard" default=yes]),,
-              enable_eekboard=yes)
-AC_MSG_RESULT($enable_eekboard)
-AM_CONDITIONAL(ENABLE_EEKBOARD, [test x$enable_eekboard = xyes])
-
-dnl Clutter
-AC_MSG_CHECKING([whether you enable Clutter])
+dnl clutter
+AC_MSG_CHECKING([whether you enable clutter])
 AC_ARG_ENABLE(clutter,
               AS_HELP_STRING([--enable-clutter=no/yes],
-                             [Enable Clutter user interface default=yes]),,
-              enable_clutter=no)
-AC_MSG_RESULT($enable_clutter)
+                             [Enable clutter user interface default=yes]),,
+              enable_clutter=yes)
 
 if test x$enable_clutter = xyes; then
-  PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], ,
-    [AC_MSG_ERROR([Clutter not found -- install it or add --disable-clutter])])
-  AC_DEFINE([HAVE_CLUTTER], [1], [Define if Clutter is found])
-  have_clutter_gtk=0
-  need_swap_event_workaround=0
-  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], [have_clutter_gtk=1],
-    [PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-0.10 clutter-x11-1.0],
-      [have_clutter_gtk=1; need_swap_event_workaround=1])])
-  AC_DEFINE_UNQUOTED([HAVE_CLUTTER_GTK], $have_clutter_gtk,
-    [Define if Clutter-Gtk is found])
-  AC_DEFINE_UNQUOTED([NEED_SWAP_EVENT_WORKAROUND], $need_swap_event_workaround,
-    [Define if GLX_INTEL_swap_event work around is needed])
+  PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], , enable_clutter=no)
+  if x$enable_clutter = xyes; then
+    AC_DEFINE([HAVE_CLUTTER], [1], [Define if clutter is found])
+  fi
 fi
 AM_CONDITIONAL(ENABLE_CLUTTER, [test x$enable_clutter = xyes])
+AC_MSG_RESULT($enable_clutter)
+
+dnl clutter-gtk
+AC_MSG_CHECKING([whether you enable clutter-gtk])
+AC_ARG_ENABLE(clutter,
+              AS_HELP_STRING([--enable-clutter-gtk=no/yes],
+                             [Enable clutter user interface default=yes]),,
+              enable_clutter_gtk=$enable_clutter)
+
+if test x$enable_clutter_gtk = xyes; then
+  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], , enable_clutter_gtk=yes)
+  if test x$enable_clutter_gtk = xyes; then
+    AC_DEFINE_UNQUOTED([HAVE_CLUTTER_GTK], $have_clutter_gtk,
+      [Define if Clutter-Gtk is found])
+  fi
+fi
+AC_MSG_RESULT($enable_clutter_gtk)
+AM_CONDITIONAL(ENABLE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
-
-dnl to re-generate eek/*-keysym-labels.txt
-AC_CHECK_PROGS([PYTHON], [python])
 
 dnl define GETTEXT_* variables
 GETTEXT_PACKAGE=$PACKAGE
@@ -218,8 +241,6 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only architecture-independent data directory.])
 AM_GLIB_GNU_GETTEXT
 AM_GLIB_DEFINE_LOCALEDIR(EEKBOARD_LOCALEDIR)
-
-GOBJECT_INTROSPECTION_CHECK([0.9.0])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile

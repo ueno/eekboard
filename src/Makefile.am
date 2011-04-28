@@ -71,9 +71,9 @@ eekboard_server_LDADD = \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS)
 
-if ENABLE_CLUTTER
-eekboard_server_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
-eekboard_server_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
+if ENABLE_CLUTTER_GTK
+eekboard_server_CFLAGS += $(CLUTTER_GTK_CFLAGS)
+eekboard_server_LDADD += $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif
 
 eekboard_server_headers = server-server.h server-context.h

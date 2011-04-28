@@ -26,25 +26,34 @@ dist_vapi_DATA = \
 MAINTAINERCLEANFILES = $(dist_vapi_DATA)
 
 eek-$(EEK_API_VERSION).vapi:
-	vapigen --library eek-$(EEK_API_VERSION) \
+	$(VAPIGEN_V)$(VAPIGEN) --library eek-$(EEK_API_VERSION) \
 		eek-$(EEK_API_VERSION)/eek-$(EEK_API_VERSION).gi
 
 eek-clutter-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	vapigen --vapidir=$(builddir) --library eek-clutter-$(EEK_API_VERSION) \
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
+		--library eek-clutter-$(EEK_API_VERSION) \
 		--pkg eek-$(EEK_API_VERSION) --pkg clutter-1.0 \
 		eek-clutter-$(EEK_API_VERSION)/eek-clutter-$(EEK_API_VERSION).gi
 
 eek-gtk-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	vapigen --vapidir=$(builddir) --library eek-gtk-$(EEK_API_VERSION) \
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
+		--library eek-gtk-$(EEK_API_VERSION) \
 		--pkg eek-$(EEK_API_VERSION) --pkg gtk+-2.0 \
 		eek-gtk-$(EEK_API_VERSION)/eek-gtk-$(EEK_API_VERSION).gi
 
 eek-xkb-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	vapigen --vapidir=$(builddir) --library eek-xkb-$(EEK_API_VERSION) \
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
+		--library eek-xkb-$(EEK_API_VERSION) \
 		--pkg eek-$(EEK_API_VERSION) \
 		eek-xkb-$(EEK_API_VERSION)/eek-xkb-$(EEK_API_VERSION).gi
 
 eek-xkl-$(EEK_API_VERSION).vapi: eek-xkb-$(EEK_API_VERSION).vapi
-	vapigen --vapidir=$(builddir) --library eek-xkl-$(EEK_API_VERSION) \
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
+		--library eek-xkl-$(EEK_API_VERSION) \
 		--pkg eek-$(EEK_API_VERSION) --pkg eek-xkb-$(EEK_API_VERSION) \
 		eek-xkl-$(EEK_API_VERSION)/eek-xkl-$(EEK_API_VERSION).gi
+
+# set up the verbosity rules to avoid some build noise
+VAPIGEN_V = $(VAPIGEN_V_$(V))
+VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
+VAPIGEN_V_0 = @echo "  VAPIG " $^;
