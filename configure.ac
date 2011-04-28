@@ -209,7 +209,7 @@ AC_ARG_ENABLE(clutter,
 
 if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], , enable_clutter=no)
-  if x$enable_clutter = xyes; then
+  if test x$enable_clutter = xyes; then
     AC_DEFINE([HAVE_CLUTTER], [1], [Define if clutter is found])
   fi
 fi
@@ -218,16 +218,15 @@ AC_MSG_RESULT($enable_clutter)
 
 dnl clutter-gtk
 AC_MSG_CHECKING([whether you enable clutter-gtk])
-AC_ARG_ENABLE(clutter,
+AC_ARG_ENABLE(clutter-gtk,
               AS_HELP_STRING([--enable-clutter-gtk=no/yes],
                              [Enable clutter user interface default=yes]),,
-              enable_clutter_gtk=$enable_clutter)
+              enable_clutter_gtk=yes)
 
 if test x$enable_clutter_gtk = xyes; then
   PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], , enable_clutter_gtk=yes)
   if test x$enable_clutter_gtk = xyes; then
-    AC_DEFINE_UNQUOTED([HAVE_CLUTTER_GTK], $have_clutter_gtk,
-      [Define if Clutter-Gtk is found])
+    AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
   fi
 fi
 AC_MSG_RESULT($enable_clutter_gtk)
