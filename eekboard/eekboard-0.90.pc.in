@@ -25,6 +25,6 @@ Name: Eekboard
 Description: A Library to Create Keyboard-like UI
 URL: http://ueno.github.com/eekboard/
 Version: @VERSION@
-Requires: gobject-2.0
+Requires: eek-@EEK_API_VERSION@
 Libs: -L${libdir} -leek
 Cflags: -I${includedir}/eekboard-@EEK_API_VERSION@
