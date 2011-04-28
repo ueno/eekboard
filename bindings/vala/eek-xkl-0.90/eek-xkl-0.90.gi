@@ -2,9 +2,6 @@
 <api version="1.0">
 	<namespace name="EekXkl">
 		<object name="EekXklLayout" parent="EekXkbLayout" type-name="EekXklLayout" get-type="eek_xkl_layout_get_type">
-			<implements>
-				<interface name="EekLayout"/>
-			</implements>
 			<method name="disable_option" symbol="eek_xkl_layout_disable_option">
 				<return-type type="gboolean"/>
 				<parameters>
@@ -53,6 +50,25 @@
 			<constructor name="new" symbol="eek_xkl_layout_new">
 				<return-type type="EekLayout*"/>
 			</constructor>
+<!--
+			<method name="set_config" symbol="eek_xkl_layout_set_config">
+				<return-type type="gboolean"/>
+				<parameters>
+					<parameter name="layout" type="EekXklLayout*"/>
+					<parameter name="config" type="XklConfigRec*"/>
+				</parameters>
+			</method>
+-->
+			<method name="set_config_full" symbol="eek_xkl_layout_set_config_full">
+				<return-type type="gboolean"/>
+				<parameters>
+					<parameter name="layout" type="EekXklLayout*"/>
+					<parameter name="model" type="gchar*"/>
+					<parameter name="layouts" type="gchar**"/>
+					<parameter name="variants" type="gchar**"/>
+					<parameter name="options" type="gchar**"/>
+				</parameters>
+			</method>
 			<method name="set_layouts" symbol="eek_xkl_layout_set_layouts">
 				<return-type type="gboolean"/>
 				<parameters>

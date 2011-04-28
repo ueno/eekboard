@@ -1,2 +1,2 @@
-include/eek-0.1/eek/eek-xkb-layout.h
+include/eek-0.90/eek/eek-xkb-layout.h
 lib/libeek-xkb.so

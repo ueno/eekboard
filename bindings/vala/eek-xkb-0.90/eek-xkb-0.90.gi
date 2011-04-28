@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
 <api version="1.0">
 	<namespace name="EekXkb">
-		<object name="EekXkbLayout" parent="GInitiallyUnowned" type-name="EekXkbLayout" get-type="eek_xkb_layout_get_type">
-			<implements>
-				<interface name="EekLayout"/>
-			</implements>
+		<object name="EekXkbLayout" parent="EekLayout" type-name="EekXkbLayout" get-type="eek_xkb_layout_get_type">
 			<method name="get_geometry" symbol="eek_xkb_layout_get_geometry">
 				<return-type type="gchar*"/>
 				<parameters>
@@ -49,6 +46,19 @@
 				</parameters>
 			</method>
 -->
+			<method name="set_names_full" symbol="eek_xkb_layout_set_names_full">
+				<return-type type="gboolean"/>
+				<parameters>
+					<parameter name="layout" type="EekXkbLayout*"/>
+				</parameters>
+			</method>
+			<method name="set_names_full_valist" symbol="eek_xkb_layout_set_names_full_valist">
+				<return-type type="gboolean"/>
+				<parameters>
+					<parameter name="layout" type="EekXkbLayout*"/>
+					<parameter name="var_args" type="va_list"/>
+				</parameters>
+			</method>
 			<method name="set_symbols" symbol="eek_xkb_layout_set_symbols">
 				<return-type type="gboolean"/>
 				<parameters>
