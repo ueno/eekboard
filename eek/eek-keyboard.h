@@ -17,6 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
+
+#if !defined(__EEK_H_INSIDE__) && !defined(EEK_COMPILATION)
+#error "Only <eek/eek.h> can be included directly."
+#endif
+
 #ifndef EEK_KEYBOARD_H
 #define EEK_KEYBOARD_H 1
 

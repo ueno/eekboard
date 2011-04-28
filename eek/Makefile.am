@@ -96,7 +96,7 @@ libeek_la_SOURCES =				\
 	$(srcdir)/eek-enumtypes.c		\
 	$(srcdir)/eek-marshalers.c
 
-libeek_la_CFLAGS = $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS) $(LIBCROCO_CFLAGS)
+libeek_la_CFLAGS = -DEEK_COMPILATION=1 $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS) $(LIBCROCO_CFLAGS)
 libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) $(LIBCROCO_LIBS) -lm
 
 if ENABLE_CLUTTER
@@ -116,7 +116,7 @@ libeek_clutter_sources =			\
 	$(srcdir)/eek-clutter-renderer.c
 
 libeek_clutter_la_SOURCES = $(libeek_clutter_sources)
-libeek_clutter_la_CFLAGS = $(CLUTTER_CFLAGS)
+libeek_clutter_la_CFLAGS = -DEEK_COMPILATION=1 $(CLUTTER_CFLAGS)
 libeek_clutter_la_LIBADD = libeek.la $(CLUTTER_LIBS)
 endif
 
@@ -130,7 +130,7 @@ libeek_gtk_sources =				\
 	$(srcdir)/eek-gtk-renderer.c
 
 libeek_gtk_la_SOURCES = $(libeek_gtk_sources)
-libeek_gtk_la_CFLAGS = $(GTK_CFLAGS)
+libeek_gtk_la_CFLAGS = -DEEK_COMPILATION=1 $(GTK_CFLAGS)
 libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS)
 
 libeek_xkb_public_headers =			\
@@ -141,7 +141,7 @@ libeek_xkb_sources =				\
 	$(srcdir)/eek-xkb-layout.c
 
 libeek_xkb_la_SOURCES = $(libeek_xkb_sources)
-libeek_xkb_la_CFLAGS = $(XKB_CFLAGS) $(GTK_CFLAGS)
+libeek_xkb_la_CFLAGS = -DEEK_COMPILATION=1 $(XKB_CFLAGS) $(GTK_CFLAGS)
 libeek_xkb_la_LIBADD = libeek.la $(XKB_LIBS) $(GTK_LIBS)
 
 libeek_xkl_public_headers =			\
@@ -152,7 +152,7 @@ libeek_xkl_sources =				\
 	$(srcdir)/eek-xkl-layout.c
 
 libeek_xkl_la_SOURCES = $(libeek_xkl_sources)
-libeek_xkl_la_CFLAGS = $(LIBXKLAVIER_CFLAGS) $(GTK_CFLAGS)
+libeek_xkl_la_CFLAGS = -DEEK_COMPILATION=1 $(LIBXKLAVIER_CFLAGS) $(GTK_CFLAGS)
 libeek_xkl_la_LIBADD = libeek-xkb.la $(LIBXKLAVIER_LIBS) $(GTK_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek

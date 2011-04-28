@@ -20,6 +20,8 @@
 #ifndef EEK_H
 #define EEK_H 1
 
+#define __EEK_H_INSIDE__ 1
+
 #include "eek-keyboard.h"
 #include "eek-section.h"
 #include "eek-key.h"

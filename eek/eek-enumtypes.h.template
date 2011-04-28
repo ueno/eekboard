@@ -1,4 +1,9 @@
 /*** BEGIN file-header ***/
+
+#if !defined(__EEK_H_INSIDE__) && !defined(EEK_COMPILATION)
+#error "Only <eek/eek.h> can be included directly."
+#endif
+
 #ifndef __EEK_ENUMTYPES_H__
 #define __EEK_ENUMTYPES_H__
 

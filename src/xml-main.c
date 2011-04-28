@@ -26,7 +26,7 @@
 #include <gdk/gdkx.h>
 #include <glib/gi18n.h>
 
-#include "eek/eek-xml.h"
+#include "eek/eek.h"
 #include "eek/eek-xkl.h"
 
 #if HAVE_CLUTTER_GTK

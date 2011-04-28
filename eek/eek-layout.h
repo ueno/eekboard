@@ -18,6 +18,10 @@
  * 02110-1301 USA
  */
 
+#if !defined(__EEK_H_INSIDE__) && !defined(EEK_COMPILATION)
+#error "Only <eek/eek.h> can be included directly."
+#endif
+
 #ifndef EEK_LAYOUT_H
 #define EEK_LAYOUT_H 1
 

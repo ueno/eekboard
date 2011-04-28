@@ -25,7 +25,7 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#include "eek/eek-xml.h"
+#include "eek/eek.h"
 #include "eek/eek-xkl.h"
 
 static void

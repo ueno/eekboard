@@ -16,6 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if !defined(__EEK_H_INSIDE__) && !defined(EEK_COMPILATION)
+#error "Only <eek/eek.h> can be included directly."
+#endif
+
 #ifndef EEK_SERIALIZABLE_H
 #define EEK_SERIALIZABLE_H 1
 

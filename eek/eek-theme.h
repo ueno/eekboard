@@ -1,4 +1,9 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
+
+#if !defined(__EEK_H_INSIDE__) && !defined(EEK_COMPILATION)
+#error "Only <eek/eek.h> can be included directly."
+#endif
+
 #ifndef __EEK_THEME_H__
 #define __EEK_THEME_H__
 
