@@ -76,9 +76,11 @@ struct _EekRendererClass
                                  gdouble      scale,
                                  gboolean     rotate);
 
+    void (* invalidate)         (EekRenderer *self);
+
     /*< private >*/
     /* padding */
-    gpointer pdummy[23];
+    gpointer pdummy[22];
 };
 
 GType        eek_renderer_get_type             (void) G_GNUC_CONST;

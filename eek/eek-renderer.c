@@ -84,7 +84,7 @@ static void eek_renderer_real_render_key_label (EekRenderer *self,
                                                 PangoLayout *layout,
                                                 EekKey      *key);
 
-static void invalidate                         (EekRenderer *renderer);
+static void eek_renderer_real_invalidate       (EekRenderer *renderer);
 static void render_key                         (EekRenderer *self,
                                                 cairo_t     *cr,
                                                 EekKey      *key);
@@ -660,6 +660,23 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
 }
 
 static void
+eek_renderer_real_invalidate (EekRenderer *self)
+{
+    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
+
+    if (priv->outline_surface_cache)
+        g_hash_table_remove_all (priv->outline_surface_cache);
+
+    if (priv->active_outline_surface_cache)
+        g_hash_table_remove_all (priv->active_outline_surface_cache);
+
+    if (priv->keyboard_surface) {
+        cairo_surface_destroy (priv->keyboard_surface);
+        priv->keyboard_surface = NULL;
+    }
+}
+
+static void
 eek_renderer_set_property (GObject      *object,
                            guint         prop_id,
                            const GValue *value,
@@ -728,7 +745,7 @@ eek_renderer_dispose (GObject *object)
     }
 
     /* this will release all allocated surfaces and font if any */
-    invalidate (EEK_RENDERER(object));
+    EEK_RENDERER_GET_CLASS(object)->invalidate (EEK_RENDERER(object));
 
     G_OBJECT_CLASS (eek_renderer_parent_class)->dispose (object);
 }
@@ -757,6 +774,7 @@ eek_renderer_class_init (EekRendererClass *klass)
     klass->render_key_outline = eek_renderer_real_render_key_outline;
     klass->render_key = eek_renderer_real_render_key;
     klass->render_keyboard = eek_renderer_real_render_keyboard;
+    klass->invalidate = eek_renderer_real_invalidate;
 
     gobject_class->set_property = eek_renderer_set_property;
     gobject_class->get_property = eek_renderer_get_property;
@@ -812,30 +830,14 @@ eek_renderer_init (EekRenderer *self)
 }
 
 static void
-invalidate (EekRenderer *renderer)
-{
-    EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
-
-    if (priv->outline_surface_cache)
-        g_hash_table_remove_all (priv->outline_surface_cache);
-
-    if (priv->active_outline_surface_cache)
-        g_hash_table_remove_all (priv->active_outline_surface_cache);
-
-    if (priv->keyboard_surface) {
-        cairo_surface_destroy (priv->keyboard_surface);
-        priv->keyboard_surface = NULL;
-    }
-}
-
-static void
 on_symbol_index_changed (EekKeyboard *keyboard,
                          gint         group,
                          gint         level,
                          gpointer     user_data)
 {
     EekRenderer *renderer = user_data;
-    invalidate (renderer);
+
+    EEK_RENDERER_GET_CLASS(renderer)->invalidate (renderer);
 }
 
 EekRenderer *
@@ -875,7 +877,8 @@ eek_renderer_set_allocation_size (EekRenderer *renderer,
 
     if (scale != priv->scale) {
         priv->scale = scale;
-        invalidate (renderer);
+
+        EEK_RENDERER_GET_CLASS(renderer)->invalidate (renderer);
     }
 }
 
