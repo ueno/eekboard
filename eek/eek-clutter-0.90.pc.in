@@ -23,7 +23,7 @@ includedir=@includedir@
 
 Name: libeek-clutter
 Description: A Library to Create Keyboard-like UI (Clutter Support)
-URL: http://ueno.github.com/eekboard/
+URL: http://fedorahosted.org/eekboard/
 Version: @VERSION@
 Requires: eek-@EEK_API_VERSION@ clutter-1.0
 Libs: -L${libdir} -leek-clutter

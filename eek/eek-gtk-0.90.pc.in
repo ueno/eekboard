@@ -23,7 +23,7 @@ includedir=@includedir@
 
 Name: libeek-gtk
 Description: A Library to Create Keyboard-like UI (GTK Support)
-URL: http://ueno.github.com/eekboard/
+URL: http://fedorahosted.org/eekboard/
 Version: @VERSION@
 Requires: eek-@EEK_API_VERSION@ gtk+-@GTK_API_VERSION@
 Libs: -L${libdir} -leek-gtk
