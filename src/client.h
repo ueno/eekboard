@@ -57,5 +57,10 @@ void             eekboard_client_disable_atspi_keystroke
 gboolean         eekboard_client_enable_fakekey  (EekboardClient  *client);
 void             eekboard_client_disable_fakekey (EekboardClient  *client);
 
+gboolean         eekboard_client_enable_ibus_focus
+                                                 (EekboardClient  *client);
+void             eekboard_client_disable_ibus_focus
+                                                 (EekboardClient  *client);
+
 G_END_DECLS
 #endif  /* EEKBOARD_CLIENT_H */

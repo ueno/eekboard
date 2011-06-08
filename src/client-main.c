@@ -24,6 +24,9 @@
 #include <dbus/dbus.h>
 #include <atspi/atspi.h>
 #endif  /* HAVE_ATSPI */
+#ifdef HAVE_IBUS
+#include <ibus.h>
+#endif  /* HAVE_IBUS */
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include "eekboard/eekboard.h"
@@ -37,6 +40,7 @@ static gchar *opt_address = NULL;
 
 static gboolean opt_use_system_layout = FALSE;
 static gboolean opt_focus = FALSE;
+static gchar *opt_focus_method = NULL;
 static gboolean opt_keystroke = FALSE;
 
 static gchar *opt_keyboard = NULL;
@@ -56,9 +60,13 @@ static const GOptionEntry options[] = {
      N_("Connect to the given D-Bus address")},
     {"use-system-layout", 'x', 0, G_OPTION_ARG_NONE, &opt_use_system_layout,
      N_("Use system keyboard layout")},
-#ifdef HAVE_ATSPI
+#if ENABLE_FOCUS_LISTENER
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
-     N_("Listen focus change events with AT-SPI")},
+     N_("Listen focus change events")},
+    {"focus-method", '\0', 0, G_OPTION_ARG_STRING, &opt_focus_method,
+     N_("Use the given focus method (\"atspi\" or \"ibus\")")},
+#endif  /* ENABLE_FOCUS_LISTENER */
+#ifdef HAVE_ATSPI
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_ATSPI */
@@ -108,6 +116,12 @@ on_destroyed (EekboardEekboard *eekboard,
     g_main_loop_quit (loop);
 }
 
+enum {
+    FOCUS_NONE,
+    FOCUS_ATSPI,
+    FOCUS_IBUS
+};
+
 int
 main (int argc, char **argv)
 {
@@ -119,6 +133,7 @@ main (int argc, char **argv)
     GError *error;
     GOptionContext *option_context;
     GMainLoop *loop;
+    gint focus;
 
     if (!gtk_init_check (&argc, &argv)) {
         g_printerr ("Can't init GTK\n");
@@ -172,8 +187,22 @@ main (int argc, char **argv)
         exit (1);
     }
 
+    focus = FOCUS_NONE;
+    if (opt_focus) {
+        if (opt_focus_method == NULL ||
+            g_strcmp0 (opt_focus_method, "atspi") == 0)
+            focus = FOCUS_ATSPI;
+        else if (g_strcmp0 (opt_focus_method, "ibus") == 0)
+            focus = FOCUS_IBUS;
+        else {
+            g_printerr ("Unknown focus method \"%s\".  "
+                        "Try \"atspi\" or \"ibus\"\n", opt_focus_method);
+            exit (1);
+        }
+    }
+        
 #ifdef HAVE_ATSPI
-    if (opt_focus || opt_keystroke) {
+    if (focus == FOCUS_ATSPI || opt_keystroke) {
         GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
 
         if (g_settings_get_boolean (settings, "toolkit-accessibility")) {
@@ -182,15 +211,15 @@ main (int argc, char **argv)
                 exit (1);
             }
 
-            if (opt_focus &&
+            if (focus == FOCUS_ATSPI &&
                 !eekboard_client_enable_atspi_focus (client)) {
-                g_printerr ("Can't register focus change event listeners\n");
+                g_printerr ("Can't register AT-SPI focus change event listeners\n");
                 exit (1);
             }
 
             if (opt_keystroke &&
                 !eekboard_client_enable_atspi_keystroke (client)) {
-                g_printerr ("Can't register keystroke event listeners\n");
+                g_printerr ("Can't register AT-SPI keystroke event listeners\n");
                 exit (1);
             }
         } else {
@@ -199,6 +228,18 @@ main (int argc, char **argv)
         }
     }
 #endif  /* HAVE_ATSPI */
+
+#ifdef HAVE_IBUS
+    if (focus == FOCUS_IBUS) {
+        ibus_init ();
+
+        if (focus == FOCUS_IBUS &&
+            !eekboard_client_enable_ibus_focus (client)) {
+            g_printerr ("Can't register IBus focus change event listeners\n");
+            exit (1);
+        }
+    }
+#endif  /* HAVE_IBUS */
 
     if (opt_use_system_layout && (opt_keyboard || opt_model || opt_layouts || opt_options)) {
         g_printerr ("Can't use --use-system-layout option with keyboard options\n");

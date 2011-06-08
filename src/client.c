@@ -32,6 +32,10 @@
 #include <fakekey/fakekey.h>
 #endif  /* HAVE_FAKEKEY */
 
+#ifdef HAVE_IBUS
+#include <ibus.h>
+#endif  /* HAVE_IBUS */
+
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
 #include "eekboard/eekboard.h"
@@ -68,11 +72,19 @@ struct _EekboardClient {
     gulong key_pressed_handler;
     gulong key_released_handler;
 
+#if ENABLE_FOCUS_LISTENER
+    gboolean follows_focus;
+#endif  /* ENABLE_FOCUS_LISTENER */
+
 #ifdef HAVE_ATSPI
     AtspiAccessible *acc;
-    gboolean follows_focus;
     AtspiDeviceListener *keystroke_listener;
 #endif  /* HAVE_ATSPI */
+
+#ifdef HAVE_IBUS
+    IBusBus *ibus_bus;
+    guint ibus_focus_message_filter;
+#endif  /* HAVE_IBUS */
 
 #ifdef HAVE_FAKEKEY
     FakeKey *fakekey;
@@ -184,6 +196,14 @@ eekboard_client_dispose (GObject *object)
     eekboard_client_disable_atspi_keystroke (client);
 #endif  /* HAVE_ATSPI */
 
+#ifdef HAVE_IBUS
+    eekboard_client_disable_ibus_focus (client);
+    if (client->ibus_bus) {
+        g_object_unref (client->ibus_bus);
+        client->ibus_bus = NULL;
+    }
+#endif  /* HAVE_IBUS */
+
 #ifdef HAVE_FAKEKEY
     eekboard_client_disable_fakekey (client);
 #endif  /* HAVE_FAKEKEY */
@@ -272,10 +292,16 @@ eekboard_client_init (EekboardClient *client)
     client->key_released_handler = 0;
     client->xkl_config_changed_handler = 0;
     client->xkl_state_changed_handler = 0;
-#ifdef HAVE_ATSPI
+#if ENABLE_FOCUS_LISTENER
     client->follows_focus = FALSE;
+#endif  /* ENABLE_FOCUS_LISTENER */
+#ifdef HAVE_ATSPI
     client->keystroke_listener = NULL;
 #endif  /* HAVE_ATSPI */
+#ifdef HAVE_IBUS
+    client->ibus_bus = NULL;
+    client->ibus_focus_message_filter = 0;
+#endif  /* HAVE_IBUS */
 #ifdef HAVE_FAKEKEY
     client->fakekey = NULL;
 #endif  /* HAVE_FAKEKEY */
@@ -287,19 +313,19 @@ eekboard_client_set_xkl_config (EekboardClient *client,
                                         const gchar *layouts,
                                         const gchar *options)
 {
-#ifdef HAVE_ATSPI
+#if ENABLE_FOCUS_LISTENER
     return set_xkl_keyboard (client,
                              !client->follows_focus,
                              model,
                              layouts,
                              options);
-#else
+#else  /* ENABLE_FOCUS_LISTENER */
     return set_xkl_keyboard (client,
                              TRUE,
                              model,
                              layouts,
                              options);
-#endif
+#endif  /* !ENABLE_FOCUS_LISTENER */
 }
 
 gboolean
@@ -338,15 +364,15 @@ eekboard_client_enable_xkl (EekboardClient *client)
 
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-#ifdef HAVE_ATSPI
+#if ENABLE_FOCUS_LISTENER
     return set_xkl_keyboard (client,
                              !client->follows_focus,
                              NULL,
                              NULL,
                              NULL);
-#else
+#else  /* ENABLE_FOCUS_LISTENER */
     return set_xkl_keyboard (client, TRUE, NULL, NULL, NULL);
-#endif
+#endif  /* !ENABLE_FOCUS_LISTENER */
 }
 
 void
@@ -543,6 +569,83 @@ keystroke_listener_cb (const AtspiDeviceEvent *stroke,
     }
 
     return TRUE;
+}
+#endif  /* HAVE_ATSPI */
+
+#ifdef HAVE_IBUS
+static void
+add_match_rule (GDBusConnection *connection,
+                const gchar     *match_rule)
+{
+  GError *error;
+  GDBusMessage *message;
+
+  message = g_dbus_message_new_method_call ("org.freedesktop.DBus", /* name */
+                                            "/org/freedesktop/DBus", /* path */
+                                            "org.freedesktop.DBus", /* interface */
+                                            "AddMatch");
+  g_dbus_message_set_body (message, g_variant_new ("(s)", match_rule));
+  error = NULL;
+  g_dbus_connection_send_message (connection,
+                                  message,
+                                  G_DBUS_SEND_MESSAGE_FLAGS_NONE,
+                                  NULL,
+                                  &error);
+  g_object_unref (message);
+}
+
+static GDBusMessage *
+focus_message_filter (GDBusConnection *connection,
+                      GDBusMessage    *message,
+                      gboolean         incoming,
+                      gpointer         user_data)
+{
+    EekboardClient *client = user_data;
+
+    if (incoming &&
+        g_strcmp0 (g_dbus_message_get_interface (message),
+                   IBUS_INTERFACE_INPUT_CONTEXT) == 0) {
+        const gchar *member = g_dbus_message_get_member (message);
+
+        if (g_strcmp0 (member, "FocusIn") == 0) {
+            eekboard_context_show_keyboard (client->context, NULL);
+        }
+    }
+
+    return message;
+}
+
+gboolean
+eekboard_client_enable_ibus_focus (EekboardClient *client)
+{
+    GDBusConnection *connection;
+    GError *error;
+
+    client->ibus_bus = ibus_bus_new ();
+    connection = ibus_bus_get_connection (client->ibus_bus);
+    add_match_rule (connection,
+                    "type='method_call',"
+                    "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
+                    "member='FocusIn'");
+    client->ibus_focus_message_filter =
+        g_dbus_connection_add_filter (connection,
+                                      focus_message_filter,
+                                      client,
+                                      NULL);
+    client->follows_focus = TRUE;
+    return TRUE;
+}
+
+void
+eekboard_client_disable_ibus_focus (EekboardClient *client)
+{
+    GDBusConnection *connection;
+
+    client->follows_focus = FALSE;
+
+    connection = ibus_bus_get_connection (client->ibus_bus);
+    g_dbus_connection_remove_filter (connection,
+                                     client->ibus_focus_message_filter);
 }
 #endif  /* HAVE_ATSPI */
 
@@ -810,11 +913,11 @@ eekboard_client_load_keyboard_from_file (EekboardClient *client,
 
     layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     g_object_unref (input);
-#ifdef HAVE_ATSPI
+#if ENABLE_FOCUS_LISTENER
     retval = set_keyboard (client, !client->follows_focus, layout);
-#else
+#else  /* ENABLE_FOCUS_LISTENER */
     retval = set_keyboard (client, TRUE, layout);
-#endif
+#endif  /* !ENABLE_FOCUS_LISTENER */
     g_object_unref (layout);
     return retval;
 }

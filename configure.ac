@@ -136,6 +136,26 @@ fi
 AC_MSG_RESULT($enable_atspi)
 AM_CONDITIONAL(ENABLE_ATSPI, [test x$enable_atspi = xyes])
 
+dnl use IBus to capture focus events
+AC_MSG_CHECKING([whether you enable IBus focus tracking])
+AC_ARG_ENABLE(ibus,
+              AS_HELP_STRING([--enable-ibus=no/yes],
+                             [Enable IBus focus tracking default=no]),,
+              enable_atspi=yes)
+
+if test x$enable_ibus = xyes; then
+  PKG_CHECK_MODULES([IBUS], [ibus-1.0 >= 1.3.99], , enable_ibus=no)
+  if test x$enable_ibus = xyes; then
+    AC_DEFINE([HAVE_IBUS], [1], [Define if IBus is found])
+  fi
+fi
+AC_MSG_RESULT($enable_ibus)
+AM_CONDITIONAL(ENABLE_IBUS, [test x$enable_ibus = xyes])
+
+if test x$enable_atspi = xyes -o x$enable_ibus = xyes; then
+  AC_DEFINE(ENABLE_FOCUS_LISTENER, [1], [Define if eekboard can follow focus changes])
+fi
+
 dnl Python language binding
 AC_MSG_CHECKING([whether you enable Python language support])
 AC_ARG_ENABLE(python,
@@ -292,4 +312,5 @@ Build options:
   Build Python binding      $enable_python
   Build document            $enable_gtk_doc
   Support accessibility     $enable_atspi
+  Support IBus focus events $enable_ibus
 ])
