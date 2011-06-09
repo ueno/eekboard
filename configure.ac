@@ -217,19 +217,22 @@ AM_CONDITIONAL(ENABLE_CLUTTER, [test x$enable_clutter = xyes])
 AC_MSG_RESULT($enable_clutter)
 
 dnl clutter-gtk
-AC_MSG_CHECKING([whether you enable clutter-gtk])
-AC_ARG_ENABLE(clutter-gtk,
-              AS_HELP_STRING([--enable-clutter-gtk=no/yes],
-                             [Enable clutter user interface default=yes]),,
-              enable_clutter_gtk=yes)
+if test x$enable_clutter = xyes; then
+  AC_MSG_CHECKING([whether you enable clutter-gtk])
+  AC_ARG_ENABLE(clutter-gtk,
+                AS_HELP_STRING([--enable-clutter-gtk=no/yes],
+                               [Enable clutter user interface default=yes]),,
+                enable_clutter_gtk=yes)
 
-if test x$enable_clutter_gtk = xyes; then
-  PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], , enable_clutter_gtk=yes)
   if test x$enable_clutter_gtk = xyes; then
-    AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
+    PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], ,
+      enable_clutter_gtk=no)
+    if test x$enable_clutter_gtk = xyes; then
+      AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
+    fi
   fi
+  AC_MSG_RESULT($enable_clutter_gtk)
 fi
-AC_MSG_RESULT($enable_clutter_gtk)
 AM_CONDITIONAL(ENABLE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
