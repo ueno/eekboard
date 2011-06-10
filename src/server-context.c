@@ -116,6 +116,7 @@ struct _ServerContext {
     gulong key_released_handler;
     gulong notify_visible_handler;
 
+    GSettings *settings;
     ServerContextUIToolkitType ui_toolkit;
 };
 
@@ -398,6 +399,11 @@ server_context_dispose (GObject *object)
         context->introspection_data = NULL;
     }
 
+    if (context->settings) {
+        g_object_unref (context->settings);
+        context->settings = NULL;
+    }
+
     G_OBJECT_CLASS (server_context_parent_class)->dispose (object);
 }
 
@@ -473,7 +479,6 @@ server_context_class_init (ServerContextClass *klass)
 static void
 server_context_init (ServerContext *context)
 {
-    GSettings *settings;
     GError *error;
 
     context->connection = NULL;
@@ -501,8 +506,8 @@ server_context_init (ServerContext *context)
 
     context->ui_toolkit = UI_TOOLKIT_DEFAULT;
 
-    settings = g_settings_new ("org.fedorahosted.eekboard");
-    g_settings_bind (settings, "ui-toolkit",
+    context->settings = g_settings_new ("org.fedorahosted.eekboard");
+    g_settings_bind (context->settings, "ui-toolkit",
                      context, "ui-toolkit",
                      G_SETTINGS_BIND_GET);
 }
