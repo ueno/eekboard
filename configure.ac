@@ -120,6 +120,9 @@ fi
 AM_CONDITIONAL(ENABLE_FAKEKEY, [test x$enable_fakekey = xyes])
 AC_MSG_RESULT($enable_fakekey)
 
+focus_listeners=""
+keystroke_listeners=""
+
 dnl use AT-SPI 2 to capture focus/keystroke events
 AC_MSG_CHECKING([whether you enable AT-SPI 2 event handling])
 AC_ARG_ENABLE(atspi,
@@ -131,6 +134,8 @@ if test x$enable_atspi = xyes; then
   PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], , enable_atspi=no)
   if test x$enable_atspi = xyes; then
     AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
+    focus_listeners="AT-SPI $focus_listeners"
+    keystroke_listeners="AT-SPI $keystroke_listeners"
   fi
 fi
 AC_MSG_RESULT($enable_atspi)
@@ -147,12 +152,13 @@ if test x$enable_ibus = xyes; then
   PKG_CHECK_MODULES([IBUS], [ibus-1.0 >= 1.3.99], , enable_ibus=no)
   if test x$enable_ibus = xyes; then
     AC_DEFINE([HAVE_IBUS], [1], [Define if IBus is found])
+    focus_listeners="IBus $focus_listeners"
   fi
 fi
 AC_MSG_RESULT($enable_ibus)
 AM_CONDITIONAL(ENABLE_IBUS, [test x$enable_ibus = xyes])
 
-if test x$enable_atspi = xyes -o x$enable_ibus = xyes; then
+if test -n "$focus_listeners"; then
   AC_DEFINE(ENABLE_FOCUS_LISTENER, [1], [Define if eekboard can follow focus changes])
 fi
 
@@ -311,6 +317,6 @@ Build options:
   Build Vala binding        $enable_vala
   Build Python binding      $enable_python
   Build document            $enable_gtk_doc
-  Support accessibility     $enable_atspi
-  Support IBus focus events $enable_ibus
+  Focus listeners           $focus_listeners
+  Keystroke listeners       $keystroke_listeners
 ])

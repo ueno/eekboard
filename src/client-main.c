@@ -40,7 +40,7 @@ static gchar *opt_address = NULL;
 
 static gboolean opt_use_system_layout = FALSE;
 static gboolean opt_focus = FALSE;
-static gchar *opt_focus_method = NULL;
+static gchar *opt_focus_listener = NULL;
 static gboolean opt_keystroke = FALSE;
 
 static gchar *opt_keyboard = NULL;
@@ -63,8 +63,8 @@ static const GOptionEntry options[] = {
 #if ENABLE_FOCUS_LISTENER
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events")},
-    {"focus-method", '\0', 0, G_OPTION_ARG_STRING, &opt_focus_method,
-     N_("Use the given focus method (\"atspi\" or \"ibus\")")},
+    {"focus-listener", '\0', 0, G_OPTION_ARG_STRING, &opt_focus_listener,
+     N_("Use the given focus listener (\"atspi\" or \"ibus\")")},
 #endif  /* ENABLE_FOCUS_LISTENER */
 #ifdef HAVE_ATSPI
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
@@ -189,14 +189,14 @@ main (int argc, char **argv)
 
     focus = FOCUS_NONE;
     if (opt_focus) {
-        if (opt_focus_method == NULL ||
-            g_strcmp0 (opt_focus_method, "atspi") == 0)
+        if (opt_focus_listener == NULL ||
+            g_strcmp0 (opt_focus_listener, "atspi") == 0)
             focus = FOCUS_ATSPI;
-        else if (g_strcmp0 (opt_focus_method, "ibus") == 0)
+        else if (g_strcmp0 (opt_focus_listener, "ibus") == 0)
             focus = FOCUS_IBUS;
         else {
-            g_printerr ("Unknown focus method \"%s\".  "
-                        "Try \"atspi\" or \"ibus\"\n", opt_focus_method);
+            g_printerr ("Unknown focus listener \"%s\".  "
+                        "Try \"atspi\" or \"ibus\"\n", opt_focus_listener);
             exit (1);
         }
     }
