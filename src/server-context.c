@@ -278,7 +278,6 @@ set_geometry (ServerContext *context)
 
     if (context->fullscreen) {
         gint width = rect.width, height = rect.height / 2;
-        gint x, y;
 
         if (width * bounds.height > height * bounds.width)
             width = (height / bounds.height) * bounds.width;
@@ -287,9 +286,9 @@ set_geometry (ServerContext *context)
 
         gtk_widget_set_size_request (context->widget, width, height);
 
-        x = (rect.width - width) / 2;
-        y = rect.height - height;
-        gtk_window_move (GTK_WINDOW(context->window), x, y);
+        gtk_window_move (GTK_WINDOW(context->window),
+                         (rect.width - width) / 2,
+                         rect.height - height);
 
         gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
         gtk_window_set_resizable (GTK_WINDOW(context->window), FALSE);
