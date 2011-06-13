@@ -28,9 +28,9 @@
 
 #include <gdk/gdkx.h>
 
-#ifdef HAVE_FAKEKEY
-#include <fakekey/fakekey.h>
-#endif  /* HAVE_FAKEKEY */
+#ifdef HAVE_XTEST
+#include <X11/extensions/XTest.h>
+#endif  /* HAVE_XTEST */
 
 #ifdef HAVE_IBUS
 #include <ibus.h>
@@ -41,6 +41,8 @@
 #include "eekboard/eekboard.h"
 #include "client.h"
 #include "xklutil.h"
+
+#include <string.h>
 
 #define CSW 640
 #define CSH 480
@@ -86,9 +88,9 @@ struct _EekboardClient {
     guint ibus_focus_message_filter;
 #endif  /* HAVE_IBUS */
 
-#ifdef HAVE_FAKEKEY
-    FakeKey *fakekey;
-#endif  /* HAVE_FAKEKEY */
+#ifdef HAVE_XTEST
+    KeyCode modifier_keycodes[8]; 
+#endif  /* HAVE_XTEST */
 };
 
 struct _EekboardClientClass {
@@ -124,6 +126,10 @@ static gboolean        set_xkl_keyboard     (EekboardClient         *client,
                                              const gchar            *model,
                                              const gchar            *layouts,
                                              const gchar            *options);
+#ifdef HAVE_XTEST
+static void            update_modifier_keycodes
+                                            (EekboardClient         *client);
+#endif  /* HAVE_XTEST */
 
 static void
 eekboard_client_set_property (GObject      *object,
@@ -204,9 +210,9 @@ eekboard_client_dispose (GObject *object)
     }
 #endif  /* HAVE_IBUS */
 
-#ifdef HAVE_FAKEKEY
-    eekboard_client_disable_fakekey (client);
-#endif  /* HAVE_FAKEKEY */
+#ifdef HAVE_XTEST
+    eekboard_client_disable_xtest (client);
+#endif  /* HAVE_XTEST */
 
     if (client->context) {
         if (client->eekboard) {
@@ -226,12 +232,6 @@ eekboard_client_dispose (GObject *object)
         g_object_unref (client->keyboard);
         client->keyboard = NULL;
     }
-
-#ifdef HAVE_FAKEKEY
-    if (client->fakekey) {
-        client->fakekey = NULL;
-    }
-#endif  /* HAVE_FAKEKEY */
 
     if (client->display) {
         gdk_display_close (client->display);
@@ -302,9 +302,6 @@ eekboard_client_init (EekboardClient *client)
     client->ibus_bus = NULL;
     client->ibus_focus_message_filter = 0;
 #endif  /* HAVE_IBUS */
-#ifdef HAVE_FAKEKEY
-    client->fakekey = NULL;
-#endif  /* HAVE_FAKEKEY */
 }
 
 gboolean
@@ -683,8 +680,7 @@ on_xkl_config_changed (XklEngine *xklengine,
     g_return_if_fail (retval);
 
 #ifdef HAVE_FAKEKEY
-    if (client->fakekey)
-        fakekey_reload_keysyms (client->fakekey);
+    update_modifier_keycodes (client);
 #endif  /* HAVE_FAKEKEY */
 }
 
@@ -789,22 +785,59 @@ on_xkl_state_changed (XklEngine           *xklengine,
     }
 }
 
-#ifdef HAVE_FAKEKEY
-G_INLINE_FUNC FakeKeyModifier
-get_fakekey_modifiers (EekModifierType modifiers)
+#ifdef HAVE_XTEST
+static void
+send_fake_modifier_key_event (EekboardClient *client,
+                              EekModifierType modifiers,
+                              gboolean        is_pressed)
 {
-    FakeKeyModifier retval = 0;
+    gint i;
 
-    if (modifiers & EEK_SHIFT_MASK)
-        retval |= FAKEKEYMOD_SHIFT;
-    if (modifiers & EEK_CONTROL_MASK)
-        retval |= FAKEKEYMOD_CONTROL;
-    if (modifiers & EEK_MOD1_MASK)
-        retval |= FAKEKEYMOD_ALT;
-    if (modifiers & EEK_META_MASK)
-        retval |= FAKEKEYMOD_META;
+    for (i = 0; i < G_N_ELEMENTS(client->modifier_keycodes); i++) {
+        if (modifiers & (1 << i)) {
+            guint keycode = client->modifier_keycodes[i];
 
-    return retval;
+            g_return_if_fail (keycode > 0);
+
+            XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (client->display),
+                               keycode,
+                               is_pressed,
+                               CurrentTime);
+        }
+    }
+}
+
+static void
+send_fake_key_event (EekboardClient *client,
+                     EekKey         *key,
+                     gboolean        is_pressed)
+{
+    EekSymbol *symbol;
+    EekModifierType modifiers;
+    guint xkeysym;
+    guint keycode;
+
+    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
+
+    /* Ignore special keys and modifiers */
+    if (!EEK_IS_KEYSYM(symbol) || eek_symbol_is_modifier (symbol))
+        return;
+
+    xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
+    g_return_if_fail (xkeysym > 0);
+
+    keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display),
+                                xkeysym);
+    g_return_if_fail (keycode > 0);
+
+    modifiers = eek_keyboard_get_modifiers (client->keyboard);
+    send_fake_modifier_key_event (client, modifiers, is_pressed);
+
+    XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (client->display),
+                       keycode,
+                       is_pressed,
+                       CurrentTime);
+    XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
 }
 
 static void
@@ -813,35 +846,7 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer     user_data)
 {
     EekboardClient *client = user_data;
-    EekSymbol *symbol;
-
-    g_assert (client->fakekey);
-
-    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    if (EEK_IS_KEYSYM(symbol) && !eek_symbol_is_modifier (symbol)) {
-        guint xkeysym;
-        guint keycode;
-        EekModifierType modifiers;
-        FakeKeyModifier fakekey_modifiers;
-
-        xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
-        g_return_if_fail (xkeysym > 0);
-        keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display),
-                                    xkeysym);
-        g_return_if_fail (keycode > 0);
-
-        modifiers = eek_keyboard_get_modifiers (client->keyboard);
-        fakekey_modifiers = get_fakekey_modifiers (modifiers);
-
-        fakekey_send_keyevent (client->fakekey,
-                               keycode,
-                               TRUE,
-                               fakekey_modifiers);
-        fakekey_send_keyevent (client->fakekey,
-                               keycode,
-                               FALSE,
-                               fakekey_modifiers);
-    }
+    send_fake_key_event (client, key, TRUE);
 }
 
 static void
@@ -850,23 +855,37 @@ on_key_released (EekKeyboard *keyboard,
                  gpointer     user_data)
 {
     EekboardClient *client = user_data;
+    send_fake_key_event (client, key, FALSE);
+}
 
-    g_assert (client->fakekey);
-    fakekey_release (client->fakekey);
+static void
+update_modifier_keycodes (EekboardClient *client)
+{
+    XModifierKeymap *mods;
+    gint i, j;
+
+    mods = XGetModifierMapping (GDK_DISPLAY_XDISPLAY (client->display));
+    for (i = 0; i < 8; i++) {
+        client->modifier_keycodes[i] = 0;
+        for (j = 0; j < mods->max_keypermod; j++) {
+            KeyCode keycode = mods->modifiermap[mods->max_keypermod * i + j];
+            if (keycode != 0) {
+                client->modifier_keycodes[i] = keycode;
+                break;
+            }
+        }
+    }
 }
 
 gboolean
-eekboard_client_enable_fakekey (EekboardClient *client)
+eekboard_client_enable_xtest (EekboardClient *client)
 {
     if (!client->display) {
         client->display = gdk_display_get_default ();
     }
     g_assert (client->display);
 
-    if (!client->fakekey) {
-        client->fakekey = fakekey_init (GDK_DISPLAY_XDISPLAY (client->display));
-    }
-    g_assert (client->fakekey);
+    update_modifier_keycodes (client);
 
     client->key_pressed_handler =
         g_signal_connect (client->keyboard, "key-pressed",
@@ -879,11 +898,8 @@ eekboard_client_enable_fakekey (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_fakekey (EekboardClient *client)
+eekboard_client_disable_xtest (EekboardClient *client)
 {
-    if (client->fakekey)
-        fakekey_release (client->fakekey);
-
     if (g_signal_handler_is_connected (client->keyboard,
                                        client->key_pressed_handler))
         g_signal_handler_disconnect (client->keyboard,
@@ -922,4 +938,4 @@ eekboard_client_load_keyboard_from_file (EekboardClient *client,
     return retval;
 }
 
-#endif  /* HAVE_FAKEKEY */
+#endif  /* HAVE_XTEST */

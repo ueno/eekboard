@@ -104,21 +104,24 @@ PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
 PKG_CHECK_MODULES([LIBCROCO], [libcroco-0.6], ,
   [AC_MSG_ERROR([libcroco not found])])
 
-dnl use libfakekey to generate key events
-AC_MSG_CHECKING([whether you enable fakekey])
-AC_ARG_ENABLE(fakekey,
-              AS_HELP_STRING([--enable-fakekey=no/yes],
-                             [Enable fakekey default=yes]),,
-              enable_fakekey=yes)
+dnl use XTest to generate key events
+AC_MSG_CHECKING([whether you enable XTest])
+AC_ARG_ENABLE(xtest,
+              AS_HELP_STRING([--enable-xtest=no/yes],
+                             [Enable XTest default=yes]),,
+              enable_xtest=yes)
 
-if test x$enable_fakekey = xyes; then
-  PKG_CHECK_MODULES([FAKEKEY], [libfakekey], , enable_fakekey=no)
-  if test x$enable_fakekey = xyes; then
-    AC_DEFINE([HAVE_FAKEKEY], [1], [Define if fakekey is found])
+if test x$enable_xtest = xyes; then
+  PKG_CHECK_MODULES([XTEST], [xtst], , enable_xtest=no)
+  if test x$enable_xtest = xyes; then
+    AC_DEFINE([HAVE_XTEST], [1], [Define if XTest is found])
   fi
 fi
-AM_CONDITIONAL(ENABLE_FAKEKEY, [test x$enable_fakekey = xyes])
-AC_MSG_RESULT($enable_fakekey)
+AM_CONDITIONAL(ENABLE_XTEST, [test x$enable_xtest = xyes])
+AC_MSG_RESULT($enable_xtest)
+
+focus_listeners=""
+keystroke_listeners=""
 
 focus_listeners=""
 keystroke_listeners=""

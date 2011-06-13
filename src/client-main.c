@@ -277,12 +277,12 @@ main (int argc, char **argv)
         g_free (file);
     }
 
-#ifdef HAVE_FAKEKEY
-    if (!eekboard_client_enable_fakekey (client)) {
-        g_printerr ("Can't init fakekey\n");
+#ifdef HAVE_XTEST
+    if (!eekboard_client_enable_xtest (client)) {
+        g_printerr ("Can't init xtest\n");
         exit (1);
     }
-#endif  /* HAVE_FAKEKEY */
+#endif  /* HAVE_XTEST */
 
     loop = g_main_loop_new (NULL, FALSE);
     if (!opt_focus) {

@@ -41,11 +41,11 @@ eekboard_LDADD = \
 	$(XKB_LIBS) \
 	$(LIBXKLAVIER_LIBS)
 
-if ENABLE_FAKEKEY
+if ENABLE_XTEST
 eekboard_CFLAGS += \
-	$(FAKEKEY_CFLAGS)
+	$(XTEST_CFLAGS)
 eekboard_LDADD += \
-	$(FAKEKEY_LIBS)
+	$(XTEST_LIBS)
 endif
 
 if ENABLE_ATSPI
