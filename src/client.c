@@ -74,9 +74,7 @@ struct _EekboardClient {
     gulong key_pressed_handler;
     gulong key_released_handler;
 
-#if ENABLE_FOCUS_LISTENER
     gboolean follows_focus;
-#endif  /* ENABLE_FOCUS_LISTENER */
 
 #ifdef HAVE_ATSPI
     AtspiAccessible *acc;
@@ -91,6 +89,8 @@ struct _EekboardClient {
 #ifdef HAVE_XTEST
     KeyCode modifier_keycodes[8]; 
 #endif  /* HAVE_XTEST */
+
+    GSettings *settings;
 };
 
 struct _EekboardClientClass {
@@ -169,9 +169,9 @@ eekboard_client_set_property (GObject      *object,
 
 static void
 eekboard_client_get_property (GObject    *object,
-                                     guint       prop_id,
-                                     GValue     *value,
-                                     GParamSpec *pspec)
+                              guint       prop_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
     EekboardClient *client = EEKBOARD_CLIENT(object);
 
@@ -238,6 +238,11 @@ eekboard_client_dispose (GObject *object)
         client->display = NULL;
     }
 
+    if (client->settings) {
+        g_object_unref (client->settings);
+        client->settings = NULL;
+    }
+
     G_OBJECT_CLASS (eekboard_client_parent_class)->dispose (object);
 }
 
@@ -302,6 +307,7 @@ eekboard_client_init (EekboardClient *client)
     client->ibus_bus = NULL;
     client->ibus_focus_message_filter = 0;
 #endif  /* HAVE_IBUS */
+    client->settings = g_settings_new ("org.fedorahosted.eekboard");
 }
 
 gboolean
@@ -519,7 +525,8 @@ focus_listener_cb (const AtspiEvent *event,
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
                 eekboard_context_show_keyboard (client->context, NULL);
-            } else if (event->detail1 == 0 && accessible == client->acc) {
+            } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
+                       event->detail1 == 0 && accessible == client->acc) {
                 client->acc = NULL;
                 eekboard_context_hide_keyboard (client->context, NULL);
             }
@@ -528,7 +535,8 @@ focus_listener_cb (const AtspiEvent *event,
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
                 eekboard_context_show_keyboard (client->context, NULL);
-            } else if (event->detail1 == 0) {
+            } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
+                       event->detail1 == 0) {
                 client->acc = NULL;
                 eekboard_context_hide_keyboard (client->context, NULL);
             }
@@ -606,6 +614,9 @@ focus_message_filter (GDBusConnection *connection,
 
         if (g_strcmp0 (member, "FocusIn") == 0) {
             eekboard_context_show_keyboard (client->context, NULL);
+        } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
+                   g_strcmp0 (member, "FocusOut") == 0) {
+            eekboard_context_hide_keyboard (client->context, NULL);
         }
     }
 
@@ -624,6 +635,10 @@ eekboard_client_enable_ibus_focus (EekboardClient *client)
                     "type='method_call',"
                     "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
                     "member='FocusIn'");
+    add_match_rule (connection,
+                    "type='method_call',"
+                    "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
+                    "member='FocusOut'");
     client->ibus_focus_message_filter =
         g_dbus_connection_add_filter (connection,
                                       focus_message_filter,

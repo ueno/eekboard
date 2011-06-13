@@ -34,6 +34,7 @@
 
 #define CSW 640
 #define CSH 480
+#define DEFAULT_THEME (THEMEDIR "/default.css")
 
 enum {
     PROP_0,
@@ -207,8 +208,6 @@ on_realize (GtkWidget *widget,
                               GDK_FUNC_MINIMIZE |
                               GDK_FUNC_CLOSE);
 }
-
-#define DEFAULT_THEME (THEMEDIR "/default.css")
 
 static void
 set_geometry (ServerContext *context)

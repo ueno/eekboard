@@ -6,5 +6,15 @@
       <summary>GUI toolkit used to render keyboard</summary>
       <description>The name of GUI toolkit (either 'gtk' or 'clutter') used to render keyboard on screen.</description>
     </key>
+    <key name="focus-listener" type="s">
+      <default>'atspi'</default>
+      <summary>Use the given focus listener</summary>
+      <description>The name of the focus listener (either 'atspi' or 'ibus') used to detect focus events.</description>
+    </key>
+    <key name="auto-hide" type="b">
+      <default>true</default>
+      <summary>Hide keyboard automatically when focus is out</summary>
+      <description>If true, hide keyboard automatically when focus is out.</description>
+    </key>
   </schema>
 </schemalist>

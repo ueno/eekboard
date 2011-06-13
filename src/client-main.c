@@ -40,7 +40,6 @@ static gchar *opt_address = NULL;
 
 static gboolean opt_use_system_layout = FALSE;
 static gboolean opt_focus = FALSE;
-static gchar *opt_focus_listener = NULL;
 static gboolean opt_keystroke = FALSE;
 
 static gchar *opt_keyboard = NULL;
@@ -63,8 +62,6 @@ static const GOptionEntry options[] = {
 #if ENABLE_FOCUS_LISTENER
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events")},
-    {"focus-listener", '\0', 0, G_OPTION_ARG_STRING, &opt_focus_listener,
-     N_("Use the given focus listener (\"atspi\" or \"ibus\")")},
 #endif  /* ENABLE_FOCUS_LISTENER */
 #ifdef HAVE_ATSPI
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
@@ -189,14 +186,18 @@ main (int argc, char **argv)
 
     focus = FOCUS_NONE;
     if (opt_focus) {
-        if (opt_focus_listener == NULL ||
-            g_strcmp0 (opt_focus_listener, "atspi") == 0)
+        GSettings *settings = g_settings_new ("org.fedorahosted.eekboard");
+        gchar *focus_listener = g_settings_get_string (settings,
+                                                       "focus-listener");
+        g_object_unref (settings);
+
+        if (g_strcmp0 (focus_listener, "atspi") == 0)
             focus = FOCUS_ATSPI;
-        else if (g_strcmp0 (opt_focus_listener, "ibus") == 0)
+        else if (g_strcmp0 (focus_listener, "ibus") == 0)
             focus = FOCUS_IBUS;
         else {
             g_printerr ("Unknown focus listener \"%s\".  "
-                        "Try \"atspi\" or \"ibus\"\n", opt_focus_listener);
+                        "Try \"atspi\" or \"ibus\"\n", focus_listener);
             exit (1);
         }
     }
@@ -204,8 +205,11 @@ main (int argc, char **argv)
 #ifdef HAVE_ATSPI
     if (focus == FOCUS_ATSPI || opt_keystroke) {
         GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
+        gboolean accessibility_enabled =
+            g_settings_get_boolean (settings, "toolkit-accessibility");
+        g_object_unref (settings);
 
-        if (g_settings_get_boolean (settings, "toolkit-accessibility")) {
+        if (accessibility_enabled) {
             if (atspi_init () != 0) {
                 g_printerr ("Can't init AT-SPI 2\n");
                 exit (1);
