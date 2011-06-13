@@ -895,11 +895,20 @@ update_modifier_keycodes (EekboardClient *client)
 gboolean
 eekboard_client_enable_xtest (EekboardClient *client)
 {
+    int event_base, error_base, major_version, minor_version;
+
     if (!client->display) {
         client->display = gdk_display_get_default ();
     }
     g_assert (client->display);
 
+    if (!XTestQueryExtension (GDK_DISPLAY_XDISPLAY (client->display),
+                              &event_base, &error_base,
+                              &major_version, &minor_version)) {
+        g_warning ("XTest extension is not available");
+        return FALSE;
+    }
+                             
     update_modifier_keycodes (client);
 
     client->key_pressed_handler =
