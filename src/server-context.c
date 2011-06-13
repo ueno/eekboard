@@ -22,6 +22,9 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
+#include <X11/Xatom.h>
+#include <gdk/gdkx.h>
+
 #include "eek/eek.h"
 
 #if HAVE_CLUTTER_GTK
@@ -194,8 +197,57 @@ on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
 }
 
 static void
-on_realize (GtkWidget *widget,
-            gpointer   user_data)
+on_realize_set_dock (GtkWidget *widget,
+                     gpointer   user_data)
+{
+    GdkWindow *window = gtk_widget_get_window (widget);
+    Atom atoms[2] = { None, None };
+    gint x, y, width, height, depth;
+    long vals[12];
+
+    /* set window type to dock */
+    atoms[0] = XInternAtom (GDK_WINDOW_XDISPLAY (window),
+                            "_NET_WM_WINDOW_TYPE_DOCK", False);
+  
+    XChangeProperty (GDK_WINDOW_XDISPLAY (window),
+                     GDK_WINDOW_XID (window),
+                     XInternAtom (GDK_WINDOW_XDISPLAY (window),
+                                  "_NET_WM_WINDOW_TYPE", False),
+                     XA_ATOM, 32, PropModeReplace,
+                     (guchar *)atoms, 
+                     1);
+  
+    /* set bottom strut */
+#if GTK_CHECK_VERSION(3,0,0)
+    gdk_window_get_geometry (window, &x, &y, &width, &height);
+#else
+    gdk_window_get_geometry (window, &x, &y, &width, &height, &depth);
+#endif  /* GTK_CHECK_VERSION(3,0,0) */
+
+    vals[0] = 0;
+    vals[1] = 0;
+    vals[2] = 0;
+    vals[3] = height;
+    vals[4] = 0;
+    vals[5] = 0;
+    vals[6] = 0;
+    vals[7] = 0;
+    vals[8] = 0;
+    vals[9] = 0;
+    vals[10] = x;
+    vals[11] = x + width;
+
+    XChangeProperty (GDK_WINDOW_XDISPLAY (window),
+                     GDK_WINDOW_XID (window),
+                     XInternAtom (GDK_WINDOW_XDISPLAY (window),
+                                  "_NET_WM_STRUT_PARTIAL", False),
+                     XA_CARDINAL, 32, PropModeReplace,
+                     (guchar *)vals, 12);
+}
+
+static void
+on_realize_set_non_maximizable (GtkWidget *widget,
+                                gpointer   user_data)
 {
     ServerContext *context = user_data;
 
@@ -225,7 +277,8 @@ set_geometry (ServerContext *context)
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
 
     if (context->fullscreen) {
-        guint width = rect.width, height = rect.height / 2;
+        gint width = rect.width, height = rect.height / 2;
+        gint x, y;
 
         if (width * bounds.height > height * bounds.width)
             width = (height / bounds.height) * bounds.width;
@@ -233,13 +286,18 @@ set_geometry (ServerContext *context)
             height = (width / bounds.width) * bounds.height;
 
         gtk_widget_set_size_request (context->widget, width, height);
-        gtk_window_move (GTK_WINDOW(context->window),
-                         (rect.width - width) / 2,
-                         rect.height - height);
+
+        x = (rect.width - width) / 2;
+        y = rect.height - height;
+        gtk_window_move (GTK_WINDOW(context->window), x, y);
 
         gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
         gtk_window_set_resizable (GTK_WINDOW(context->window), FALSE);
         gtk_window_set_opacity (GTK_WINDOW(context->window), 0.8);
+
+        g_signal_connect_after (context->window, "realize",
+                                G_CALLBACK(on_realize_set_dock),
+                                context);
     } else {
         if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
 #if HAVE_CLUTTER_GTK
@@ -263,6 +321,9 @@ set_geometry (ServerContext *context)
         gtk_window_move (GTK_WINDOW(context->window),
                          MAX(rect.width - 20 - bounds.width, 0),
                          MAX(rect.height - 40 - bounds.height, 0));
+        g_signal_connect_after (context->window, "realize",
+                                G_CALLBACK(on_realize_set_non_maximizable),
+                                context);
     }
 }
 
@@ -318,9 +379,6 @@ update_widget (ServerContext *context)
                               _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
-
-        g_signal_connect (context->window, "realize",
-                          G_CALLBACK(on_realize), context);
 
         set_geometry (context);
     }
