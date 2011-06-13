@@ -83,6 +83,11 @@ eekboard_server_CFLAGS += $(CLUTTER_GTK_CFLAGS)
 eekboard_server_LDADD += $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
 endif
 
+if ENABLE_XDOCK
+eekboard_server_CFLAGS += $(XDOCK_CFLAGS)
+eekboard_server_LDADD += $(XDOCK_LIBS)
+endif
+
 eekboard_server_headers = server-server.h server-context.h
 eekboard_server_SOURCES = server-server.c server-context.c server-main.c
 

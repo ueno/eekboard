@@ -200,6 +200,7 @@ static void
 on_realize_set_dock (GtkWidget *widget,
                      gpointer   user_data)
 {
+#ifdef HAVE_XDOCK
     GdkWindow *window = gtk_widget_get_window (widget);
     Atom atoms[2] = { None, None };
     gint x, y, width, height, depth;
@@ -243,6 +244,7 @@ on_realize_set_dock (GtkWidget *widget,
                                   "_NET_WM_STRUT_PARTIAL", False),
                      XA_CARDINAL, 32, PropModeReplace,
                      (guchar *)vals, 12);
+#endif  /* HAVE_XDOCK */
 }
 
 static void

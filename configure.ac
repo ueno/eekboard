@@ -120,6 +120,22 @@ fi
 AM_CONDITIONAL(ENABLE_XTEST, [test x$enable_xtest = xyes])
 AC_MSG_RESULT($enable_xtest)
 
+dnl use X to mark the fullscreen window as dock
+AC_MSG_CHECKING([whether you enable X dock])
+AC_ARG_ENABLE(x-dock,
+              AS_HELP_STRING([--enable-x-dock=no/yes],
+                             [Enable X dock default=yes]),,
+              enable_x_dock=yes)
+
+if test x$enable_x_dock = xyes; then
+  PKG_CHECK_MODULES([XDOCK], [x], , enable_x_dock=no)
+  if test x$enable_x_dock = xyes; then
+    AC_DEFINE([HAVE_XDOCK], [1], [Define if X dock is found])
+  fi
+fi
+AM_CONDITIONAL(ENABLE_XDOCK, [test x$enable_x_dock = xyes])
+AC_MSG_RESULT($enable_x_dock)
+
 focus_listeners=""
 keystroke_listeners=""
 
