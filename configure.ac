@@ -137,8 +137,8 @@ if test x$enable_atspi = xyes; then
   PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], , enable_atspi=no)
   if test x$enable_atspi = xyes; then
     AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
-    focus_listeners="AT-SPI $focus_listeners"
-    keystroke_listeners="AT-SPI $keystroke_listeners"
+    focus_listeners="atspi $focus_listeners"
+    keystroke_listeners="atspi $keystroke_listeners"
   fi
 fi
 AC_MSG_RESULT($enable_atspi)
@@ -155,7 +155,7 @@ if test x$enable_ibus = xyes; then
   PKG_CHECK_MODULES([IBUS], [ibus-1.0 >= 1.3.99], , enable_ibus=no)
   if test x$enable_ibus = xyes; then
     AC_DEFINE([HAVE_IBUS], [1], [Define if IBus is found])
-    focus_listeners="IBus $focus_listeners"
+    focus_listeners="ibus $focus_listeners"
   fi
 fi
 AC_MSG_RESULT($enable_ibus)
