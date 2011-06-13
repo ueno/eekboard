@@ -225,14 +225,20 @@ set_geometry (ServerContext *context)
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
 
     if (context->fullscreen) {
+        guint width = rect.width, height = rect.height / 2;
+
+        if (width * bounds.height > height * bounds.width)
+            width = (height / bounds.height) * bounds.width;
+        else
+            height = (width / bounds.width) * bounds.height;
+
+        gtk_widget_set_size_request (context->widget, width, height);
+        gtk_window_move (GTK_WINDOW(context->window),
+                         (rect.width - width) / 2,
+                         rect.height - height);
+
         gtk_window_set_decorated (GTK_WINDOW(context->window), FALSE);
         gtk_window_set_resizable (GTK_WINDOW(context->window), FALSE);
-        gtk_widget_set_size_request (context->widget,
-                                     rect.width,
-                                     rect.height / 2);
-        gtk_window_move (GTK_WINDOW(context->window),
-                         0,
-                         rect.height / 2);
         gtk_window_set_opacity (GTK_WINDOW(context->window), 0.8);
     } else {
         if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
