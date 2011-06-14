@@ -278,6 +278,13 @@ set_geometry (ServerContext *context)
     gdk_screen_get_monitor_geometry (screen, monitor, &rect);
     eek_element_get_bounds (EEK_ELEMENT(context->keyboard), &bounds);
 
+    g_signal_handlers_disconnect_by_func (context->window,
+                                          on_realize_set_dock,
+                                          context);
+    g_signal_handlers_disconnect_by_func (context->window,
+                                          on_realize_set_non_maximizable,
+                                          context);
+
     if (context->fullscreen) {
         gint width = rect.width, height = rect.height / 2;
 
@@ -380,10 +387,9 @@ update_widget (ServerContext *context)
                               _("Keyboard"));
         gtk_window_set_icon_name (GTK_WINDOW(context->window), "eekboard");
         gtk_window_set_keep_above (GTK_WINDOW(context->window), TRUE);
-
-        set_geometry (context);
     }
     gtk_container_add (GTK_CONTAINER(context->window), context->widget);
+    set_geometry (context);
 }
 
 static void
@@ -541,8 +547,18 @@ server_context_class_init (ServerContextClass *klass)
 }
 
 static void
+on_monitors_changed (GdkScreen *screen,
+                     gpointer   user_data)
+{
+    ServerContext *context = user_data;
+    if (context->window)
+        set_geometry (context);
+}
+
+static void
 server_context_init (ServerContext *context)
 {
+    GdkScreen *screen;
     GError *error;
 
     context->connection = NULL;
@@ -574,6 +590,12 @@ server_context_init (ServerContext *context)
     g_settings_bind (context->settings, "ui-toolkit",
                      context, "ui-toolkit",
                      G_SETTINGS_BIND_GET);
+
+    screen = gdk_screen_get_default ();
+    g_signal_connect (screen,
+                      "monitors-changed",
+                      G_CALLBACK(on_monitors_changed),
+                      context);
 }
 
 static void
