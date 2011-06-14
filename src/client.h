@@ -31,36 +31,38 @@ G_BEGIN_DECLS
 
 typedef struct _EekboardClient EekboardClient;
 
-EekboardClient * eekboard_client_new            (GDBusConnection *connection);
+EekboardClient * eekboard_client_new           (GDBusConnection *connection);
 
 gboolean         eekboard_client_load_keyboard_from_file
-                                                (EekboardClient  *client,
-                                                 const gchar     *file);
-gboolean         eekboard_client_set_xkl_config (EekboardClient  *client,
-                                                 const gchar     *model,
-                                                 const gchar     *layouts,
-                                                 const gchar     *options);
+                                               (EekboardClient  *client,
+                                                const gchar     *file);
 
-gboolean         eekboard_client_enable_xkl     (EekboardClient  *client);
-void             eekboard_client_disable_xkl    (EekboardClient  *client);
+gboolean         eekboard_client_load_keyboard_from_xkl
+                                               (EekboardClient  *client,
+                                                const gchar     *model,
+                                                const gchar     *layouts,
+                                                const gchar     *options);
+
+gboolean         eekboard_client_enable_xkl    (EekboardClient  *client);
+void             eekboard_client_disable_xkl   (EekboardClient  *client);
 
 gboolean         eekboard_client_enable_atspi_focus
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 void             eekboard_client_disable_atspi_focus
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 
 gboolean         eekboard_client_enable_atspi_keystroke
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 void             eekboard_client_disable_atspi_keystroke
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 
-gboolean         eekboard_client_enable_xtest   (EekboardClient  *client);
-void             eekboard_client_disable_xtest  (EekboardClient  *client);
+gboolean         eekboard_client_enable_xtest  (EekboardClient  *client);
+void             eekboard_client_disable_xtest (EekboardClient  *client);
 
 gboolean         eekboard_client_enable_ibus_focus
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 void             eekboard_client_disable_ibus_focus
-                                                (EekboardClient  *client);
+                                               (EekboardClient  *client);
 
 G_END_DECLS
 #endif  /* EEKBOARD_CLIENT_H */

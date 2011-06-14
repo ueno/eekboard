@@ -179,6 +179,8 @@ main (int argc, char **argv)
     }
 
     client = eekboard_client_new (connection);
+    g_object_unref (connection);
+
     if (client == NULL) {
         g_printerr ("Can't create a client\n");
         exit (1);
@@ -198,6 +200,7 @@ main (int argc, char **argv)
         else {
             g_printerr ("Unknown focus listener \"%s\".  "
                         "Try \"atspi\" or \"ibus\"\n", focus_listener);
+            g_object_unref (client);
             exit (1);
         }
     }
@@ -212,22 +215,26 @@ main (int argc, char **argv)
         if (accessibility_enabled) {
             if (atspi_init () != 0) {
                 g_printerr ("Can't init AT-SPI 2\n");
+                g_object_unref (client);
                 exit (1);
             }
 
             if (focus == FOCUS_ATSPI &&
                 !eekboard_client_enable_atspi_focus (client)) {
                 g_printerr ("Can't register AT-SPI focus change event listeners\n");
+                g_object_unref (client);
                 exit (1);
             }
 
             if (opt_keystroke &&
                 !eekboard_client_enable_atspi_keystroke (client)) {
                 g_printerr ("Can't register AT-SPI keystroke event listeners\n");
+                g_object_unref (client);
                 exit (1);
             }
         } else {
             g_printerr ("Desktop accessibility support is disabled\n");
+            g_object_unref (client);
             exit (1);
         }
     }
@@ -240,6 +247,7 @@ main (int argc, char **argv)
         if (focus == FOCUS_IBUS &&
             !eekboard_client_enable_ibus_focus (client)) {
             g_printerr ("Can't register IBus focus change event listeners\n");
+            g_object_unref (client);
             exit (1);
         }
     }
@@ -247,24 +255,28 @@ main (int argc, char **argv)
 
     if (opt_use_system_layout && (opt_keyboard || opt_model || opt_layouts || opt_options)) {
         g_printerr ("Can't use --use-system-layout option with keyboard options\n");
+        g_object_unref (client);
         exit (1);
     }
 
-    if (opt_use_system_layout) {
-        if (!eekboard_client_enable_xkl (client)) {
-            g_printerr ("Can't register xklavier event listeners\n");
-            exit (1);
-        }
-    } else if (opt_model || opt_layouts || opt_options) {
-        if (!eekboard_client_set_xkl_config (client,
-                                             opt_model,
-                                             opt_layouts,
-                                             opt_options)) {
-            g_printerr ("Can't set xklavier config\n");
+    if (!eekboard_client_enable_xkl (client)) {
+        g_printerr ("Can't register xklavier event listeners\n");
+        g_object_unref (client);
+        exit (1);
+    }
+
+    if (opt_use_system_layout || opt_model || opt_layouts || opt_options) {
+        if (!eekboard_client_load_keyboard_from_xkl (client,
+                                                     opt_model,
+                                                     opt_layouts,
+                                                     opt_options)) {
+            g_printerr ("Can't load keyboard from xklavier config\n");
+            g_object_unref (client);
             exit (1);
         }
     } else {
         gchar *file;
+        gboolean success;
 
         if (!opt_keyboard)
             opt_keyboard = DEFAULT_LAYOUT;
@@ -273,17 +285,19 @@ main (int argc, char **argv)
             file = g_strdup (opt_keyboard);
         else
             file = g_strdup_printf ("%s/%s.xml", KEYBOARDDIR, opt_keyboard);
-        if (!eekboard_client_load_keyboard_from_file (client, file)) {
+        success = eekboard_client_load_keyboard_from_file (client, file);
+        g_free (file);
+        if (!success) {
             g_printerr ("Can't load keyboard file %s\n", file);
-            g_free (file);
+            g_object_unref (client);
             exit (1);
         }
-        g_free (file);
     }
 
 #ifdef HAVE_XTEST
     if (!eekboard_client_enable_xtest (client)) {
         g_printerr ("Can't init xtest\n");
+        g_object_unref (client);
         exit (1);
     }
 #endif  /* HAVE_XTEST */
@@ -310,6 +324,7 @@ main (int argc, char **argv)
 
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
+    g_object_unref (client);
 
     return 0;
 }

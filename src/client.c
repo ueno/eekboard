@@ -30,6 +30,7 @@
 
 #ifdef HAVE_XTEST
 #include <X11/extensions/XTest.h>
+#include <X11/XKBlib.h>
 #endif  /* HAVE_XTEST */
 
 #ifdef HAVE_IBUS
@@ -67,6 +68,8 @@ struct _EekboardClient {
     GdkDisplay *display;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
+    gboolean use_xkl_layout;
+    gint group;
 
     gulong xkl_config_changed_handler;
     gulong xkl_state_changed_handler;
@@ -88,6 +91,9 @@ struct _EekboardClient {
 
 #ifdef HAVE_XTEST
     KeyCode modifier_keycodes[8]; 
+    KeyCode reserved_keycode;
+    KeySym reserved_keysym;
+    XkbDescRec *xkb;
 #endif  /* HAVE_XTEST */
 
     GSettings *settings;
@@ -121,14 +127,24 @@ static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
 static gboolean        set_keyboard         (EekboardClient         *client,
                                              gboolean                show,
                                              EekLayout              *layout);
-static gboolean        set_xkl_keyboard     (EekboardClient         *client,
-                                             gboolean                show,
-                                             const gchar            *model,
-                                             const gchar            *layouts,
-                                             const gchar            *options);
+static gboolean        set_keyboard_from_xkl (EekboardClient         *client,
+                                              gboolean                show,
+                                              const gchar            *model,
+                                              const gchar            *layouts,
+                                              const gchar            *options);
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
                                             (EekboardClient         *client);
+static gboolean        get_keycode_for_keysym
+                                            (EekboardClient         *client,
+                                             guint                   keysym,
+                                             guint                  *keycode,
+                                             guint                  *modifiers);
+static gboolean        get_keycode_for_keysym_replace
+                                            (EekboardClient         *client,
+                                             guint                   keysym,
+                                             guint                  *keycode,
+                                             guint                  *modifiers);
 #endif  /* HAVE_XTEST */
 
 static void
@@ -311,23 +327,25 @@ eekboard_client_init (EekboardClient *client)
 }
 
 gboolean
-eekboard_client_set_xkl_config (EekboardClient *client,
-                                        const gchar *model,
-                                        const gchar *layouts,
-                                        const gchar *options)
+eekboard_client_load_keyboard_from_xkl (EekboardClient *client,
+                                        const gchar    *model,
+                                        const gchar    *layouts,
+                                        const gchar    *options)
 {
+    client->use_xkl_layout = TRUE;
+
 #if ENABLE_FOCUS_LISTENER
-    return set_xkl_keyboard (client,
-                             !client->follows_focus,
-                             model,
-                             layouts,
-                             options);
+    return set_keyboard_from_xkl (client,
+                                  !client->follows_focus,
+                                  model,
+                                  layouts,
+                                  options);
 #else  /* ENABLE_FOCUS_LISTENER */
-    return set_xkl_keyboard (client,
-                             TRUE,
-                             model,
-                             layouts,
-                             options);
+    return set_keyboard_from_xkl (client,
+                                  TRUE,
+                                  model,
+                                  layouts,
+                                  options);
 #endif  /* !ENABLE_FOCUS_LISTENER */
 }
 
@@ -365,22 +383,18 @@ eekboard_client_enable_xkl (EekboardClient *client)
                            (GdkFilterFunc) filter_xkl_event,
                            client);
 
+    client->use_xkl_layout = FALSE;
+
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-#if ENABLE_FOCUS_LISTENER
-    return set_xkl_keyboard (client,
-                             !client->follows_focus,
-                             NULL,
-                             NULL,
-                             NULL);
-#else  /* ENABLE_FOCUS_LISTENER */
-    return set_xkl_keyboard (client, TRUE, NULL, NULL, NULL);
-#endif  /* !ENABLE_FOCUS_LISTENER */
+    return TRUE;
 }
 
 void
 eekboard_client_disable_xkl (EekboardClient *client)
 {
+    client->use_xkl_layout = FALSE;
+
     if (client->xkl_engine)
         xkl_engine_stop_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
     if (g_signal_handler_is_connected (client->xkl_engine,
@@ -665,8 +679,8 @@ EekboardClient *
 eekboard_client_new (GDBusConnection *connection)
 {
     EekboardClient *client = g_object_new (EEKBOARD_TYPE_CLIENT,
-                                                  "connection", connection,
-                                                  NULL);
+                                           "connection", connection,
+                                           NULL);
     if (client->context)
         return client;
     return NULL;
@@ -691,12 +705,14 @@ on_xkl_config_changed (XklEngine *xklengine,
     EekboardClient *client = user_data;
     gboolean retval;
 
-    retval = set_xkl_keyboard (client, FALSE, NULL, NULL, NULL);
-    g_return_if_fail (retval);
+    if (client->use_xkl_layout) {
+        retval = set_keyboard_from_xkl (client, FALSE, NULL, NULL, NULL);
+        g_return_if_fail (retval);
+    }
 
-#ifdef HAVE_FAKEKEY
+#ifdef HAVE_XTEST
     update_modifier_keycodes (client);
-#endif  /* HAVE_FAKEKEY */
+#endif  /* HAVE_XTEST */
 }
 
 static gboolean
@@ -726,11 +742,11 @@ set_keyboard (EekboardClient *client,
 }
 
 static gboolean
-set_xkl_keyboard (EekboardClient *client,
-                  gboolean        show,
-                  const gchar    *model,
-                  const gchar    *layouts,
-                  const gchar    *options)
+set_keyboard_from_xkl (EekboardClient *client,
+                       gboolean        show,
+                       const gchar    *model,
+                       const gchar    *layouts,
+                       const gchar    *options)
 {
     EekLayout *layout;
     gboolean retval;
@@ -793,10 +809,13 @@ on_xkl_state_changed (XklEngine           *xklengine,
     EekboardClient *client = user_data;
 
     if (type == GROUP_CHANGED && client->keyboard) {
-        gint group = eek_element_get_group (EEK_ELEMENT(client->keyboard));
-        if (group != value) {
-            eekboard_context_set_group (client->context, value, NULL);
+        if (client->use_xkl_layout) {
+            gint group = eek_element_get_group (EEK_ELEMENT(client->keyboard));
+            if (group != value) {
+                eekboard_context_set_group (client->context, value, NULL);
+            }
         }
+        client->group = value;
     }
 }
 
@@ -841,12 +860,19 @@ send_fake_key_event (EekboardClient *client,
     xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
     g_return_if_fail (xkeysym > 0);
 
+    if (!get_keycode_for_keysym (client, xkeysym, &keycode, &modifiers)) {
+        g_warning ("failed to lookup X keysym %X", xkeysym);
+        return;
+    }
+
+    modifiers |= eek_keyboard_get_modifiers (client->keyboard);
+
+    send_fake_modifier_key_event (client, modifiers, is_pressed);
+    XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
+
     keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display),
                                 xkeysym);
     g_return_if_fail (keycode > 0);
-
-    modifiers = eek_keyboard_get_modifiers (client->keyboard);
-    send_fake_modifier_key_event (client, modifiers, is_pressed);
 
     XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (client->display),
                        keycode,
@@ -862,6 +888,7 @@ on_key_pressed (EekKeyboard *keyboard,
 {
     EekboardClient *client = user_data;
     send_fake_key_event (client, key, TRUE);
+    send_fake_key_event (client, key, FALSE);
 }
 
 static void
@@ -869,8 +896,6 @@ on_key_released (EekKeyboard *keyboard,
                  EekKey      *key,
                  gpointer     user_data)
 {
-    EekboardClient *client = user_data;
-    send_fake_key_event (client, key, FALSE);
 }
 
 static void
@@ -892,10 +917,130 @@ update_modifier_keycodes (EekboardClient *client)
     }
 }
 
+/* The following functions for keyboard mapping change are direct
+   translation of the code in Caribou (in libcaribou/xadapter.vala):
+
+   - get_reserved_keycode
+   - reset_reserved
+   - get_keycode_for_keysym_replace (Caribou: replace_keycode)
+   - get_keycode_for_keysym_best (Caribou: best_keycode_keyval_match)
+   - get_keycode_for_keysym (Caribou: keycode_for_keyval)
+*/
+static guint
+get_reserved_keycode (EekboardClient *client)
+{
+    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    gint i;
+
+    for (i = client->xkb->max_key_code; i >= client->xkb->min_key_code; --i) {
+        if (client->xkb->map->key_sym_map[i].kt_index[0] == XkbOneLevelIndex) {
+            if (XKeycodeToKeysym (display, i, 0) != 0) {
+                gdk_error_trap_push ();
+                XGrabKey (display, i, 0,
+                          gdk_x11_get_default_root_xwindow (), TRUE,
+                          GrabModeSync, GrabModeSync);
+                XFlush (display);
+                XUngrabKey (display, i, 0,
+                            gdk_x11_get_default_root_xwindow ());
+                if (gdk_error_trap_pop () == 0)
+                    return i;
+            }
+        }
+    }
+
+    return XKeysymToKeycode (display, 0x0023); /* XK_numbersign */
+}
+
+static gboolean
+reset_reserved (gpointer user_data)
+{
+    EekboardClient *client = user_data;
+    guint keycode, modifiers;
+
+    get_keycode_for_keysym_replace (client,
+                                    client->reserved_keysym,
+                                    &keycode,
+                                    &modifiers);
+    return FALSE;
+}
+
+static gboolean
+get_keycode_for_keysym_replace (EekboardClient *client,
+                                guint           keysym,
+                                guint          *keycode,
+                                guint          *modifiers)
+{
+    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    guint offset;
+    if (client->reserved_keycode == 0) {
+        client->reserved_keycode = get_reserved_keycode (client);
+        client->reserved_keysym =
+            XKeycodeToKeysym (display,
+                              client->reserved_keycode,
+                              0);
+    }
+    XFlush (display);
+
+    offset = client->xkb->map->key_sym_map[client->reserved_keycode].offset;
+    client->xkb->map->syms[offset] = keysym;
+    XkbSetMap (display,
+               XkbAllMapComponentsMask,
+               client->xkb);
+    XFlush (display);
+
+    *keycode = client->reserved_keycode;
+    *modifiers = 0;
+
+    if (keysym != client->reserved_keysym)
+        g_timeout_add (500, reset_reserved, client);
+
+    return TRUE;
+}
+
+static gboolean
+get_keycode_for_keysym_best (EekboardClient *client,
+                             guint           keysym,
+                             guint          *keycode,
+                             guint          *modifiers)
+{
+    GdkKeymap *keymap = gdk_keymap_get_default ();
+    GdkKeymapKey *keys, *best_match;
+    gint n_keys, i;
+
+    if (!gdk_keymap_get_entries_for_keyval (keymap, keysym, &keys, &n_keys))
+        return FALSE;
+
+    for (i = 0; i < n_keys; i++)
+        if (keys[i].group == client->group)
+            best_match = &keys[i];
+
+    *keycode = best_match->keycode;
+    *modifiers = best_match->level == 1 ? EEK_SHIFT_MASK : 0;
+
+    g_free (keys);
+
+    return TRUE;
+}
+
+static gboolean
+get_keycode_for_keysym (EekboardClient *client,
+                        guint           keysym,
+                        guint          *keycode,
+                        guint          *modifiers)
+{
+    if (get_keycode_for_keysym_best (client, keysym, keycode, modifiers))
+        return TRUE;
+
+    if (get_keycode_for_keysym_replace (client, keysym, keycode, modifiers))
+        return TRUE;
+
+    return FALSE;
+}
+
 gboolean
 eekboard_client_enable_xtest (EekboardClient *client)
 {
-    int event_base, error_base, major_version, minor_version;
+    int opcode, event_base, error_base, major_version, minor_version;
 
     if (!client->display) {
         client->display = gdk_display_get_default ();
@@ -908,7 +1053,21 @@ eekboard_client_enable_xtest (EekboardClient *client)
         g_warning ("XTest extension is not available");
         return FALSE;
     }
-                             
+
+    if (!XkbQueryExtension (GDK_DISPLAY_XDISPLAY (client->display),
+                            &opcode, &event_base, &error_base,
+                            &major_version, &minor_version)) {
+        g_warning ("Xkb extension is not available");
+        return FALSE;
+    }
+
+    if (!client->xkb)
+        client->xkb = XkbGetKeyboard (GDK_DISPLAY_XDISPLAY (client->display),
+                                      XkbGBN_AllComponentsMask,
+                                      XkbUseCoreKbd);
+    g_assert (client->xkb);
+
+    client->reserved_keycode = 0;
     update_modifier_keycodes (client);
 
     client->key_pressed_handler =
@@ -924,6 +1083,11 @@ eekboard_client_enable_xtest (EekboardClient *client)
 void
 eekboard_client_disable_xtest (EekboardClient *client)
 {
+    if (client->xkb) {
+        XkbFreeKeyboard (client->xkb, 0, TRUE);	/* free_all = TRUE */
+        client->xkb = NULL;
+    }
+
     if (g_signal_handler_is_connected (client->keyboard,
                                        client->key_pressed_handler))
         g_signal_handler_disconnect (client->keyboard,
