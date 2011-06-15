@@ -65,7 +65,6 @@ struct _EekboardClient {
     EekboardContext *context;
 
     EekKeyboard *keyboard;
-    GdkDisplay *display;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
     gboolean use_xkl_layout;
@@ -237,11 +236,6 @@ eekboard_client_dispose (GObject *object)
         client->keyboard = NULL;
     }
 
-    if (client->display) {
-        gdk_display_close (client->display);
-        client->display = NULL;
-    }
-
     if (client->settings) {
         g_object_unref (client->settings);
         client->settings = NULL;
@@ -293,7 +287,6 @@ eekboard_client_init (EekboardClient *client)
 {
     client->eekboard = NULL;
     client->context = NULL;
-    client->display = NULL;
     client->xkl_engine = NULL;
     client->xkl_config_registry = NULL;
     client->keyboard = NULL;
@@ -340,14 +333,12 @@ eekboard_client_load_keyboard_from_xkl (EekboardClient *client,
 gboolean
 eekboard_client_enable_xkl (EekboardClient *client)
 {
-    if (!client->display) {
-        client->display = gdk_display_get_default ();
-    }
-    g_assert (client->display);
+    GdkDisplay *display = gdk_display_get_default ();
+    g_assert (display);
 
     if (!client->xkl_engine) {
         client->xkl_engine =
-            xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY (client->display));
+            xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY (display));
     }
     g_assert (client->xkl_engine);
 
@@ -828,15 +819,16 @@ on_xkl_state_changed (XklEngine           *xklengine,
 static guint
 get_replaced_keycode (EekboardClient *client)
 {
-    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
     gint i;
 
     for (i = client->xkb->max_key_code; i >= client->xkb->min_key_code; --i)
         if (client->xkb->map->key_sym_map[i].kt_index[0] == XkbOneLevelIndex &&
-            XKeycodeToKeysym (display, i, 0) != 0)
+            XKeycodeToKeysym (xdisplay, i, 0) != 0)
             return i;
 
-    return XKeysymToKeycode (display, 0x0023); /* XK_numbersign */
+    return XKeysymToKeycode (xdisplay, 0x0023); /* XK_numbersign */
 }
 
 /* Replace keysym assigned to KEYCODE to KEYSYM.  Both args are used
@@ -851,7 +843,8 @@ replace_keycode (EekboardClient *client,
                  guint          *keycode,
                  guint          *keysym)
 {
-    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
     guint offset;
     XkbMapChangesRec changes;
     guint replaced_keycode, replaced_keysym;
@@ -862,8 +855,8 @@ replace_keycode (EekboardClient *client,
     replaced_keycode = get_replaced_keycode (client);
     if (replaced_keycode == 0)
         return FALSE;
-    replaced_keysym = XKeycodeToKeysym (display, replaced_keycode, 0);
-    XFlush (display);
+    replaced_keysym = XKeycodeToKeysym (xdisplay, replaced_keycode, 0);
+    XFlush (xdisplay);
 
     offset = client->xkb->map->key_sym_map[replaced_keycode].offset;
     client->xkb->map->syms[offset] = *keysym;
@@ -872,8 +865,8 @@ replace_keycode (EekboardClient *client,
     changes.first_key_sym = replaced_keycode;
     changes.num_key_syms = 1;
 
-    XkbChangeMap (display, client->xkb, &changes);
-    XFlush (display);
+    XkbChangeMap (xdisplay, client->xkb, &changes);
+    XFlush (xdisplay);
 
     *keycode = replaced_keycode;
     *keysym = replaced_keysym;
@@ -911,6 +904,7 @@ send_fake_modifier_key_event (EekboardClient *client,
                               EekModifierType modifiers,
                               gboolean        is_pressed)
 {
+    GdkDisplay *display = gdk_display_get_default ();
     gint i;
 
     for (i = 0; i < G_N_ELEMENTS(client->modifier_keycodes); i++) {
@@ -919,7 +913,7 @@ send_fake_modifier_key_event (EekboardClient *client,
 
             g_return_if_fail (keycode > 0);
 
-            XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (client->display),
+            XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (display),
                                keycode,
                                is_pressed,
                                CurrentTime);
@@ -932,6 +926,7 @@ send_fake_key_event (EekboardClient *client,
                      EekKey         *key,
                      gboolean        is_pressed)
 {
+    GdkDisplay *display = gdk_display_get_default ();
     EekSymbol *symbol;
     EekModifierType keyboard_modifiers, modifiers;
     guint xkeysym;
@@ -965,17 +960,17 @@ send_fake_key_event (EekboardClient *client,
     modifiers |= keyboard_modifiers;
 
     send_fake_modifier_key_event (client, modifiers, is_pressed);
-    XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
+    XSync (GDK_DISPLAY_XDISPLAY (display), False);
 
-    keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (client->display),
+    keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (display),
                                 xkeysym);
     g_return_if_fail (keycode > 0);
 
-    XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (client->display),
+    XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (display),
                        keycode,
                        is_pressed,
                        CurrentTime);
-    XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
+    XSync (GDK_DISPLAY_XDISPLAY (display), False);
 
     if (replaced_keysym)
         replace_keycode (client, &keycode, &replaced_keysym);
@@ -1001,10 +996,11 @@ on_key_released (EekKeyboard *keyboard,
 static void
 update_modifier_keycodes (EekboardClient *client)
 {
+    GdkDisplay *display = gdk_display_get_default ();
     XModifierKeymap *mods;
     gint i, j;
 
-    mods = XGetModifierMapping (GDK_DISPLAY_XDISPLAY (client->display));
+    mods = XGetModifierMapping (GDK_DISPLAY_XDISPLAY (display));
     for (i = 0; i < 8; i++) {
         client->modifier_keycodes[i] = 0;
         for (j = 0; j < mods->max_keypermod; j++) {
@@ -1020,21 +1016,19 @@ update_modifier_keycodes (EekboardClient *client)
 gboolean
 eekboard_client_enable_xtest (EekboardClient *client)
 {
+    GdkDisplay *display = gdk_display_get_default ();
     int opcode, event_base, error_base, major_version, minor_version;
 
-    if (!client->display) {
-        client->display = gdk_display_get_default ();
-    }
-    g_assert (client->display);
+    g_assert (display);
 
-    if (!XTestQueryExtension (GDK_DISPLAY_XDISPLAY (client->display),
+    if (!XTestQueryExtension (GDK_DISPLAY_XDISPLAY (display),
                               &event_base, &error_base,
                               &major_version, &minor_version)) {
         g_warning ("XTest extension is not available");
         return FALSE;
     }
 
-    if (!XkbQueryExtension (GDK_DISPLAY_XDISPLAY (client->display),
+    if (!XkbQueryExtension (GDK_DISPLAY_XDISPLAY (display),
                             &opcode, &event_base, &error_base,
                             &major_version, &minor_version)) {
         g_warning ("Xkb extension is not available");
@@ -1042,7 +1036,7 @@ eekboard_client_enable_xtest (EekboardClient *client)
     }
 
     if (!client->xkb)
-        client->xkb = XkbGetMap (GDK_DISPLAY_XDISPLAY (client->display),
+        client->xkb = XkbGetMap (GDK_DISPLAY_XDISPLAY (display),
                                  XkbKeySymsMask,
                                  XkbUseCoreKbd);
     g_assert (client->xkb);
