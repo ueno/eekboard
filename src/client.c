@@ -972,6 +972,8 @@ get_keycode_for_keysym_replace (EekboardClient *client,
 {
     Display *display = GDK_DISPLAY_XDISPLAY (client->display);
     guint offset;
+    XkbMapChangesRec changes;
+
     if (client->reserved_keycode == 0) {
         client->reserved_keycode = get_reserved_keycode (client);
         client->reserved_keysym =
@@ -983,9 +985,13 @@ get_keycode_for_keysym_replace (EekboardClient *client,
 
     offset = client->xkb->map->key_sym_map[client->reserved_keycode].offset;
     client->xkb->map->syms[offset] = keysym;
-    XkbSetMap (display,
-               XkbAllMapComponentsMask,
-               client->xkb);
+
+    memset (&changes, 0, sizeof changes);
+    changes.changed = XkbKeySymsMask;
+    changes.first_key_sym = client->reserved_keycode;
+    changes.num_key_syms = 1;
+
+    XkbChangeMap (display, client->xkb, &changes);
     XFlush (display);
 
     *keycode = client->reserved_keycode;
