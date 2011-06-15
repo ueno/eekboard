@@ -91,8 +91,6 @@ struct _EekboardClient {
 
 #ifdef HAVE_XTEST
     KeyCode modifier_keycodes[8]; 
-    KeyCode reserved_keycode;
-    KeySym reserved_keysym;
     XkbDescRec *xkb;
 #endif  /* HAVE_XTEST */
 
@@ -135,16 +133,6 @@ static gboolean        set_keyboard_from_xkl (EekboardClient         *client,
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
                                             (EekboardClient         *client);
-static gboolean        get_keycode_for_keysym
-                                            (EekboardClient         *client,
-                                             guint                   keysym,
-                                             guint                  *keycode,
-                                             guint                  *modifiers);
-static gboolean        get_keycode_for_keysym_replace
-                                            (EekboardClient         *client,
-                                             guint                   keysym,
-                                             guint                  *keycode,
-                                             guint                  *modifiers);
 #endif  /* HAVE_XTEST */
 
 static void
@@ -820,6 +808,94 @@ on_xkl_state_changed (XklEngine           *xklengine,
 }
 
 #ifdef HAVE_XTEST
+/* The following functions for keyboard mapping change are direct
+   translation of the code in Caribou (in libcaribou/xadapter.vala):
+
+   - get_replaced_keycode (Caribou: get_reserved_keycode)
+   - replace_keycode
+   - get_keycode_from_gdk_keymap (Caribou: best_keycode_keyval_match)
+*/
+static guint
+get_replaced_keycode (EekboardClient *client)
+{
+    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    gint i;
+
+    for (i = client->xkb->max_key_code; i >= client->xkb->min_key_code; --i)
+        if (client->xkb->map->key_sym_map[i].kt_index[0] == XkbOneLevelIndex &&
+            XKeycodeToKeysym (display, i, 0) != 0)
+            return i;
+
+    return XKeysymToKeycode (display, 0x0023); /* XK_numbersign */
+}
+
+/* Replace keysym assigned to KEYCODE to KEYSYM.  Both args are used
+   as in-out.  If KEYCODE points to 0, this function picks a keycode
+   from the current map and replace the associated keysym to KEYSYM.
+   In that case, the replaced keycode is stored in KEYCODE and the old
+   keysym is stored in KEYSYM.  If otherwise (KEYCODE points to
+   non-zero keycode), it simply changes the current map with the
+   specified KEYCODE and KEYSYM. */
+static gboolean
+replace_keycode (EekboardClient *client,
+                 guint          *keycode,
+                 guint          *keysym)
+{
+    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
+    guint offset;
+    XkbMapChangesRec changes;
+    guint replaced_keycode, replaced_keysym;
+
+    g_assert (keycode != NULL);
+    g_assert (keysym != NULL && *keysym != 0);
+
+    replaced_keycode = get_replaced_keycode (client);
+    if (replaced_keycode == 0)
+        return FALSE;
+    replaced_keysym = XKeycodeToKeysym (display, replaced_keycode, 0);
+    XFlush (display);
+
+    offset = client->xkb->map->key_sym_map[replaced_keycode].offset;
+    client->xkb->map->syms[offset] = *keysym;
+
+    changes.changed = XkbKeySymsMask;
+    changes.first_key_sym = replaced_keycode;
+    changes.num_key_syms = 1;
+
+    XkbChangeMap (display, client->xkb, &changes);
+    XFlush (display);
+
+    *keycode = replaced_keycode;
+    *keysym = replaced_keysym;
+
+    return TRUE;
+}
+
+static gboolean
+get_keycode_from_gdk_keymap (EekboardClient *client,
+                             guint           keysym,
+                             guint          *keycode,
+                             guint          *modifiers)
+{
+    GdkKeymap *keymap = gdk_keymap_get_default ();
+    GdkKeymapKey *keys, *best_match;
+    gint n_keys, i;
+
+    if (!gdk_keymap_get_entries_for_keyval (keymap, keysym, &keys, &n_keys))
+        return FALSE;
+
+    for (i = 0; i < n_keys; i++)
+        if (keys[i].group == client->group)
+            best_match = &keys[i];
+
+    *keycode = best_match->keycode;
+    *modifiers = best_match->level == 1 ? EEK_SHIFT_MASK : 0;
+
+    g_free (keys);
+
+    return TRUE;
+}
+
 static void
 send_fake_modifier_key_event (EekboardClient *client,
                               EekModifierType modifiers,
@@ -849,7 +925,7 @@ send_fake_key_event (EekboardClient *client,
     EekSymbol *symbol;
     EekModifierType keyboard_modifiers, modifiers;
     guint xkeysym;
-    guint keycode;
+    guint keycode, replaced_keysym = 0;
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
 
@@ -860,9 +936,14 @@ send_fake_key_event (EekboardClient *client,
     xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
     g_return_if_fail (xkeysym > 0);
 
-    if (!get_keycode_for_keysym (client, xkeysym, &keycode, &modifiers)) {
-        g_warning ("failed to lookup X keysym %X", xkeysym);
-        return;
+    modifiers = 0;
+    if (!get_keycode_from_gdk_keymap (client, xkeysym, &keycode, &modifiers)) {
+        keycode = 0;
+        replaced_keysym = xkeysym;
+        if (!replace_keycode (client, &keycode, &replaced_keysym)) {
+            g_warning ("failed to lookup X keysym %X", xkeysym);
+            return;
+        }
     }
     
     /* Clear level shift modifiers */
@@ -885,6 +966,9 @@ send_fake_key_event (EekboardClient *client,
                        is_pressed,
                        CurrentTime);
     XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
+
+    if (replaced_keysym)
+        replace_keycode (client, &keycode, &replaced_keysym);
 }
 
 static void
@@ -923,132 +1007,6 @@ update_modifier_keycodes (EekboardClient *client)
     }
 }
 
-/* The following functions for keyboard mapping change are direct
-   translation of the code in Caribou (in libcaribou/xadapter.vala):
-
-   - get_reserved_keycode
-   - reset_reserved
-   - get_keycode_for_keysym_replace (Caribou: replace_keycode)
-   - get_keycode_for_keysym_best (Caribou: best_keycode_keyval_match)
-   - get_keycode_for_keysym (Caribou: keycode_for_keyval)
-*/
-static guint
-get_reserved_keycode (EekboardClient *client)
-{
-    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
-    gint i;
-
-    for (i = client->xkb->max_key_code; i >= client->xkb->min_key_code; --i) {
-        if (client->xkb->map->key_sym_map[i].kt_index[0] == XkbOneLevelIndex) {
-            if (XKeycodeToKeysym (display, i, 0) != 0) {
-                gdk_error_trap_push ();
-                XGrabKey (display, i, 0,
-                          gdk_x11_get_default_root_xwindow (), TRUE,
-                          GrabModeSync, GrabModeSync);
-                XFlush (display);
-                XUngrabKey (display, i, 0,
-                            gdk_x11_get_default_root_xwindow ());
-                if (gdk_error_trap_pop () == 0)
-                    return i;
-            }
-        }
-    }
-
-    return XKeysymToKeycode (display, 0x0023); /* XK_numbersign */
-}
-
-static gboolean
-reset_reserved (gpointer user_data)
-{
-    EekboardClient *client = user_data;
-    guint keycode, modifiers;
-
-    get_keycode_for_keysym_replace (client,
-                                    client->reserved_keysym,
-                                    &keycode,
-                                    &modifiers);
-    return FALSE;
-}
-
-static gboolean
-get_keycode_for_keysym_replace (EekboardClient *client,
-                                guint           keysym,
-                                guint          *keycode,
-                                guint          *modifiers)
-{
-    Display *display = GDK_DISPLAY_XDISPLAY (client->display);
-    guint offset;
-    XkbMapChangesRec changes;
-
-    if (client->reserved_keycode == 0) {
-        client->reserved_keycode = get_reserved_keycode (client);
-        client->reserved_keysym =
-            XKeycodeToKeysym (display,
-                              client->reserved_keycode,
-                              0);
-    }
-    XFlush (display);
-
-    offset = client->xkb->map->key_sym_map[client->reserved_keycode].offset;
-    client->xkb->map->syms[offset] = keysym;
-
-    memset (&changes, 0, sizeof changes);
-    changes.changed = XkbKeySymsMask;
-    changes.first_key_sym = client->reserved_keycode;
-    changes.num_key_syms = 1;
-
-    XkbChangeMap (display, client->xkb, &changes);
-    XFlush (display);
-
-    *keycode = client->reserved_keycode;
-    *modifiers = 0;
-
-    if (keysym != client->reserved_keysym)
-        g_timeout_add (500, reset_reserved, client);
-
-    return TRUE;
-}
-
-static gboolean
-get_keycode_for_keysym_best (EekboardClient *client,
-                             guint           keysym,
-                             guint          *keycode,
-                             guint          *modifiers)
-{
-    GdkKeymap *keymap = gdk_keymap_get_default ();
-    GdkKeymapKey *keys, *best_match;
-    gint n_keys, i;
-
-    if (!gdk_keymap_get_entries_for_keyval (keymap, keysym, &keys, &n_keys))
-        return FALSE;
-
-    for (i = 0; i < n_keys; i++)
-        if (keys[i].group == client->group)
-            best_match = &keys[i];
-
-    *keycode = best_match->keycode;
-    *modifiers = best_match->level == 1 ? EEK_SHIFT_MASK : 0;
-
-    g_free (keys);
-
-    return TRUE;
-}
-
-static gboolean
-get_keycode_for_keysym (EekboardClient *client,
-                        guint           keysym,
-                        guint          *keycode,
-                        guint          *modifiers)
-{
-    if (get_keycode_for_keysym_best (client, keysym, keycode, modifiers))
-        return TRUE;
-
-    if (get_keycode_for_keysym_replace (client, keysym, keycode, modifiers))
-        return TRUE;
-
-    return FALSE;
-}
-
 gboolean
 eekboard_client_enable_xtest (EekboardClient *client)
 {
@@ -1079,7 +1037,6 @@ eekboard_client_enable_xtest (EekboardClient *client)
                                  XkbUseCoreKbd);
     g_assert (client->xkb);
 
-    client->reserved_keycode = 0;
     update_modifier_keycodes (client);
 
     client->key_pressed_handler =
