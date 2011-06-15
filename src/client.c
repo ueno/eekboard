@@ -631,7 +631,11 @@ eekboard_client_enable_ibus_focus (EekboardClient *client)
     GDBusConnection *connection;
     GError *error;
 
-    client->ibus_bus = ibus_bus_new ();
+    if (!client->ibus_bus) {
+        client->ibus_bus = ibus_bus_new ();
+        g_object_ref_sink (client->ibus_bus);
+    }
+
     connection = ibus_bus_get_connection (client->ibus_bus);
     add_match_rule (connection,
                     "type='method_call',"
@@ -657,9 +661,15 @@ eekboard_client_disable_ibus_focus (EekboardClient *client)
 
     client->follows_focus = FALSE;
 
-    connection = ibus_bus_get_connection (client->ibus_bus);
-    g_dbus_connection_remove_filter (connection,
-                                     client->ibus_focus_message_filter);
+    if (client->ibus_bus) {
+        if (client->ibus_focus_message_filter != 0) {
+            connection = ibus_bus_get_connection (client->ibus_bus);
+            g_dbus_connection_remove_filter (connection,
+                                             client->ibus_focus_message_filter);
+        }
+        g_object_unref (client->ibus_bus);
+        client->ibus_bus = NULL;
+    }
 }
 #endif  /* HAVE_ATSPI */
 
