@@ -1074,9 +1074,9 @@ eekboard_client_enable_xtest (EekboardClient *client)
     }
 
     if (!client->xkb)
-        client->xkb = XkbGetKeyboard (GDK_DISPLAY_XDISPLAY (client->display),
-                                      XkbGBN_AllComponentsMask,
-                                      XkbUseCoreKbd);
+        client->xkb = XkbGetMap (GDK_DISPLAY_XDISPLAY (client->display),
+                                 XkbKeySymsMask,
+                                 XkbUseCoreKbd);
     g_assert (client->xkb);
 
     client->reserved_keycode = 0;
