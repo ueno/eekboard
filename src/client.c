@@ -847,7 +847,7 @@ send_fake_key_event (EekboardClient *client,
                      gboolean        is_pressed)
 {
     EekSymbol *symbol;
-    EekModifierType modifiers;
+    EekModifierType keyboard_modifiers, modifiers;
     guint xkeysym;
     guint keycode;
 
@@ -864,8 +864,14 @@ send_fake_key_event (EekboardClient *client,
         g_warning ("failed to lookup X keysym %X", xkeysym);
         return;
     }
+    
+    /* Clear level shift modifiers */
+    keyboard_modifiers = eek_keyboard_get_modifiers (client->keyboard);
+    keyboard_modifiers &= ~EEK_SHIFT_MASK;
+    keyboard_modifiers &= ~EEK_LOCK_MASK;
+    keyboard_modifiers &= ~eek_keyboard_get_alt_gr_mask (client->keyboard);
 
-    modifiers |= eek_keyboard_get_modifiers (client->keyboard);
+    modifiers |= keyboard_modifiers;
 
     send_fake_modifier_key_event (client, modifiers, is_pressed);
     XSync (GDK_DISPLAY_XDISPLAY (client->display), False);
