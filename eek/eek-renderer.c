@@ -647,6 +647,7 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
                                    cairo_t     *cr)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
+    cairo_pattern_t *source;
 
     g_return_if_fail (priv->keyboard);
     g_return_if_fail (priv->allocation_width > 0.0);
@@ -656,6 +657,8 @@ eek_renderer_real_render_keyboard (EekRenderer *self,
         priv->keyboard_surface = create_keyboard_surface (self);
 
     cairo_set_source_surface (cr, priv->keyboard_surface, 0.0, 0.0);
+    source = cairo_get_source (cr);
+    cairo_pattern_set_extend (source, CAIRO_EXTEND_PAD);
     cairo_paint (cr);
 }
 
