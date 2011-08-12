@@ -419,6 +419,7 @@ on_key_released (EekKeyboard *keyboard,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
     cairo_t *cr;
     EekBounds bounds, large_bounds;
+    EekColor background;
 
     /* renderer may have not been set yet if the widget is a popup */
     if (!priv->renderer)
@@ -434,6 +435,18 @@ on_key_released (EekKeyboard *keyboard,
                      large_bounds.width,
                      large_bounds.height);
     cairo_clip (cr);
+
+    /* blank background, in case that a large key does not fit in the
+       keyboard */
+    eek_renderer_get_background_color (priv->renderer,
+                                       EEK_ELEMENT(priv->keyboard),
+                                       &background);
+    cairo_set_source_rgba (cr,
+                           background.red,
+                           background.green,
+                           background.blue,
+                           background.alpha);
+    cairo_paint (cr);
     eek_renderer_render_keyboard (priv->renderer, cr);
     cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
     cairo_destroy (cr);
