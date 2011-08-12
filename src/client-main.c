@@ -131,6 +131,7 @@ main (int argc, char **argv)
     GOptionContext *option_context;
     GMainLoop *loop;
     gint focus;
+    GSettings *settings;
 
     if (!gtk_init_check (&argc, &argv)) {
         g_printerr ("Can't init GTK\n");
@@ -186,9 +187,9 @@ main (int argc, char **argv)
         exit (1);
     }
 
+    settings = g_settings_new ("org.fedorahosted.eekboard");
     focus = FOCUS_NONE;
     if (opt_focus) {
-        GSettings *settings = g_settings_new ("org.fedorahosted.eekboard");
         gchar *focus_listener = g_settings_get_string (settings,
                                                        "focus-listener");
         g_object_unref (settings);
@@ -312,7 +313,8 @@ main (int argc, char **argv)
         g_object_unref (context);
     }
 
-    if (opt_fullscreen) {
+    if (opt_fullscreen ||
+        g_settings_get_boolean (settings, "start-fullscreen")) {
         g_object_get (client, "context", &context, NULL);
         eekboard_context_set_fullscreen (context, TRUE, NULL);
         g_object_unref (context);

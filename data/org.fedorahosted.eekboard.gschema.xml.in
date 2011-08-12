@@ -16,5 +16,10 @@
       <summary>Hide keyboard automatically when focus is out</summary>
       <description>If true, hide keyboard automatically when focus is out.</description>
     </key>
+    <key name="start-fullscreen" type="b">
+      <default>false</default>
+      <summary>Switch to fullscreen mode when startup</summary>
+      <description>If true, switch to fullscreen mode when startup.</description>
+    </key>
   </schema>
 </schemalist>
