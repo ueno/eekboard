@@ -616,18 +616,14 @@ focus_message_filter (GDBusConnection *connection,
     return message;
 }
 
-gboolean
-eekboard_client_enable_ibus_focus (EekboardClient *client)
+static void
+_ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
 {
+    EekboardClient *client = user_data;
     GDBusConnection *connection;
     GError *error;
 
-    if (!client->ibus_bus) {
-        client->ibus_bus = ibus_bus_new ();
-        g_object_ref_sink (client->ibus_bus);
-    }
-
-    connection = ibus_bus_get_connection (client->ibus_bus);
+    connection = ibus_bus_get_connection (bus);
     add_match_rule (connection,
                     "type='method_call',"
                     "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
@@ -641,6 +637,22 @@ eekboard_client_enable_ibus_focus (EekboardClient *client)
                                       focus_message_filter,
                                       client,
                                       NULL);
+}
+
+gboolean
+eekboard_client_enable_ibus_focus (EekboardClient *client)
+{
+    if (!client->ibus_bus) {
+        client->ibus_bus = ibus_bus_new ();
+        g_object_ref (client->ibus_bus);
+        g_signal_connect (client->ibus_bus, "connected",
+                          G_CALLBACK(_ibus_connect_focus_handlers),
+                          client);
+    }
+
+    if (ibus_bus_is_connected (client->ibus_bus))
+        _ibus_connect_focus_handlers (client->ibus_bus, client);
+
     client->follows_focus = TRUE;
     return TRUE;
 }
