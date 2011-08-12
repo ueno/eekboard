@@ -621,7 +621,6 @@ _ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
 {
     EekboardClient *client = user_data;
     GDBusConnection *connection;
-    GError *error;
 
     connection = ibus_bus_get_connection (bus);
     add_match_rule (connection,
