@@ -108,7 +108,8 @@ dnl use XTest to generate key events
 AC_MSG_CHECKING([whether you enable XTest])
 AC_ARG_ENABLE(xtest,
               AS_HELP_STRING([--enable-xtest=no/yes],
-                             [Enable XTest default=yes]),,
+                             [Enable XTest default=yes]),
+              enable_xtest=$enableval,
               enable_xtest=yes)
 
 if test x$enable_xtest = xyes; then
@@ -124,7 +125,8 @@ dnl use X to mark the fullscreen window as dock
 AC_MSG_CHECKING([whether you enable X dock])
 AC_ARG_ENABLE(x-dock,
               AS_HELP_STRING([--enable-x-dock=no/yes],
-                             [Enable X dock default=yes]),,
+                             [Enable X dock default=yes]),
+              enable_x_dock=$enableval,
               enable_x_dock=yes)
 
 if test x$enable_x_dock = xyes; then
@@ -146,7 +148,8 @@ dnl use AT-SPI 2 to capture focus/keystroke events
 AC_MSG_CHECKING([whether you enable AT-SPI 2 event handling])
 AC_ARG_ENABLE(atspi,
               AS_HELP_STRING([--enable-atspi=no/yes],
-                             [Enable AT-SPI 2 event handling default=no]),,
+                             [Enable AT-SPI 2 event handling default=yes]),
+              enable_atspi=$enableval,
               enable_atspi=yes)
 
 if test x$enable_atspi = xyes; then
@@ -164,8 +167,9 @@ dnl use IBus to capture focus events
 AC_MSG_CHECKING([whether you enable IBus focus tracking])
 AC_ARG_ENABLE(ibus,
               AS_HELP_STRING([--enable-ibus=no/yes],
-                             [Enable IBus focus tracking default=no]),,
-              enable_atspi=yes)
+                             [Enable IBus focus tracking default=yes]),
+              enable_ibus=$enableval,
+              enable_ibus=yes)
 
 if test x$enable_ibus = xyes; then
   PKG_CHECK_MODULES([IBUS], [ibus-1.0 >= 1.3.99], , enable_ibus=no)
@@ -185,7 +189,8 @@ dnl Python language binding
 AC_MSG_CHECKING([whether you enable Python language support])
 AC_ARG_ENABLE(python,
               AS_HELP_STRING([--enable-python=no/yes],
-                             [Enable Python language binding default=yes]),,
+                             [Enable Python language binding default=yes]),
+              enable_python=$enableval,
               enable_python=yes)
 
 dnl check python unconditionally to re-generate
@@ -218,7 +223,8 @@ dnl Vala langauge binding
 AC_MSG_CHECKING([whether you enable Vala language support])
 AC_ARG_ENABLE(vala,
               AS_HELP_STRING([--enable-vala=no/yes],
-                             [Enable Vala language binding default=yes]),,
+                             [Enable Vala language binding default=yes]),
+              enable_vala=$enableval,
               enable_vala=yes)
 if test x$enable_vala = xyes; then
   if test "x$INTROSPECTION_SCANNER" = x; then
@@ -249,8 +255,9 @@ dnl clutter
 AC_MSG_CHECKING([whether you enable clutter])
 AC_ARG_ENABLE(clutter,
               AS_HELP_STRING([--enable-clutter=no/yes],
-                             [Enable clutter user interface default=yes]),,
-              enable_clutter=yes)
+                             [Enable clutter user interface default=no]),
+              enable_clutter=$enableval,
+              enable_clutter=no)
 
 if test x$enable_clutter = xyes; then
   PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], , enable_clutter=no)
@@ -266,7 +273,8 @@ if test x$enable_clutter = xyes; then
   AC_MSG_CHECKING([whether you enable clutter-gtk])
   AC_ARG_ENABLE(clutter-gtk,
                 AS_HELP_STRING([--enable-clutter-gtk=no/yes],
-                               [Enable clutter user interface default=yes]),,
+                               [Enable clutter user interface default=yes]),
+                enable_clutter_gtk=$enableval,
                 enable_clutter_gtk=yes)
 
   if test x$enable_clutter_gtk = xyes; then
