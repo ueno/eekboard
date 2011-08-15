@@ -87,7 +87,8 @@ eek_gtk_keyboard_real_realize (GtkWidget      *self)
                            GDK_KEY_PRESS_MASK |
                            GDK_KEY_RELEASE_MASK |
                            GDK_BUTTON_PRESS_MASK |
-                           GDK_BUTTON_RELEASE_MASK);
+                           GDK_BUTTON_RELEASE_MASK |
+                           GDK_BUTTON_MOTION_MASK);
 
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->realize (self);
 }
@@ -180,6 +181,19 @@ eek_gtk_keyboard_real_size_allocate (GtkWidget     *self,
         size_allocate (self, allocation);
 }
 
+static void
+set_dragged_key (EekGtkKeyboard *keyboard, EekKey *key)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    if (priv->dragged_key && priv->dragged_key != key)
+        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
+    if (key && !eek_key_is_pressed (key)) {
+        priv->dragged_key = key;
+        g_signal_emit_by_name (key, "pressed", priv->keyboard);
+    }
+}
+
 static gboolean
 eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
                                           GdkEventButton *event)
@@ -191,13 +205,7 @@ eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
 
-    if (priv->dragged_key && priv->dragged_key != key)
-        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
-    if (key && !eek_key_is_pressed (key)) {
-        priv->dragged_key = key;
-        g_signal_emit_by_name (key, "pressed", priv->keyboard);
-    }
-
+    set_dragged_key (EEK_GTK_KEYBOARD(self), key);
     return TRUE;
 }
 
@@ -217,6 +225,20 @@ eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
                                             GdkEventButton *event)
 {
     clear_dragged_key (EEK_GTK_KEYBOARD(self));
+    return TRUE;
+}
+
+static gboolean
+eek_gtk_keyboard_real_motion_notify_event (GtkWidget      *self,
+                                           GdkEventMotion *event)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+    EekKey *key;
+
+    key = eek_renderer_find_key_by_position (priv->renderer,
+                                             (gdouble)event->x,
+                                             (gdouble)event->y);
+    set_dragged_key (EEK_GTK_KEYBOARD(self), key);
     return TRUE;
 }
 
@@ -331,6 +353,8 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
         eek_gtk_keyboard_real_button_press_event;
     widget_class->button_release_event =
         eek_gtk_keyboard_real_button_release_event;
+    widget_class->motion_notify_event =
+        eek_gtk_keyboard_real_motion_notify_event;
 
     gobject_class->set_property = eek_gtk_keyboard_set_property;
     gobject_class->dispose = eek_gtk_keyboard_dispose;
