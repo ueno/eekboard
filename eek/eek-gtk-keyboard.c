@@ -414,8 +414,16 @@ render_pressed_key (GtkWidget *widget,
     eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
     magnify_bounds (widget, &bounds, &large_bounds, 1.5);
 
+    cairo_save (cr);
+    cairo_translate (cr, bounds.x, bounds.y);
+    eek_renderer_render_key (priv->renderer, cr, key, 1.0, TRUE);
+    cairo_restore (cr);
+
+    cairo_save (cr);
     cairo_translate (cr, large_bounds.x, large_bounds.y);
     eek_renderer_render_key (priv->renderer, cr, key, 1.5, TRUE);
+    cairo_restore (cr);
+
     cairo_destroy (cr);
 }
 
@@ -457,6 +465,11 @@ on_key_released (EekKeyboard *keyboard,
                      large_bounds.y,
                      large_bounds.width,
                      large_bounds.height);
+    cairo_rectangle (cr,
+                     bounds.x,
+                     bounds.y,
+                     bounds.width,
+                     bounds.height);
     cairo_clip (cr);
 
     eek_renderer_render_keyboard (priv->renderer, cr);
