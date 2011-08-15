@@ -273,8 +273,7 @@
         <key id="keycode66" name="CAPS" column="0" row="2">
             <bounds>2.000000,53.000000,44.000000,24.000000</bounds>
             <oref>outline5</oref>
-            <symbols groups="1" levels="2">
-                <keysym keyval="65507">Control_L</keysym>
+            <symbols groups="1" levels="1">
                 <keysym keyval="65507">Control_L</keysym>
             </symbols>
         </key>
@@ -512,33 +511,29 @@
         <key id="keycode96" name="FK12" column="12" row="0">
             <bounds>366.000000,1.000000,24.000000,24.000000</bounds>
             <oref>outline1</oref>
-            <symbols groups="1" levels="2">
-                <keysym keyval="65481">F12</keysym>
-                <keysym keyval="269024780">(null)</keysym>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65363">Right</keysym>
             </symbols>
         </key>
         <key id="keycode95" name="FK11" column="11" row="0">
             <bounds>340.000000,1.000000,24.000000,24.000000</bounds>
             <oref>outline1</oref>
-            <symbols groups="1" levels="2">
-                <keysym keyval="65480">F11</keysym>
-                <keysym keyval="269024779">(null)</keysym>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65364">Down</keysym>
             </symbols>
         </key>
         <key id="keycode76" name="FK10" column="10" row="0">
             <bounds>314.000000,1.000000,24.000000,24.000000</bounds>
             <oref>outline1</oref>
-            <symbols groups="1" levels="2">
-                <keysym keyval="65479">F10</keysym>
-                <keysym keyval="269024778">(null)</keysym>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65362">Up</keysym>
             </symbols>
         </key>
         <key id="keycode75" name="FK09" column="9" row="0">
             <bounds>288.000000,1.000000,24.000000,24.000000</bounds>
             <oref>outline1</oref>
-            <symbols groups="1" levels="2">
-                <keysym keyval="65478">F9</keysym>
-                <keysym keyval="269024777">(null)</keysym>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65361">Left</keysym>
             </symbols>
         </key>
         <key id="keycode74" name="FK08" column="8" row="0">
@@ -578,7 +573,7 @@
             <oref>outline1</oref>
             <symbols groups="1" levels="2">
                 <keysym keyval="65473">F4</keysym>
-                <keysym keyval="269024772">(null)</keysym>
+                <keysym keyval="65481">F12</keysym>
             </symbols>
         </key>
         <key id="keycode69" name="FK03" column="3" row="0">
@@ -586,7 +581,7 @@
             <oref>outline1</oref>
             <symbols groups="1" levels="2">
                 <keysym keyval="65472">F3</keysym>
-                <keysym keyval="269024771">(null)</keysym>
+                <keysym keyval="65480">F11</keysym>
             </symbols>
         </key>
         <key id="keycode68" name="FK02" column="2" row="0">
@@ -594,7 +589,7 @@
             <oref>outline1</oref>
             <symbols groups="1" levels="2">
                 <keysym keyval="65471">F2</keysym>
-                <keysym keyval="269024770">(null)</keysym>
+                <keysym keyval="65479">F10</keysym>
             </symbols>
         </key>
         <key id="keycode67" name="FK01" column="1" row="0">
@@ -602,7 +597,7 @@
             <oref>outline1</oref>
             <symbols groups="1" levels="2">
                 <keysym keyval="65470">F1</keysym>
-                <keysym keyval="269024769">(null)</keysym>
+                <keysym keyval="65478">F9</keysym>
             </symbols>
         </key>
         <key id="keycode9" name="ESC" column="0" row="0">
