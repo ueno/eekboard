@@ -77,6 +77,7 @@ struct _EekboardClient {
     gulong key_released_handler;
 
     gboolean follows_focus;
+    guint hide_keyboard_timeout_id;
 
 #ifdef HAVE_ATSPI
     AtspiAccessible *acc;
@@ -296,6 +297,7 @@ eekboard_client_init (EekboardClient *client)
     client->xkl_state_changed_handler = 0;
 #if ENABLE_FOCUS_LISTENER
     client->follows_focus = FALSE;
+    client->hide_keyboard_timeout_id = 0;
 #endif  /* ENABLE_FOCUS_LISTENER */
 #ifdef HAVE_ATSPI
     client->keystroke_listener = NULL;
@@ -592,6 +594,14 @@ add_match_rule (GDBusConnection *connection,
   g_object_unref (message);
 }
 
+static gboolean
+on_hide_keyboard_timeout (EekboardClient *client)
+{
+    eekboard_context_hide_keyboard (client->context, NULL);
+    client->hide_keyboard_timeout_id = 0;
+    return FALSE;
+}
+
 static GDBusMessage *
 focus_message_filter (GDBusConnection *connection,
                       GDBusMessage    *message,
@@ -606,10 +616,19 @@ focus_message_filter (GDBusConnection *connection,
         const gchar *member = g_dbus_message_get_member (message);
 
         if (g_strcmp0 (member, "FocusIn") == 0) {
+            if (client->hide_keyboard_timeout_id > 0) {
+                g_source_remove (client->hide_keyboard_timeout_id);
+                client->hide_keyboard_timeout_id = 0;
+            }
             eekboard_context_show_keyboard (client->context, NULL);
         } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
                    g_strcmp0 (member, "FocusOut") == 0) {
-            eekboard_context_hide_keyboard (client->context, NULL);
+            gdouble delay = g_settings_get_double (client->settings,
+                                                   "auto-hide-delay");
+            client->hide_keyboard_timeout_id =
+                g_timeout_add ((guint)(delay * 1000),
+                               (GSourceFunc)on_hide_keyboard_timeout,
+                               client);
         }
     }
 

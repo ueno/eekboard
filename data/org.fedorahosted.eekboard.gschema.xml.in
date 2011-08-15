@@ -16,6 +16,11 @@
       <summary>Hide keyboard automatically when focus is out</summary>
       <description>If true, hide keyboard automatically when focus is out.</description>
     </key>
+    <key name="auto-hide-delay" type="d">
+      <default>0.5</default>
+      <summary>Delay seconds before hiding keyboard</summary>
+      <description>Delay seconds before hiding keyboard.  This is useful when focus listener is enabled.</description>
+    </key>
     <key name="start-fullscreen" type="b">
       <default>false</default>
       <summary>Switch to fullscreen mode when startup</summary>

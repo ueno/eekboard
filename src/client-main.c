@@ -192,7 +192,6 @@ main (int argc, char **argv)
     if (opt_focus) {
         gchar *focus_listener = g_settings_get_string (settings,
                                                        "focus-listener");
-        g_object_unref (settings);
 
         if (g_strcmp0 (focus_listener, "atspi") == 0)
             focus = FOCUS_ATSPI;
@@ -208,10 +207,11 @@ main (int argc, char **argv)
         
 #ifdef HAVE_ATSPI
     if (focus == FOCUS_ATSPI || opt_keystroke) {
-        GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
+        GSettings *desktop_settings =
+            g_settings_new ("org.gnome.desktop.interface");
         gboolean accessibility_enabled =
             g_settings_get_boolean (settings, "toolkit-accessibility");
-        g_object_unref (settings);
+        g_object_unref (desktop_settings);
 
         if (accessibility_enabled) {
             if (atspi_init () != 0) {
@@ -327,6 +327,7 @@ main (int argc, char **argv)
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
     g_object_unref (client);
+    g_object_unref (settings);
 
     return 0;
 }
