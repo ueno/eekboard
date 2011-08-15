@@ -201,18 +201,30 @@ eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
     return TRUE;
 }
 
-static gboolean
-eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
-                                            GdkEventButton *event)
+static void
+clear_dragged_key (EekGtkKeyboard *keyboard)
 {
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
 
     if (priv->dragged_key) {
         g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
         priv->dragged_key = NULL;
     }
+}
 
+static gboolean
+eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
+                                            GdkEventButton *event)
+{
+    clear_dragged_key (EEK_GTK_KEYBOARD(self));
     return TRUE;
+}
+
+static void
+eek_gtk_keyboard_real_unmap (GtkWidget *self)
+{
+    clear_dragged_key (EEK_GTK_KEYBOARD(self));
+    GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->unmap (self);
 }
 
 static void
@@ -308,6 +320,7 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
                               sizeof (EekGtkKeyboardPrivate));
 
     widget_class->realize = eek_gtk_keyboard_real_realize;
+    widget_class->unmap = eek_gtk_keyboard_real_unmap;
 #if GTK_CHECK_VERSION (2, 91, 2)
     widget_class->draw = eek_gtk_keyboard_real_draw;
 #else  /* GTK_CHECK_VERSION (2, 91, 2) */
