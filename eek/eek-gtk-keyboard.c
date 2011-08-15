@@ -419,7 +419,7 @@ magnify_bounds (GtkWidget *self,
     large_bounds->height = bounds->height * scale;
 
     x = bounds->x - (large_bounds->width - bounds->width) / 2;
-    y = bounds->y - large_bounds->height + bounds->height / 2;
+    y = bounds->y - large_bounds->height;
 
     large_bounds->x = CLAMP(x, 0, allocation.width - large_bounds->width);
     large_bounds->y = CLAMP(y, 0, allocation.height - large_bounds->height);
