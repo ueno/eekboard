@@ -120,6 +120,9 @@ struct _ServerContext {
     gulong key_released_handler;
     gulong notify_visible_handler;
 
+    EekKey *repeat_key;
+    guint repeat_timeout_id;
+
     GSettings *settings;
     ServerContextUIToolkitType ui_toolkit;
 };
@@ -584,6 +587,9 @@ server_context_init (ServerContext *context)
     context->key_pressed_handler = 0;
     context->key_released_handler = 0;
 
+    context->repeat_key = NULL;
+    context->repeat_timeout_id = 0;
+
     context->ui_toolkit = UI_TOOLKIT_DEFAULT;
 
     context->settings = g_settings_new ("org.fedorahosted.eekboard");
@@ -598,12 +604,56 @@ server_context_init (ServerContext *context)
                       context);
 }
 
+static gboolean on_repeat_timeout (ServerContext *context);
+
+static gboolean
+on_repeat_timeout (ServerContext *context)
+{
+    if (context->connection && context->enabled) {
+        guint keycode = eek_key_get_keycode (context->repeat_key);
+        GError *error;
+
+        error = NULL;
+        g_dbus_connection_emit_signal (context->connection,
+                                       NULL,
+                                       context->object_path,
+                                       SERVER_CONTEXT_INTERFACE,
+                                       "KeyPressed",
+                                       g_variant_new ("(u)", keycode),
+                                       &error);
+        g_assert_no_error (error);
+
+        error = NULL;
+        g_dbus_connection_emit_signal (context->connection,
+                                       NULL,
+                                       context->object_path,
+                                       SERVER_CONTEXT_INTERFACE,
+                                       "KeyReleased",
+                                       g_variant_new ("(u)", keycode),
+                                       &error);
+        g_assert_no_error (error);
+
+        gint delay = g_settings_get_int (context->settings, "repeat-interval");
+        context->repeat_timeout_id =
+            g_timeout_add (delay,
+                           (GSourceFunc)on_repeat_timeout,
+                           context);
+    }
+
+    return FALSE;
+}
+
 static void
 on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key,
                 gpointer     user_data)
 {
     ServerContext *context = user_data;
+
+    if (context->repeat_timeout_id) {
+        g_source_remove (context->repeat_timeout_id);
+        context->repeat_timeout_id = 0;
+    }
 
     if (context->connection && context->enabled) {
         guint keycode = eek_key_get_keycode (key);
@@ -618,6 +668,15 @@ on_key_pressed (EekKeyboard *keyboard,
                                        g_variant_new ("(u)", keycode),
                                        &error);
         g_assert_no_error (error);
+
+        if (g_settings_get_boolean (context->settings, "repeat")) {
+            gint delay = g_settings_get_int (context->settings, "repeat-delay");
+            context->repeat_key = key;
+            context->repeat_timeout_id =
+                g_timeout_add (delay,
+                               (GSourceFunc)on_repeat_timeout,
+                               context);
+        }
     }
 }
 
@@ -627,6 +686,11 @@ on_key_released (EekKeyboard *keyboard,
                  gpointer     user_data)
 {
     ServerContext *context = user_data;
+
+    if (context->repeat_timeout_id) {
+        g_source_remove (context->repeat_timeout_id);
+        context->repeat_timeout_id = 0;
+    }
 
     if (context->connection && context->enabled) {
         guint keycode = eek_key_get_keycode (key);

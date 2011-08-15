@@ -21,6 +21,21 @@
       <summary>Delay seconds before hiding keyboard</summary>
       <description>Delay seconds before hiding keyboard.  This is useful when focus listener is enabled.</description>
     </key>
+    <key type="b" name="repeat">
+      <default>true</default>
+      <summary>Key repeat</summary>
+      <description>Generate key-press/release event repeatedly while a key is held down</description>
+    </key>
+    <key type="i" name="repeat-interval">
+      <default>30</default>
+      <summary>Key repeat interval</summary>
+      <description>Delay between repeats in milliseconds.</description>
+    </key>
+    <key type="i" name="repeat-delay">
+      <default>500</default>
+      <summary>Initial key repeat delay</summary>
+      <description>Initial key repeat delay in milliseconds.</description>
+    </key>
     <key name="start-fullscreen" type="b">
       <default>false</default>
       <summary>Switch to fullscreen mode when startup</summary>
