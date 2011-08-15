@@ -379,15 +379,26 @@ color_from_gdk_color (GdkColor *gdk_color)
 }
 
 static void
-magnify_bounds (EekBounds *bounds, EekBounds *large_bounds, gdouble scale)
+magnify_bounds (GtkWidget *self,
+                EekBounds *bounds,
+                EekBounds *large_bounds,
+                gdouble    scale)
 {
+    GtkAllocation allocation;
+    gdouble x, y;
+
     g_assert (scale >= 1.0);
+
+    gtk_widget_get_allocation (self, &allocation);
 
     large_bounds->width = bounds->width * scale;
     large_bounds->height = bounds->height * scale;
 
-    large_bounds->x = bounds->x - (large_bounds->width - bounds->width) / 2;
-    large_bounds->y = bounds->y - (large_bounds->height - bounds->height) / 2;
+    x = bounds->x - (large_bounds->width - bounds->width) / 2;
+    y = bounds->y - large_bounds->height + bounds->height / 2;
+
+    large_bounds->x = CLAMP(x, 0, allocation.width - large_bounds->width);
+    large_bounds->y = CLAMP(y, 0, allocation.height - large_bounds->height);
 }
 
 static void
@@ -401,7 +412,7 @@ render_pressed_key (GtkWidget *widget,
     cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
 
     eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
-    magnify_bounds (&bounds, &large_bounds, 1.5);
+    magnify_bounds (widget, &bounds, &large_bounds, 1.5);
 
     cairo_translate (cr, large_bounds.x, large_bounds.y);
     eek_renderer_render_key (priv->renderer, cr, key, 1.5, TRUE);
@@ -440,7 +451,7 @@ on_key_released (EekKeyboard *keyboard,
     cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
 
     eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
-    magnify_bounds (&bounds, &large_bounds, 2.0);
+    magnify_bounds (widget, &bounds, &large_bounds, 2.0);
     cairo_rectangle (cr,
                      large_bounds.x,
                      large_bounds.y,
