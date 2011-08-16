@@ -87,7 +87,8 @@ static void eek_renderer_real_render_key_label (EekRenderer *self,
 static void invalidate                         (EekRenderer *renderer);
 static void render_key                         (EekRenderer *self,
                                                 cairo_t     *cr,
-                                                EekKey      *key);
+                                                EekKey      *key,
+                                                gboolean     active);
 static void on_symbol_index_changed            (EekKeyboard *keyboard,
                                                 gint         group,
                                                 gint         level,
@@ -117,7 +118,7 @@ create_keyboard_surface_key_callback (EekElement *element,
                      bounds.width * priv->scale,
                      bounds.height * priv->scale);
     cairo_clip (data->cr);
-    render_key (data->renderer, data->cr, EEK_KEY(element));
+    render_key (data->renderer, data->cr, EEK_KEY(element), FALSE);
 
     cairo_restore (data->cr);
 }
@@ -197,7 +198,8 @@ create_keyboard_surface (EekRenderer *renderer)
 static void
 render_key_outline (EekRenderer *renderer,
                     cairo_t     *cr,
-                    EekKey      *key)
+                    EekKey      *key,
+                    gboolean     active)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(renderer);
     EekOutline *outline;
@@ -215,10 +217,10 @@ render_key_outline (EekRenderer *renderer,
     if (oref == 0)
         return;
 
-    if (eek_key_is_pressed (key))
-        theme_node = g_object_get_data (G_OBJECT(key), "theme-node-pressed");
-    else
-        theme_node = g_object_get_data (G_OBJECT(key), "theme-node");
+    theme_node = g_object_get_data (G_OBJECT(key),
+                                    active ?
+                                    "theme-node-pressed" :
+                                    "theme-node");
     if (theme_node) {
         eek_theme_node_get_foreground_color (theme_node, &foreground);
         eek_theme_node_get_background_color (theme_node, &background);
@@ -428,7 +430,8 @@ calculate_font_size (EekRenderer                *renderer,
 static void
 render_key (EekRenderer *self,
             cairo_t     *cr,
-            EekKey      *key)
+            EekKey      *key,
+            gboolean     active)
 {
     EekRendererPrivate *priv = EEK_RENDERER_GET_PRIVATE(self);
     EekOutline *outline;
@@ -443,7 +446,7 @@ render_key (EekRenderer *self,
     if (oref == 0)
         return;
 
-    if (eek_key_is_pressed (key))
+    if (active)
         outline_surface_cache = priv->active_outline_surface_cache;
     else
         outline_surface_cache = priv->outline_surface_cache;
@@ -463,7 +466,11 @@ render_key (EekRenderer *self,
         cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 0.0);
         cairo_paint (cr);
 
-        eek_renderer_render_key_outline (self, cr, key, 1.0, 0);
+        cairo_save (cr);
+        eek_renderer_apply_transformation_for_key (self, cr, key, 1.0, FALSE);
+        render_key_outline (self, cr, key, active);
+        cairo_restore (cr);
+
         cairo_destroy (cr);
 
         g_hash_table_insert (outline_surface_cache,
@@ -625,7 +632,7 @@ eek_renderer_real_render_key_outline (EekRenderer *self,
 {
     cairo_save (cr);
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
-    render_key_outline (self, cr, key);
+    render_key_outline (self, cr, key, eek_key_is_pressed (key));
     cairo_restore (cr);
 }
 
@@ -638,7 +645,7 @@ eek_renderer_real_render_key (EekRenderer *self,
 {
     cairo_save (cr);
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
-    render_key (self, cr, key);
+    render_key (self, cr, key, eek_key_is_pressed (key));
     cairo_restore (cr);
 }
 

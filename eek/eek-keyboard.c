@@ -748,6 +748,21 @@ eek_keyboard_get_modifier_behavior (EekKeyboard *keyboard)
     return priv->modifier_behavior;
 }
 
+void
+eek_keyboard_set_modifiers (EekKeyboard    *keyboard,
+                            EekModifierType modifiers)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    priv->modifiers = modifiers;
+    set_level_from_modifiers (keyboard);
+
+    return priv->modifiers;
+}
+
 /**
  * eek_keyboard_get_modifiers:
  * @keyboard: an #EekKeyboard

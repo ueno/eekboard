@@ -122,6 +122,7 @@ struct _ServerContext {
 
     EekKey *repeat_key;
     guint repeat_timeout_id;
+    gboolean repeat_triggered;
 
     GSettings *settings;
     ServerContextUIToolkitType ui_toolkit;
@@ -606,8 +607,8 @@ server_context_init (ServerContext *context)
 
 static gboolean on_repeat_timeout (ServerContext *context);
 
-static gboolean
-on_repeat_timeout (ServerContext *context)
+static void
+emit_press_release_dbus_signal (ServerContext *context)
 {
     if (context->connection && context->enabled) {
         guint keycode = eek_key_get_keycode (context->repeat_key);
@@ -632,13 +633,42 @@ on_repeat_timeout (ServerContext *context)
                                        g_variant_new ("(u)", keycode),
                                        &error);
         g_assert_no_error (error);
+    }
+}
 
+static gboolean
+on_repeat_timeout (ServerContext *context)
+{
+    gint delay = g_settings_get_int (context->settings, "repeat-interval");
+
+    emit_press_release_dbus_signal (context);
+
+    context->repeat_timeout_id =
+        g_timeout_add (delay,
+                       (GSourceFunc)on_repeat_timeout,
+                       context);
+
+    return FALSE;
+}
+
+static gboolean
+on_repeat_timeout_init (ServerContext *context)
+{
+    emit_press_release_dbus_signal (context);
+
+    /* FIXME: clear modifiers for further key repeat; better not
+       depend on modifier behavior is LATCH */
+    eek_keyboard_set_modifiers (context->keyboard, 0);
+    
+    /* reschedule repeat timeout only when "repeat" option is set */
+    if (g_settings_get_boolean (context->settings, "repeat")) {
         gint delay = g_settings_get_int (context->settings, "repeat-interval");
         context->repeat_timeout_id =
             g_timeout_add (delay,
                            (GSourceFunc)on_repeat_timeout,
                            context);
-    }
+    } else
+        context->repeat_timeout_id = 0;
 
     return FALSE;
 }
@@ -649,35 +679,18 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer     user_data)
 {
     ServerContext *context = user_data;
+    gint delay = g_settings_get_int (context->settings, "repeat-delay");
 
     if (context->repeat_timeout_id) {
         g_source_remove (context->repeat_timeout_id);
         context->repeat_timeout_id = 0;
     }
 
-    if (context->connection && context->enabled) {
-        guint keycode = eek_key_get_keycode (key);
-        GError *error;
-
-        error = NULL;
-        g_dbus_connection_emit_signal (context->connection,
-                                       NULL,
-                                       context->object_path,
-                                       SERVER_CONTEXT_INTERFACE,
-                                       "KeyPressed",
-                                       g_variant_new ("(u)", keycode),
-                                       &error);
-        g_assert_no_error (error);
-
-        if (g_settings_get_boolean (context->settings, "repeat")) {
-            gint delay = g_settings_get_int (context->settings, "repeat-delay");
-            context->repeat_key = key;
-            context->repeat_timeout_id =
-                g_timeout_add (delay,
-                               (GSourceFunc)on_repeat_timeout,
-                               context);
-        }
-    }
+    context->repeat_key = key;
+    context->repeat_timeout_id =
+        g_timeout_add (delay,
+                       (GSourceFunc)on_repeat_timeout_init,
+                       context);
 }
 
 static void
@@ -686,15 +699,29 @@ on_key_released (EekKeyboard *keyboard,
                  gpointer     user_data)
 {
     ServerContext *context = user_data;
+    gboolean need_key_press = FALSE;
 
-    if (context->repeat_timeout_id) {
+    if (context->repeat_timeout_id > 0) {
         g_source_remove (context->repeat_timeout_id);
         context->repeat_timeout_id = 0;
+        need_key_press = TRUE;
     }
 
     if (context->connection && context->enabled) {
         guint keycode = eek_key_get_keycode (key);
         GError *error;
+
+        if (need_key_press) {
+            error = NULL;
+            g_dbus_connection_emit_signal (context->connection,
+                                           NULL,
+                                           context->object_path,
+                                           SERVER_CONTEXT_INTERFACE,
+                                           "KeyPressed",
+                                           g_variant_new ("(u)", keycode),
+                                           &error);
+            g_assert_no_error (error);
+        }
 
         error = NULL;
         g_dbus_connection_emit_signal (context->connection,

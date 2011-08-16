@@ -135,6 +135,9 @@ void                eek_keyboard_set_modifier_behavior
                                       EekModifierBehavior modifier_behavior);
 EekModifierBehavior eek_keyboard_get_modifier_behavior
                                      (EekKeyboard        *keyboard);
+void                eek_keyboard_set_modifiers
+                                     (EekKeyboard        *keyboard,
+                                      EekModifierType     modifiers);
 EekModifierType     eek_keyboard_get_modifiers
                                      (EekKeyboard        *keyboard);
 

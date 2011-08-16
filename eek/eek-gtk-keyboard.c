@@ -77,6 +77,8 @@ static void       on_symbol_index_changed (EekKeyboard *keyboard,
                                            gpointer     user_data);
 static void       render_pressed_key      (GtkWidget   *widget,
                                            EekKey      *key);
+static void       render_released_key     (GtkWidget   *widget,
+                                           EekKey      *key);
 
 static void
 eek_gtk_keyboard_real_realize (GtkWidget      *self)
@@ -181,19 +183,6 @@ eek_gtk_keyboard_real_size_allocate (GtkWidget     *self,
         size_allocate (self, allocation);
 }
 
-static void
-set_dragged_key (EekGtkKeyboard *keyboard, EekKey *key)
-{
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    if (priv->dragged_key && priv->dragged_key != key)
-        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
-    if (key && !eek_key_is_pressed (key)) {
-        priv->dragged_key = key;
-        g_signal_emit_by_name (key, "pressed", priv->keyboard);
-    }
-}
-
 static gboolean
 eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
                                           GdkEventButton *event)
@@ -204,27 +193,23 @@ eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
     key = eek_renderer_find_key_by_position (priv->renderer,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
-
-    set_dragged_key (EEK_GTK_KEYBOARD(self), key);
-    return TRUE;
-}
-
-static void
-clear_dragged_key (EekGtkKeyboard *keyboard)
-{
-    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    if (priv->dragged_key) {
-        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
-        priv->dragged_key = NULL;
+    if (key && key != priv->dragged_key) {
+        priv->dragged_key = key;
+        g_signal_emit_by_name (key, "pressed", priv->keyboard);
     }
+    return TRUE;
 }
 
 static gboolean
 eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
                                             GdkEventButton *event)
 {
-    clear_dragged_key (EEK_GTK_KEYBOARD(self));
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+
+    if (priv->dragged_key) {
+        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
+        priv->dragged_key = NULL;
+    }
     return TRUE;
 }
 
@@ -238,14 +223,24 @@ eek_gtk_keyboard_real_motion_notify_event (GtkWidget      *self,
     key = eek_renderer_find_key_by_position (priv->renderer,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
-    set_dragged_key (EEK_GTK_KEYBOARD(self), key);
+    if (key && key != priv->dragged_key) {
+        if (priv->dragged_key)
+            render_released_key (GTK_WIDGET(self), priv->dragged_key);
+        priv->dragged_key = key;
+        g_signal_emit_by_name (key, "pressed", priv->keyboard);
+    }
     return TRUE;
 }
 
 static void
 eek_gtk_keyboard_real_unmap (GtkWidget *self)
 {
-    clear_dragged_key (EEK_GTK_KEYBOARD(self));
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+
+    if (priv->dragged_key) {
+        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
+        priv->dragged_key = NULL;
+    }
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->unmap (self);
 }
 
@@ -452,6 +447,34 @@ render_pressed_key (GtkWidget *widget,
 }
 
 static void
+render_released_key (GtkWidget *widget,
+                     EekKey    *key)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+    EekBounds bounds, large_bounds;
+    cairo_t *cr;
+
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
+
+    eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
+    magnify_bounds (widget, &bounds, &large_bounds, 2.0);
+    cairo_rectangle (cr,
+                     large_bounds.x,
+                     large_bounds.y,
+                     large_bounds.width,
+                     large_bounds.height);
+    cairo_rectangle (cr,
+                     bounds.x,
+                     bounds.y,
+                     bounds.width,
+                     bounds.height);
+    cairo_clip (cr);
+
+    eek_renderer_render_keyboard (priv->renderer, cr);
+    cairo_destroy (cr);
+}
+
+static void
 on_key_pressed (EekKeyboard *keyboard,
                 EekKey      *key,
                 gpointer     user_data)
@@ -473,32 +496,12 @@ on_key_released (EekKeyboard *keyboard,
 {
     GtkWidget *widget = user_data;
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
-    cairo_t *cr;
-    EekBounds bounds, large_bounds;
 
     /* renderer may have not been set yet if the widget is a popup */
     if (!priv->renderer)
         return;
 
-    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
-
-    eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
-    magnify_bounds (widget, &bounds, &large_bounds, 2.0);
-    cairo_rectangle (cr,
-                     large_bounds.x,
-                     large_bounds.y,
-                     large_bounds.width,
-                     large_bounds.height);
-    cairo_rectangle (cr,
-                     bounds.x,
-                     bounds.y,
-                     bounds.width,
-                     bounds.height);
-    cairo_clip (cr);
-
-    eek_renderer_render_keyboard (priv->renderer, cr);
-    cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
-    cairo_destroy (cr);
+    render_released_key (widget, key);
 }
 
 static void
