@@ -612,7 +612,7 @@ focus_message_filter (GDBusConnection *connection,
 
     if (incoming &&
         g_strcmp0 (g_dbus_message_get_interface (message),
-                   IBUS_INTERFACE_INPUT_CONTEXT) == 0) {
+                   IBUS_INTERFACE_PANEL) == 0) {
         const gchar *member = g_dbus_message_get_member (message);
 
         if (g_strcmp0 (member, "FocusIn") == 0) {
@@ -644,11 +644,11 @@ _ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
     connection = ibus_bus_get_connection (bus);
     add_match_rule (connection,
                     "type='method_call',"
-                    "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
+                    "interface='" IBUS_INTERFACE_PANEL "',"
                     "member='FocusIn'");
     add_match_rule (connection,
                     "type='method_call',"
-                    "interface='" IBUS_INTERFACE_INPUT_CONTEXT "',"
+                    "interface='" IBUS_INTERFACE_PANEL "',"
                     "member='FocusOut'");
     client->ibus_focus_message_filter =
         g_dbus_connection_add_filter (connection,
