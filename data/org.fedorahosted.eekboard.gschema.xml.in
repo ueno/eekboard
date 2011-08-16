@@ -16,10 +16,10 @@
       <summary>Hide keyboard automatically when focus is out</summary>
       <description>If true, hide keyboard automatically when focus is out.</description>
     </key>
-    <key name="auto-hide-delay" type="d">
-      <default>0.5</default>
-      <summary>Delay seconds before hiding keyboard</summary>
-      <description>Delay seconds before hiding keyboard.  This is useful when focus listener is enabled.</description>
+    <key name="auto-hide-delay" type="i">
+      <default>500</default>
+      <summary>Delay before hiding keyboard</summary>
+      <description>Delay before hiding keyboard in milliseconds.  This is useful when focus listener is enabled.</description>
     </key>
     <key type="b" name="repeat">
       <default>true</default>
@@ -27,12 +27,12 @@
       <description>Generate key-press/release event repeatedly while a key is held down</description>
     </key>
     <key type="i" name="repeat-interval">
-      <default>30</default>
+      <default>100</default>
       <summary>Key repeat interval</summary>
       <description>Delay between repeats in milliseconds.</description>
     </key>
     <key type="i" name="repeat-delay">
-      <default>500</default>
+      <default>1000</default>
       <summary>Initial key repeat delay</summary>
       <description>Initial key repeat delay in milliseconds.</description>
     </key>
