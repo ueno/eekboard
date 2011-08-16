@@ -2,5 +2,5 @@
 Name=Eekboard
 Exec=eekboard -f
 Type=Application
-AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-keyboard-enabled
+#AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-keyboard-enabled
 X-GNOME-AutoRestart=true

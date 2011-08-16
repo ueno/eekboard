@@ -3,7 +3,7 @@ eekboard - an easy to use virtual keyboard toolkit -*- outline -*-
 eekboard is a virtual keyboard software package, including a set of
 tools to implement desktop virtual keyboards.
 
-* How to build
+* Building
 
 ** Dependencies
 
@@ -24,55 +24,12 @@ OPTIONAL: libXtst, at-spi2-core, IBus, Clutter, Clutter-Gtk, Python, Vala, gobje
   $ make
   $ sudo make install
 
-* Using command-line tools
-
-eekboard currently includes 3 tools to implement your own virtual
-keyboard.
-
-** eekboard-server
-
-eekboard-server is a D-Bus server which is responsible for drawing
-interactive on-screen keyboards.  Since it has a D-Bus service
-activation entry, you will not need to start it manually, but you can
-do that with:
-
-  $ eekboard-server &
-
-** eekboard
-
-eekboard is a client of eekboard-server.  It listens desktop events
-(keyboard change, focus in/out, and keystroke) and generates key
-events when some keys are pressed on the on-screen keyboard.  It can
-be started with:
+* Running
 
   $ eekboard
+  $ eekboard -f # show/hide automatically based on focus-in/focus-out events
 
-By default it renders current system keyboard layout.  To read custom
-keyboard layout, specify --keyboard option like:
+Even though eekboard -f watches a11y events by default, it currently
+works better with IBus.  To use IBus, do:
 
-  $ eekboard --keyboard /usr/share/eekboard/keyboards/us-qwerty.xml
-
-** eekboard-xml
-
-eekboard-xml is a tool to manipulate XML keyboard description read by
-eekboard if --keyboard option is specified.
-
-To dump the current system keyboard layout into an XML file:
-
-  $ eekboard-xml --dump > keyboard.xml
-
-You can display the dumped layout with:
-
-  $ eekboard-xml --load keyboard.xml
-
-* Using library
-
-eekboard currently includes two libraries.  One is to access
-eekboard-server via D-Bus and another is to manually render on-screen
-keyboards.
-
-For the former, see
-file:docs/reference/eekboard/html/index.html
-
-For the latter, see
-See file:docs/reference/eek/html/index.html
+  $ gsettings set org.fedorahosted.eekboard focus-listener 'ibus'
