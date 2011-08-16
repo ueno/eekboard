@@ -211,16 +211,7 @@ on_realize_set_dock (GtkWidget *widget,
     long vals[12];
 
     /* set window type to dock */
-    atoms[0] = XInternAtom (GDK_WINDOW_XDISPLAY (window),
-                            "_NET_WM_WINDOW_TYPE_DOCK", False);
-  
-    XChangeProperty (GDK_WINDOW_XDISPLAY (window),
-                     GDK_WINDOW_XID (window),
-                     XInternAtom (GDK_WINDOW_XDISPLAY (window),
-                                  "_NET_WM_WINDOW_TYPE", False),
-                     XA_ATOM, 32, PropModeReplace,
-                     (guchar *)atoms, 
-                     1);
+    gdk_window_set_type_hint (window, GDK_WINDOW_TYPE_HINT_DOCK);
   
     /* set bottom strut */
 #if GTK_CHECK_VERSION(3,0,0)

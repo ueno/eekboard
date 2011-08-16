@@ -130,7 +130,7 @@ AC_ARG_ENABLE(x-dock,
               enable_x_dock=yes)
 
 if test x$enable_x_dock = xyes; then
-  PKG_CHECK_MODULES([XDOCK], [x], , enable_x_dock=no)
+  PKG_CHECK_MODULES([XDOCK], [x11], , enable_x_dock=no)
   if test x$enable_x_dock = xyes; then
     AC_DEFINE([HAVE_XDOCK], [1], [Define if X dock is found])
   fi
