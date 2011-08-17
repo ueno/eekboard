@@ -102,6 +102,7 @@ int
 main (int argc, char **argv)
 {
     GOptionContext *context;
+    EekKeyboard *keyboard = NULL;
 
 #if HAVE_CLUTTER_GTK
     if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS) {
@@ -122,18 +123,59 @@ main (int argc, char **argv)
     g_option_context_parse (context, &argc, &argv, NULL);
     g_option_context_free (context);
 
+    if (!opt_list && !opt_load && !opt_dump) {
+        g_printerr ("Specify -l, -d, or -L option\n");
+        exit (1);
+    }
+
+    if (opt_list) {
+        GdkDisplay *display;
+        XklEngine *engine;
+        XklConfigRegistry *registry;
+        GSList *items = NULL, *head;
+
+        display = gdk_display_get_default ();
+        engine = xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY(display));
+        registry = xkl_config_registry_get_instance (engine);
+        xkl_config_registry_load (registry, FALSE);
+
+        if (g_strcmp0 (opt_list, "model") == 0) {
+            items = eekboard_xkl_list_models (registry);
+        } else if (g_strcmp0 (opt_list, "layout") == 0) {
+            items = eekboard_xkl_list_layouts (registry);
+        } else if (g_strcmp0 (opt_list, "option-group") == 0) {
+            items = eekboard_xkl_list_option_groups (registry);
+        } else if (g_str_has_prefix (opt_list, "layout-variant-")) {
+            items =  eekboard_xkl_list_layout_variants
+                (registry,
+                 opt_list + strlen ("layout-variant-"));
+        } else if (g_str_has_prefix (opt_list, "option-")) {
+            items = eekboard_xkl_list_options
+                (registry,
+                 opt_list + strlen ("option-"));
+        } else {
+            g_printerr ("Unknown list spec \"%s\"\n", opt_list);
+        }
+        g_slist_foreach (items, print_item, NULL);
+        for (head = items; head; head = g_slist_next (head))
+            g_object_unref (head->data);
+        g_slist_free (items);
+        g_object_unref (engine);
+        g_object_unref (registry);
+        exit (0);
+    }
+
+    if (!((opt_load != NULL) ^
+          (opt_model || opt_layouts || opt_options))) {
+        g_printerr ("Either -l or --model/layouts/options are needed\n");
+        exit (1);
+    }
+
     if (opt_load) {
         GFile *file;
         GFileInputStream *input;
         EekLayout *layout;
-        EekKeyboard *keyboard;
-        EekBounds bounds;
-        GtkWidget *widget, *window;
         GError *error;
-#if HAVE_CLUTTER_GTK
-        ClutterActor *stage, *actor;
-        ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
-#endif
 
         file = g_file_new_for_path (opt_load);
 
@@ -148,6 +190,55 @@ main (int argc, char **argv)
         g_object_unref (input);
         keyboard = eek_keyboard_new (layout, 640, 480);
         g_object_unref (layout);
+    } else if (opt_model || opt_layouts || opt_options) {
+        EekLayout *layout;
+
+        layout = eek_xkl_layout_new ();
+
+        if (opt_model)
+            eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
+
+        if (opt_layouts) {
+            XklConfigRec *rec;
+
+            rec = eekboard_xkl_config_rec_new_from_string (opt_layouts);
+            eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
+            eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
+            g_object_unref (rec);
+        }
+
+        if (opt_options) {
+            gchar **options;
+            options = g_strsplit (opt_options, ",", -1);
+            eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
+            g_strfreev (options);
+        }
+
+        keyboard = eek_keyboard_new (layout, 640, 480);
+        g_object_unref (layout);
+    }
+
+    if (!keyboard) {
+        g_printerr ("Can't create keyboard\n");
+        exit (1);
+    }
+
+    if (opt_dump) {
+        GString *output;
+
+        output = g_string_sized_new (BUFSIZE);
+        eek_keyboard_output (keyboard, output, 0);
+        g_object_unref (keyboard);
+        fwrite (output->str, sizeof(gchar), output->len, stdout);
+        g_string_free (output, TRUE);
+        exit (0);
+    } else {
+        EekBounds bounds;
+        GtkWidget *widget, *window;
+#if HAVE_CLUTTER_GTK
+        ClutterActor *stage, *actor;
+        ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
+#endif
 
         eek_element_set_group (EEK_ELEMENT(keyboard), opt_group);
         eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
@@ -195,78 +286,6 @@ main (int argc, char **argv)
 
         gtk_main ();
         exit (0);
-    } else if (opt_dump) {
-        GString *output;
-        EekLayout *layout;
-        EekKeyboard *keyboard;
-
-        output = g_string_sized_new (BUFSIZE);
-        layout = eek_xkl_layout_new ();
-
-        if (opt_model)
-            eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
-
-        if (opt_layouts) {
-            XklConfigRec *rec;
-
-            rec = eekboard_xkl_config_rec_new_from_string (opt_layouts);
-            eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
-            eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
-            g_object_unref (rec);
-        }
-
-        if (opt_options) {
-            gchar **options;
-            options = g_strsplit (opt_options, ",", -1);
-            eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
-            g_strfreev (options);
-        }
-
-        keyboard = eek_keyboard_new (layout, 640, 480);
-        g_object_unref (layout);
-        eek_keyboard_output (keyboard, output, 0);
-        g_object_unref (keyboard);
-        fwrite (output->str, sizeof(gchar), output->len, stdout);
-        g_string_free (output, TRUE);
-        exit (0);
-    } else if (opt_list) {
-        GdkDisplay *display;
-        XklEngine *engine;
-        XklConfigRegistry *registry;
-        GSList *items = NULL, *head;
-
-        display = gdk_display_get_default ();
-        engine = xkl_engine_get_instance (GDK_DISPLAY_XDISPLAY(display));
-        registry = xkl_config_registry_get_instance (engine);
-        xkl_config_registry_load (registry, FALSE);
-
-        if (g_strcmp0 (opt_list, "model") == 0) {
-            items = eekboard_xkl_list_models (registry);
-        } else if (g_strcmp0 (opt_list, "layout") == 0) {
-            items = eekboard_xkl_list_layouts (registry);
-        } else if (g_strcmp0 (opt_list, "option-group") == 0) {
-            items = eekboard_xkl_list_option_groups (registry);
-        } else if (g_str_has_prefix (opt_list, "layout-variant-")) {
-            items =  eekboard_xkl_list_layout_variants
-                (registry,
-                 opt_list + strlen ("layout-variant-"));
-        } else if (g_str_has_prefix (opt_list, "option-")) {
-            items = eekboard_xkl_list_options
-                (registry,
-                 opt_list + strlen ("option-"));
-        } else {
-            g_printerr ("Unknown list spec \"%s\"\n", opt_list);
-        }
-        g_slist_foreach (items, print_item, NULL);
-        for (head = items; head; head = g_slist_next (head))
-            g_object_unref (head->data);
-        g_slist_free (items);
-        g_object_unref (engine);
-        g_object_unref (registry);
-        exit (0);
-    } else {
-        g_printerr ("Specify -l, -d, or -L option\n");
-        exit (1);
     }
 
     return 0;
