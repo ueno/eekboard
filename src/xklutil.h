@@ -24,16 +24,16 @@
 
 G_BEGIN_DECLS
 
-XklConfigRec *eekboard_xkl_config_rec_new_from_string
-                                                (const gchar       *layouts);
+XklConfigRec *eekboard_xkl_config_rec_from_string (const gchar       *layouts);
+gchar        *eekboard_xkl_config_rec_to_string   (XklConfigRec      *rec);
 
-GSList       *eekboard_xkl_list_models          (XklConfigRegistry *registry);
-GSList       *eekboard_xkl_list_layouts         (XklConfigRegistry *registry);
-GSList       *eekboard_xkl_list_option_groups   (XklConfigRegistry *registry);
-GSList       *eekboard_xkl_list_layout_variants (XklConfigRegistry *registry,
-                                                 const gchar       *layout);
-GSList       *eekboard_xkl_list_options         (XklConfigRegistry *registry,
-                                                 const gchar       *group);
+GSList       *eekboard_xkl_list_models            (XklConfigRegistry *registry);
+GSList       *eekboard_xkl_list_layouts           (XklConfigRegistry *registry);
+GSList       *eekboard_xkl_list_option_groups     (XklConfigRegistry *registry);
+GSList       *eekboard_xkl_list_layout_variants   (XklConfigRegistry *registry,
+                                                   const gchar       *layout);
+GSList       *eekboard_xkl_list_options           (XklConfigRegistry *registry,
+                                                   const gchar       *group);
 
 G_END_DECLS
 #endif  /* EEKBOARD_XKLUTIL_H */

@@ -69,14 +69,19 @@ eekboard_server_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
 	$(GTK_CFLAGS) \
-	-DTHEMEDIR=\"$(pkgdatadir)/themes\"
+	$(LIBXKLAVIER_CFLAGS) \
+	-DTHEMEDIR=\"$(pkgdatadir)/themes\" \
+	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
 
 eekboard_server_LDADD = \
+	$(builddir)/libxklutil.la \
 	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-gtk.la \
+	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
-	$(GTK_LIBS)
+	$(GTK_LIBS) \
+	$(LIBXKLAVIER_LIBS)
 
 if ENABLE_CLUTTER_GTK
 eekboard_server_CFLAGS += $(CLUTTER_GTK_CFLAGS)

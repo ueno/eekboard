@@ -29,6 +29,7 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eekboard/eekboard-context.h"
+#include "eekboard/eekboard-marshalers.h"
 
 #define I_(string) g_intern_static_string (string)
 
@@ -36,7 +37,6 @@ enum {
     ENABLED,
     DISABLED,
     KEY_PRESSED,
-    KEY_RELEASED,
     DESTROYED,
     LAST_SIGNAL
 };
@@ -56,11 +56,10 @@ G_DEFINE_TYPE (EekboardContext, eekboard_context, G_TYPE_DBUS_PROXY);
 
 struct _EekboardContextPrivate
 {
-    EekKeyboard *keyboard;
-    GHashTable *keyboard_hash;
     gboolean keyboard_visible;
     gboolean enabled;
     gboolean fullscreen;
+    gint group;
 };
 
 static void
@@ -83,26 +82,40 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
     }
 
     if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
-        guint keycode;
-        g_variant_get (parameters, "(u)", &keycode);
-        g_signal_emit_by_name (context, "key-pressed", keycode);
-        return;
-    }
+        guint keycode = 0;
+        GVariant *variant = NULL;
+        guint modifiers = 0;
+        EekSerializable *serializable;
 
-    if (g_strcmp0 (signal_name, "KeyReleased") == 0) {
-        guint keycode;
-        g_variant_get (parameters, "(u)", &keycode);
-        g_signal_emit_by_name (context, "key-released", keycode);
+        g_variant_get (parameters, "(uvu)", &keycode, &variant, &modifiers);
+        g_return_if_fail (variant != NULL);
+
+        serializable = eek_serializable_deserialize (variant);
+        g_return_if_fail (EEK_IS_SYMBOL(serializable));
+        
+        g_signal_emit_by_name (context, "key-pressed",
+                               keycode, EEK_SYMBOL(serializable), modifiers);
         return;
     }
 
     if (g_strcmp0 (signal_name, "KeyboardVisibilityChanged") == 0) {
-        gboolean keyboard_visible;
+        gboolean keyboard_visible = FALSE;
 
         g_variant_get (parameters, "(b)", &keyboard_visible);
         if (keyboard_visible != priv->keyboard_visible) {
             priv->keyboard_visible = keyboard_visible;
             g_object_notify (G_OBJECT(context), "keyboard-visible");
+        }
+        return;
+    }
+
+    if (g_strcmp0 (signal_name, "GroupChanged") == 0) {
+        gint group = 0;
+
+        g_variant_get (parameters, "(i)", &group);
+        if (group != priv->group) {
+            priv->group = group;
+            //g_object_notify (G_OBJECT(context), "group");
         }
         return;
     }
@@ -126,32 +139,15 @@ eekboard_context_real_disabled (EekboardContext *self)
 
 static void
 eekboard_context_real_key_pressed (EekboardContext *self,
-                                   guint            keycode)
+                                   guint            keycode,
+                                   EekSymbol       *symbol,
+                                   guint            modifiers)
 {
-    EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE(self);
-    if (priv->keyboard) {
-        EekKey *key = eek_keyboard_find_key_by_keycode (priv->keyboard,
-                                                        keycode);
-        g_signal_emit_by_name (key, "pressed");
-    }
-}
-
-static void
-eekboard_context_real_key_released (EekboardContext *self,
-                                    guint             keycode)
-{
-    EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE(self);
-    if (priv->keyboard) {
-        EekKey *key = eek_keyboard_find_key_by_keycode (priv->keyboard,
-                                                        keycode);
-        g_signal_emit_by_name (key, "released");
-    }
 }
 
 static void
 eekboard_context_real_destroyed (EekboardContext *self)
 {
-    // g_debug ("eekboard_context_real_destroyed");
 }
 
 static void
@@ -174,22 +170,6 @@ eekboard_context_get_property (GObject    *object,
 }
 
 static void
-eekboard_context_dispose (GObject *self)
-{
-    EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE (self);
-    
-    if (priv->keyboard) {
-        g_object_unref (priv->keyboard);
-        priv->keyboard = NULL;
-    }
-
-    if (priv->keyboard_hash) {
-        g_hash_table_destroy (priv->keyboard_hash);
-        priv->keyboard_hash = NULL;
-    }
-}
-
-static void
 eekboard_context_class_init (EekboardContextClass *klass)
 {
     GDBusProxyClass *proxy_class = G_DBUS_PROXY_CLASS (klass);
@@ -202,13 +182,11 @@ eekboard_context_class_init (EekboardContextClass *klass)
     klass->enabled = eekboard_context_real_enabled;
     klass->disabled = eekboard_context_real_disabled;
     klass->key_pressed = eekboard_context_real_key_pressed;
-    klass->key_released = eekboard_context_real_key_released;
     klass->destroyed = eekboard_context_real_destroyed;
 
     proxy_class->g_signal = eekboard_context_real_g_signal;
 
     gobject_class->get_property = eekboard_context_get_property;
-    gobject_class->dispose = eekboard_context_dispose;
 
     /**
      * EekboardContext:keyboard-visible:
@@ -262,6 +240,8 @@ eekboard_context_class_init (EekboardContextClass *klass)
      * EekboardContext::key-pressed:
      * @context: an #EekboardContext
      * @keycode: keycode
+     * @symbol: an #EekSymbol
+     * @modifiers: modifiers
      *
      * The ::key-pressed signal is emitted each time a key is pressed
      * in @context.
@@ -273,29 +253,11 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       G_STRUCT_OFFSET(EekboardContextClass, key_pressed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__UINT,
+                      _eekboard_marshal_VOID__UINT_OBJECT_UINT,
                       G_TYPE_NONE,
-                      1,
-                      G_TYPE_UINT);
-
-    /**
-     * EekboardContext::key-released:
-     * @context: an #EekboardContext
-     * @keycode: keycode
-     *
-     * The ::key-released signal is emitted each time a key is released
-     * in @context.
-     */
-    signals[KEY_RELEASED] =
-        g_signal_new (I_("key-released"),
-                      G_TYPE_FROM_CLASS(gobject_class),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET(EekboardContextClass, key_released),
-                      NULL,
-                      NULL,
-                      g_cclosure_marshal_VOID__UINT,
-                      G_TYPE_NONE,
-                      1,
+                      3,
+                      G_TYPE_UINT,
+                      G_TYPE_OBJECT,
                       G_TYPE_UINT);
 
     /**
@@ -320,17 +282,7 @@ eekboard_context_class_init (EekboardContextClass *klass)
 static void
 eekboard_context_init (EekboardContext *self)
 {
-    EekboardContextPrivate *priv;
-
-    priv = self->priv = EEKBOARD_CONTEXT_GET_PRIVATE(self);
-    priv->keyboard = NULL;
-    priv->keyboard_visible = FALSE;
-    priv->enabled = FALSE;
-    priv->keyboard_hash =
-        g_hash_table_new_full (g_direct_hash,
-                               g_direct_equal,
-                               NULL,
-                               (GDestroyNotify)g_object_unref);
+    self->priv = EEKBOARD_CONTEXT_GET_PRIVATE(self);
 }
 
 static void
@@ -415,38 +367,29 @@ context_async_ready_callback (GObject      *source_object,
 /**
  * eekboard_context_add_keyboard:
  * @context: an #EekboardContext
- * @keyboard: an #EekKeyboard
+ * @keyboard: a string representing keyboard
  * @cancellable: a #GCancellable
  *
  * Register @keyboard in @context.
  */
 guint
 eekboard_context_add_keyboard (EekboardContext *context,
-                               EekKeyboard     *keyboard,
+                               const gchar     *keyboard,
                                GCancellable    *cancellable)
 {
-    EekboardContextPrivate *priv;
-    GVariant *variant, *result;
+    GVariant *result;
     GError *error;
 
     g_return_val_if_fail (EEKBOARD_IS_CONTEXT(context), 0);
-    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
-
-    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
-
-    variant = eek_serializable_serialize (EEK_SERIALIZABLE(keyboard));
-    if (g_variant_is_floating (variant))
-        g_variant_ref_sink (variant);
 
     error = NULL;
     result = g_dbus_proxy_call_sync (G_DBUS_PROXY(context),
                                      "AddKeyboard",
-                                     g_variant_new ("(v)", variant),
+                                     g_variant_new ("(s)", keyboard),
                                      G_DBUS_CALL_FLAGS_NONE,
                                      -1,
                                      cancellable,
                                      &error);
-    g_variant_unref (variant);
 
     if (result) {
         guint keyboard_id;
@@ -454,11 +397,6 @@ eekboard_context_add_keyboard (EekboardContext *context,
         g_variant_get (result, "(u)", &keyboard_id);
         g_variant_unref (result);
 
-        if (keyboard_id != 0) {
-            g_hash_table_insert (priv->keyboard_hash,
-                                 GUINT_TO_POINTER(keyboard_id),
-                                 g_object_ref (keyboard));
-        }
         return keyboard_id;
     }
     return 0;
@@ -477,19 +415,7 @@ eekboard_context_remove_keyboard (EekboardContext *context,
                                   guint            keyboard_id,
                                   GCancellable    *cancellable)
 {
-    EekboardContextPrivate *priv;
-    EekKeyboard *keyboard;
-
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
-
-    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
-
-    keyboard = g_hash_table_lookup (priv->keyboard_hash,
-                                    GUINT_TO_POINTER(keyboard_id));
-    if (keyboard == priv->keyboard)
-        priv->keyboard = NULL;
-
-    g_hash_table_remove (priv->keyboard_hash, GUINT_TO_POINTER(keyboard_id));
 
     g_dbus_proxy_call (G_DBUS_PROXY(context),
                        "RemoveKeyboard",
@@ -514,19 +440,7 @@ eekboard_context_set_keyboard (EekboardContext *context,
                                guint            keyboard_id,
                                GCancellable    *cancellable)
 {
-    EekboardContextPrivate *priv;
-    EekKeyboard *keyboard;
-
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
-
-    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
-
-    keyboard = g_hash_table_lookup (priv->keyboard_hash,
-                                    GUINT_TO_POINTER(keyboard_id));
-    if (!keyboard || keyboard == priv->keyboard)
-        return;
-
-    priv->keyboard = keyboard;
 
     g_dbus_proxy_call (G_DBUS_PROXY(context),
                        "SetKeyboard",
@@ -557,10 +471,7 @@ eekboard_context_set_group (EekboardContext *context,
 
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
 
-    g_return_if_fail (priv->keyboard);
-
-    if (eek_element_get_group (EEK_ELEMENT(priv->keyboard)) != group) {
-        eek_element_set_group (EEK_ELEMENT(priv->keyboard), group);
+    if (priv->group != group) {
         g_dbus_proxy_call (G_DBUS_PROXY(context),
                            "SetGroup",
                            g_variant_new ("(i)", group),
@@ -570,6 +481,25 @@ eekboard_context_set_group (EekboardContext *context,
                            context_async_ready_callback,
                            NULL);
     }
+}
+
+/**
+ * eekboard_context_get_group:
+ * @context: an #EekboardContext
+ * @cancellable: a #GCancellable
+ *
+ * Get the keyboard group of @context.
+ */
+gint
+eekboard_context_get_group (EekboardContext *context,
+                            GCancellable    *cancellable)
+{
+    EekboardContextPrivate *priv;
+
+    g_return_val_if_fail (EEKBOARD_IS_CONTEXT(context), 0);
+
+    priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
+    return priv->group;
 }
 
 /**

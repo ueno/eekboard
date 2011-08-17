@@ -68,7 +68,6 @@ struct _EekboardClient {
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
     gboolean use_xkl_layout;
-    gint group;
 
     gulong xkl_config_changed_handler;
     gulong xkl_state_changed_handler;
@@ -123,13 +122,7 @@ static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                                               void                   *user_data);
 #endif  /* HAVE_ATSPI */
 static gboolean        set_keyboard         (EekboardClient         *client,
-                                             gboolean                show,
-                                             EekLayout              *layout);
-static gboolean        set_keyboard_from_xkl (EekboardClient         *client,
-                                              gboolean                show,
-                                              const gchar            *model,
-                                              const gchar            *layouts,
-                                              const gchar            *options);
+                                             const gchar *keyboard);
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
                                             (EekboardClient         *client);
@@ -232,11 +225,6 @@ eekboard_client_dispose (GObject *object)
         client->eekboard = NULL;
     }
 
-    if (client->keyboard) {
-        g_object_unref (client->keyboard);
-        client->keyboard = NULL;
-    }
-
     if (client->settings) {
         g_object_unref (client->settings);
         client->settings = NULL;
@@ -286,50 +274,25 @@ eekboard_client_class_init (EekboardClientClass *klass)
 static void
 eekboard_client_init (EekboardClient *client)
 {
-    client->eekboard = NULL;
-    client->context = NULL;
-    client->xkl_engine = NULL;
-    client->xkl_config_registry = NULL;
-    client->keyboard = NULL;
-    client->key_pressed_handler = 0;
-    client->key_released_handler = 0;
-    client->xkl_config_changed_handler = 0;
-    client->xkl_state_changed_handler = 0;
-#if ENABLE_FOCUS_LISTENER
-    client->follows_focus = FALSE;
-    client->hide_keyboard_timeout_id = 0;
-#endif  /* ENABLE_FOCUS_LISTENER */
-#ifdef HAVE_ATSPI
-    client->keystroke_listener = NULL;
-#endif  /* HAVE_ATSPI */
-#ifdef HAVE_IBUS
-    client->ibus_bus = NULL;
-    client->ibus_focus_message_filter = 0;
-#endif  /* HAVE_IBUS */
     client->settings = g_settings_new ("org.fedorahosted.eekboard");
 }
 
-gboolean
-eekboard_client_load_keyboard_from_xkl (EekboardClient *client,
-                                        const gchar    *model,
-                                        const gchar    *layouts,
-                                        const gchar    *options)
-{
-    client->use_xkl_layout = TRUE;
-
 #if ENABLE_FOCUS_LISTENER
-    return set_keyboard_from_xkl (client,
-                                  !client->follows_focus,
-                                  model,
-                                  layouts,
-                                  options);
+#define IS_KEYBOARD_VISIBLE(client) (!client->follows_focus)
 #else  /* ENABLE_FOCUS_LISTENER */
-    return set_keyboard_from_xkl (client,
-                                  TRUE,
-                                  model,
-                                  layouts,
-                                  options);
+#define IS_KEYBOARD_VISIBLE(client) TRUE
 #endif  /* !ENABLE_FOCUS_LISTENER */
+
+gboolean
+eekboard_client_set_keyboard (EekboardClient *client,
+                              const gchar    *keyboard)
+{
+    gboolean retval;
+
+    retval = set_keyboard (client, keyboard);
+    if (IS_KEYBOARD_VISIBLE (client))
+        eekboard_context_show_keyboard (client->context, NULL);
+    return retval;
 }
 
 gboolean
@@ -550,24 +513,17 @@ keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                        void                   *user_data)
 {
     EekboardClient *client = user_data;
-    EekKey *key;
 
-    /* Ignore modifiers since the keystroke listener does not called
-       when a modifier key is released. */
-    key = eek_keyboard_find_key_by_keycode (client->keyboard,
-                                            stroke->hw_code);
-    if (key) {
-        EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-        if (symbol && eek_symbol_is_modifier (symbol))
-            return FALSE;
-    }
-
-    if (stroke->type == ATSPI_KEY_PRESSED) {
+    switch (stroke->type) {
+    case ATSPI_KEY_PRESSED:
         eekboard_context_press_key (client->context, stroke->hw_code, NULL);
-    } else {
+        break;
+    case ATSPI_KEY_RELEASED:
         eekboard_context_release_key (client->context, stroke->hw_code, NULL);
+        break;
+    default:
+        g_return_val_if_reached (FALSE);
     }
-
     return TRUE;
 }
 #endif  /* HAVE_ATSPI */
@@ -725,7 +681,19 @@ on_xkl_config_changed (XklEngine *xklengine,
     gboolean retval;
 
     if (client->use_xkl_layout) {
-        retval = set_keyboard_from_xkl (client, FALSE, NULL, NULL, NULL);
+        XklConfigRec *rec;
+        gchar *layout, *keyboard;
+
+        rec = xkl_config_rec_new ();
+        xkl_config_rec_get_from_server (rec, client->xkl_engine);
+        layout = eekboard_xkl_config_rec_to_string (rec);
+        g_object_unref (rec);
+
+        keyboard = g_strdup_printf ("xkl:%s", layout);
+        g_free (layout);
+        retval = set_keyboard (client, keyboard);
+        g_free (keyboard);
+
         g_return_if_fail (retval);
     }
 
@@ -736,86 +704,15 @@ on_xkl_config_changed (XklEngine *xklengine,
 
 static gboolean
 set_keyboard (EekboardClient *client,
-              gboolean        show,
-              EekLayout      *layout)
+              const gchar    *keyboard)
 {
-    gchar *keyboard_name;
-    static gint keyboard_serial = 0;
     guint keyboard_id;
 
-    client->keyboard = eek_keyboard_new (layout, CSW, CSH);
-    eek_keyboard_set_modifier_behavior (client->keyboard,
-                                        EEK_MODIFIER_BEHAVIOR_LATCH);
-
-    keyboard_name = g_strdup_printf ("keyboard%d", keyboard_serial++);
-    eek_element_set_name (EEK_ELEMENT(client->keyboard), keyboard_name);
-    g_free (keyboard_name);
-
     keyboard_id = eekboard_context_add_keyboard (client->context,
-                                                 client->keyboard,
+                                                 keyboard,
                                                  NULL);
     eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
-    if (show)
-        eekboard_context_show_keyboard (client->context, NULL);
     return TRUE;
-}
-
-static gboolean
-set_keyboard_from_xkl (EekboardClient *client,
-                       gboolean        show,
-                       const gchar    *model,
-                       const gchar    *layouts,
-                       const gchar    *options)
-{
-    EekLayout *layout;
-    gboolean retval;
-
-    if (client->keyboard)
-        g_object_unref (client->keyboard);
-    layout = eek_xkl_layout_new ();
-
-    if (model) {
-        if (!eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), model)) {
-            g_object_unref (layout);
-            return FALSE;
-        }
-    }
-
-    if (layouts) {
-        XklConfigRec *rec;
-
-        rec = eekboard_xkl_config_rec_new_from_string (layouts);
-        if (!eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout),
-                                         rec->layouts)) {
-            g_object_unref (rec);
-            g_object_unref (layout);
-            return FALSE;
-        }
-
-        if (!eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout),
-                                          rec->variants)) {
-            g_object_unref (rec);
-            g_object_unref (layout);
-            return FALSE;
-        }            
-
-        g_object_unref (rec);
-    }
-
-    if (options) {
-        gchar **_options;
-
-        _options = g_strsplit (options, ",", -1);
-        if (!eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), _options)) {
-            g_strfreev (_options);
-            g_object_unref (layout);
-            return FALSE;
-        }
-    }
-
-    retval = set_keyboard (client, show, layout);
-    g_object_unref (layout);
-    return retval;
 }
 
 static void
@@ -827,14 +724,9 @@ on_xkl_state_changed (XklEngine           *xklengine,
 {
     EekboardClient *client = user_data;
 
-    if (type == GROUP_CHANGED && client->keyboard) {
-        if (client->use_xkl_layout) {
-            gint group = eek_element_get_group (EEK_ELEMENT(client->keyboard));
-            if (group != value) {
-                eekboard_context_set_group (client->context, value, NULL);
-            }
-        }
-        client->group = value;
+    if (type == GROUP_CHANGED) {
+        if (client->use_xkl_layout)
+            eekboard_context_set_group (client->context, value, NULL);
     }
 }
 
@@ -918,7 +810,7 @@ get_keycode_from_gdk_keymap (EekboardClient *client,
         return FALSE;
 
     for (i = 0; i < n_keys; i++)
-        if (keys[i].group == client->group)
+        if (keys[i].group == eekboard_context_get_group (client->context))
             best_match = &keys[i];
 
     *keycode = best_match->keycode;
@@ -953,16 +845,14 @@ send_fake_modifier_key_event (EekboardClient *client,
 
 static void
 send_fake_key_event (EekboardClient *client,
-                     EekKey         *key,
+                     EekSymbol      *symbol,
+                     guint           keyboard_modifiers,
                      gboolean        is_pressed)
 {
     GdkDisplay *display = gdk_display_get_default ();
-    EekSymbol *symbol;
-    EekModifierType keyboard_modifiers, modifiers;
+    EekModifierType modifiers;
     guint xkeysym;
     guint keycode, replaced_keysym = 0;
-
-    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
 
     /* Ignore special keys and modifiers */
     if (!EEK_IS_KEYSYM(symbol) || eek_symbol_is_modifier (symbol))
@@ -982,10 +872,9 @@ send_fake_key_event (EekboardClient *client,
     }
     
     /* Clear level shift modifiers */
-    keyboard_modifiers = eek_keyboard_get_modifiers (client->keyboard);
     keyboard_modifiers &= ~EEK_SHIFT_MASK;
     keyboard_modifiers &= ~EEK_LOCK_MASK;
-    keyboard_modifiers &= ~eek_keyboard_get_alt_gr_mask (client->keyboard);
+    //keyboard_modifiers &= ~eek_keyboard_get_alt_gr_mask (client->keyboard);
 
     modifiers |= keyboard_modifiers;
 
@@ -1007,20 +896,15 @@ send_fake_key_event (EekboardClient *client,
 }
 
 static void
-on_key_pressed (EekKeyboard *keyboard,
-                EekKey      *key,
-                gpointer     user_data)
+on_key_pressed (EekboardContext *context,
+                guint            keycode,
+                EekSymbol       *symbol,
+                guint            modifiers,
+                gpointer         user_data)
 {
     EekboardClient *client = user_data;
-    send_fake_key_event (client, key, TRUE);
-    send_fake_key_event (client, key, FALSE);
-}
-
-static void
-on_key_released (EekKeyboard *keyboard,
-                 EekKey      *key,
-                 gpointer     user_data)
-{
+    send_fake_key_event (client, symbol, modifiers, TRUE);
+    send_fake_key_event (client, symbol, modifiers, FALSE);
 }
 
 static void
@@ -1074,11 +958,8 @@ eekboard_client_enable_xtest (EekboardClient *client)
     update_modifier_keycodes (client);
 
     client->key_pressed_handler =
-        g_signal_connect (client->keyboard, "key-pressed",
+        g_signal_connect (client->context, "key-pressed",
                           G_CALLBACK(on_key_pressed), client);
-    client->key_released_handler =
-        g_signal_connect (client->keyboard, "key-released",
-                          G_CALLBACK(on_key_released), client);
 
     return TRUE;
 }
@@ -1090,43 +971,5 @@ eekboard_client_disable_xtest (EekboardClient *client)
         XkbFreeKeyboard (client->xkb, 0, TRUE);	/* free_all = TRUE */
         client->xkb = NULL;
     }
-
-    if (g_signal_handler_is_connected (client->keyboard,
-                                       client->key_pressed_handler))
-        g_signal_handler_disconnect (client->keyboard,
-                                     client->key_pressed_handler);
-    if (g_signal_handler_is_connected (client->keyboard,
-                                       client->key_released_handler))
-        g_signal_handler_disconnect (client->keyboard,
-                                     client->key_released_handler);
 }
-
-gboolean
-eekboard_client_load_keyboard_from_file (EekboardClient *client,
-                                         const gchar    *keyboard_file)
-{
-    GFile *file;
-    GFileInputStream *input;
-    GError *error;
-    EekLayout *layout;
-    gboolean retval;
-
-    file = g_file_new_for_path (keyboard_file);
-
-    error = NULL;
-    input = g_file_read (file, NULL, &error);
-    if (input == NULL)
-        return FALSE;
-
-    layout = eek_xml_layout_new (G_INPUT_STREAM(input));
-    g_object_unref (input);
-#if ENABLE_FOCUS_LISTENER
-    retval = set_keyboard (client, !client->follows_focus, layout);
-#else  /* ENABLE_FOCUS_LISTENER */
-    retval = set_keyboard (client, TRUE, layout);
-#endif  /* !ENABLE_FOCUS_LISTENER */
-    g_object_unref (layout);
-    return retval;
-}
-
 #endif  /* HAVE_XTEST */

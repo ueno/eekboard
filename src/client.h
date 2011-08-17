@@ -33,15 +33,9 @@ typedef struct _EekboardClient EekboardClient;
 
 EekboardClient * eekboard_client_new           (GDBusConnection *connection);
 
-gboolean         eekboard_client_load_keyboard_from_file
+gboolean         eekboard_client_set_keyboard
                                                (EekboardClient  *client,
-                                                const gchar     *file);
-
-gboolean         eekboard_client_load_keyboard_from_xkl
-                                               (EekboardClient  *client,
-                                                const gchar     *model,
-                                                const gchar     *layouts,
-                                                const gchar     *options);
+                                                const gchar     *keyboard);
 
 gboolean         eekboard_client_enable_xkl    (EekboardClient  *client);
 void             eekboard_client_disable_xkl   (EekboardClient  *client);

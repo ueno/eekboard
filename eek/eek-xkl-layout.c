@@ -84,11 +84,6 @@ eek_xkl_layout_dispose (GObject *object)
         priv->config = NULL;
     }
 
-    if (priv->engine) {
-        g_object_unref (priv->engine);
-        priv->engine = NULL;
-    }
-
     G_OBJECT_CLASS (eek_xkl_layout_parent_class)->dispose (object);
 }
 

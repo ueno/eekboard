@@ -32,7 +32,7 @@
 #include "eekboard/eekboard.h"
 #include "client.h"
 
-#define DEFAULT_LAYOUT "us-qwerty"
+#define DEFAULT_KEYBOARD "us"
 
 static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
@@ -43,10 +43,6 @@ static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
 
 static gchar *opt_keyboard = NULL;
-
-static gchar *opt_model = NULL;
-static gchar *opt_layouts = NULL;
-static gchar *opt_options = NULL;
 
 static gboolean opt_fullscreen = FALSE;
 
@@ -69,12 +65,6 @@ static const GOptionEntry options[] = {
 #endif  /* HAVE_ATSPI */
     {"keyboard", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboard,
      N_("Specify keyboard")},
-    {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
-     N_("Specify model")},
-    {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
-     N_("Specify layouts")},
-    {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
-     N_("Specify options")},
     {"fullscreen", 'F', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
      N_("Create window in fullscreen mode")},
     {NULL}
@@ -137,6 +127,13 @@ main (int argc, char **argv)
         g_printerr ("Can't init GTK\n");
         exit (1);
     }
+
+    /* preload Eek* types for EekKeyboard deserialization */
+    g_type_class_ref (EEK_TYPE_KEYBOARD);
+    g_type_class_ref (EEK_TYPE_SECTION);
+    g_type_class_ref (EEK_TYPE_KEY);
+    g_type_class_ref (EEK_TYPE_SYMBOL);
+    g_type_class_ref (EEK_TYPE_KEYSYM);
 
     option_context = g_option_context_new ("eekboard-desktop-client");
     g_option_context_add_main_entries (option_context, options, NULL);
@@ -254,7 +251,7 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_IBUS */
 
-    if (opt_use_system_layout && (opt_keyboard || opt_model || opt_layouts || opt_options)) {
+    if (opt_use_system_layout && opt_keyboard) {
         g_printerr ("Can't use --use-system-layout option with keyboard options\n");
         g_object_unref (client);
         exit (1);
@@ -266,35 +263,6 @@ main (int argc, char **argv)
         exit (1);
     }
 
-    if (opt_use_system_layout || opt_model || opt_layouts || opt_options) {
-        if (!eekboard_client_load_keyboard_from_xkl (client,
-                                                     opt_model,
-                                                     opt_layouts,
-                                                     opt_options)) {
-            g_printerr ("Can't load keyboard from xklavier config\n");
-            g_object_unref (client);
-            exit (1);
-        }
-    } else {
-        gchar *file;
-        gboolean success;
-
-        if (!opt_keyboard)
-            opt_keyboard = DEFAULT_LAYOUT;
-
-        if (g_str_has_suffix (opt_keyboard, ".xml"))
-            file = g_strdup (opt_keyboard);
-        else
-            file = g_strdup_printf ("%s/%s.xml", KEYBOARDDIR, opt_keyboard);
-        success = eekboard_client_load_keyboard_from_file (client, file);
-        g_free (file);
-        if (!success) {
-            g_printerr ("Can't load keyboard file %s\n", file);
-            g_object_unref (client);
-            exit (1);
-        }
-    }
-
 #ifdef HAVE_XTEST
     if (!eekboard_client_enable_xtest (client)) {
         g_printerr ("Can't init xtest\n");
@@ -302,6 +270,8 @@ main (int argc, char **argv)
         exit (1);
     }
 #endif  /* HAVE_XTEST */
+
+    eekboard_client_set_keyboard (client, opt_keyboard ? opt_keyboard : DEFAULT_KEYBOARD);
 
     loop = g_main_loop_new (NULL, FALSE);
     if (!opt_focus) {

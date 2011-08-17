@@ -32,8 +32,10 @@
 #include "eek/eek-clutter.h"
 #endif
 #include "eek/eek-gtk.h"
+#include "eek/eek-xkl.h"
 
 #include "server-context.h"
+#include "xklutil.h"
 
 #define CSW 640
 #define CSH 480
@@ -51,7 +53,7 @@ static const gchar introspection_xml[] =
     "<node>"
     "  <interface name='org.fedorahosted.Eekboard.Context'>"
     "    <method name='AddKeyboard'>"
-    "      <arg direction='in' type='v' name='keyboard'/>"
+    "      <arg direction='in' type='s' name='keyboard'/>"
     "      <arg direction='out' type='u' name='keyboard_id'/>"
     "    </method>"
     "    <method name='RemoveKeyboard'>"
@@ -79,12 +81,17 @@ static const gchar introspection_xml[] =
     "    <signal name='Disabled'/>"
     "    <signal name='KeyPressed'>"
     "      <arg type='u' name='keycode'/>"
-    "    </signal>"
-    "    <signal name='KeyReleased'>"
-    "      <arg type='u' name='keycode'/>"
+    "      <arg type='v' name='symbol'/>"
+    "      <arg type='u' name='modifiers'/>"
     "    </signal>"
     "    <signal name='KeyboardVisibilityChanged'>"
     "      <arg type='b' name='visible'/>"
+    "    </signal>"
+    "    <signal name='KeyboardChanged'>"
+    "      <arg type='u' name='keyboard_id'/>"
+    "    </signal>"
+    "    <signal name='GroupChanged'>"
+    "      <arg type='i' name='group'/>"
     "    </signal>"
     "  </interface>"
     "</node>";
@@ -206,8 +213,7 @@ on_realize_set_dock (GtkWidget *widget,
 {
 #ifdef HAVE_XDOCK
     GdkWindow *window = gtk_widget_get_window (widget);
-    Atom atoms[2] = { None, None };
-    gint x, y, width, height, depth;
+    gint x, y, width, height;
     long vals[12];
 
     /* set window type to dock */
@@ -599,11 +605,16 @@ server_context_init (ServerContext *context)
 static gboolean on_repeat_timeout (ServerContext *context);
 
 static void
-emit_press_release_dbus_signal (ServerContext *context)
+emit_key_pressed_dbus_signal (ServerContext *context, EekKey *key)
 {
     if (context->connection && context->enabled) {
-        guint keycode = eek_key_get_keycode (context->repeat_key);
+        guint keycode = eek_key_get_keycode (key);
+        EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
+        guint modifiers = eek_keyboard_get_modifiers (context->keyboard);
+        GVariant *variant;
         GError *error;
+
+        variant = eek_serializable_serialize (EEK_SERIALIZABLE(symbol));
 
         error = NULL;
         g_dbus_connection_emit_signal (context->connection,
@@ -611,18 +622,12 @@ emit_press_release_dbus_signal (ServerContext *context)
                                        context->object_path,
                                        SERVER_CONTEXT_INTERFACE,
                                        "KeyPressed",
-                                       g_variant_new ("(u)", keycode),
+                                       g_variant_new ("(uvu)",
+                                                      keycode,
+                                                      variant,
+                                                      modifiers),
                                        &error);
-        g_assert_no_error (error);
-
-        error = NULL;
-        g_dbus_connection_emit_signal (context->connection,
-                                       NULL,
-                                       context->object_path,
-                                       SERVER_CONTEXT_INTERFACE,
-                                       "KeyReleased",
-                                       g_variant_new ("(u)", keycode),
-                                       &error);
+        g_variant_unref (variant);
         g_assert_no_error (error);
     }
 }
@@ -632,7 +637,7 @@ on_repeat_timeout (ServerContext *context)
 {
     gint delay = g_settings_get_int (context->settings, "repeat-interval");
 
-    emit_press_release_dbus_signal (context);
+    emit_key_pressed_dbus_signal (context, context->repeat_key);
 
     context->repeat_timeout_id =
         g_timeout_add (delay,
@@ -645,7 +650,7 @@ on_repeat_timeout (ServerContext *context)
 static gboolean
 on_repeat_timeout_init (ServerContext *context)
 {
-    emit_press_release_dbus_signal (context);
+    emit_key_pressed_dbus_signal (context, context->repeat_key);
 
     /* FIXME: clear modifiers for further key repeat; better not
        depend on modifier behavior is LATCH */
@@ -690,39 +695,13 @@ on_key_released (EekKeyboard *keyboard,
                  gpointer     user_data)
 {
     ServerContext *context = user_data;
-    gboolean need_key_press = FALSE;
 
     if (context->repeat_timeout_id > 0) {
         g_source_remove (context->repeat_timeout_id);
         context->repeat_timeout_id = 0;
-        need_key_press = TRUE;
-    }
 
-    if (context->connection && context->enabled) {
-        guint keycode = eek_key_get_keycode (key);
-        GError *error;
-
-        if (need_key_press) {
-            error = NULL;
-            g_dbus_connection_emit_signal (context->connection,
-                                           NULL,
-                                           context->object_path,
-                                           SERVER_CONTEXT_INTERFACE,
-                                           "KeyPressed",
-                                           g_variant_new ("(u)", keycode),
-                                           &error);
-            g_assert_no_error (error);
-        }
-
-        error = NULL;
-        g_dbus_connection_emit_signal (context->connection,
-                                       NULL,
-                                       context->object_path,
-                                       SERVER_CONTEXT_INTERFACE,
-                                       "KeyReleased",
-                                       g_variant_new ("(u)", keycode),
-                                       &error);
-        g_assert_no_error (error);
+        /* KeyPressed signal has not been emitted in repeat handler */
+        emit_key_pressed_dbus_signal (context, context->repeat_key);
     }
 }
 
@@ -739,6 +718,60 @@ disconnect_keyboard_signals (ServerContext *context)
                                      context->key_released_handler);
 }
 
+static EekKeyboard *
+create_keyboard_from_string (const gchar *string)
+{
+    EekKeyboard *keyboard;
+    EekLayout *layout;
+
+    if (g_str_has_prefix (string, "xkl:")) {
+        XklConfigRec *rec = eekboard_xkl_config_rec_from_string (&string[4]);
+
+        layout = eek_xkl_layout_new ();
+        if (!eek_xkl_layout_set_config (EEK_XKL_LAYOUT(layout), rec)) {
+            g_object_unref (layout);
+            return NULL;
+        }
+    } else {
+        gchar *path;
+        GFile *file;
+        GFileInputStream *input;
+        GError *error;
+
+        path = g_strdup_printf ("%s/%s.xml", KEYBOARDDIR, string);
+        file = g_file_new_for_path (path);
+        g_free (path);
+
+        error = NULL;
+        input = g_file_read (file, NULL, &error);
+        if (input == NULL) {
+            g_object_unref (file);
+            return NULL;
+        }
+        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
+    }
+    keyboard = eek_keyboard_new (layout, CSW, CSH);
+    g_object_unref (layout);
+
+    return keyboard;
+}
+
+static void
+emit_group_changed_signal (ServerContext *context, int group)
+{
+    GError *error;
+
+    error = NULL;
+    g_dbus_connection_emit_signal (context->connection,
+                                   NULL,
+                                   context->object_path,
+                                   SERVER_CONTEXT_INTERFACE,
+                                   "GroupChanged",
+                                   g_variant_new ("(i)", group),
+                                   &error);
+    g_assert_no_error (error);
+}
+
 static void
 handle_method_call (GDBusConnection       *connection,
                     const gchar           *sender,
@@ -752,26 +785,27 @@ handle_method_call (GDBusConnection       *connection,
     ServerContext *context = user_data;
 
     if (g_strcmp0 (method_name, "AddKeyboard") == 0) {
-        GVariant *variant;
-        EekSerializable *serializable;
+        const gchar *name;
         static guint keyboard_id = 0;
+        EekKeyboard *keyboard;
 
-        g_variant_get (parameters, "(v)", &variant);
+        g_variant_get (parameters, "(&s)", &name);
+        keyboard = create_keyboard_from_string (name);
 
-        serializable = eek_serializable_deserialize (variant);
-        if (!EEK_IS_KEYBOARD(serializable)) {
+        if (keyboard == NULL) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
-                                                   "not a keyboard");
+                                                   "can't create a keyboard");
             return;
         }
-        eek_keyboard_set_modifier_behavior (EEK_KEYBOARD(serializable),
+
+        eek_keyboard_set_modifier_behavior (keyboard,
                                             EEK_MODIFIER_BEHAVIOR_LATCH);
 
         g_hash_table_insert (context->keyboard_hash,
                              GUINT_TO_POINTER(++keyboard_id),
-                             serializable);
+                             keyboard);
         g_dbus_method_invocation_return_value (invocation,
                                                g_variant_new ("(u)",
                                                               keyboard_id));
@@ -802,6 +836,7 @@ handle_method_call (GDBusConnection       *connection,
     if (g_strcmp0 (method_name, "SetKeyboard") == 0) {
         EekKeyboard *keyboard;
         guint keyboard_id;
+        gint group;
 
         g_variant_get (parameters, "(u)", &keyboard_id);
 
@@ -847,6 +882,10 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
+
+        eek_element_get_group (EEK_ELEMENT(context->keyboard));
+        emit_group_changed_signal (context, group);
+
         return;
     }
 
@@ -895,6 +934,9 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
+
+        emit_group_changed_signal (context, group);
+
         return;
     }
 

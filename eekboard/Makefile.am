@@ -21,12 +21,24 @@ lib_LTLIBRARIES = libeekboard.la
 libeekboard_headers =					\
 	eekboard.h					\
 	eekboard-eekboard.h				\
-	eekboard-context.h			
+	eekboard-context.h
+libeekboard_private_headers = \
+	eekboard-marshalers.h
 libeekboard_sources =				\
 	eekboard-eekboard.c			\
 	eekboard-context.c
 
-libeekboard_la_SOURCES = $(libeekboard_sources)
+libeekboard_marshalers_sources =		\
+	eekboard-marshalers.c		\
+	eekboard-marshalers.h
+
+BUILT_SOURCES = \
+	$(libeekboard_marshalers_sources)
+
+libeekboard_la_SOURCES = \
+	$(libeekboard_sources) \
+	eekboard-marshalers.c
+
 libeekboard_la_CFLAGS = -DEEKBOARD_COMPILATION=1 -I$(top_srcdir) $(GIO2_CFLAGS)
 libeekboard_la_LIBADD = $(top_builddir)/eek/libeek.la $(GIO2_LIBS)
 
@@ -37,9 +49,22 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =				\
 	eekboard-$(EEK_API_VERSION).pc
 DISTCLEANFILES =				\
+	$(BUILT_SOURCES)			\
 	$(pkgconfig_DATA)
 
 CLEANFILES =
+
+EXTRA_DIST = eekboard-marshalers.list
+
+# gen marshal
+eekboard-marshalers.h: eekboard-marshalers.list
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=_eekboard_marshal $(srcdir)/eekboard-marshalers.list --header --internal > $@.tmp && \
+	mv $@.tmp $@
+
+eekboard-marshalers.c: eekboard-marshalers.list eekboard-marshalers.h
+	$(AM_V_GEN) (echo "#include \"eekboard-marshalers.h\""; \
+	$(GLIB_GENMARSHAL) --prefix=_eekboard_marshal $(srcdir)/eekboard-marshalers.list --body --internal) > $@.tmp && \
+	mv $@.tmp $@
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =

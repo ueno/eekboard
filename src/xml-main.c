@@ -201,7 +201,7 @@ main (int argc, char **argv)
         if (opt_layouts) {
             XklConfigRec *rec;
 
-            rec = eekboard_xkl_config_rec_new_from_string (opt_layouts);
+            rec = eekboard_xkl_config_rec_from_string (opt_layouts);
             eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
             eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
             g_object_unref (rec);

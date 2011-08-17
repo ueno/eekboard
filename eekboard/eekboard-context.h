@@ -57,7 +57,6 @@ struct _EekboardContext {
  * @enabled: class handler for #EekboardContext::enabled signal
  * @disabled: class handler for #EekboardContext::disabled signal
  * @key_pressed: class handler for #EekboardContext::key-pressed signal
- * @key_released: class handler for #EekboardContext::key-released signal
  */
 struct _EekboardContextClass {
     /*< private >*/
@@ -68,14 +67,14 @@ struct _EekboardContextClass {
     void (*enabled)      (EekboardContext *self);
     void (*disabled)     (EekboardContext *self);
     void (*key_pressed)  (EekboardContext *self,
-                          guint            keycode);
-    void (*key_released) (EekboardContext *self,
-                          guint            keycode);
+                          guint            keycode,
+                          EekSymbol       *symbol,
+                          guint            modifiers);
     void (*destroyed)    (EekboardContext *self);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[23];
+    gpointer pdummy[24];
 };
 
 GType            eekboard_context_get_type       (void) G_GNUC_CONST;
@@ -84,7 +83,7 @@ EekboardContext *eekboard_context_new            (GDBusConnection *connection,
                                                   const gchar     *object_path,
                                                   GCancellable    *cancellable);
 guint            eekboard_context_add_keyboard   (EekboardContext *context,
-                                                  EekKeyboard     *keyboard,
+                                                  const gchar     *keyboard,
                                                   GCancellable    *cancellable);
 void             eekboard_context_remove_keyboard (EekboardContext *context,
                                                    guint            keyboard_id,

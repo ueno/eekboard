@@ -21,13 +21,13 @@
 #include "xklutil.h"
 
 XklConfigRec *
-eekboard_xkl_config_rec_new_from_string (const gchar *layouts)
+eekboard_xkl_config_rec_from_string (const gchar *layouts)
 {
     XklConfigRec *rec;
     gchar **l, **v;
     gint i;
 
-    l = g_strsplit (layouts, ",", -1);
+    l = g_strsplit (layouts, ":", -1);
     v = g_strdupv (l);
     for (i = 0; l[i]; i++) {
         gchar *layout = l[i], *variant = v[i],
@@ -48,6 +48,36 @@ eekboard_xkl_config_rec_new_from_string (const gchar *layouts)
     rec->variants = v;
 
     return rec;
+}
+
+gchar *
+eekboard_xkl_config_rec_to_string (XklConfigRec *rec)
+{
+    gchar **strv, **sp, **lp, **vp, *p;
+    gint n_layouts;
+    GString *str;
+
+    n_layouts = g_strv_length (rec->layouts);
+    strv = g_malloc0_n (n_layouts + 2, sizeof (gchar *));
+    for (sp = strv, lp = rec->layouts, vp = rec->variants; *lp; sp++, lp++) {
+        if (*vp != NULL)
+            *sp = g_strdup_printf ("%s(%s)", *lp, *vp++);
+        else
+            *sp = g_strdup_printf ("%s", *lp);
+    }
+
+    str = g_string_new ("");
+    p = g_strjoinv (":", strv);
+    g_strfreev (strv);
+    g_string_append (str, p);
+    g_free (p);
+
+    g_string_append_c (str, ':');
+    p = g_strjoinv ("+", rec->options);
+    g_string_append (str, p);
+    g_free (p);
+
+    return g_string_free (str,FALSE);
 }
 
 static XklConfigItem *
