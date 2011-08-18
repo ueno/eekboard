@@ -213,7 +213,7 @@ on_realize_set_dock (GtkWidget *widget,
 {
 #ifdef HAVE_XDOCK
     GdkWindow *window = gtk_widget_get_window (widget);
-    gint x, y, width, height;
+    gint x, y, width, height, depth;
     long vals[12];
 
     /* set window type to dock */
