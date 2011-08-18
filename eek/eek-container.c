@@ -53,7 +53,8 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (EekContainer, eek_container, EEK_TYPE_ELEMENT,
 
 struct _EekContainerPrivate
 {
-    GList *children;
+    GList *head;
+    GList *last;
 };
 
 static EekSerializableIface *eek_container_parent_serializable_iface;
@@ -69,7 +70,7 @@ eek_container_real_serialize (EekSerializable *self,
     eek_container_parent_serializable_iface->serialize (self, builder);
 
     g_variant_builder_init (&array, G_VARIANT_TYPE("av"));
-    for (head = priv->children; head; head = g_list_next (head)) {
+    for (head = priv->head; head; head = g_list_next (head)) {
         GVariant *variant =
             eek_serializable_serialize (EEK_SERIALIZABLE(head->data));
         g_variant_builder_add (&array, "v", variant);
@@ -119,7 +120,12 @@ eek_container_real_add_child (EekContainer *self,
     g_return_if_fail (EEK_IS_ELEMENT(child));
     g_object_ref (child);
 
-    priv->children = g_list_append (priv->children, child);
+    if (!priv->head) {
+        priv->head = priv->last = g_list_prepend (priv->head, child);
+    } else {
+        priv->last->next = g_list_prepend (priv->last->next, child);
+        priv->last = priv->last->next;
+    }
     eek_element_set_parent (child, EEK_ELEMENT(self));
     g_signal_emit_by_name (self, "child-added", child);
 }
@@ -132,10 +138,12 @@ eek_container_real_remove_child (EekContainer *self,
     GList *head;
 
     g_return_if_fail (EEK_IS_ELEMENT(child));
-    head = g_list_find (priv->children, child);
+    head = g_list_find (priv->head, child);
     g_return_if_fail (head);
     g_object_unref (child);
-    priv->children = g_list_remove_link (priv->children, head);
+    if (head == priv->last)
+        priv->last = g_list_previous (priv->last);
+    priv->head = g_list_remove_link (priv->head, head);
     eek_element_set_parent (child, NULL);
     g_signal_emit_by_name (self, "child-removed", child);
 }
@@ -148,7 +156,7 @@ eek_container_real_foreach_child (EekContainer *self,
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
     GList *head;
 
-    for (head = priv->children; head; head = g_list_next (head))
+    for (head = priv->head; head; head = g_list_next (head))
         (*callback) (EEK_ELEMENT(head->data), user_data);
 }
 
@@ -160,7 +168,7 @@ eek_container_real_find (EekContainer *self,
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
     GList *head;
 
-    head = g_list_find_custom (priv->children, user_data, (GCompareFunc)func);
+    head = g_list_find_custom (priv->head, user_data, (GCompareFunc)func);
     if (head)
         return head->data;
     return NULL;
@@ -172,9 +180,9 @@ eek_container_dispose (GObject *object)
     EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(object);
     GList *head;
 
-    for (head = priv->children; head; head = priv->children) {
+    for (head = priv->head; head; head = priv->head) {
         g_object_unref (head->data);
-        priv->children = g_list_next (head);
+        priv->head = g_list_next (head);
         g_list_free1 (head);
     }
     G_OBJECT_CLASS(eek_container_parent_class)->dispose (object);
