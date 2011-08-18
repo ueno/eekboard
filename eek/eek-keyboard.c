@@ -35,7 +35,6 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-symbol.h"
-#include "eek-serializable.h"
 #include "eek-enumtypes.h"
 
 enum {
@@ -53,11 +52,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-static void eek_serializable_iface_init (EekSerializableIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (EekKeyboard, eek_keyboard, EEK_TYPE_CONTAINER,
-                         G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
-                                                eek_serializable_iface_init));
+G_DEFINE_TYPE (EekKeyboard, eek_keyboard, EEK_TYPE_CONTAINER);
 
 #define EEK_KEYBOARD_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_KEYBOARD, EekKeyboardPrivate))
@@ -74,120 +69,6 @@ struct _EekKeyboardPrivate
     EekModifierType num_lock_mask;
     EekModifierType alt_gr_mask;
 };
-
-static EekSerializableIface *eek_keyboard_parent_serializable_iface;
-
-static GVariant *_g_variant_new_outline (EekOutline *outline);
-static EekOutline *_g_variant_get_outline (GVariant *variant);
-
-static GVariant *
-_g_variant_new_outline (EekOutline *outline)
-{
-    GVariantBuilder builder, array;
-    gint i;
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("(div)"));
-    g_variant_builder_add (&builder, "d", outline->corner_radius);
-    g_variant_builder_add (&builder, "i", outline->num_points);
-    g_variant_builder_init (&array, G_VARIANT_TYPE ("a(dd)"));
-    for (i = 0; i < outline->num_points; i++)
-        g_variant_builder_add (&array,
-                               "(dd)",
-                               outline->points[i].x,
-                               outline->points[i].y);
-    g_variant_builder_add (&builder, "v", g_variant_builder_end (&array));
-    return g_variant_builder_end (&builder);
-}
-
-static EekOutline *
-_g_variant_get_outline (GVariant *variant)
-{
-    EekOutline *outline;
-    GVariant *array;
-    GVariantIter iter;
-    gdouble x, y;
-    gint i;
-
-    outline = g_slice_new0 (EekOutline);
-
-    g_variant_get_child (variant, 0, "d", &outline->corner_radius);
-    g_variant_get_child (variant, 1, "i", &outline->num_points);
-
-    outline->points = g_slice_alloc0 (sizeof (EekPoint) * outline->num_points);
-
-    g_variant_get_child (variant, 2, "v", &array);
-    g_variant_iter_init (&iter, array);
-    for (i = 0; i < outline->num_points; i++) {
-        if (!g_variant_iter_next (&iter, "(dd)", &x, &y)) {
-            eek_outline_free (outline);
-            g_return_val_if_reached (NULL);
-        }
-        outline->points[i].x = x;
-        outline->points[i].y = y;
-    }
-
-    return outline;
-}
-
-static void
-eek_keyboard_real_serialize (EekSerializable *self,
-                             GVariantBuilder *builder)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    GVariantBuilder array;
-    guint i;
-
-    eek_keyboard_parent_serializable_iface->serialize (self, builder);
-
-    g_variant_builder_init (&array, G_VARIANT_TYPE ("av"));
-    for (i = 0; i < priv->outline_array->len; i++) {
-        EekOutline *outline =
-            eek_keyboard_get_outline (EEK_KEYBOARD(self), i + 1);
-        g_variant_builder_add (&array, "v",
-                               _g_variant_new_outline (outline));
-    }
-    g_variant_builder_add (builder, "v", g_variant_builder_end (&array));
-    g_variant_builder_add (builder, "u", priv->num_lock_mask);
-    g_variant_builder_add (builder, "u", priv->alt_gr_mask);
-}
-
-static gsize
-eek_keyboard_real_deserialize (EekSerializable *self,
-                               GVariant        *variant,
-                               gsize            index)
-{
-    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    GVariant *array, *outline;
-    GVariantIter iter;
-
-    index = eek_keyboard_parent_serializable_iface->deserialize (self,
-                                                                 variant,
-                                                                 index);
-
-    g_variant_get_child (variant, index++, "v", &array);
-
-    g_variant_iter_init (&iter, array);
-    while (g_variant_iter_next (&iter, "v", &outline)) {
-        EekOutline *_outline = _g_variant_get_outline (outline);
-        g_array_append_val (priv->outline_array, *_outline);
-        /* don't use eek_outline_free here, so as to keep _outline->points */
-        g_slice_free (EekOutline, _outline);
-    }
-    g_variant_get_child (variant, index++, "u", &priv->num_lock_mask);
-    g_variant_get_child (variant, index++, "u", &priv->alt_gr_mask);
-
-    return index;
-}
-
-static void
-eek_serializable_iface_init (EekSerializableIface *iface)
-{
-    eek_keyboard_parent_serializable_iface =
-        g_type_interface_peek_parent (iface);
-
-    iface->serialize = eek_keyboard_real_serialize;
-    iface->deserialize = eek_keyboard_real_deserialize;
-}
 
 static void
 on_key_pressed (EekSection  *section,
