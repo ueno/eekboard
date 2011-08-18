@@ -130,8 +130,8 @@ libeek_gtk_sources =				\
 	$(srcdir)/eek-gtk-renderer.c
 
 libeek_gtk_la_SOURCES = $(libeek_gtk_sources)
-libeek_gtk_la_CFLAGS = -DEEK_COMPILATION=1 $(GTK_CFLAGS)
-libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS)
+libeek_gtk_la_CFLAGS = -DEEK_COMPILATION=1 $(GTK_CFLAGS) $(LIBCANBERRA_CFLAGS)
+libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS) $(LIBCANBERRA_LIBS)
 
 libeek_xkb_public_headers =			\
 	$(srcdir)/eek-xkb-layout.h		\

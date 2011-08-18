@@ -27,6 +27,10 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
+#ifdef HAVE_LIBCANBERRA
+#include <canberra-gtk.h>
+#endif
+
 #include <string.h>
 
 #include "eek-gtk-keyboard.h"
@@ -370,9 +374,6 @@ eek_gtk_keyboard_init (EekGtkKeyboard *self)
     EekGtkKeyboardPrivate *priv;
 
     priv = self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
-    priv->renderer = NULL;
-    priv->keyboard = NULL;
-    priv->dragged_key = NULL;
 }
 
 /**
@@ -487,6 +488,14 @@ on_key_pressed (EekKeyboard *keyboard,
         return;
 
     render_pressed_key (widget, key);
+
+#if HAVE_LIBCANBERRA
+    ca_gtk_play_for_widget (widget, 0,
+                            CA_PROP_EVENT_ID, "button-pressed",
+                            CA_PROP_EVENT_DESCRIPTION, "virtual key pressed",
+                            CA_PROP_APPLICATION_ID, "org.fedorahosted.Eekboard",
+                            NULL);
+#endif
 }
 
 static void
@@ -502,6 +511,14 @@ on_key_released (EekKeyboard *keyboard,
         return;
 
     render_released_key (widget, key);
+
+#if HAVE_LIBCANBERRA
+    ca_gtk_play_for_widget (widget, 0,
+                            CA_PROP_EVENT_ID, "button-released",
+                            CA_PROP_EVENT_DESCRIPTION, "virtual key pressed",
+                            CA_PROP_APPLICATION_ID, "org.fedorahosted.Eekboard",
+                            NULL);
+#endif
 }
 
 static void

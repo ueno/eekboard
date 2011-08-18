@@ -288,6 +288,23 @@ if test x$enable_clutter = xyes; then
 fi
 AM_CONDITIONAL(ENABLE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
 
+dnl libcanberra
+AC_MSG_CHECKING([whether you enable libcanberra])
+AC_ARG_ENABLE(libcanberra,
+              AS_HELP_STRING([--enable-libcanberra=no/yes],
+                             [Enable clutter user interface default=no]),
+              enable_libcanberra=$enableval,
+              enable_libcanberra=yes)
+
+if test x$enable_libcanberra = xyes; then
+  PKG_CHECK_MODULES([LIBCANBERRA], [libcanberra-gtk3], , enable_libcanberra=no)
+  if test x$enable_libcanberra = xyes; then
+    AC_DEFINE([HAVE_LIBCANBERRA], [1], [Define if libcanberra is found])
+  fi
+fi
+AM_CONDITIONAL(ENABLE_LIBCANBERRA, [test x$enable_libcanberra = xyes])
+AC_MSG_RESULT($enable_libcanberra)
+
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
 dnl define GETTEXT_* variables
@@ -343,7 +360,10 @@ Build options:
   Build Clutter UI          $enable_clutter
   Build Vala binding        $enable_vala
   Build Python binding      $enable_python
+  Sound support             $enable_libcanberra
   Build document            $enable_gtk_doc
   Focus listeners           $focus_listeners
   Keystroke listeners       $keystroke_listeners
 ])
+
+
