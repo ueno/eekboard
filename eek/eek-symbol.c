@@ -228,11 +228,7 @@ eek_symbol_init (EekSymbol *self)
     EekSymbolPrivate *priv;
 
     priv = self->priv = EEK_SYMBOL_GET_PRIVATE(self);
-    priv->name = NULL;
-    priv->label = NULL;
-    priv->icon_name = NULL;
     priv->category = EEK_SYMBOL_CATEGORY_UNKNOWN;
-    priv->modifier_mask = 0;
 }
 
 /**

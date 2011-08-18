@@ -810,7 +810,7 @@ get_keycode_from_gdk_keymap (EekboardClient *client,
         return FALSE;
 
     for (i = 0; i < n_keys; i++)
-        if (keys[i].group == eekboard_context_get_group (client->context))
+        if (keys[i].group == eekboard_context_get_group (client->context, NULL))
             best_match = &keys[i];
 
     *keycode = best_match->keycode;

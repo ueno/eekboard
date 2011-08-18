@@ -486,10 +486,7 @@ eek_key_init (EekKey *self)
     EekKeyPrivate *priv;
 
     priv = self->priv = EEK_KEY_GET_PRIVATE(self);
-    priv->keycode = 0;
     priv->symbol_matrix = eek_symbol_matrix_new (0, 0);
-    priv->column = priv->row = 0;
-    priv->oref = 0;
 }
 
 /**

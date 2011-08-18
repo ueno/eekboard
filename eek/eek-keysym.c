@@ -208,10 +208,7 @@ eek_keysym_class_init (EekKeysymClass *klass)
 static void
 eek_keysym_init (EekKeysym *self)
 {
-    EekKeysymPrivate *priv;
-
-    priv = self->priv = EEK_KEYSYM_GET_PRIVATE(self);
-    priv->xkeysym = EEK_INVALID_KEYSYM;
+    self->priv = EEK_KEYSYM_GET_PRIVATE(self);
 }
 
 /**

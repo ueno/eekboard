@@ -404,8 +404,6 @@ eek_element_init (EekElement *self)
     EekElementPrivate *priv;
 
     priv = self->priv = EEK_ELEMENT_GET_PRIVATE(self);
-    priv->name = NULL;
-    memset (&priv->bounds, 0, sizeof priv->bounds);
     priv->group = -1;
     priv->level = -1;
 }

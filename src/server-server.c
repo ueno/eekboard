@@ -231,19 +231,16 @@ server_server_init (ServerServer *server)
 {
     GError *error;
 
-    server->connection = NULL;
     error = NULL;
     server->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
     g_assert (server->introspection_data != NULL);
-    server->registration_id = 0;
 
     server->context_hash =
         g_hash_table_new_full (g_str_hash,
                                g_str_equal,
                                (GDestroyNotify)g_free,
                                (GDestroyNotify)g_object_unref);
-    server->context_stack = NULL;
 }
 
 static void

@@ -523,11 +523,8 @@ eek_keyboard_init (EekKeyboard *self)
     EekKeyboardPrivate *priv;
 
     priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    priv->layout = NULL;
     priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
-    priv->modifiers = 0;
     priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
-    priv->num_lock_mask = 0;
     eek_element_set_symbol_index (EEK_ELEMENT(self), 0, 0);
 }
 
@@ -759,8 +756,6 @@ eek_keyboard_set_modifiers (EekKeyboard    *keyboard,
 
     priv->modifiers = modifiers;
     set_level_from_modifiers (keyboard);
-
-    return priv->modifiers;
 }
 
 /**

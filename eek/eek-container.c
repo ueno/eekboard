@@ -69,7 +69,7 @@ eek_container_real_serialize (EekSerializable *self,
     eek_container_parent_serializable_iface->serialize (self, builder);
 
     g_variant_builder_init (&array, G_VARIANT_TYPE("av"));
-    for (head = priv->children; head; head = g_slist_next (head)) {
+    for (head = priv->children; head; head = g_list_next (head)) {
         GVariant *variant =
             eek_serializable_serialize (EEK_SERIALIZABLE(head->data));
         g_variant_builder_add (&array, "v", variant);
@@ -240,10 +240,7 @@ eek_container_class_init (EekContainerClass *klass)
 static void
 eek_container_init (EekContainer *self)
 {
-    EekContainerPrivate *priv;
-
-    priv = self->priv = EEK_CONTAINER_GET_PRIVATE(self);
-    priv->children = NULL;
+    self->priv = EEK_CONTAINER_GET_PRIVATE(self);
 }
 
 /**

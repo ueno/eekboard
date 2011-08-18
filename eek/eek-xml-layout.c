@@ -676,10 +676,7 @@ eek_xml_layout_class_init (EekXmlLayoutClass *klass)
 static void
 eek_xml_layout_init (EekXmlLayout *self)
 {
-    EekXmlLayoutPrivate *priv;
-
-    priv = self->priv = EEK_XML_LAYOUT_GET_PRIVATE (self);
-    priv->source = NULL;
+    self->priv = EEK_XML_LAYOUT_GET_PRIVATE (self);
 }
 
 EekLayout *

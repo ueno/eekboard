@@ -457,7 +457,6 @@ eek_xkb_layout_init (EekXkbLayout *self)
     EekXkbLayoutPrivate *priv;
 
     priv = self->priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
-    memset (&priv->names, 0, sizeof priv->names);
 
     priv->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     g_return_if_fail (priv->display);

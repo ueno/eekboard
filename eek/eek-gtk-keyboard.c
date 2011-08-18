@@ -371,9 +371,7 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
 static void
 eek_gtk_keyboard_init (EekGtkKeyboard *self)
 {
-    EekGtkKeyboardPrivate *priv;
-
-    priv = self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+    self->priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
 }
 
 /**

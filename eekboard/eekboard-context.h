@@ -98,6 +98,8 @@ void             eekboard_context_hide_keyboard  (EekboardContext *context,
 void             eekboard_context_set_group      (EekboardContext *context,
                                                   gint             group,
                                                   GCancellable    *cancellable);
+gint             eekboard_context_get_group      (EekboardContext *context,
+                                                  GCancellable    *cancellable);
 void             eekboard_context_press_key      (EekboardContext *context,
                                                   guint            keycode,
                                                   GCancellable    *cancellable);

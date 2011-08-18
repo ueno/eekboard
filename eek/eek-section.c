@@ -485,12 +485,7 @@ eek_section_class_init (EekSectionClass *klass)
 static void
 eek_section_init (EekSection *self)
 {
-    EekSectionPrivate *priv;
-
-    priv = self->priv = EEK_SECTION_GET_PRIVATE (self);
-    priv->angle = 0;
-    priv->rows = NULL;
-    priv->modifiers = 0;
+    self->priv = EEK_SECTION_GET_PRIVATE (self);
 }
 
 /**
