@@ -64,7 +64,7 @@ struct _EekboardClient {
     EekboardEekboard *eekboard;
     EekboardContext *context;
 
-    EekKeyboard *keyboard;
+    GSList *keyboards;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
 
@@ -288,7 +288,6 @@ eekboard_client_set_keyboard (EekboardClient *client,
                               const gchar    *keyboard)
 {
     gboolean retval;
-
     retval = set_keyboard (client, keyboard);
     if (retval && IS_KEYBOARD_VISIBLE (client))
         eekboard_context_show_keyboard (client->context, NULL);
@@ -695,17 +694,37 @@ on_xkl_config_changed (XklEngine *xklengine,
 
 static gboolean
 set_keyboard (EekboardClient *client,
-              const gchar    *keyboard)
+              const gchar *keyboard)
 {
-    guint keyboard_id;
+    GSList *keyboards = NULL;
+    gchar **strv, **p;
 
-    keyboard_id = eekboard_context_add_keyboard (client->context,
-                                                 keyboard,
-                                                 NULL);
-    if (keyboard_id == 0)
-        return FALSE;
+    if (client->keyboards)
+        g_slist_free (client->keyboards);
 
-    eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
+    strv = g_strsplit (keyboard, ",", -1);
+    for (p = strv; *p != NULL; p++) {
+        guint keyboard_id;
+
+        keyboard_id = eekboard_context_add_keyboard (client->context,
+                                                     *p,
+                                                     NULL);
+        if (keyboard_id == 0)
+            return FALSE;
+        keyboards = g_slist_prepend (keyboards,
+                                     GUINT_TO_POINTER(keyboard_id));
+    }
+    g_strfreev (strv);
+
+    /* make a cycle */
+    keyboards = g_slist_reverse (keyboards);
+    g_slist_last (keyboards)->next = keyboards;
+    client->keyboards = keyboards;
+
+    /* select the first keyboard */
+    eekboard_context_set_keyboard (client->context,
+                                   GPOINTER_TO_UINT(keyboards->data),
+                                   NULL);
     return TRUE;
 }
 
@@ -714,7 +733,7 @@ set_keyboard_from_xkl (EekboardClient *client)
 {
     XklConfigRec *rec;
     gchar *layout, *keyboard;
-    gboolean retval;
+    guint keyboard_id;
 
     rec = xkl_config_rec_new ();
     xkl_config_rec_get_from_server (rec, client->xkl_engine);
@@ -723,10 +742,16 @@ set_keyboard_from_xkl (EekboardClient *client)
 
     keyboard = g_strdup_printf ("xkb:%s", layout);
     g_free (layout);
-    retval = set_keyboard (client, keyboard);
-    g_free (keyboard);
 
-    return retval;
+    keyboard_id = eekboard_context_add_keyboard (client->context,
+                                                 keyboard,
+                                                 NULL);
+    g_free (keyboard);
+    if (keyboard_id == 0)
+        return FALSE;
+    eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
+
+    return TRUE;
 }
 
 static void
@@ -909,12 +934,20 @@ send_fake_key_event (EekboardClient *client,
 
 static void
 on_key_pressed (EekboardContext *context,
-                guint            keycode,
+                const gchar     *keyname,
                 EekSymbol       *symbol,
                 guint            modifiers,
                 gpointer         user_data)
 {
     EekboardClient *client = user_data;
+
+    if (g_strcmp0 (eek_symbol_get_name (symbol), "cycle-keyboard") == 0) {
+        client->keyboards = g_slist_next (client->keyboards);
+        eekboard_context_set_keyboard (client->context,
+                                       GPOINTER_TO_UINT(client->keyboards->data),
+                                       NULL);
+    }
+
     send_fake_key_event (client, symbol, modifiers, TRUE);
     send_fake_key_event (client, symbol, modifiers, FALSE);
 }

@@ -82,19 +82,20 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
     }
 
     if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
-        guint keycode = 0;
+        const gchar *keyname;
         GVariant *variant = NULL;
         guint modifiers = 0;
         EekSerializable *serializable;
 
-        g_variant_get (parameters, "(uvu)", &keycode, &variant, &modifiers);
+        g_variant_get (parameters, "(&svu)", &keyname, &variant, &modifiers);
         g_return_if_fail (variant != NULL);
 
         serializable = eek_serializable_deserialize (variant);
         g_return_if_fail (EEK_IS_SYMBOL(serializable));
         
         g_signal_emit_by_name (context, "key-pressed",
-                               keycode, EEK_SYMBOL(serializable), modifiers);
+                               keyname, EEK_SYMBOL(serializable), modifiers);
+
         return;
     }
 
@@ -139,7 +140,7 @@ eekboard_context_real_disabled (EekboardContext *self)
 
 static void
 eekboard_context_real_key_pressed (EekboardContext *self,
-                                   guint            keycode,
+                                   const gchar     *keyname,
                                    EekSymbol       *symbol,
                                    guint            modifiers)
 {
@@ -253,10 +254,10 @@ eekboard_context_class_init (EekboardContextClass *klass)
                       G_STRUCT_OFFSET(EekboardContextClass, key_pressed),
                       NULL,
                       NULL,
-                      _eekboard_marshal_VOID__UINT_OBJECT_UINT,
+                      _eekboard_marshal_VOID__STRING_OBJECT_UINT,
                       G_TYPE_NONE,
                       3,
-                      G_TYPE_UINT,
+                      G_TYPE_STRING,
                       G_TYPE_OBJECT,
                       G_TYPE_UINT);
 

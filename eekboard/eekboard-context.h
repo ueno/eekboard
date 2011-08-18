@@ -67,7 +67,7 @@ struct _EekboardContextClass {
     void (*enabled)      (EekboardContext *self);
     void (*disabled)     (EekboardContext *self);
     void (*key_pressed)  (EekboardContext *self,
-                          guint            keycode,
+                          const gchar     *keyname,
                           EekSymbol       *symbol,
                           guint            modifiers);
     void (*destroyed)    (EekboardContext *self);

@@ -240,7 +240,7 @@ eek_symbol_init (EekSymbol *self)
 EekSymbol *
 eek_symbol_new (const gchar *name)
 {
-    return g_object_new (EEK_TYPE_SYMBOL, "name", name);
+    return g_object_new (EEK_TYPE_SYMBOL, "name", name, NULL);
 }
 
 /**

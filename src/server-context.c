@@ -80,7 +80,7 @@ static const gchar introspection_xml[] =
     "    <signal name='Enabled'/>"
     "    <signal name='Disabled'/>"
     "    <signal name='KeyPressed'>"
-    "      <arg type='u' name='keycode'/>"
+    "      <arg type='s' name='keyname'/>"
     "      <arg type='v' name='symbol'/>"
     "      <arg type='u' name='modifiers'/>"
     "    </signal>"
@@ -593,7 +593,7 @@ static void
 emit_key_pressed_dbus_signal (ServerContext *context, EekKey *key)
 {
     if (context->connection && context->enabled) {
-        guint keycode = eek_key_get_keycode (key);
+        const gchar *keyname = eek_element_get_name (EEK_ELEMENT(key));
         EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
         guint modifiers = eek_keyboard_get_modifiers (context->keyboard);
         GVariant *variant;
@@ -607,8 +607,8 @@ emit_key_pressed_dbus_signal (ServerContext *context, EekKey *key)
                                        context->object_path,
                                        SERVER_CONTEXT_INTERFACE,
                                        "KeyPressed",
-                                       g_variant_new ("(uvu)",
-                                                      keycode,
+                                       g_variant_new ("(svu)",
+                                                      keyname,
                                                       variant,
                                                       modifiers),
                                        &error);

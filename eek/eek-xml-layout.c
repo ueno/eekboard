@@ -94,9 +94,7 @@ static const gchar *valid_path_list[] = {
     "groups/symbols/key/section/keyboard",
     "levels/symbols/key/section/keyboard",
     "keysym/symbols/key/section/keyboard",
-    "custom/symbols/key/section/keyboard",
-    "text/symbols/key/section/keyboard",
-    "icon/symbols/key/section/keyboard",
+    "symbol/symbols/key/section/keyboard",
     "invalid/symbols/key/section/keyboard",
     "index/key/section/keyboard",
     "point/outline/keyboard",
@@ -229,10 +227,12 @@ start_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysym") == 0) {
+    if (g_strcmp0 (element_name, "symbol") == 0 ||
+        g_strcmp0 (element_name, "keysym") == 0) {
         data->label = g_strdup (label);
         data->icon = g_strdup (icon);
-        data->keyval = keyval;
+        if (g_strcmp0 (element_name, "keysym") == 0)
+            data->keyval = keyval;
     }
 
     if (g_strcmp0 (element_name, "outline") == 0) {
@@ -410,23 +410,32 @@ end_element_callback (GMarkupParseContext *pcontext,
         goto out;
     }
 
-    if (g_strcmp0 (element_name, "keysym") == 0) {
-        EekKeysym *keysym;
+    if (g_strcmp0 (element_name, "symbol") == 0 ||
+        g_strcmp0 (element_name, "keysym") == 0) {
+        EekSymbol *symbol;
 
-        if (data->keyval != EEK_INVALID_KEYSYM) {
-            keysym = eek_keysym_new (data->keyval);
-            //g_debug ("%u %s", data->keyval, eek_symbol_get_label (EEK_SYMBOL(keysym)));
-        } else
-            keysym = eek_keysym_new_from_name (text);
+        if (g_strcmp0 (element_name, "keysym") == 0) {
+            EekKeysym *keysym;
+            if (data->keyval != EEK_INVALID_KEYSYM)
+                keysym = eek_keysym_new (data->keyval);
+            else
+                keysym = eek_keysym_new_from_name (text);
+            symbol = EEK_SYMBOL(keysym);
+        } else {
+            symbol = eek_symbol_new (text);
+            eek_symbol_set_category (symbol, EEK_SYMBOL_CATEGORY_KEYNAME);
+        }
+
         if (data->label) {
-            eek_symbol_set_label (EEK_SYMBOL(keysym), data->label);
+            eek_symbol_set_label (symbol, data->label);
             g_free (data->label);
         }
         if (data->icon) {
-            eek_symbol_set_icon_name (EEK_SYMBOL(keysym), data->icon);
+            eek_symbol_set_icon_name (symbol, data->icon);
             g_free (data->icon);
         }
-        data->symbols = g_slist_prepend (data->symbols, keysym);
+
+        data->symbols = g_slist_prepend (data->symbols, symbol);
         goto out;
     }
 
