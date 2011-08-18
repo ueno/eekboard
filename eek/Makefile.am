@@ -54,6 +54,7 @@ libeek_private_headers =			\
 	$(srcdir)/eek-theme-node.h
 
 libeek_sources =				\
+	$(srcdir)/eek.c				\
 	$(srcdir)/eek-layout.c			\
 	$(srcdir)/eek-element.c			\
 	$(srcdir)/eek-container.c		\

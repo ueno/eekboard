@@ -122,12 +122,7 @@ main (int argc, char **argv)
         exit (1);
     }
 
-    /* preload Eek* types for EekKeyboard deserialization */
-    g_type_class_ref (EEK_TYPE_KEYBOARD);
-    g_type_class_ref (EEK_TYPE_SECTION);
-    g_type_class_ref (EEK_TYPE_KEY);
-    g_type_class_ref (EEK_TYPE_SYMBOL);
-    g_type_class_ref (EEK_TYPE_KEYSYM);
+    eek_init ();
 
     option_context = g_option_context_new ("eekboard-desktop-client");
     g_option_context_add_main_entries (option_context, options, NULL);

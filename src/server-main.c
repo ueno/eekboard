@@ -91,14 +91,9 @@ main (int argc, char **argv)
     }
 #endif
 
-    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
+    eek_init ();
 
-    /* preload Eek* types for EekKeyboard deserialization */
-    g_type_class_ref (EEK_TYPE_KEYBOARD);
-    g_type_class_ref (EEK_TYPE_SECTION);
-    g_type_class_ref (EEK_TYPE_KEY);
-    g_type_class_ref (EEK_TYPE_SYMBOL);
-    g_type_class_ref (EEK_TYPE_KEYSYM);
+    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
     if (opt_system)
         bus_type = G_BUS_TYPE_SYSTEM;

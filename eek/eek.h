@@ -32,4 +32,6 @@
 #include "eek-serializable.h"
 #include "eek-theme.h"
 
+void eek_init (void);
+
 #endif  /* EEK_H */
