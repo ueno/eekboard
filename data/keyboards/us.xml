@@ -18,93 +18,85 @@
         <key id="keycode67" name="keycode67" column="1" row="0">
             <bounds>84.292683,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65470">F1</keysym>
-                <keysym keyval="65478">F9</keysym>
             </symbols>
         </key>
         <key id="keycode68" name="keycode68" column="2" row="0">
             <bounds>124.878049,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65471">F2</keysym>
-                <keysym keyval="65479">F10</keysym>
             </symbols>
         </key>
         <key id="keycode69" name="keycode69" column="3" row="0">
             <bounds>165.463415,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65472">F3</keysym>
-                <keysym keyval="65480">F11</keysym>
             </symbols>
         </key>
         <key id="keycode70" name="keycode70" column="4" row="0">
             <bounds>206.048780,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65473">F4</keysym>
-                <keysym keyval="65481">F12</keysym>
             </symbols>
         </key>
         <key id="keycode71" name="keycode71" column="5" row="0">
             <bounds>266.926829,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65474">F5</keysym>
-                <keysym keyval="269024773">(null)</keysym>
             </symbols>
         </key>
         <key id="keycode72" name="keycode72" column="6" row="0">
             <bounds>307.512195,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65475">F6</keysym>
-                <keysym keyval="269024774">(null)</keysym>
             </symbols>
         </key>
         <key id="keycode73" name="keycode73" column="7" row="0">
             <bounds>348.097561,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65476">F7</keysym>
-                <keysym keyval="269024775">(null)</keysym>
             </symbols>
         </key>
         <key id="keycode74" name="keycode74" column="8" row="0">
             <bounds>388.682927,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="1">
                 <keysym keyval="65477">F8</keysym>
-                <keysym keyval="269024776">(null)</keysym>
             </symbols>
         </key>
         <key id="keycode75" name="keycode75" column="9" row="0">
             <bounds>449.560976,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65361">Left</keysym>
+                <keysym keyval="65478">F9</keysym>
             </symbols>
         </key>
         <key id="keycode76" name="keycode76" column="10" row="0">
             <bounds>490.146341,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65362">Up</keysym>
+                <keysym keyval="65479">F10</keysym>
             </symbols>
         </key>
         <key id="keycode95" name="keycode95" column="11" row="0">
             <bounds>530.731707,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65364">Down</keysym>
+                <keysym keyval="65480">F11</keysym>
             </symbols>
         </key>
         <key id="keycode96" name="keycode96" column="12" row="0">
             <bounds>571.317073,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65363">Right</keysym>
+                <keysym keyval="65481">F12</keysym>
             </symbols>
         </key>
     </section>
@@ -174,9 +166,10 @@
         <key id="keycode14" name="keycode14" column="5" row="0">
             <bounds>206.048780,1.560976,37.463415,37.463415</bounds>
             <oref>outline2</oref>
-            <symbols groups="1" levels="2">
+            <symbols groups="1" levels="3">
                 <keysym keyval="53">5</keysym>
                 <keysym keyval="37">percent</keysym>
+                <keysym keyval="8364">EuroSign</keysym>
             </symbols>
         </key>
         <key id="keycode15" name="keycode15" column="6" row="0">
@@ -561,7 +554,7 @@
             <bounds>62.439024,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65515">Super_L</keysym>
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
             </symbols>
         </key>
         <key id="keycode64" name="keycode64" column="2" row="4">
@@ -583,28 +576,28 @@
             <bounds>407.414634,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65027">ISO_Level3_Shift</keysym>
+                <keysym keyval="65361">Left</keysym>
             </symbols>
         </key>
         <key id="keycode134" name="keycode134" column="5" row="4">
             <bounds>458.926829,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65516">Super_R</keysym>
+                <keysym keyval="65362">Up</keysym>
             </symbols>
         </key>
         <key id="keycode135" name="keycode135" column="6" row="4">
             <bounds>508.878049,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65383">Menu</keysym>
+                <keysym keyval="65364">Down</keysym>
             </symbols>
         </key>
         <key id="keycode105" name="keycode105" column="7" row="4">
             <bounds>560.390244,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65508">Control_R</keysym>
+                <keysym keyval="65363">Right</keysym>
             </symbols>
         </key>
     </section>
