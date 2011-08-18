@@ -42,9 +42,6 @@
 
 static gchar *opt_load = NULL;
 static gboolean opt_dump = FALSE;
-static gchar *opt_model = NULL;
-static gchar *opt_layouts = NULL;
-static gchar *opt_options = NULL;
 static gchar *opt_list = NULL;
 static guint opt_group = 0;
 static gchar *opt_theme = NULL;
@@ -56,12 +53,6 @@ static const GOptionEntry options[] = {
      N_("Output the current layout into an XML file")},
     {"list", 'L', 0, G_OPTION_ARG_STRING, &opt_list,
      N_("List configuration items for given spec")},
-    {"model", '\0', 0, G_OPTION_ARG_STRING, &opt_model,
-     N_("Specify model")},
-    {"layouts", '\0', 0, G_OPTION_ARG_STRING, &opt_layouts,
-     N_("Specify layouts")},
-    {"options", '\0', 0, G_OPTION_ARG_STRING, &opt_options,
-     N_("Specify options")},
     {"group", 'g', 0, G_OPTION_ARG_INT, &opt_group,
      N_("Specify group")},
     {"theme", 't', 0, G_OPTION_ARG_STRING, &opt_theme,
@@ -165,53 +156,33 @@ main (int argc, char **argv)
         exit (0);
     }
 
-    if (!((opt_load != NULL) ^
-          (opt_model || opt_layouts || opt_options))) {
-        g_printerr ("Either -l or --model/layouts/options are needed\n");
-        exit (1);
-    }
-
     if (opt_load) {
-        GFile *file;
-        GFileInputStream *input;
-        EekLayout *layout;
-        GError *error;
-
-        file = g_file_new_for_path (opt_load);
-
-        error = NULL;
-        input = g_file_read (file, NULL, &error);
-        if (error) {
-            g_printerr ("Can't read file %s: %s\n", opt_load, error->message);
-            exit (1);
-        }
-
-        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
-        g_object_unref (input);
-        keyboard = eek_keyboard_new (layout, 640, 480);
-        g_object_unref (layout);
-    } else if (opt_model || opt_layouts || opt_options) {
         EekLayout *layout;
 
-        layout = eek_xkl_layout_new ();
-
-        if (opt_model)
-            eek_xkl_layout_set_model (EEK_XKL_LAYOUT(layout), opt_model);
-
-        if (opt_layouts) {
+        if (g_str_has_prefix (opt_load, "xkb:")) {
             XklConfigRec *rec;
 
-            rec = eekboard_xkl_config_rec_from_string (opt_layouts);
-            eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(layout), rec->layouts);
-            eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(layout), rec->variants);
+            rec = eekboard_xkl_config_rec_from_string (&opt_load[4]);
+            layout = eek_xkl_layout_new ();
+            eek_xkl_layout_set_config (EEK_XKL_LAYOUT(layout), rec);
             g_object_unref (rec);
-        }
+        } else {
+            GFile *file;
+            GFileInputStream *input;
+            GError *error;
 
-        if (opt_options) {
-            gchar **options;
-            options = g_strsplit (opt_options, ",", -1);
-            eek_xkl_layout_set_options (EEK_XKL_LAYOUT(layout), options);
-            g_strfreev (options);
+            file = g_file_new_for_path (opt_load);
+
+            error = NULL;
+            input = g_file_read (file, NULL, &error);
+            if (error) {
+                g_printerr ("Can't read file %s: %s\n",
+                            opt_load, error->message);
+                exit (1);
+            }
+
+            layout = eek_xml_layout_new (G_INPUT_STREAM(input));
+            g_object_unref (input);
         }
 
         keyboard = eek_keyboard_new (layout, 640, 480);
