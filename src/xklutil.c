@@ -24,10 +24,13 @@ XklConfigRec *
 eekboard_xkl_config_rec_from_string (const gchar *layouts)
 {
     XklConfigRec *rec;
-    gchar **l, **v;
+    gchar **strv, **l, **v;
     gint i;
 
-    l = g_strsplit (layouts, ":", -1);
+    strv = g_strsplit (layouts, "/", -1);
+    g_return_val_if_fail (g_strv_length (strv) == 3, NULL);
+    
+    l = g_strsplit (strv[1], ";", -1);
     v = g_strdupv (l);
     for (i = 0; l[i]; i++) {
         gchar *layout = l[i], *variant = v[i],
@@ -44,8 +47,11 @@ eekboard_xkl_config_rec_from_string (const gchar *layouts)
     }
 
     rec = xkl_config_rec_new ();
+    rec->model = g_strdup (strv[0]);
     rec->layouts = l;
     rec->variants = v;
+    rec->options = g_strsplit (strv[2], ";", -1);
+    g_strfreev (strv);
 
     return rec;
 }
@@ -66,14 +72,17 @@ eekboard_xkl_config_rec_to_string (XklConfigRec *rec)
             *sp = g_strdup_printf ("%s", *lp);
     }
 
-    str = g_string_new ("");
-    p = g_strjoinv (":", strv);
+    /* MODEL/L0(V0);L1(V1);...;Ln(Vn)/O0;O1;...;On */
+    str = g_string_new (rec->model);
+
+    g_string_append_c (str, '/');
+    p = g_strjoinv (";", strv);
     g_strfreev (strv);
     g_string_append (str, p);
     g_free (p);
 
-    g_string_append_c (str, ':');
-    p = g_strjoinv ("+", rec->options);
+    g_string_append_c (str, '/');
+    p = g_strjoinv (";", rec->options);
     g_string_append (str, p);
     g_free (p);
 
