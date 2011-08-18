@@ -1,0 +1,747 @@
+<?xml version="1.0"?>
+<keyboard version="0.90">
+    <bounds>0.000000,0.000000,410.000000,152.000000</bounds>
+    <section name="LeftModifiers">
+        <bounds>10.000000,10.000000,60.000000,129.000000</bounds>
+        <angle>0</angle>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <key id="keycode61" name="TAB" column="1" row="0">
+            <bounds>2.000000,27.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="2">
+                <keysym keyval="65289">Tab</keysym>
+                <keysym keyval="65056">ISO_Left_Tab</keysym>
+            </symbols>
+        </key>
+        <key id="keycode56" name="CAPS" column="2" row="0">
+            <bounds>2.000000,53.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65507">Control_L</keysym>
+            </symbols>
+        </key>
+        <key id="keycode57" name="LFSH" column="3" row="0">
+            <bounds>2.000000,78.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65505">Shift_L</keysym>
+            </symbols>
+        </key>
+        <key id="keycode58" name="LCTL" column="4" row="0">
+            <bounds>2.000000,104.000000,36.000000,24.000000</bounds>
+            <oref>outline9</oref>
+            <symbols groups="1" levels="1">
+                <symbol label="⌨">cycle-keyboard</symbol>
+            </symbols>
+        </key>
+        <key id="keycode60" name="BKSP" column="1" row="1">
+            <bounds>331.000000,28.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65288">BackSpace</keysym>
+            </symbols>
+        </key>
+        <key id="keycode62" name="RTRN" column="1" row="1">
+            <bounds>331.000000,53.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65293">Return</keysym>
+            </symbols>
+        </key>
+        <key id="keycode63" name="RTSH" column="2" row="1">
+            <bounds>331.000000,78.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="1" levels="1">
+                <keysym keyval="65506">Shift_R</keysym>
+            </symbols>
+        </key>
+    </section>
+    <section name="Alpha">
+        <bounds>63.000000,10.000000,300.000000,129.000000</bounds>
+        <angle>0</angle>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <row>
+            <columns>5</columns>
+            <orientation>0</orientation>
+        </row>
+        <key id="keycode1" name="AE03" column="0" row="0">
+            <bounds>2.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="51" label="あ">3</keysym>
+                <keysym keyval="35" label="ぁ">numbersign</keysym>
+                <keysym keyval="51" label="ア">3</keysym>
+                <keysym keyval="35" label="ァ">numbersign</keysym>
+            </symbols>
+        </key>
+        <key id="keycode2" name="AD03" column="1" row="0">
+            <bounds>2.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="101" label="い">e</keysym>
+                <keysym keyval="69" label="ぃ">E</keysym>
+                <keysym keyval="101" label="イ">e</keysym>
+                <keysym keyval="69" label="ィ">E</keysym>
+            </symbols>
+        </key>
+        <key id="keycode3" name="AE04" column="2" row="0">
+            <bounds>2.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="52" label="う">4</keysym>
+                <keysym keyval="36" label="ぅ">dollar</keysym>
+                <keysym keyval="52" label="ウ">4</keysym>
+                <keysym keyval="36" label="ゥ">dollar</keysym>
+            </symbols>
+        </key>
+        <key id="keycode4" name="AE05" column="3" row="0">
+            <bounds>2.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="53" label="え">5</keysym>
+                <keysym keyval="37" label="ぇ">percent</keysym>
+                <keysym keyval="53" label="エ">5</keysym>
+                <keysym keyval="37" label="ェ">percent</keysym>
+            </symbols>
+        </key>
+        <key id="keycode5" name="AE06" column="4" row="0">
+            <bounds>2.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="54" label="お">6</keysym>
+                <keysym keyval="38" label="ぉ">ampersand</keysym>
+                <keysym keyval="54" label="オ">6</keysym>
+                <keysym keyval="38" label="ォ">ampersand</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode6" name="AE03" column="0" row="1">
+            <bounds>27.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="116" label="か">t</keysym>
+                <keysym keyval="84" label="">T</keysym>
+                <keysym keyval="116" label="カ">t</keysym>
+                <keysym keyval="84" label="">T</keysym>
+            </symbols>
+        </key>
+        <key id="keycode7" name="AD03" column="1" row="1">
+            <bounds>27.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="103" label="き">g</keysym>
+                <keysym keyval="71" label="">G</keysym>
+                <keysym keyval="103" label="キ">g</keysym>
+                <keysym keyval="71" label="">G</keysym>
+            </symbols>
+        </key>
+        <key id="keycode8" name="AE04" column="2" row="1">
+            <bounds>27.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="104" label="く">h</keysym>
+                <keysym keyval="72" label="">H</keysym>
+                <keysym keyval="104" label="ク">h</keysym>
+                <keysym keyval="72" label="">H</keysym>
+            </symbols>
+        </key>
+        <key id="keycode9" name="AE05" column="3" row="1">
+            <bounds>27.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="58" label="け">colon</keysym>
+                <keysym keyval="34" label="">quotedbl</keysym>
+                <keysym keyval="58" label="ケ">colon</keysym>
+                <keysym keyval="34" label="">quotedbl</keysym>
+            </symbols>
+        </key>
+        <key id="keycode10" name="AE06" column="4" row="1">
+            <bounds>27.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="98" label="こ">b</keysym>
+                <keysym keyval="66" label="">B</keysym>
+                <keysym keyval="98" label="コ">b</keysym>
+                <keysym keyval="66" label="">B</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode11" name="AE03" column="0" row="2">
+            <bounds>52.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="120" label="さ">x</keysym>
+                <keysym keyval="88" label="">X</keysym>
+                <keysym keyval="120" label="サ">x</keysym>
+                <keysym keyval="88" label="">X</keysym>
+            </symbols>
+        </key>
+        <key id="keycode12" name="AD03" column="1" row="2">
+            <bounds>52.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="100" label="し">d</keysym>
+                <keysym keyval="68" label="">D</keysym>
+                <keysym keyval="100" label="シ">d</keysym>
+                <keysym keyval="68" label="">D</keysym>
+            </symbols>
+        </key>
+        <key id="keycode13" name="AE04" column="2" row="0">
+            <bounds>52.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="114" label="す">r</keysym>
+                <keysym keyval="82" label="">R</keysym>
+                <keysym keyval="114" label="ス">r</keysym>
+                <keysym keyval="82" label="">R</keysym>
+            </symbols>
+        </key>
+        <key id="keycode14" name="AE05" column="3" row="2">
+            <bounds>52.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="112" label="せ">p</keysym>
+                <keysym keyval="80" label="">P</keysym>
+                <keysym keyval="112" label="セ">p</keysym>
+                <keysym keyval="80" label="">P</keysym>
+            </symbols>
+        </key>
+        <key id="keycode15" name="AE06" column="4" row="2">
+            <bounds>52.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="99" label="そ">c</keysym>
+                <keysym keyval="67" label="">C</keysym>
+                <keysym keyval="99" label="ソ">c</keysym>
+                <keysym keyval="67" label="">C</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode16" name="AE03" column="0" row="3">
+            <bounds>77.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="113" label="た">q</keysym>
+                <keysym keyval="81" label="">Q</keysym>
+                <keysym keyval="113" label="タ">q</keysym>
+                <keysym keyval="81" label="">Q</keysym>
+            </symbols>
+        </key>
+        <key id="keycode17" name="AD03" column="1" row="3">
+            <bounds>77.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="97" label="ち">a</keysym>
+                <keysym keyval="65" label="">A</keysym>
+                <keysym keyval="97" label="チ">a</keysym>
+                <keysym keyval="65" label="">A</keysym>
+            </symbols>
+        </key>
+        <key id="keycode18" name="AE04" column="2" row="3">
+            <bounds>77.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="122" label="つ">z</keysym>
+                <keysym keyval="90" label="っ">Z</keysym>
+                <keysym keyval="122" label="ツ">z</keysym>
+                <keysym keyval="90" label="ッ">Z</keysym>
+            </symbols>
+        </key>
+        <key id="keycode19" name="AE05" column="3" row="3">
+            <bounds>77.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="119" label="て">w</keysym>
+                <keysym keyval="87" label="">W</keysym>
+                <keysym keyval="119" label="テ">w</keysym>
+                <keysym keyval="87" label="">W</keysym>
+            </symbols>
+        </key>
+        <key id="keycode20" name="AE06" column="4" row="3">
+            <bounds>77.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="115" label="と">s</keysym>
+                <keysym keyval="83" label="">S</keysym>
+                <keysym keyval="115" label="ト">s</keysym>
+                <keysym keyval="83" label="">S</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode21" name="AE03" column="0" row="4">
+            <bounds>102.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="117" label="な">u</keysym>
+                <keysym keyval="85" label="">U</keysym>
+                <keysym keyval="117" label="ナ">u</keysym>
+                <keysym keyval="85" label="">U</keysym>
+            </symbols>
+        </key>
+        <key id="keycode22" name="AD03" column="1" row="4">
+            <bounds>102.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="105" label="に">i</keysym>
+                <keysym keyval="73" label="">I</keysym>
+                <keysym keyval="105" label="ニ">i</keysym>
+                <keysym keyval="73" label="">I</keysym>
+            </symbols>
+        </key>
+        <key id="keycode23" name="AE04" column="2" row="4">
+            <bounds>102.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="33" label="ぬ">exclam</keysym>
+                <keysym keyval="49" label="">1</keysym>
+                <keysym keyval="33" label="ヌ">exclam</keysym>
+                <keysym keyval="49" label="">1</keysym>
+            </symbols>
+        </key>
+        <key id="keycode24" name="AE05" column="3" row="4">
+            <bounds>102.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="44" label="ね">comma</keysym>
+                <symbol></symbol>
+                <keysym keyval="44" label="ネ">comma</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode25" name="AE06" column="4" row="4">
+            <bounds>102.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="107" label="の">k</keysym>
+                <keysym keyval="75" label="">K</keysym>
+                <keysym keyval="107" label="ノ">k</keysym>
+                <keysym keyval="75" label="">K</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode26" name="AE03" column="0" row="5">
+            <bounds>127.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="102" label="は">f</keysym>
+                <keysym keyval="70" label="">F</keysym>
+                <keysym keyval="102" label="ハ">f</keysym>
+                <keysym keyval="70" label="">F</keysym>
+            </symbols>
+        </key>
+        <key id="keycode27" name="AD03" column="1" row="5">
+            <bounds>127.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="118" label="ひ">v</keysym>
+                <keysym keyval="86" label="">V</keysym>
+                <keysym keyval="118" label="ヒ">v</keysym>
+                <keysym keyval="86" label="">V</keysym>
+            </symbols>
+        </key>
+        <key id="keycode28" name="AE04" column="2" row="5">
+            <bounds>127.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="34" label="ふ">quotedbl</keysym>
+                <keysym keyval="64" label="">at</keysym>
+                <keysym keyval="34" label="フ">quotedbl</keysym>
+                <keysym keyval="64" label="">at</keysym>
+            </symbols>
+        </key>
+        <key id="keycode29" name="AE05" column="3" row="5">
+            <bounds>127.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="94" label="へ">asciicircum</keysym>
+                <keysym keyval="43" label="">plus</keysym>
+                <keysym keyval="94" label="ヘ">asciicircum</keysym>
+                <keysym keyval="43" label="">plus</keysym>
+            </symbols>
+        </key>
+        <key id="keycode30" name="AE06" column="4" row="5">
+            <bounds>127.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="61" label="ほ">equal</keysym>
+                <keysym keyval="95" label="">underscore</keysym>
+                <keysym keyval="61" label="ホ">equal</keysym>
+                <keysym keyval="95" label="">underscore</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode31" name="AE03" column="0" row="6">
+            <bounds>152.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="106" label="ま">j</keysym>
+                <keysym keyval="74" label="">J</keysym>
+                <keysym keyval="106" label="マ">j</keysym>
+                <keysym keyval="74" label="">J</keysym>
+            </symbols>
+        </key>
+        <key id="keycode32" name="AD03" column="1" row="6">
+            <bounds>152.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="110" label="み">n</keysym>
+                <keysym keyval="78" label="">N</keysym>
+                <keysym keyval="110" label="ミ">n</keysym>
+                <keysym keyval="78" label="">N</keysym>
+            </symbols>
+        </key>
+        <key id="keycode33" name="AE04" column="2" row="6">
+            <bounds>152.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="93" label="む">bracketright</keysym>
+                <symbol></symbol>
+                <keysym keyval="93" label="ム">bracketright</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode34" name="AE05" column="3" row="6">
+            <bounds>152.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="47" label="め">slash</keysym>
+                <symbol></symbol>
+                <keysym keyval="47" label="メ">slash</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode35" name="AE06" column="4" row="6">
+            <bounds>152.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="109" label="も">m</keysym>
+                <keysym keyval="77" label="">M</keysym>
+                <keysym keyval="109" label="モ">m</keysym>
+                <keysym keyval="77" label="">M</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode36" name="AE03" column="0" row="7">
+            <bounds>177.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="55" label="や">7</keysym>
+                <keysym keyval="39" label="ゃ">quoteright</keysym>
+                <keysym keyval="55" label="ヤ">7</keysym>
+                <keysym keyval="39" label="ャ">quoteright</keysym>
+            </symbols>
+        </key>
+        <key id="keycode37" name="AD03" column="1" row="7">
+            <bounds>177.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="48" label="ゐ">0</keysym>
+                <symbol></symbol>
+                <keysym keyval="48" label="ヰ">0</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode38" name="AE04" column="2" row="7">
+            <bounds>177.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="56" label="ゆ">8</keysym>
+                <keysym keyval="40" label="ゅ">parenleft</keysym>
+                <keysym keyval="56" label="ユ">8</keysym>
+                <keysym keyval="40" label="ュ">parenleft</keysym>
+            </symbols>
+        </key>
+        <key id="keycode39" name="AE05" column="3" row="7">
+            <bounds>177.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="48" label="ゑ">0</keysym>
+                <symbol></symbol>
+                <keysym keyval="48" label="ヱ">0</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode40" name="AE06" column="4" row="7">
+            <bounds>177.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="57" label="よ">9</keysym>
+                <keysym keyval="41" label="ょ">parenright</keysym>
+                <keysym keyval="57" label="ヨ">9</keysym>
+                <keysym keyval="41" label="ョ">parenright</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode41" name="AE03" column="0" row="8">
+            <bounds>202.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="111" label="ら">o</keysym>
+                <keysym keyval="79" label="">O</keysym>
+                <keysym keyval="111" label="ラ">o</keysym>
+                <keysym keyval="79" label="">O</keysym>
+            </symbols>
+        </key>
+        <key id="keycode42" name="AD03" column="1" row="8">
+            <bounds>202.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="108" label="り">l</keysym>
+                <keysym keyval="76" label="">L</keysym>
+                <keysym keyval="108" label="リ">l</keysym>
+                <keysym keyval="76" label="">L</keysym>
+            </symbols>
+        </key>
+        <key id="keycode43" name="AE04" column="2" row="8">
+            <bounds>202.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="46" label="る">period</keysym>
+                <symbol></symbol>
+                <keysym keyval="46" label="ル">period</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode44" name="AE05" column="3" row="8">
+            <bounds>202.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="59" label="れ">semicolon</keysym>
+                <symbol></symbol>
+                <keysym keyval="59" label="レ">semicolon</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode45" name="AE06" column="4" row="8">
+            <bounds>202.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="92" label="ろ">backslash</keysym>
+                <symbol></symbol>
+                <keysym keyval="92" label="ロ">backslash</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+
+        <key id="keycode46" name="AE03" column="0" row="9">
+            <bounds>227.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="48" label="わ">0</keysym>
+                <symbol></symbol>
+                <keysym keyval="48" label="ワ">0</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode47" name="AD03" column="1" row="9">
+            <bounds>227.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <symbol></symbol>
+                <symbol></symbol>
+                <symbol></symbol>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode48" name="AE04" column="2" row="9">
+            <bounds>227.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="126" label="を">asciitilde</keysym>
+                <keysym keyval="63" label="・">question</keysym>
+                <keysym keyval="126" label="ヲ">asciitilde</keysym>
+                <keysym keyval="63" label="・">question</keysym>
+            </symbols>
+        </key>
+        <key id="keycode49" name="AE05" column="3" row="9">
+            <bounds>227.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <symbol></symbol>
+                <keysym keyval="123" label="「">braceleft</keysym>
+                <symbol></symbol>
+                <keysym keyval="123" label="「">braceleft</keysym>
+            </symbols>
+        </key>
+        <key id="keycode50" name="AE06" column="4" row="9">
+            <bounds>227.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="121" label="ん">y</keysym>
+                <keysym keyval="125" label="」">braceright</keysym>
+                <keysym keyval="121" label="ン">y</keysym>
+                <keysym keyval="125" label="」">braceright</keysym>
+            </symbols>
+        </key>
+
+        <key id="keycode51" name="AE03" column="0" row="10">
+            <bounds>252.000000,2.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="64" label="゛">at</keysym>
+                <symbol></symbol>
+                <keysym keyval="64" label="゛">at</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode52" name="AD03" column="1" row="10">
+            <bounds>252.000000,27.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="2">
+                <keysym keyval="91" label="゜">bracketleft</keysym>
+                <symbol></symbol>
+                <keysym keyval="91" label="゜">bracketleft</keysym>
+                <symbol></symbol>
+            </symbols>
+        </key>
+        <key id="keycode53" name="AE04" column="2" row="10">
+            <bounds>252.000000,52.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="1">
+                <keysym keyval="124" label="ー">bar</keysym>
+                <keysym keyval="124" label="ー">bar</keysym>
+            </symbols>
+        </key>
+        <key id="keycode54" name="AE05" column="3" row="10">
+            <bounds>252.000000,77.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="1">
+                <keysym keyval="60" label="、">less</keysym>
+                <keysym keyval="60" label="、">less</keysym>
+            </symbols>
+        </key>
+        <key id="keycode55" name="AE06" column="4" row="10">
+            <bounds>252.000000,102.000000,24.000000,24.000000</bounds>
+            <oref>outline1</oref>
+            <symbols groups="2" levels="1">
+                <keysym keyval="62" label="。">greater</keysym>
+                <keysym keyval="62" label="。">greater</keysym>
+            </symbols>
+        </key>
+    </section>
+    <outline id="outline1">
+        <point>0.000000,0.000000</point>
+        <point>24.000000,0.000000</point>
+        <point>24.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline3">
+        <point>0.000000,0.000000</point>
+        <point>38.000000,0.000000</point>
+        <point>38.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline4">
+        <point>0.000000,0.000000</point>
+        <point>38.000000,0.000000</point>
+        <point>38.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline5">
+        <point>0.000000,0.000000</point>
+        <point>44.000000,0.000000</point>
+        <point>44.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline6">
+        <point>0.000000,0.000000</point>
+        <point>57.000000,0.000000</point>
+        <point>57.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline7">
+        <point>0.000000,0.000000</point>
+        <point>57.000000,0.000000</point>
+        <point>57.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline8">
+        <point>0.000000,0.000000</point>
+        <point>70.000000,0.000000</point>
+        <point>70.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline9">
+        <point>0.000000,0.000000</point>
+        <point>36.000000,0.000000</point>
+        <point>36.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline10">
+        <point>0.000000,0.000000</point>
+        <point>31.000000,0.000000</point>
+        <point>31.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline11">
+        <point>0.000000,0.000000</point>
+        <point>153.000000,0.000000</point>
+        <point>153.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline12">
+        <point>0.000000,0.000000</point>
+        <point>24.000000,0.000000</point>
+        <point>24.000000,50.000000</point>
+        <point>0.000000,50.000000</point>
+    </outline>
+    <outline id="outline13">
+        <point>0.000000,0.000000</point>
+        <point>50.000000,0.000000</point>
+        <point>50.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+    <outline id="outline2">
+        <point>0.000000,0.000000</point>
+        <point>51.000000,0.000000</point>
+        <point>51.000000,24.000000</point>
+        <point>0.000000,24.000000</point>
+    </outline>
+</keyboard>
+
