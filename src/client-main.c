@@ -38,11 +38,8 @@ static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
-static gboolean opt_use_system_layout = FALSE;
 static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
-
-static gchar *opt_keyboard = NULL;
 
 static gboolean opt_fullscreen = FALSE;
 
@@ -53,8 +50,6 @@ static const GOptionEntry options[] = {
      N_("Connect to the session bus")},
     {"address", 'a', 0, G_OPTION_ARG_STRING, &opt_address,
      N_("Connect to the given D-Bus address")},
-    {"use-system-layout", 'x', 0, G_OPTION_ARG_NONE, &opt_use_system_layout,
-     N_("Use system keyboard layout")},
 #if ENABLE_FOCUS_LISTENER
     {"listen-focus", 'f', 0, G_OPTION_ARG_NONE, &opt_focus,
      N_("Listen focus change events")},
@@ -63,8 +58,6 @@ static const GOptionEntry options[] = {
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_ATSPI */
-    {"keyboard", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboard,
-     N_("Specify keyboard")},
     {"fullscreen", 'F', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
      N_("Create window in fullscreen mode")},
     {NULL}
@@ -122,6 +115,7 @@ main (int argc, char **argv)
     GMainLoop *loop;
     gint focus;
     GSettings *settings;
+    gchar *keyboard;
 
     if (!gtk_init_check (&argc, &argv)) {
         g_printerr ("Can't init GTK\n");
@@ -251,12 +245,6 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_IBUS */
 
-    if (opt_use_system_layout && opt_keyboard) {
-        g_printerr ("Can't use --use-system-layout option with keyboard options\n");
-        g_object_unref (client);
-        exit (1);
-    }
-
     if (!eekboard_client_enable_xkl (client)) {
         g_printerr ("Can't register xklavier event listeners\n");
         g_object_unref (client);
@@ -271,7 +259,9 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_XTEST */
 
-    eekboard_client_set_keyboard (client, opt_keyboard ? opt_keyboard : DEFAULT_KEYBOARD);
+    keyboard = g_settings_get_string (settings, "keyboard");
+    eekboard_client_set_keyboard (client, keyboard);
+    g_free (keyboard);
 
     loop = g_main_loop_new (NULL, FALSE);
     if (!opt_focus) {

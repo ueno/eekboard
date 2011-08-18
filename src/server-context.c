@@ -562,31 +562,16 @@ server_context_init (ServerContext *context)
     GdkScreen *screen;
     GError *error;
 
-    context->connection = NULL;
     error = NULL;
     context->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
     g_assert (context->introspection_data != NULL);
-    context->registration_id = 0;
-    context->object_path = NULL;
 
-    context->enabled = FALSE;
-    context->last_keyboard_visible = FALSE;
-
-    context->keyboard = NULL;
     context->keyboard_hash =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
                                (GDestroyNotify)g_object_unref);
-
-    context->widget = NULL;
-    context->window = NULL;
-    context->key_pressed_handler = 0;
-    context->key_released_handler = 0;
-
-    context->repeat_key = NULL;
-    context->repeat_timeout_id = 0;
 
     context->ui_toolkit = UI_TOOLKIT_DEFAULT;
 
@@ -883,7 +868,7 @@ handle_method_call (GDBusConnection       *connection,
 
         g_dbus_method_invocation_return_value (invocation, NULL);
 
-        eek_element_get_group (EEK_ELEMENT(context->keyboard));
+        group = eek_element_get_group (EEK_ELEMENT(context->keyboard));
         emit_group_changed_signal (context, group);
 
         return;
