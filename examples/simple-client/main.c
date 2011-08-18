@@ -147,31 +147,11 @@ main (int argc, char **argv)
     eekboard_eekboard_push_context (eekboard, context, NULL);
 
     if (opt_set_keyboard) {
-        GFile *file;
-        GFileInputStream *input;
-        EekLayout *layout;
-        EekKeyboard *keyboard;
         guint keyboard_id;
 
-        file = g_file_new_for_path (opt_set_keyboard);
-
-        error = NULL;
-        input = g_file_read (file, NULL, &error);
-        if (error) {
-            g_printerr ("Can't read file %s: %s\n",
-                        opt_set_keyboard, error->message);
-            retval = 1;
-            goto out;
-        }
-
-        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
-        g_object_unref (input);
-        keyboard = eek_keyboard_new (layout, 640, 480);
-        g_object_unref (layout);
-
-        keyboard_id = eekboard_context_add_keyboard (context, keyboard, NULL);
-        g_object_unref (keyboard);
-
+        keyboard_id = eekboard_context_add_keyboard (context,
+                                                     opt_set_keyboard,
+                                                     NULL);
         eekboard_context_set_keyboard (context, keyboard_id, NULL);
     }
 
