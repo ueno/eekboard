@@ -880,8 +880,17 @@ eek_renderer_set_allocation_size (EekRenderer *renderer,
     priv->allocation_height = height;
 
     eek_element_get_bounds (EEK_ELEMENT(priv->keyboard), &bounds);
-    scale = width > height ? height / bounds.height :
-        width / bounds.width;
+
+    if (bounds.height * width / bounds.width <= height)
+        scale = width / bounds.width;
+    else if (bounds.width * height / bounds.height <= width)
+        scale = height / bounds.height;
+    else {
+        if (bounds.width * height < bounds.height * width)
+            scale = bounds.width / width;
+        else
+            scale = bounds.height / height;
+    }
 
     if (scale != priv->scale) {
         priv->scale = scale;

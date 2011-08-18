@@ -87,10 +87,16 @@ eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
     width = gdk_pixbuf_get_width (pixbuf);
     height = gdk_pixbuf_get_height (pixbuf);
 
-    if (bounds.width * height < bounds.height * width)
-        scale = bounds.width / width;
-    else
-        scale = bounds.height / height;
+    if (bounds.height * width / bounds.width <= height)
+        scale = width / bounds.width;
+    else if (bounds.width * height / bounds.height <= width)
+        scale = height / bounds.height;
+    else {
+        if (bounds.width * height < bounds.height * width)
+            scale = bounds.width / width;
+        else
+            scale = bounds.height / height;
+    }
 
     cairo_save (cr);
     cairo_translate (cr,
