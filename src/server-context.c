@@ -709,7 +709,7 @@ create_keyboard_from_string (const gchar *string)
     EekKeyboard *keyboard;
     EekLayout *layout;
 
-    if (g_str_has_prefix (string, "xkl:")) {
+    if (g_str_has_prefix (string, "xkb:")) {
         XklConfigRec *rec = eekboard_xkl_config_rec_from_string (&string[4]);
 
         layout = eek_xkl_layout_new ();

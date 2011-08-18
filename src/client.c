@@ -67,7 +67,6 @@ struct _EekboardClient {
     EekKeyboard *keyboard;
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
-    gboolean use_xkl_layout;
 
     gulong xkl_config_changed_handler;
     gulong xkl_state_changed_handler;
@@ -102,6 +101,12 @@ struct _EekboardClientClass {
 
 G_DEFINE_TYPE (EekboardClient, eekboard_client, G_TYPE_OBJECT);
 
+#if ENABLE_FOCUS_LISTENER
+#define IS_KEYBOARD_VISIBLE(client) (!client->follows_focus)
+#else  /* ENABLE_FOCUS_LISTENER */
+#define IS_KEYBOARD_VISIBLE(client) TRUE
+#endif  /* !ENABLE_FOCUS_LISTENER */
+
 static GdkFilterReturn filter_xkl_event     (GdkXEvent              *xev,
                                              GdkEvent               *event,
                                              gpointer                user_data);
@@ -122,7 +127,8 @@ static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                                               void                   *user_data);
 #endif  /* HAVE_ATSPI */
 static gboolean        set_keyboard         (EekboardClient         *client,
-                                             const gchar *keyboard);
+                                             const gchar            *keyboard);
+static gboolean        set_keyboard_from_xkl (EekboardClient         *client);
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
                                             (EekboardClient         *client);
@@ -277,12 +283,6 @@ eekboard_client_init (EekboardClient *client)
     client->settings = g_settings_new ("org.fedorahosted.eekboard");
 }
 
-#if ENABLE_FOCUS_LISTENER
-#define IS_KEYBOARD_VISIBLE(client) (!client->follows_focus)
-#else  /* ENABLE_FOCUS_LISTENER */
-#define IS_KEYBOARD_VISIBLE(client) TRUE
-#endif  /* !ENABLE_FOCUS_LISTENER */
-
 gboolean
 eekboard_client_set_keyboard (EekboardClient *client,
                               const gchar    *keyboard)
@@ -290,7 +290,7 @@ eekboard_client_set_keyboard (EekboardClient *client,
     gboolean retval;
 
     retval = set_keyboard (client, keyboard);
-    if (IS_KEYBOARD_VISIBLE (client))
+    if (retval && IS_KEYBOARD_VISIBLE (client))
         eekboard_context_show_keyboard (client->context, NULL);
     return retval;
 }
@@ -299,6 +299,8 @@ gboolean
 eekboard_client_enable_xkl (EekboardClient *client)
 {
     GdkDisplay *display = gdk_display_get_default ();
+    gboolean retval;
+
     g_assert (display);
 
     if (!client->xkl_engine) {
@@ -327,28 +329,31 @@ eekboard_client_enable_xkl (EekboardClient *client)
                            (GdkFilterFunc) filter_xkl_event,
                            client);
 
-    client->use_xkl_layout = FALSE;
-
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-    return TRUE;
+    retval = set_keyboard_from_xkl (client);
+    if (IS_KEYBOARD_VISIBLE (client))
+        eekboard_context_show_keyboard (client->context, NULL);
+
+    return retval;
 }
 
 void
 eekboard_client_disable_xkl (EekboardClient *client)
 {
-    client->use_xkl_layout = FALSE;
-
-    if (client->xkl_engine)
+    if (client->xkl_engine) {
         xkl_engine_stop_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
-    if (g_signal_handler_is_connected (client->xkl_engine,
-                                       client->xkl_config_changed_handler))
-        g_signal_handler_disconnect (client->xkl_engine,
-                                     client->xkl_config_changed_handler);
-    if (g_signal_handler_is_connected (client->xkl_engine,
-                                       client->xkl_state_changed_handler))
-        g_signal_handler_disconnect (client->xkl_engine,
-                                     client->xkl_state_changed_handler);
+
+        if (g_signal_handler_is_connected (client->xkl_engine,
+                                           client->xkl_config_changed_handler))
+            g_signal_handler_disconnect (client->xkl_engine,
+                                         client->xkl_config_changed_handler);
+        if (g_signal_handler_is_connected (client->xkl_engine,
+                                           client->xkl_state_changed_handler))
+            g_signal_handler_disconnect (client->xkl_engine,
+                                         client->xkl_state_changed_handler);
+        client->xkl_engine = NULL;
+    }
 }
 
 #ifdef HAVE_ATSPI
@@ -680,22 +685,8 @@ on_xkl_config_changed (XklEngine *xklengine,
     EekboardClient *client = user_data;
     gboolean retval;
 
-    if (client->use_xkl_layout) {
-        XklConfigRec *rec;
-        gchar *layout, *keyboard;
-
-        rec = xkl_config_rec_new ();
-        xkl_config_rec_get_from_server (rec, client->xkl_engine);
-        layout = eekboard_xkl_config_rec_to_string (rec);
-        g_object_unref (rec);
-
-        keyboard = g_strdup_printf ("xkl:%s", layout);
-        g_free (layout);
-        retval = set_keyboard (client, keyboard);
-        g_free (keyboard);
-
-        g_return_if_fail (retval);
-    }
+    retval = set_keyboard_from_xkl (client);
+    g_return_if_fail (retval);
 
 #ifdef HAVE_XTEST
     update_modifier_keycodes (client);
@@ -711,8 +702,31 @@ set_keyboard (EekboardClient *client,
     keyboard_id = eekboard_context_add_keyboard (client->context,
                                                  keyboard,
                                                  NULL);
+    if (keyboard_id == 0)
+        return FALSE;
+
     eekboard_context_set_keyboard (client->context, keyboard_id, NULL);
     return TRUE;
+}
+
+static gboolean
+set_keyboard_from_xkl (EekboardClient *client)
+{
+    XklConfigRec *rec;
+    gchar *layout, *keyboard;
+    gboolean retval;
+
+    rec = xkl_config_rec_new ();
+    xkl_config_rec_get_from_server (rec, client->xkl_engine);
+    layout = eekboard_xkl_config_rec_to_string (rec);
+    g_object_unref (rec);
+
+    keyboard = g_strdup_printf ("xkb:%s", layout);
+    g_free (layout);
+    retval = set_keyboard (client, keyboard);
+    g_free (keyboard);
+
+    return retval;
 }
 
 static void
@@ -724,10 +738,8 @@ on_xkl_state_changed (XklEngine           *xklengine,
 {
     EekboardClient *client = user_data;
 
-    if (type == GROUP_CHANGED) {
-        if (client->use_xkl_layout)
-            eekboard_context_set_group (client->context, value, NULL);
-    }
+    if (type == GROUP_CHANGED)
+        eekboard_context_set_group (client->context, value, NULL);
 }
 
 #ifdef HAVE_XTEST
@@ -925,6 +937,7 @@ update_modifier_keycodes (EekboardClient *client)
             }
         }
     }
+    XFreeModifiermap (mods);
 }
 
 gboolean

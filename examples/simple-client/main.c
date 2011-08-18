@@ -152,6 +152,11 @@ main (int argc, char **argv)
         keyboard_id = eekboard_context_add_keyboard (context,
                                                      opt_set_keyboard,
                                                      NULL);
+        if (keyboard_id == 0) {
+            g_printerr ("Can't create keyboard\n");
+            retval = 1;
+            goto out;
+        }
         eekboard_context_set_keyboard (context, keyboard_id, NULL);
     }
 

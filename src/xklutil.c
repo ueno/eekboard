@@ -66,7 +66,7 @@ eekboard_xkl_config_rec_to_string (XklConfigRec *rec)
     n_layouts = g_strv_length (rec->layouts);
     strv = g_malloc0_n (n_layouts + 2, sizeof (gchar *));
     for (sp = strv, lp = rec->layouts, vp = rec->variants; *lp; sp++, lp++) {
-        if (*vp != NULL)
+        if (*vp != NULL && **vp != '\0')
             *sp = g_strdup_printf ("%s(%s)", *lp, *vp++);
         else
             *sp = g_strdup_printf ("%s", *lp);

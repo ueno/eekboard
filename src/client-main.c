@@ -102,20 +102,39 @@ enum {
     FOCUS_IBUS
 };
 
+static gboolean
+set_keyboard (EekboardClient *client,
+              const gchar    *keyboard)
+{
+    if (g_strcmp0 (keyboard, "system") == 0) {
+        if (!eekboard_client_enable_xkl (client)) {
+            g_printerr ("Can't register xklavier event listeners\n");
+            return FALSE;
+        }
+    } else {
+        if (!eekboard_client_set_keyboard (client, keyboard)) {
+            g_printerr ("Can't set keyboard \"%s\"\n", keyboard);
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 int
 main (int argc, char **argv)
 {
-    EekboardClient *client;
+    EekboardClient *client = NULL;
     EekboardEekboard *eekboard;
     EekboardContext *context;
     GBusType bus_type;
     GDBusConnection *connection;
     GError *error;
     GOptionContext *option_context;
-    GMainLoop *loop;
+    GMainLoop *loop = NULL;
     gint focus;
-    GSettings *settings;
+    GSettings *settings = NULL;
     gchar *keyboard;
+    gint retval = 0;
 
     if (!gtk_init_check (&argc, &argv)) {
         g_printerr ("Can't init GTK\n");
@@ -186,8 +205,8 @@ main (int argc, char **argv)
         else {
             g_printerr ("Unknown focus listener \"%s\".  "
                         "Try \"atspi\" or \"ibus\"\n", focus_listener);
-            g_object_unref (client);
-            exit (1);
+            retval = 1;
+            goto out;
         }
     }
         
@@ -202,27 +221,27 @@ main (int argc, char **argv)
         if (accessibility_enabled) {
             if (atspi_init () != 0) {
                 g_printerr ("Can't init AT-SPI 2\n");
-                g_object_unref (client);
-                exit (1);
+                retval = 1;
+                goto out;
             }
 
             if (focus == FOCUS_ATSPI &&
                 !eekboard_client_enable_atspi_focus (client)) {
                 g_printerr ("Can't register AT-SPI focus change event listeners\n");
-                g_object_unref (client);
-                exit (1);
+                retval = 1;
+                goto out;
             }
 
             if (opt_keystroke &&
                 !eekboard_client_enable_atspi_keystroke (client)) {
                 g_printerr ("Can't register AT-SPI keystroke event listeners\n");
-                g_object_unref (client);
-                exit (1);
+                retval = 1;
+                goto out;
             }
         } else {
             g_printerr ("Desktop accessibility support is disabled\n");
-            g_object_unref (client);
-            exit (1);
+            retval = 1;
+            goto out;
         }
     }
 #endif  /* HAVE_ATSPI */
@@ -231,20 +250,13 @@ main (int argc, char **argv)
     if (focus == FOCUS_IBUS) {
         ibus_init ();
 
-        if (focus == FOCUS_IBUS &&
-            !eekboard_client_enable_ibus_focus (client)) {
+        if (!eekboard_client_enable_ibus_focus (client)) {
             g_printerr ("Can't register IBus focus change event listeners\n");
-            g_object_unref (client);
-            exit (1);
+            retval = 1;
+            goto out;
         }
     }
 #endif  /* HAVE_IBUS */
-
-    if (!eekboard_client_enable_xkl (client)) {
-        g_printerr ("Can't register xklavier event listeners\n");
-        g_object_unref (client);
-        exit (1);
-    }
 
 #ifdef HAVE_XTEST
     if (!eekboard_client_enable_xtest (client)) {
@@ -254,11 +266,8 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_XTEST */
 
-    keyboard = g_settings_get_string (settings, "keyboard");
-    eekboard_client_set_keyboard (client, keyboard);
-    g_free (keyboard);
-
     loop = g_main_loop_new (NULL, FALSE);
+
     if (!opt_focus) {
         g_object_get (client, "context", &context, NULL);
         g_signal_connect (context, "notify::keyboard-visible",
@@ -278,11 +287,25 @@ main (int argc, char **argv)
     g_object_get (client, "eekboard", &eekboard, NULL);
     g_signal_connect (eekboard, "destroyed",
                       G_CALLBACK(on_destroyed), loop);
+    g_object_unref (eekboard);
+
+    keyboard = g_settings_get_string (settings, "keyboard");
+    if (!set_keyboard (client, keyboard)) {
+        g_free (keyboard);
+        retval = 1;
+        goto out;
+    }
+    g_free (keyboard);
 
     g_main_loop_run (loop);
-    g_main_loop_unref (loop);
-    g_object_unref (client);
-    g_object_unref (settings);
 
-    return 0;
+ out:
+    if (loop)
+        g_main_loop_unref (loop);
+    if (client)
+        g_object_unref (client);
+    if (settings)
+        g_object_unref (settings);
+
+    return retval;
 }
