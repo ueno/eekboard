@@ -42,10 +42,18 @@
             </symbols>
         </key>
         <key id="keycode60" name="BKSP" column="1" row="1">
-            <bounds>331.000000,28.000000,51.000000,24.000000</bounds>
+            <bounds>331.000000,1.000000,51.000000,24.000000</bounds>
             <oref>outline2</oref>
             <symbols groups="1" levels="1">
                 <keysym keyval="65288">BackSpace</keysym>
+            </symbols>
+        </key>
+        <key id="keycode65" name="SPCE" column="1" row="1">
+            <bounds>331.000000,28.000000,51.000000,24.000000</bounds>
+            <oref>outline2</oref>
+            <symbols groups="2" levels="1">
+                <keysym keyval="32">space</keysym>
+                <keysym keyval="32">space</keysym>
             </symbols>
         </key>
         <key id="keycode62" name="RTRN" column="1" row="1">
