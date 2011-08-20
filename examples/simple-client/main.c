@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <glib/gi18n.h>
 
-#include "eekboard/eekboard.h"
+#include "eekboard/eekboard-client.h"
 
 static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
@@ -61,21 +61,19 @@ static const GOptionEntry options[] = {
 };
 
 static void
-on_key_pressed (guint keycode, gpointer user_data)
+on_key_pressed (EekboardContext *context,
+                const gchar *keyname,
+                EekSymbol   *symbol,
+                guint        modifiers,
+                gpointer     user_data)
 {
-    g_print ("KeyPressed %u\n", keycode);
-}
-
-static void
-on_key_released (guint keycode, gpointer user_data)
-{
-    g_print ("KeyReleased %u\n", keycode);
+    g_print ("KeyPressed %s %s\n", keyname, eek_symbol_get_name (symbol));
 }
 
 int
 main (int argc, char **argv)
 {
-    EekboardEekboard *eekboard = NULL;
+    EekboardClient *eekboard = NULL;
     EekboardContext *context = NULL;
     GBusType bus_type;
     GDBusConnection *connection = NULL;
@@ -84,7 +82,7 @@ main (int argc, char **argv)
     GMainLoop *loop = NULL;
     gint retval = 0;
 
-    g_type_init ();
+    eek_init ();
     g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
 
     option_context = g_option_context_new ("eekboard-client");
@@ -128,14 +126,14 @@ main (int argc, char **argv)
         break;
     }
 
-    eekboard = eekboard_eekboard_new (connection, NULL);
+    eekboard = eekboard_client_new (connection, NULL);
     if (eekboard == NULL) {
         g_printerr ("Can't create eekboard proxy\n");
         retval = 1;
         goto out;
     }
 
-    context = eekboard_eekboard_create_context (eekboard,
+    context = eekboard_client_create_context (eekboard,
                                                 "eekboard-client",
                                                 NULL);
     if (context == NULL) {
@@ -144,7 +142,7 @@ main (int argc, char **argv)
         goto out;
     }
 
-    eekboard_eekboard_push_context (eekboard, context, NULL);
+    eekboard_client_push_context (eekboard, context, NULL);
 
     if (opt_set_keyboard) {
         guint keyboard_id;
@@ -173,18 +171,16 @@ main (int argc, char **argv)
     }
 
     if (opt_press_key >= 0) {
-        eekboard_context_press_key (context, opt_press_key, NULL);
+        eekboard_context_press_keycode (context, opt_press_key, NULL);
     }
 
     if (opt_release_key >= 0) {
-        eekboard_context_release_key (context, opt_release_key, NULL);
+        eekboard_context_release_keycode (context, opt_release_key, NULL);
     }
 
     if (opt_listen) {
         g_signal_connect (context, "key-pressed",
                           G_CALLBACK(on_key_pressed), NULL);
-        g_signal_connect (context, "key-released",
-                          G_CALLBACK(on_key_released), NULL);
         loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (loop);
     }

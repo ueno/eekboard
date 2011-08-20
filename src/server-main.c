@@ -28,7 +28,7 @@
 #include <clutter-gtk/clutter-gtk.h>
 #endif
 
-#include "server-server.h"
+#include "server-service.h"
 #include "eek/eek.h"
 
 static gboolean opt_system = FALSE;
@@ -61,7 +61,7 @@ on_name_lost (GDBusConnection *connection,
 }
 
 static void
-on_destroyed (ServerServer *server,
+on_destroyed (ServerService *service,
               gpointer      user_data)
 {
     GMainLoop *loop = user_data;
@@ -72,7 +72,7 @@ on_destroyed (ServerServer *server,
 int
 main (int argc, char **argv)
 {
-    ServerServer *server;
+    ServerService *service;
     GBusType bus_type;
     GDBusConnection *connection;
     GError *error;
@@ -131,15 +131,15 @@ main (int argc, char **argv)
         break;
     }
 
-    server = server_server_new (SERVER_SERVER_PATH, connection);
+    service = server_service_new (EEKBOARD_SERVICE_PATH, connection);
 
-    if (server == NULL) {
+    if (service == NULL) {
         g_printerr ("Can't create server\n");
         exit (1);
     }
 
     owner_id = g_bus_own_name_on_connection (connection,
-                                             SERVER_SERVER_INTERFACE,
+                                             EEKBOARD_SERVICE_INTERFACE,
                                              G_BUS_NAME_OWNER_FLAGS_NONE,
                                              on_name_acquired,
                                              on_name_lost,
@@ -152,12 +152,12 @@ main (int argc, char **argv)
 
     loop = g_main_loop_new (NULL, FALSE);
 
-    g_signal_connect (server, "destroyed", G_CALLBACK(on_destroyed), loop);
+    g_signal_connect (service, "destroyed", G_CALLBACK(on_destroyed), loop);
 
     g_main_loop_run (loop);
 
     g_bus_unown_name (owner_id);
-    g_object_unref (server);
+    g_object_unref (service);
     g_object_unref (connection);
     g_main_loop_unref (loop);
 

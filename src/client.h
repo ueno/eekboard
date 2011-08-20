@@ -15,48 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef EEKBOARD_CLIENT_H
-#define EEKBOARD_CLIENT_H 1
+#ifndef CLIENT_H
+#define CLIENT_H 1
 
 #include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define EEKBOARD_TYPE_CLIENT (eekboard_client_get_type())
-#define EEKBOARD_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EEKBOARD_TYPE_CLIENT, EekboardClient))
-#define EEKBOARD_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), EEKBOARD_TYPE_CLIENT, EekboardClientClass))
-#define EEKBOARD_IS_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EEKBOARD_TYPE_CLIENT))
-#define EEKBOARD_IS_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), EEKBOARD_TYPE_CLIENT))
-#define EEKBOARD_CLIENT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EEKBOARD_TYPE_CLIENT, EekboardClientClass))
+#define TYPE_CLIENT (client_get_type())
+#define CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_CLIENT, Client))
+#define CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_CLIENT, ClientClass))
+#define IS_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_CLIENT))
+#define IS_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_CLIENT))
+#define CLIENT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_CLIENT, ClientClass))
 
-typedef struct _EekboardClient EekboardClient;
+typedef struct _Client Client;
 
-EekboardClient * eekboard_client_new           (GDBusConnection *connection);
+Client  *client_new                     (GDBusConnection *connection);
 
-gboolean         eekboard_client_set_keyboard
-                                               (EekboardClient  *client,
-                                                const gchar     *keyboard);
+gboolean client_set_keyboard            (Client          *client,
+                                         const gchar     *keyboard);
 
-gboolean         eekboard_client_enable_xkl    (EekboardClient  *client);
-void             eekboard_client_disable_xkl   (EekboardClient  *client);
+gboolean client_enable_xkl              (Client          *client);
+void     client_disable_xkl             (Client          *client);
 
-gboolean         eekboard_client_enable_atspi_focus
-                                               (EekboardClient  *client);
-void             eekboard_client_disable_atspi_focus
-                                               (EekboardClient  *client);
+gboolean client_enable_atspi_focus      (Client          *client);
+void     client_disable_atspi_focus     (Client          *client);
 
-gboolean         eekboard_client_enable_atspi_keystroke
-                                               (EekboardClient  *client);
-void             eekboard_client_disable_atspi_keystroke
-                                               (EekboardClient  *client);
+gboolean client_enable_atspi_keystroke  (Client          *client);
+void     client_disable_atspi_keystroke (Client          *client);
 
-gboolean         eekboard_client_enable_xtest  (EekboardClient  *client);
-void             eekboard_client_disable_xtest (EekboardClient  *client);
+gboolean client_enable_xtest            (Client          *client);
+void     client_disable_xtest           (Client          *client);
 
-gboolean         eekboard_client_enable_ibus_focus
-                                               (EekboardClient  *client);
-void             eekboard_client_disable_ibus_focus
-                                               (EekboardClient  *client);
+gboolean client_enable_ibus_focus       (Client          *client);
+void     client_disable_ibus_focus      (Client          *client);
 
 G_END_DECLS
-#endif  /* EEKBOARD_CLIENT_H */
+#endif  /* CLIENT_H */

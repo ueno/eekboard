@@ -29,7 +29,7 @@
 #endif  /* HAVE_IBUS */
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
-#include "eekboard/eekboard.h"
+#include "eekboard/eekboard-client.h"
 #include "client.h"
 
 #define DEFAULT_KEYBOARD "us"
@@ -64,14 +64,14 @@ static const GOptionEntry options[] = {
 };
 
 static void
-on_notify_keyboard_visible (GObject    *object,
-                            GParamSpec *spec,
-                            gpointer    user_data)
+on_notify_visible (GObject    *object,
+                   GParamSpec *spec,
+                   gpointer    user_data)
 {
     GMainLoop *loop = user_data;
     gboolean visible;
 
-    g_object_get (object, "keyboard-visible", &visible, NULL);
+    g_object_get (object, "visible", &visible, NULL);
 
     /* user explicitly closed the window */
     if (!visible && eekboard_context_is_enabled (EEKBOARD_CONTEXT(object)))
@@ -88,7 +88,7 @@ on_context_destroyed (EekboardContext *context,
 }
 
 static void
-on_destroyed (EekboardEekboard *eekboard,
+on_destroyed (EekboardClient *eekboard,
               gpointer          user_data)
 {
     GMainLoop *loop = user_data;
@@ -96,23 +96,23 @@ on_destroyed (EekboardEekboard *eekboard,
     g_main_loop_quit (loop);
 }
 
-enum {
+enum FocusListenerType {
     FOCUS_NONE,
     FOCUS_ATSPI,
     FOCUS_IBUS
 };
 
 static gboolean
-set_keyboard (EekboardClient *client,
+set_keyboard (Client *client,
               const gchar    *keyboard)
 {
     if (g_strcmp0 (keyboard, "system") == 0) {
-        if (!eekboard_client_enable_xkl (client)) {
+        if (!client_enable_xkl (client)) {
             g_printerr ("Can't register xklavier event listeners\n");
             return FALSE;
         }
     } else {
-        if (!eekboard_client_set_keyboard (client, keyboard)) {
+        if (!client_set_keyboard (client, keyboard)) {
             g_printerr ("Can't set keyboard \"%s\"\n", keyboard);
             return FALSE;
         }
@@ -123,8 +123,8 @@ set_keyboard (EekboardClient *client,
 int
 main (int argc, char **argv)
 {
-    EekboardClient *client = NULL;
-    EekboardEekboard *eekboard;
+    Client *client = NULL;
+    EekboardClient *eekboard;
     EekboardContext *context;
     GBusType bus_type;
     GDBusConnection *connection;
@@ -184,7 +184,7 @@ main (int argc, char **argv)
         break;
     }
 
-    client = eekboard_client_new (connection);
+    client = client_new (connection);
     g_object_unref (connection);
 
     if (client == NULL) {
@@ -197,12 +197,26 @@ main (int argc, char **argv)
     if (opt_focus) {
         gchar *focus_listener = g_settings_get_string (settings,
                                                        "focus-listener");
+        const struct {
+            const gchar *name;
+            enum FocusListenerType type;
+        } focus_listeners[] = {
+#ifdef HAVE_ATSPI
+            { "atspi", FOCUS_ATSPI },
+#endif
+#ifdef HAVE_IBUS
+            { "ibus", FOCUS_IBUS },
+#endif
+            { NULL }
+        };
+        gint i;
 
-        if (g_strcmp0 (focus_listener, "atspi") == 0)
-            focus = FOCUS_ATSPI;
-        else if (g_strcmp0 (focus_listener, "ibus") == 0)
-            focus = FOCUS_IBUS;
-        else {
+        focus = FOCUS_NONE;
+        for (i = 0; focus_listeners[i].name; i++) {
+            if (g_strcmp0 (focus_listener, focus_listeners[i].name) == 0)
+                focus = focus_listeners[i].type;
+        }
+        if (focus == FOCUS_NONE) {
             g_printerr ("Unknown focus listener \"%s\".  "
                         "Try \"atspi\" or \"ibus\"\n", focus_listener);
             retval = 1;
@@ -215,7 +229,7 @@ main (int argc, char **argv)
         GSettings *desktop_settings =
             g_settings_new ("org.gnome.desktop.interface");
         gboolean accessibility_enabled =
-            g_settings_get_boolean (settings, "toolkit-accessibility");
+            g_settings_get_boolean (desktop_settings, "toolkit-accessibility");
         g_object_unref (desktop_settings);
 
         if (accessibility_enabled) {
@@ -226,14 +240,14 @@ main (int argc, char **argv)
             }
 
             if (focus == FOCUS_ATSPI &&
-                !eekboard_client_enable_atspi_focus (client)) {
+                !client_enable_atspi_focus (client)) {
                 g_printerr ("Can't register AT-SPI focus change event listeners\n");
                 retval = 1;
                 goto out;
             }
 
             if (opt_keystroke &&
-                !eekboard_client_enable_atspi_keystroke (client)) {
+                !client_enable_atspi_keystroke (client)) {
                 g_printerr ("Can't register AT-SPI keystroke event listeners\n");
                 retval = 1;
                 goto out;
@@ -250,7 +264,7 @@ main (int argc, char **argv)
     if (focus == FOCUS_IBUS) {
         ibus_init ();
 
-        if (!eekboard_client_enable_ibus_focus (client)) {
+        if (!client_enable_ibus_focus (client)) {
             g_printerr ("Can't register IBus focus change event listeners\n");
             retval = 1;
             goto out;
@@ -259,7 +273,7 @@ main (int argc, char **argv)
 #endif  /* HAVE_IBUS */
 
 #ifdef HAVE_XTEST
-    if (!eekboard_client_enable_xtest (client)) {
+    if (!client_enable_xtest (client)) {
         g_printerr ("Can't init xtest\n");
         g_object_unref (client);
         exit (1);
@@ -270,8 +284,8 @@ main (int argc, char **argv)
 
     if (!opt_focus) {
         g_object_get (client, "context", &context, NULL);
-        g_signal_connect (context, "notify::keyboard-visible",
-                          G_CALLBACK(on_notify_keyboard_visible), loop);
+        g_signal_connect (context, "notify::visible",
+                          G_CALLBACK(on_notify_visible), loop);
         g_signal_connect (context, "destroyed",
                           G_CALLBACK(on_context_destroyed), loop);
         g_object_unref (context);

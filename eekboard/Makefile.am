@@ -18,29 +18,43 @@
 
 lib_LTLIBRARIES = libeekboard.la
 
-libeekboard_headers =					\
-	eekboard.h					\
-	eekboard-eekboard.h				\
-	eekboard-context.h
-libeekboard_private_headers = \
+libeekboard_headers =				\
+	eekboard-service.h			\
+	eekboard-context-service.h		\
+	eekboard-client.h			\
+	eekboard-context.h			\
+	eekboard-xklutil.h
+libeekboard_private_headers =			\
 	eekboard-marshalers.h
 libeekboard_sources =				\
-	eekboard-eekboard.c			\
-	eekboard-context.c
+	eekboard-service.c			\
+	eekboard-context-service.c		\
+	eekboard-client.c			\
+	eekboard-context.c			\
+	eekboard-xklutil.c
 
 libeekboard_marshalers_sources =		\
-	eekboard-marshalers.c		\
+	eekboard-marshalers.c			\
 	eekboard-marshalers.h
 
-BUILT_SOURCES = \
+BUILT_SOURCES =					\
 	$(libeekboard_marshalers_sources)
 
-libeekboard_la_SOURCES = \
-	$(libeekboard_sources) \
+libeekboard_la_SOURCES =			\
+	$(libeekboard_sources)			\
 	eekboard-marshalers.c
 
-libeekboard_la_CFLAGS = -DEEKBOARD_COMPILATION=1 -I$(top_srcdir) $(GIO2_CFLAGS)
-libeekboard_la_LIBADD = $(top_builddir)/eek/libeek.la $(GIO2_LIBS)
+libeekboard_la_CFLAGS =					\
+	-DEEKBOARD_COMPILATION=1			\
+	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"	\
+	-I$(top_srcdir)					\
+	$(GIO2_CFLAGS)					\
+	$(LIBXKLAVIER_CFLAGS)
+libeekboard_la_LIBADD =				\
+	$(top_builddir)/eek/libeek.la		\
+	$(top_builddir)/eek/libeek-xkl.la	\
+	$(GIO2_LIBS)				\
+	$(LIBXKLAVIER_LIBS)
 
 eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
 eekboard_HEADERS = $(libeekboard_headers)

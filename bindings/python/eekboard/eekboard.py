@@ -21,7 +21,7 @@ import gobject
 from context import Context
 
 class Eekboard(gobject.GObject):
-    __gtype_name__ = "PYEekboardEekboard"
+    __gtype_name__ = "PYEekboardClient"
     __gsignals__ = {
         'destroyed': (
             gobject.SIGNAL_RUN_LAST,
@@ -32,18 +32,18 @@ class Eekboard(gobject.GObject):
     def __init__(self):
         super(Eekboard, self).__init__()
         self.__connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-        self.__eekboard = gi.repository.Eekboard.Eekboard.new(self.__connection, None);
-        self.__eekboard.connect('destroyed', lambda *args: self.emit('destroyed'))
+        self.__client = gi.repository.Eekboard.Client.new(self.__connection, None);
+        self.__client.connect('destroyed', lambda *args: self.emit('destroyed'))
 
     def create_context(self, client_name):
-        context = self.__eekboard.create_context(client_name, None)
+        context = self.__client.create_context(client_name, None)
         return Context(context)
 
     def push_context(self, context):
-        self.__eekboard.push_context(context.get_giobject(), None)
+        self.__client.push_context(context.get_giobject(), None)
 
     def pop_context(self):
-        self.__eekboard.pop_context(None)
+        self.__client.pop_context(None)
 
     def destroy_context(self, context):
-        self.__eekboard.destroy_context(context.get_giobject(), None)
+        self.__client.destroy_context(context.get_giobject(), None)

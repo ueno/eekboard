@@ -21,8 +21,6 @@ bin_PROGRAMS = \
 	eekboard-server \
 	eekboard-xml
 
-noinst_LTLIBRARIES = libxklutil.la
-
 eekboard_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GIO2_CFLAGS) \
@@ -32,7 +30,6 @@ eekboard_CFLAGS = \
 	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
 
 eekboard_LDADD = \
-	$(builddir)/libxklutil.la \
 	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
@@ -74,7 +71,6 @@ eekboard_server_CFLAGS = \
 	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
 
 eekboard_server_LDADD = \
-	$(builddir)/libxklutil.la \
 	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-gtk.la \
@@ -93,8 +89,8 @@ eekboard_server_CFLAGS += $(XDOCK_CFLAGS)
 eekboard_server_LDADD += $(XDOCK_LIBS)
 endif
 
-eekboard_server_headers = server-server.h server-context.h
-eekboard_server_SOURCES = server-server.c server-context.c server-main.c
+eekboard_server_headers = server-service.h server-context-service.h
+eekboard_server_SOURCES = server-service.c server-context-service.c server-main.c
 
 eekboard_xml_CFLAGS = \
 	-I$(top_srcdir) \
@@ -103,7 +99,7 @@ eekboard_xml_CFLAGS = \
 	$(LIBXKLAVIER_CFLAGS)
 
 eekboard_xml_LDADD = \
-	$(builddir)/libxklutil.la \
+	$(top_builddir)/eekboard/libeekboard.la \
 	$(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(top_builddir)/eek/libeek-gtk.la \
@@ -118,11 +114,6 @@ endif
 
 eekboard_xml_SOURCES = xml-main.c
 
-libxklutil_la_headers = xklutil.h
-libxklutil_la_SOURCES = xklutil.c
-libxklutil_la_CFLAGS = $(LIBXKLAVIER_CFLAGS)
-libxklutil_la_LIBADD = $(LIBXKLAVIER_LIBS)
-
 eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
 eekboard_HEADERS =				\
 	$(libeekboard_headers)
@@ -130,5 +121,4 @@ eekboard_HEADERS =				\
 noinst_HEADERS = \
 	$(eekboard_headers) \
 	$(eekboard_server_headers) \
-	$(eekboard_xml_headers) \
-	$(libxklutil_la_headers)
+	$(eekboard_xml_headers)

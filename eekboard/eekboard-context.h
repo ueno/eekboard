@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#if !defined(__EEKBOARD_H_INSIDE__) && !defined(EEKBOARD_COMPILATION)
-#error "Only <eekboard/eekboard.h> can be included directly."
+#if !defined(__EEKBOARD_CLIENT_H_INSIDE__) && !defined(EEKBOARD_COMPILATION)
+#error "Only <eekboard/eekboard-client.h> can be included directly."
 #endif
 
 #ifndef EEKBOARD_CONTEXT_H
@@ -100,12 +99,12 @@ void             eekboard_context_set_group      (EekboardContext *context,
                                                   GCancellable    *cancellable);
 gint             eekboard_context_get_group      (EekboardContext *context,
                                                   GCancellable    *cancellable);
-void             eekboard_context_press_key      (EekboardContext *context,
+void             eekboard_context_press_keycode  (EekboardContext *context,
                                                   guint            keycode,
                                                   GCancellable    *cancellable);
-void             eekboard_context_release_key    (EekboardContext *context,
-                                                  guint            keycode,
-                                                  GCancellable    *cancellable);
+void             eekboard_context_release_keycode (EekboardContext *context,
+                                                   guint            keycode,
+                                                   GCancellable    *cancellable);
 gboolean         eekboard_context_is_keyboard_visible
                                                  (EekboardContext *context);
 void             eekboard_context_set_enabled    (EekboardContext *context,

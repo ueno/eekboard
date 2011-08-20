@@ -18,7 +18,7 @@
  * 02110-1301 USA
  */
 #include <string.h>
-#include "xklutil.h"
+#include "eekboard/eekboard-xklutil.h"
 
 XklConfigRec *
 eekboard_xkl_config_rec_from_string (const gchar *layouts)

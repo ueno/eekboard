@@ -41,6 +41,7 @@ eek/*.typelib
 eekboard/*.pc
 eekboard/*.gir
 eekboard/*.typelib
+eekboard/eekboard-marshalers.[ch]
 tests/eek-simple-test
 tests/eek-xkb-test
 tests/eek-xml-test

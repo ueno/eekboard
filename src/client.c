@@ -39,9 +39,9 @@
 
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
-#include "eekboard/eekboard.h"
+#include "eekboard/eekboard-client.h"
+#include "eekboard/eekboard-xklutil.h"
 #include "client.h"
-#include "xklutil.h"
 
 #include <string.h>
 
@@ -56,12 +56,12 @@ enum {
     PROP_LAST
 };
 
-typedef struct _EekboardClientClass EekboardClientClass;
+typedef struct _ClientClass ClientClass;
 
-struct _EekboardClient {
+struct _Client {
     GObject parent;
 
-    EekboardEekboard *eekboard;
+    EekboardClient *eekboard;
     EekboardContext *context;
 
     GSList *keyboards;
@@ -95,11 +95,11 @@ struct _EekboardClient {
     GSettings *settings;
 };
 
-struct _EekboardClientClass {
+struct _ClientClass {
     GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (EekboardClient, eekboard_client, G_TYPE_OBJECT);
+G_DEFINE_TYPE (Client, client, G_TYPE_OBJECT);
 
 #if ENABLE_FOCUS_LISTENER
 #define IS_KEYBOARD_VISIBLE(client) (!client->follows_focus)
@@ -126,40 +126,40 @@ static void            focus_listener_cb    (const AtspiEvent       *event,
 static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                                               void                   *user_data);
 #endif  /* HAVE_ATSPI */
-static gboolean        set_keyboard         (EekboardClient         *client,
+static gboolean        set_keyboard         (Client         *client,
                                              const gchar            *keyboard);
-static gboolean        set_keyboard_from_xkl (EekboardClient         *client);
+static gboolean        set_keyboard_from_xkl (Client         *client);
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
-                                            (EekboardClient         *client);
+(Client         *client);
 #endif  /* HAVE_XTEST */
 
 static void
-eekboard_client_set_property (GObject      *object,
-                                      guint         prop_id,
-                                      const GValue *value,
-                                      GParamSpec   *pspec)
+client_set_property (GObject      *object,
+                     guint         prop_id,
+                     const GValue *value,
+                     GParamSpec   *pspec)
 {
-    EekboardClient *client = EEKBOARD_CLIENT(object);
+    Client *client = CLIENT(object);
     GDBusConnection *connection;
 
     switch (prop_id) {
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
 
-        client->eekboard = eekboard_eekboard_new (connection, NULL);
+        client->eekboard = eekboard_client_new (connection, NULL);
         if (client->eekboard != NULL) {
             client->context =
-                eekboard_eekboard_create_context (client->eekboard,
-                                                  "eekboard",
-                                                  NULL);
+                eekboard_client_create_context (client->eekboard,
+                                                "eekboard",
+                                                NULL);
             if (client->context == NULL) {
                 g_object_unref (client->eekboard);
                 client->eekboard = NULL;
             } else
-                eekboard_eekboard_push_context (client->eekboard,
-                                                client->context,
-                                                NULL);
+                eekboard_client_push_context (client->eekboard,
+                                              client->context,
+                                              NULL);
         }
         break;
     default:
@@ -171,12 +171,12 @@ eekboard_client_set_property (GObject      *object,
 }
 
 static void
-eekboard_client_get_property (GObject    *object,
-                              guint       prop_id,
-                              GValue     *value,
-                              GParamSpec *pspec)
+client_get_property (GObject    *object,
+                     guint       prop_id,
+                     GValue     *value,
+                     GParamSpec *pspec)
 {
-    EekboardClient *client = EEKBOARD_CLIENT(object);
+    Client *client = CLIENT(object);
 
     switch (prop_id) {
     case PROP_EEKBOARD:
@@ -194,19 +194,19 @@ eekboard_client_get_property (GObject    *object,
 }
 
 static void
-eekboard_client_dispose (GObject *object)
+client_dispose (GObject *object)
 {
-    EekboardClient *client = EEKBOARD_CLIENT(object);
+    Client *client = CLIENT(object);
 
-    eekboard_client_disable_xkl (client);
+    client_disable_xkl (client);
 
 #ifdef HAVE_ATSPI
-    eekboard_client_disable_atspi_focus (client);
-    eekboard_client_disable_atspi_keystroke (client);
+    client_disable_atspi_focus (client);
+    client_disable_atspi_keystroke (client);
 #endif  /* HAVE_ATSPI */
 
 #ifdef HAVE_IBUS
-    eekboard_client_disable_ibus_focus (client);
+    client_disable_ibus_focus (client);
     if (client->ibus_bus) {
         g_object_unref (client->ibus_bus);
         client->ibus_bus = NULL;
@@ -214,12 +214,12 @@ eekboard_client_dispose (GObject *object)
 #endif  /* HAVE_IBUS */
 
 #ifdef HAVE_XTEST
-    eekboard_client_disable_xtest (client);
+    client_disable_xtest (client);
 #endif  /* HAVE_XTEST */
 
     if (client->context) {
         if (client->eekboard) {
-            eekboard_eekboard_pop_context (client->eekboard, NULL);
+            eekboard_client_pop_context (client->eekboard, NULL);
         }
 
         g_object_unref (client->context);
@@ -236,18 +236,18 @@ eekboard_client_dispose (GObject *object)
         client->settings = NULL;
     }
 
-    G_OBJECT_CLASS (eekboard_client_parent_class)->dispose (object);
+    G_OBJECT_CLASS (client_parent_class)->dispose (object);
 }
 
 static void
-eekboard_client_class_init (EekboardClientClass *klass)
+client_class_init (ClientClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GParamSpec *pspec;
 
-    gobject_class->set_property = eekboard_client_set_property;
-    gobject_class->get_property = eekboard_client_get_property;
-    gobject_class->dispose = eekboard_client_dispose;
+    gobject_class->set_property = client_set_property;
+    gobject_class->get_property = client_get_property;
+    gobject_class->dispose = client_dispose;
 
     pspec = g_param_spec_object ("connection",
                                  "Connection",
@@ -261,7 +261,7 @@ eekboard_client_class_init (EekboardClientClass *klass)
     pspec = g_param_spec_object ("eekboard",
                                  "Eekboard",
                                  "Eekboard",
-                                 EEKBOARD_TYPE_EEKBOARD,
+                                 EEKBOARD_TYPE_CLIENT,
                                  G_PARAM_READABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_EEKBOARD,
@@ -278,14 +278,14 @@ eekboard_client_class_init (EekboardClientClass *klass)
 }
 
 static void
-eekboard_client_init (EekboardClient *client)
+client_init (Client *client)
 {
     client->settings = g_settings_new ("org.fedorahosted.eekboard");
 }
 
 gboolean
-eekboard_client_set_keyboard (EekboardClient *client,
-                              const gchar    *keyboard)
+client_set_keyboard (Client *client,
+                     const gchar    *keyboard)
 {
     gboolean retval;
     retval = set_keyboard (client, keyboard);
@@ -295,7 +295,7 @@ eekboard_client_set_keyboard (EekboardClient *client,
 }
 
 gboolean
-eekboard_client_enable_xkl (EekboardClient *client)
+client_enable_xkl (Client *client)
 {
     GdkDisplay *display = gdk_display_get_default ();
     gboolean retval;
@@ -338,7 +338,7 @@ eekboard_client_enable_xkl (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_xkl (EekboardClient *client)
+client_disable_xkl (Client *client)
 {
     if (client->xkl_engine) {
         xkl_engine_stop_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
@@ -357,7 +357,7 @@ eekboard_client_disable_xkl (EekboardClient *client)
 
 #ifdef HAVE_ATSPI
 gboolean
-eekboard_client_enable_atspi_focus (EekboardClient *client)
+client_enable_atspi_focus (Client *client)
 {
     GError *error;
 
@@ -384,7 +384,7 @@ eekboard_client_enable_atspi_focus (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_atspi_focus (EekboardClient *client)
+client_disable_atspi_focus (Client *client)
 {
     GError *error;
 
@@ -406,7 +406,7 @@ eekboard_client_disable_atspi_focus (EekboardClient *client)
 }
 
 gboolean
-eekboard_client_enable_atspi_keystroke (EekboardClient *client)
+client_enable_atspi_keystroke (Client *client)
 {
     GError *error;
 
@@ -438,7 +438,7 @@ eekboard_client_enable_atspi_keystroke (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_atspi_keystroke (EekboardClient *client)
+client_disable_atspi_keystroke (Client *client)
 {
     if (client->keystroke_listener) {
         GError *error;
@@ -466,7 +466,7 @@ static void
 focus_listener_cb (const AtspiEvent *event,
                    void             *user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
     AtspiAccessible *accessible = event->source;
     AtspiStateSet *state_set = atspi_accessible_get_state_set (accessible);
     AtspiRole role;
@@ -516,14 +516,14 @@ static gboolean
 keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                        void                   *user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
 
     switch (stroke->type) {
     case ATSPI_KEY_PRESSED:
-        eekboard_context_press_key (client->context, stroke->hw_code, NULL);
+        eekboard_context_press_keycode (client->context, stroke->hw_code, NULL);
         break;
     case ATSPI_KEY_RELEASED:
-        eekboard_context_release_key (client->context, stroke->hw_code, NULL);
+        eekboard_context_release_keycode (client->context, stroke->hw_code, NULL);
         break;
     default:
         g_return_val_if_reached (FALSE);
@@ -537,25 +537,25 @@ static void
 add_match_rule (GDBusConnection *connection,
                 const gchar     *match_rule)
 {
-  GError *error;
-  GDBusMessage *message;
+    GError *error;
+    GDBusMessage *message;
 
-  message = g_dbus_message_new_method_call ("org.freedesktop.DBus", /* name */
-                                            "/org/freedesktop/DBus", /* path */
-                                            "org.freedesktop.DBus", /* interface */
-                                            "AddMatch");
-  g_dbus_message_set_body (message, g_variant_new ("(s)", match_rule));
-  error = NULL;
-  g_dbus_connection_send_message (connection,
-                                  message,
-                                  G_DBUS_SEND_MESSAGE_FLAGS_NONE,
-                                  NULL,
-                                  &error);
-  g_object_unref (message);
+    message = g_dbus_message_new_method_call ("org.freedesktop.DBus", /* name */
+                                              "/org/freedesktop/DBus", /* path */
+                                              "org.freedesktop.DBus", /* interface */
+                                              "AddMatch");
+    g_dbus_message_set_body (message, g_variant_new ("(s)", match_rule));
+    error = NULL;
+    g_dbus_connection_send_message (connection,
+                                    message,
+                                    G_DBUS_SEND_MESSAGE_FLAGS_NONE,
+                                    NULL,
+                                    &error);
+    g_object_unref (message);
 }
 
 static gboolean
-on_hide_keyboard_timeout (EekboardClient *client)
+on_hide_keyboard_timeout (Client *client)
 {
     eekboard_context_hide_keyboard (client->context, NULL);
     client->hide_keyboard_timeout_id = 0;
@@ -568,7 +568,7 @@ focus_message_filter (GDBusConnection *connection,
                       gboolean         incoming,
                       gpointer         user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
 
     if (incoming &&
         g_strcmp0 (g_dbus_message_get_interface (message),
@@ -598,7 +598,7 @@ focus_message_filter (GDBusConnection *connection,
 static void
 _ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
     GDBusConnection *connection;
 
     connection = ibus_bus_get_connection (bus);
@@ -618,7 +618,7 @@ _ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
 }
 
 gboolean
-eekboard_client_enable_ibus_focus (EekboardClient *client)
+client_enable_ibus_focus (Client *client)
 {
     if (!client->ibus_bus) {
         client->ibus_bus = ibus_bus_new ();
@@ -636,7 +636,7 @@ eekboard_client_enable_ibus_focus (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_ibus_focus (EekboardClient *client)
+client_disable_ibus_focus (Client *client)
 {
     GDBusConnection *connection;
 
@@ -654,12 +654,12 @@ eekboard_client_disable_ibus_focus (EekboardClient *client)
 }
 #endif  /* HAVE_ATSPI */
 
-EekboardClient *
-eekboard_client_new (GDBusConnection *connection)
+Client *
+client_new (GDBusConnection *connection)
 {
-    EekboardClient *client = g_object_new (EEKBOARD_TYPE_CLIENT,
-                                           "connection", connection,
-                                           NULL);
+    Client *client = g_object_new (TYPE_CLIENT,
+                                   "connection", connection,
+                                   NULL);
     if (client->context)
         return client;
     return NULL;
@@ -670,7 +670,7 @@ filter_xkl_event (GdkXEvent *xev,
                   GdkEvent  *event,
                   gpointer   user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
     XEvent *xevent = (XEvent *)xev;
 
     xkl_engine_filter_events (client->xkl_engine, xevent);
@@ -681,7 +681,7 @@ static void
 on_xkl_config_changed (XklEngine *xklengine,
                        gpointer   user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
     gboolean retval;
 
     retval = set_keyboard_from_xkl (client);
@@ -693,7 +693,7 @@ on_xkl_config_changed (XklEngine *xklengine,
 }
 
 static gboolean
-set_keyboard (EekboardClient *client,
+set_keyboard (Client *client,
               const gchar *keyboard)
 {
     GSList *keyboards = NULL;
@@ -729,7 +729,7 @@ set_keyboard (EekboardClient *client,
 }
 
 static gboolean
-set_keyboard_from_xkl (EekboardClient *client)
+set_keyboard_from_xkl (Client *client)
 {
     XklConfigRec *rec;
     gchar *layout, *keyboard;
@@ -761,7 +761,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
                       gboolean             restore,
                       gpointer             user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
 
     if (type == GROUP_CHANGED)
         eekboard_context_set_group (client->context, value, NULL);
@@ -776,7 +776,7 @@ on_xkl_state_changed (XklEngine           *xklengine,
    - get_keycode_from_gdk_keymap (Caribou: best_keycode_keyval_match)
 */
 static guint
-get_replaced_keycode (EekboardClient *client)
+get_replaced_keycode (Client *client)
 {
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
@@ -798,7 +798,7 @@ get_replaced_keycode (EekboardClient *client)
    non-zero keycode), it simply changes the current map with the
    specified KEYCODE and KEYSYM. */
 static gboolean
-replace_keycode (EekboardClient *client,
+replace_keycode (Client *client,
                  guint          *keycode,
                  guint          *keysym)
 {
@@ -834,7 +834,7 @@ replace_keycode (EekboardClient *client,
 }
 
 static gboolean
-get_keycode_from_gdk_keymap (EekboardClient *client,
+get_keycode_from_gdk_keymap (Client *client,
                              guint           keysym,
                              guint          *keycode,
                              guint          *modifiers)
@@ -859,7 +859,7 @@ get_keycode_from_gdk_keymap (EekboardClient *client,
 }
 
 static void
-send_fake_modifier_key_event (EekboardClient *client,
+send_fake_modifier_key_event (Client *client,
                               EekModifierType modifiers,
                               gboolean        is_pressed)
 {
@@ -881,7 +881,7 @@ send_fake_modifier_key_event (EekboardClient *client,
 }
 
 static void
-send_fake_key_event (EekboardClient *client,
+send_fake_key_event (Client *client,
                      EekSymbol      *symbol,
                      guint           keyboard_modifiers,
                      gboolean        is_pressed)
@@ -939,7 +939,7 @@ on_key_pressed (EekboardContext *context,
                 guint            modifiers,
                 gpointer         user_data)
 {
-    EekboardClient *client = user_data;
+    Client *client = user_data;
 
     if (g_strcmp0 (eek_symbol_get_name (symbol), "cycle-keyboard") == 0) {
         client->keyboards = g_slist_next (client->keyboards);
@@ -953,7 +953,7 @@ on_key_pressed (EekboardContext *context,
 }
 
 static void
-update_modifier_keycodes (EekboardClient *client)
+update_modifier_keycodes (Client *client)
 {
     GdkDisplay *display = gdk_display_get_default ();
     XModifierKeymap *mods;
@@ -974,7 +974,7 @@ update_modifier_keycodes (EekboardClient *client)
 }
 
 gboolean
-eekboard_client_enable_xtest (EekboardClient *client)
+client_enable_xtest (Client *client)
 {
     GdkDisplay *display = gdk_display_get_default ();
     int opcode, event_base, error_base, major_version, minor_version;
@@ -1011,7 +1011,7 @@ eekboard_client_enable_xtest (EekboardClient *client)
 }
 
 void
-eekboard_client_disable_xtest (EekboardClient *client)
+client_disable_xtest (Client *client)
 {
     if (client->xkb) {
         XkbFreeKeyboard (client->xkb, 0, TRUE);	/* free_all = TRUE */

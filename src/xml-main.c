@@ -36,7 +36,7 @@
 #include "eek/eek-gtk.h"
 #endif  /* !HAVE_CLUTTER_GTK */
 
-#include "xklutil.h"
+#include "eekboard/eekboard-xklutil.h"
 
 #define BUFSIZE 8192
 

@@ -45,7 +45,7 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 enum {
     PROP_0,
-    PROP_KEYBOARD_VISIBLE,
+    PROP_VISIBLE,
     PROP_LAST
 };
 
@@ -56,7 +56,7 @@ G_DEFINE_TYPE (EekboardContext, eekboard_context, G_TYPE_DBUS_PROXY);
 
 struct _EekboardContextPrivate
 {
-    gboolean keyboard_visible;
+    gboolean visible;
     gboolean enabled;
     gboolean fullscreen;
     gint group;
@@ -99,13 +99,13 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
         return;
     }
 
-    if (g_strcmp0 (signal_name, "KeyboardVisibilityChanged") == 0) {
-        gboolean keyboard_visible = FALSE;
+    if (g_strcmp0 (signal_name, "VisibilityChanged") == 0) {
+        gboolean visible = FALSE;
 
-        g_variant_get (parameters, "(b)", &keyboard_visible);
-        if (keyboard_visible != priv->keyboard_visible) {
-            priv->keyboard_visible = keyboard_visible;
-            g_object_notify (G_OBJECT(context), "keyboard-visible");
+        g_variant_get (parameters, "(b)", &visible);
+        if (visible != priv->visible) {
+            priv->visible = visible;
+            g_object_notify (G_OBJECT(context), "visible");
         }
         return;
     }
@@ -159,8 +159,8 @@ eekboard_context_get_property (GObject    *object,
 {
     EekboardContextPrivate *priv = EEKBOARD_CONTEXT_GET_PRIVATE(object);
     switch (prop_id) {
-    case PROP_KEYBOARD_VISIBLE:
-        g_value_set_boolean (value, priv->keyboard_visible);
+    case PROP_VISIBLE:
+        g_value_set_boolean (value, priv->visible);
         break;
     default:
         g_object_get_property (object,
@@ -190,17 +190,17 @@ eekboard_context_class_init (EekboardContextClass *klass)
     gobject_class->get_property = eekboard_context_get_property;
 
     /**
-     * EekboardContext:keyboard-visible:
+     * EekboardContext:visible:
      *
      * Flag to indicate if keyboard is visible or not.
      */
-    pspec = g_param_spec_boolean ("keyboard-visible",
-                                  "Keyboard-visible",
+    pspec = g_param_spec_boolean ("visible",
+                                  "visible",
                                   "Flag that indicates if keyboard is visible",
                                   FALSE,
                                   G_PARAM_READABLE);
     g_object_class_install_property (gobject_class,
-                                     PROP_KEYBOARD_VISIBLE,
+                                     PROP_VISIBLE,
                                      pspec);
 
     /**
@@ -321,7 +321,7 @@ eekboard_context_new (GDBusConnection *connection,
         g_initable_new (EEKBOARD_TYPE_CONTEXT,
                         cancellable,
                         &error,
-                        "g-name", "org.fedorahosted.Eekboard.Server",
+                        "g-name", "org.fedorahosted.Eekboard",
                         "g-connection", connection,
                         "g-interface-name", "org.fedorahosted.Eekboard.Context",
                         "g-object-path", object_path,
@@ -563,7 +563,7 @@ eekboard_context_hide_keyboard (EekboardContext *context,
 }
 
 /**
- * eekboard_context_press_key:
+ * eekboard_context_press_keycode:
  * @context: an #EekboardContext
  * @keycode: keycode number
  * @cancellable: a #GCancellable
@@ -571,9 +571,9 @@ eekboard_context_hide_keyboard (EekboardContext *context,
  * Tell eekboard-server that a key identified by @keycode is pressed.
  */
 void
-eekboard_context_press_key (EekboardContext *context,
-                            guint            keycode,
-                            GCancellable    *cancellable)
+eekboard_context_press_keycode (EekboardContext *context,
+                                guint            keycode,
+                                GCancellable    *cancellable)
 {
     EekboardContextPrivate *priv;
 
@@ -584,7 +584,7 @@ eekboard_context_press_key (EekboardContext *context,
         return;
 
     g_dbus_proxy_call (G_DBUS_PROXY(context),
-                       "PressKey",
+                       "PressKeycode",
                        g_variant_new ("(u)", keycode),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
@@ -594,15 +594,15 @@ eekboard_context_press_key (EekboardContext *context,
 }
 
 /**
- * eekboard_context_release_key:
- * @context: an #EekboardContext
+ * eekboard_context_release_keycode:
+ * @Context: an #EekboardContext
  * @keycode: keycode number
  * @cancellable: a #GCancellable
  *
  * Tell eekboard-server that a key identified by @keycode is released.
  */
 void
-eekboard_context_release_key (EekboardContext *context,
+eekboard_context_release_keycode (EekboardContext *context,
                               guint            keycode,
                               GCancellable    *cancellable)
 {
@@ -615,7 +615,7 @@ eekboard_context_release_key (EekboardContext *context,
         return;
 
     g_dbus_proxy_call (G_DBUS_PROXY(context),
-                       "ReleaseKey",
+                       "ReleaseKeycode",
                        g_variant_new ("(u)", keycode),
                        G_DBUS_CALL_FLAGS_NONE,
                        -1,
@@ -625,20 +625,20 @@ eekboard_context_release_key (EekboardContext *context,
 }
 
 /**
- * eekboard_context_is_keyboard_visible:
+ * eekboard_context_is_visible:
  * @context: an #EekboardContext
  *
  * Check if keyboard is visible.
  */
 gboolean
-eekboard_context_is_keyboard_visible (EekboardContext *context)
+eekboard_context_is_visible (EekboardContext *context)
 {
     EekboardContextPrivate *priv;
 
     g_assert (EEKBOARD_IS_CONTEXT(context));
 
     priv = EEKBOARD_CONTEXT_GET_PRIVATE (context);
-    return priv->enabled && priv->keyboard_visible;
+    return priv->enabled && priv->visible;
 }
 
 /**
