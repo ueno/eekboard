@@ -38,7 +38,7 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_TYPE (EekboardClient, eekboard_client, G_TYPE_DBUS_PROXY);
 
-#define EEKBOARD_CLIENT_GET_PRIVATE(obj)                               \
+#define EEKBOARD_CLIENT_GET_PRIVATE(obj)                                \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEKBOARD_TYPE_CLIENT, EekboardClientPrivate))
 
 struct _EekboardClientPrivate
@@ -117,8 +117,8 @@ eekboard_name_vanished_callback (GDBusConnection *connection,
                                  const gchar     *name,
                                  gpointer         user_data)
 {
-    EekboardClient *eekboard = user_data;
-    g_signal_emit_by_name (eekboard, "destroyed", NULL);
+    EekboardClient *client = user_data;
+    g_signal_emit_by_name (client, "destroyed", NULL);
 }
 
 /**
@@ -130,7 +130,7 @@ eekboard_name_vanished_callback (GDBusConnection *connection,
  */
 EekboardClient *
 eekboard_client_new (GDBusConnection *connection,
-                       GCancellable    *cancellable)
+                     GCancellable    *cancellable)
 {
     GInitable *initable;
     GError *error;
@@ -148,10 +148,10 @@ eekboard_client_new (GDBusConnection *connection,
                         "g-object-path", "/org/fedorahosted/Eekboard",
                         NULL);
     if (initable != NULL) {
-        EekboardClient *eekboard = EEKBOARD_CLIENT (initable);
-        gchar *name_owner = g_dbus_proxy_get_name_owner (G_DBUS_PROXY(eekboard));
+        EekboardClient *client = EEKBOARD_CLIENT (initable);
+        gchar *name_owner = g_dbus_proxy_get_name_owner (G_DBUS_PROXY(client));
         if (name_owner == NULL) {
-            g_object_unref (eekboard);
+            g_object_unref (client);
             return NULL;
         }
 
@@ -161,11 +161,11 @@ eekboard_client_new (GDBusConnection *connection,
                                         G_BUS_NAME_WATCHER_FLAGS_NONE,
                                         NULL,
                                         eekboard_name_vanished_callback,
-                                        eekboard,
+                                        client,
                                         NULL);
         g_free (name_owner);
 
-        return eekboard;
+        return client;
     }
     return NULL;
 }
@@ -174,8 +174,8 @@ static void
 on_context_destroyed (EekboardContext *context,
                       gpointer         user_data)
 {
-    EekboardClient *eekboard = user_data;
-    EekboardClientPrivate *priv = EEKBOARD_CLIENT_GET_PRIVATE(eekboard);
+    EekboardClient *client = user_data;
+    EekboardClientPrivate *priv = EEKBOARD_CLIENT_GET_PRIVATE(client);
 
     g_hash_table_remove (priv->context_hash,
                          g_dbus_proxy_get_object_path (G_DBUS_PROXY(context)));
@@ -192,9 +192,9 @@ on_context_destroyed (EekboardContext *context,
  * Return value: (transfer full): a newly created #EekboardContext.
  */
 EekboardContext *
-eekboard_client_create_context (EekboardClient *eekboard,
-                                  const gchar      *client_name,
-                                  GCancellable     *cancellable)
+eekboard_client_create_context (EekboardClient *client,
+                                const gchar    *client_name,
+                                GCancellable   *cancellable)
 {
     GVariant *variant;
     const gchar *object_path;
@@ -203,11 +203,11 @@ eekboard_client_create_context (EekboardClient *eekboard,
     GError *error;
     GDBusConnection *connection;
 
-    g_assert (EEKBOARD_IS_EEKBOARD(eekboard));
+    g_assert (EEKBOARD_IS_CLIENT(client));
     g_assert (client_name);
 
     error = NULL;
-    variant = g_dbus_proxy_call_sync (G_DBUS_PROXY(eekboard),
+    variant = g_dbus_proxy_call_sync (G_DBUS_PROXY(client),
                                       "CreateContext",
                                       g_variant_new ("(s)", client_name),
                                       G_DBUS_CALL_FLAGS_NONE,
@@ -218,26 +218,26 @@ eekboard_client_create_context (EekboardClient *eekboard,
         return NULL;
 
     g_variant_get (variant, "(&s)", &object_path);
-    connection = g_dbus_proxy_get_connection (G_DBUS_PROXY(eekboard));
+    connection = g_dbus_proxy_get_connection (G_DBUS_PROXY(client));
     context = eekboard_context_new (connection, object_path, cancellable);
     if (!context) {
         g_variant_unref (variant);
         return NULL;
     }
 
-    priv = EEKBOARD_CLIENT_GET_PRIVATE(eekboard);
+    priv = EEKBOARD_CLIENT_GET_PRIVATE(client);
     g_hash_table_insert (priv->context_hash,
                          g_strdup (object_path),
                          g_object_ref (context));
     g_signal_connect (context, "destroyed",
-                      G_CALLBACK(on_context_destroyed), eekboard);
+                      G_CALLBACK(on_context_destroyed), client);
     return context;
 }
 
 static void
 eekboard_async_ready_callback (GObject      *source_object,
-                             GAsyncResult *res,
-                             gpointer      user_data)
+                               GAsyncResult *res,
+                               gpointer      user_data)
 {
     GError *error = NULL;
     GVariant *result;
@@ -258,25 +258,25 @@ eekboard_async_ready_callback (GObject      *source_object,
  * Enable the input context @context and disable the others.
  */
 void
-eekboard_client_push_context (EekboardClient *eekboard,
-                                EekboardContext  *context,
-                                GCancellable     *cancellable)
+eekboard_client_push_context (EekboardClient  *client,
+                              EekboardContext *context,
+                              GCancellable    *cancellable)
 {
     EekboardClientPrivate *priv;
     const gchar *object_path;
 
-    g_return_if_fail (EEKBOARD_IS_EEKBOARD(eekboard));
+    g_return_if_fail (EEKBOARD_IS_CLIENT(client));
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
 
     object_path = g_dbus_proxy_get_object_path (G_DBUS_PROXY(context));
 
-    priv = EEKBOARD_CLIENT_GET_PRIVATE(eekboard);
+    priv = EEKBOARD_CLIENT_GET_PRIVATE(client);
     context = g_hash_table_lookup (priv->context_hash, object_path);
     if (!context)
         return;
 
     eekboard_context_set_enabled (context, TRUE);
-    g_dbus_proxy_call (G_DBUS_PROXY(eekboard),
+    g_dbus_proxy_call (G_DBUS_PROXY(client),
                        "PushContext",
                        g_variant_new ("(s)", object_path),
                        G_DBUS_CALL_FLAGS_NONE,
@@ -294,12 +294,12 @@ eekboard_client_push_context (EekboardClient *eekboard,
  * Disable the current input context and enable the previous one.
  */
 void
-eekboard_client_pop_context (EekboardClient *eekboard,
-                               GCancellable     *cancellable)
+eekboard_client_pop_context (EekboardClient *client,
+                             GCancellable   *cancellable)
 {
-    g_return_if_fail (EEKBOARD_IS_EEKBOARD(eekboard));
+    g_return_if_fail (EEKBOARD_IS_CLIENT(client));
 
-    g_dbus_proxy_call (G_DBUS_PROXY(eekboard),
+    g_dbus_proxy_call (G_DBUS_PROXY(client),
                        "PopContext",
                        NULL,
                        G_DBUS_CALL_FLAGS_NONE,
@@ -318,22 +318,21 @@ eekboard_client_pop_context (EekboardClient *eekboard,
  * Remove @context from @eekboard.
  */
 void
-eekboard_client_destroy_context (EekboardClient *eekboard,
-                                   EekboardContext  *context,
-                                   GCancellable     *cancellable)
+eekboard_client_destroy_context (EekboardClient  *client,
+                                 EekboardContext *context,
+                                 GCancellable    *cancellable)
 {
     EekboardClientPrivate *priv;
     const gchar *object_path;
 
-    g_return_if_fail (EEKBOARD_IS_EEKBOARD(eekboard));
+    g_return_if_fail (EEKBOARD_IS_CLIENT(client));
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
 
-    priv = EEKBOARD_CLIENT_GET_PRIVATE(eekboard);
-
+    priv = EEKBOARD_CLIENT_GET_PRIVATE(client);
     object_path = g_dbus_proxy_get_object_path (G_DBUS_PROXY(context));
     g_hash_table_remove (priv->context_hash, object_path);
 
-    g_dbus_proxy_call (G_DBUS_PROXY(eekboard),
+    g_dbus_proxy_call (G_DBUS_PROXY(client),
                        "DestroyContext",
                        g_variant_new ("(s)", object_path),
                        G_DBUS_CALL_FLAGS_NONE,
