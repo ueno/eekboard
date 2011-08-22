@@ -632,7 +632,7 @@ eek_renderer_real_render_key_outline (EekRenderer *self,
 {
     cairo_save (cr);
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
-    render_key_outline (self, cr, key, eek_key_is_pressed (key));
+    render_key_outline (self, cr, key, eek_key_is_pressed (key) || eek_key_is_locked (key));
     cairo_restore (cr);
 }
 
@@ -645,7 +645,7 @@ eek_renderer_real_render_key (EekRenderer *self,
 {
     cairo_save (cr);
     eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
-    render_key (self, cr, key, eek_key_is_pressed (key));
+    render_key (self, cr, key, eek_key_is_pressed (key) || eek_key_is_locked (key));
     cairo_restore (cr);
 }
 

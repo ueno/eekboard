@@ -61,6 +61,8 @@ struct _EekSection
  * section by keycode
  * @key_pressed: class handler for #EekSection::key-pressed signal
  * @key_released: class handler for #EekSection::key-released signal
+ * @key_locked: class handler for #EekSection::key-locked signal
+ * @key_unlocked: class handler for #EekSection::key-unlocked signal
  */
 struct _EekSectionClass
 {
@@ -93,10 +95,16 @@ struct _EekSectionClass
                                      EekKey         *key);
     void    (* key_released)        (EekSection     *self,
                                      EekKey         *key);
+    void    (* key_locked)          (EekSection     *self,
+                                     EekKey         *key);
+    void    (* key_unlocked)        (EekSection     *self,
+                                     EekKey         *key);
+    void    (* key_cancelled)       (EekSection     *self,
+                                     EekKey         *key);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[22];
+    gpointer pdummy[19];
 };
 
 GType   eek_section_get_type             (void) G_GNUC_CONST;

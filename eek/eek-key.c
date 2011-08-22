@@ -53,6 +53,9 @@ enum {
 enum {
     PRESSED,
     RELEASED,
+    LOCKED,
+    UNLOCKED,
+    CANCELLED,
     LAST_SIGNAL
 };
 
@@ -72,6 +75,7 @@ struct _EekKeyPrivate
     gint row;
     gulong oref;
     gboolean is_pressed;
+    gboolean is_locked;
 };
 
 static void
@@ -151,6 +155,13 @@ eek_key_real_is_pressed (EekKey *self)
     return priv->is_pressed;
 }
 
+static gboolean
+eek_key_real_is_locked (EekKey *self)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+    return priv->is_locked;
+}
+
 static void
 eek_key_real_pressed (EekKey *self)
 {
@@ -170,6 +181,39 @@ eek_key_real_released (EekKey *self)
     priv->is_pressed = FALSE;
 #if DEBUG
     g_debug ("released %X", eek_key_get_keycode (self));
+#endif
+}
+
+static void
+eek_key_real_locked (EekKey *self)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    priv->is_locked = TRUE;
+#if DEBUG
+    g_debug ("locked %X", eek_key_get_keycode (self));
+#endif
+}
+
+static void
+eek_key_real_unlocked (EekKey *self)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    priv->is_locked = FALSE;
+#if DEBUG
+    g_debug ("unlocked %X", eek_key_get_keycode (self));
+#endif
+}
+
+static void
+eek_key_real_cancelled (EekKey *self)
+{
+    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
+
+    priv->is_pressed = FALSE;
+#if DEBUG
+    g_debug ("cancelled %X", eek_key_get_keycode (self));
 #endif
 }
 
@@ -271,6 +315,7 @@ eek_key_class_init (EekKeyClass *klass)
     klass->set_oref = eek_key_real_set_oref;
     klass->get_oref = eek_key_real_get_oref;
     klass->is_pressed = eek_key_real_is_pressed;
+    klass->is_locked = eek_key_real_is_locked;
 
     gobject_class->set_property = eek_key_set_property;
     gobject_class->get_property = eek_key_get_property;
@@ -279,6 +324,9 @@ eek_key_class_init (EekKeyClass *klass)
     /* signals */
     klass->pressed = eek_key_real_pressed;
     klass->released = eek_key_real_released;
+    klass->locked = eek_key_real_locked;
+    klass->unlocked = eek_key_real_unlocked;
+    klass->cancelled = eek_key_real_cancelled;
 
     /**
      * EekKey:keycode:
@@ -371,6 +419,59 @@ eek_key_class_init (EekKeyClass *klass)
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyClass, released),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
+
+    /**
+     * EekKey::locked:
+     * @key: an #EekKey
+     *
+     * The ::locked signal is emitted each time @key is shifted to
+     * the locked state.  The class handler runs before signal
+     * handlers to allow signal handlers to read the status of @key
+     * with eek_key_is_locked().
+     */
+    signals[LOCKED] =
+        g_signal_new (I_("locked"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET(EekKeyClass, locked),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
+
+    /**
+     * EekKey::unlocked:
+     * @key: an #EekKey
+     *
+     * The ::unlocked signal is emitted each time @key is shifted to
+     * the unlocked state.
+     */
+   signals[UNLOCKED] =
+        g_signal_new (I_("unlocked"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyClass, unlocked),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE, 0);
+
+    /**
+     * EekKey::cancelled:
+     * @key: an #EekKey
+     *
+     * The ::cancelled signal is emitted each time @key is shifted to
+     * the cancelled state.
+     */
+   signals[CANCELLED] =
+        g_signal_new (I_("cancelled"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyClass, cancelled),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__VOID,
@@ -642,4 +743,17 @@ eek_key_is_pressed (EekKey *key)
 {
     g_assert (EEK_IS_KEY(key));
     return EEK_KEY_GET_CLASS(key)->is_pressed (key);
+}
+
+/**
+ * eek_key_is_locked:
+ * @key: an #EekKey
+ *
+ * Return %TRUE if key is marked as locked.
+ */
+gboolean
+eek_key_is_locked (EekKey *key)
+{
+    g_assert (EEK_IS_KEY(key));
+    return EEK_KEY_GET_CLASS(key)->is_locked (key);
 }

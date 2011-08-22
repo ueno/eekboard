@@ -63,6 +63,8 @@ struct _EekKeyboard
  * keyboard by keycode
  * @key_pressed: class handler for #EekKeyboard::key-pressed signal
  * @key_released: class handler for #EekKeyboard::key-released signal
+ * @key_locked: class handler for #EekKeyboard::key-locked signal
+ * @key_unlocked: class handler for #EekKeyboard::key-unlocked signal
  */
 struct _EekKeyboardClass
 {
@@ -74,24 +76,40 @@ struct _EekKeyboardClass
     gpointer get_symbol_index;
 
     /*< public >*/
-    EekSection *(* create_section)       (EekKeyboard *self);
+    EekSection *(* create_section)      (EekKeyboard *self);
 
-    EekKey     *(* find_key_by_keycode)  (EekKeyboard *self,
-                                          guint        keycode);
+    EekKey     *(* find_key_by_keycode) (EekKeyboard *self,
+                                         guint        keycode);
 
     /* signals */
-    void        (* key_pressed)          (EekKeyboard *self,
-                                          EekKey      *key);
-    void        (* key_released)         (EekKeyboard *self,
-                                          EekKey      *key);
+    void        (* key_pressed)         (EekKeyboard *self,
+                                         EekKey      *key);
+    void        (* key_released)        (EekKeyboard *self,
+                                         EekKey      *key);
 
     /*< private >*/
     /* obsolete members moved to EekElement */
     gpointer symbol_index_changed;
 
+    /*< public >*/
+    /* signals */
+    void        (* key_locked)          (EekKeyboard *self,
+                                         EekKey      *key);
+    void        (* key_unlocked)        (EekKeyboard *self,
+                                         EekKey      *key);
+    void        (* key_cancelled)        (EekKeyboard *self,
+                                         EekKey      *key);
+
+    /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[21];
 };
+
+struct _EekModifierKey {
+    EekModifierType modifiers;
+    EekKey *key;
+};
+typedef struct _EekModifierKey EekModifierKey;
 
 GType               eek_keyboard_get_type
                                      (void) G_GNUC_CONST;
@@ -166,6 +184,11 @@ void                eek_keyboard_set_alt_gr_mask
                                      (EekKeyboard        *keyboard,
                                       EekModifierType     alt_gr_mask);
 EekModifierType     eek_keyboard_get_alt_gr_mask
+                                     (EekKeyboard        *keyboard);
+
+GList              *eek_keyboard_get_pressed_keys
+                                     (EekKeyboard        *keyboard);
+GList              *eek_keyboard_get_locked_keys
                                      (EekKeyboard        *keyboard);
 
 G_END_DECLS

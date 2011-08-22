@@ -62,7 +62,10 @@ struct _EekKey
  * @get_oref: virtual function for getting outline id of the key
  * @pressed: class handler for #EekKey::pressed signal
  * @released: class handler for #EekKey::released signal
+ * @locked: class handler for #EekKey::locked signal
+ * @unlocked: class handler for #EekKey::unlocked signal
  * @is_pressed: virtual function for getting whether the key is pressed
+ * @is_locked: virtual function for getting whether the key is locked
  */
 struct _EekKeyClass
 {
@@ -90,13 +93,18 @@ struct _EekKeyClass
 
     gboolean         (* is_pressed)        (EekKey          *self);
 
-    /* signals */
     void             (* pressed)           (EekKey          *key);
     void             (* released)          (EekKey          *key);
 
+    gboolean         (* is_locked)         (EekKey          *self);
+
+    void             (* locked)            (EekKey          *key);
+    void             (* unlocked)          (EekKey          *key);
+    void             (* cancelled)         (EekKey          *key);
+
     /*< private >*/
     /* padding */
-    gpointer pdummy[24];
+    gpointer pdummy[20];
 };
 
 GType            eek_key_get_type            (void) G_GNUC_CONST;
@@ -130,6 +138,7 @@ void             eek_key_set_oref            (EekKey          *key,
 gulong           eek_key_get_oref            (EekKey          *key);
 
 gboolean         eek_key_is_pressed          (EekKey          *key);
+gboolean         eek_key_is_locked           (EekKey          *key);
 
 G_END_DECLS
 #endif  /* EEK_KEY_H */

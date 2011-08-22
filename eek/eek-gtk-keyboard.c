@@ -61,9 +61,11 @@ struct _EekGtkKeyboardPrivate
 {
     EekRenderer *renderer;
     EekKeyboard *keyboard;
-    EekKey *dragged_key;
     gulong key_pressed_handler;
     gulong key_released_handler;
+    gulong key_locked_handler;
+    gulong key_unlocked_handler;
+    gulong key_cancelled_handler;
     gulong symbol_index_changed_handler;
     EekTheme *theme;
 };
@@ -75,11 +77,22 @@ static void       on_key_pressed          (EekKeyboard *keyboard,
 static void       on_key_released         (EekKeyboard *keyboard,
                                            EekKey      *key,
                                            gpointer     user_data);
+static void       on_key_locked          (EekKeyboard *keyboard,
+                                           EekKey      *key,
+                                           gpointer     user_data);
+static void       on_key_unlocked         (EekKeyboard *keyboard,
+                                           EekKey      *key,
+                                           gpointer     user_data);
+static void       on_key_cancelled        (EekKeyboard *keyboard,
+                                           EekKey      *key,
+                                           gpointer     user_data);
 static void       on_symbol_index_changed (EekKeyboard *keyboard,
                                            gint         group,
                                            gint         level,
                                            gpointer     user_data);
 static void       render_pressed_key      (GtkWidget   *widget,
+                                           EekKey      *key);
+static void       render_locked_key       (GtkWidget   *widget,
                                            EekKey      *key);
 static void       render_released_key     (GtkWidget   *widget,
                                            EekKey      *key);
@@ -106,6 +119,7 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     GtkAllocation allocation;
     EekColor background;
+    GList *head;
 
     gtk_widget_get_allocation (self, &allocation);
 
@@ -149,9 +163,17 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
 
     eek_renderer_render_keyboard (priv->renderer, cr);
 
-    /* redraw dragged key */
-    if (priv->dragged_key)
-        render_pressed_key (self, priv->dragged_key);
+    /* redraw pressed key */
+    head = eek_keyboard_get_pressed_keys (priv->keyboard);
+    for (; head; head = g_list_next (head)) {
+        render_pressed_key (self, head->data);
+    }
+
+    /* redraw locked key */
+    head = eek_keyboard_get_locked_keys (priv->keyboard);
+    for (; head; head = g_list_next (head)) {
+        render_locked_key (self, ((EekModifierKey *)head->data)->key);
+    }
 
     return FALSE;
 }
@@ -197,10 +219,8 @@ eek_gtk_keyboard_real_button_press_event (GtkWidget      *self,
     key = eek_renderer_find_key_by_position (priv->renderer,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
-    if (key && key != priv->dragged_key) {
-        priv->dragged_key = key;
+    if (key)
         g_signal_emit_by_name (key, "pressed", priv->keyboard);
-    }
     return TRUE;
 }
 
@@ -209,10 +229,11 @@ eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
                                             GdkEventButton *event)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
+    GList *head;
 
-    if (priv->dragged_key) {
-        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
-        priv->dragged_key = NULL;
+    head = eek_keyboard_get_pressed_keys (priv->keyboard);
+    for (; head; head = g_list_next (head)) {
+        g_signal_emit_by_name (head->data, "released", priv->keyboard);
     }
     return TRUE;
 }
@@ -227,11 +248,17 @@ eek_gtk_keyboard_real_motion_notify_event (GtkWidget      *self,
     key = eek_renderer_find_key_by_position (priv->renderer,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
-    if (key && key != priv->dragged_key) {
-        if (priv->dragged_key)
-            render_released_key (GTK_WIDGET(self), priv->dragged_key);
-        priv->dragged_key = key;
-        g_signal_emit_by_name (key, "pressed", priv->keyboard);
+    if (key) {
+        GList *head = eek_keyboard_get_pressed_keys (priv->keyboard);
+        gboolean found = FALSE;
+        for (; head; head = g_list_next (head)) {
+            if (head->data == key)
+                found = TRUE;
+            else
+                g_signal_emit_by_name (head->data, "cancelled", priv->keyboard);
+        }
+        if (!found)
+            g_signal_emit_by_name (key, "pressed", priv->keyboard);
     }
     return TRUE;
 }
@@ -241,10 +268,15 @@ eek_gtk_keyboard_real_unmap (GtkWidget *self)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
 
-    if (priv->dragged_key) {
-        g_signal_emit_by_name (priv->dragged_key, "released", priv->keyboard);
-        priv->dragged_key = NULL;
+    if (priv->keyboard) {
+        GList *head;
+
+        head = eek_keyboard_get_pressed_keys (priv->keyboard);
+        for (; head; head = g_list_next (head)) {
+            g_signal_emit_by_name (head->data, "released", priv->keyboard);
+        }
     }
+
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->unmap (self);
 }
 
@@ -261,6 +293,15 @@ eek_gtk_keyboard_set_keyboard (EekGtkKeyboard *self,
     priv->key_released_handler =
         g_signal_connect (priv->keyboard, "key-released",
                           G_CALLBACK(on_key_released), self);
+    priv->key_locked_handler =
+        g_signal_connect (priv->keyboard, "key-locked",
+                          G_CALLBACK(on_key_locked), self);
+    priv->key_unlocked_handler =
+        g_signal_connect (priv->keyboard, "key-unlocked",
+                          G_CALLBACK(on_key_unlocked), self);
+    priv->key_cancelled_handler =
+        g_signal_connect (priv->keyboard, "key-cancelled",
+                          G_CALLBACK(on_key_cancelled), self);
     priv->symbol_index_changed_handler =
         g_signal_connect (priv->keyboard, "symbol-index-changed",
                           G_CALLBACK(on_symbol_index_changed), self);
@@ -307,15 +348,27 @@ eek_gtk_keyboard_dispose (GObject *object)
             g_signal_handler_disconnect (priv->keyboard,
                                          priv->key_released_handler);
         if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->key_locked_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->key_locked_handler);
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->key_unlocked_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->key_unlocked_handler);
+        if (g_signal_handler_is_connected (priv->keyboard,
+                                           priv->key_cancelled_handler))
+            g_signal_handler_disconnect (priv->keyboard,
+                                         priv->key_cancelled_handler);
+        if (g_signal_handler_is_connected (priv->keyboard,
                                            priv->symbol_index_changed_handler))
             g_signal_handler_disconnect (priv->keyboard,
                                          priv->symbol_index_changed_handler);
             
-        if (priv->dragged_key) {
-            g_signal_emit_by_name (priv->dragged_key,
-                                   "released",
-                                   priv->keyboard);
-            priv->dragged_key = NULL;
+        GList *head;
+
+        head = eek_keyboard_get_pressed_keys (priv->keyboard);
+        for (; head; head = g_list_next (head)) {
+            g_signal_emit_by_name (head->data, "released", priv->keyboard);
         }
 
         g_object_unref (priv->keyboard);
@@ -446,6 +499,23 @@ render_pressed_key (GtkWidget *widget,
 }
 
 static void
+render_locked_key (GtkWidget *widget,
+                   EekKey    *key)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+    EekBounds bounds;
+    cairo_t *cr;
+
+    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
+
+    eek_renderer_get_key_bounds (priv->renderer, key, &bounds, TRUE);
+    cairo_translate (cr, bounds.x, bounds.y);
+    eek_renderer_render_key (priv->renderer, cr, key, 1.0, TRUE);
+
+    cairo_destroy (cr);
+}
+
+static void
 render_released_key (GtkWidget *widget,
                      EekKey    *key)
 {
@@ -517,6 +587,51 @@ on_key_released (EekKeyboard *keyboard,
                             CA_PROP_APPLICATION_ID, "org.fedorahosted.Eekboard",
                             NULL);
 #endif
+}
+
+static void
+on_key_cancelled (EekKeyboard *keyboard,
+                 EekKey      *key,
+                 gpointer     user_data)
+{
+    GtkWidget *widget = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+
+    /* renderer may have not been set yet if the widget is a popup */
+    if (!priv->renderer)
+        return;
+
+    render_released_key (widget, key);
+}
+
+static void
+on_key_locked (EekKeyboard *keyboard,
+               EekKey      *key,
+               gpointer     user_data)
+{
+    GtkWidget *widget = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+
+    /* renderer may have not been set yet if the widget is a popup */
+    if (!priv->renderer)
+        return;
+
+    render_locked_key (widget, key);
+}
+
+static void
+on_key_unlocked (EekKeyboard *keyboard,
+                 EekKey      *key,
+                 gpointer     user_data)
+{
+    GtkWidget *widget = user_data;
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+
+    /* renderer may have not been set yet if the widget is a popup */
+    if (!priv->renderer)
+        return;
+
+    render_released_key (widget, key);
 }
 
 static void

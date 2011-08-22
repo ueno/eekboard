@@ -47,6 +47,9 @@ enum {
 enum {
     KEY_PRESSED,
     KEY_RELEASED,
+    KEY_LOCKED,
+    KEY_UNLOCKED,
+    KEY_CANCELLED,
     LAST_SIGNAL
 };
 
@@ -57,12 +60,13 @@ G_DEFINE_TYPE (EekKeyboard, eek_keyboard, EEK_TYPE_CONTAINER);
 #define EEK_KEYBOARD_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_KEYBOARD, EekKeyboardPrivate))
 
-
 struct _EekKeyboardPrivate
 {
     EekLayout *layout;
     EekModifierBehavior modifier_behavior;
     EekModifierType modifiers;
+    GList *pressed_keys;
+    GList *locked_keys;
     GArray *outline_array;
 
     /* modifiers dynamically assigned at run time */
@@ -84,6 +88,30 @@ on_key_released (EekSection  *section,
                  EekKeyboard *keyboard)
 {
     g_signal_emit_by_name (keyboard, "key-released", key);
+}
+
+static void
+on_key_locked (EekSection  *section,
+                EekKey      *key,
+                EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "key-locked", key);
+}
+
+static void
+on_key_unlocked (EekSection  *section,
+                 EekKey      *key,
+                 EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "key-unlocked", key);
+}
+
+static void
+on_key_cancelled (EekSection  *section,
+                 EekKey      *key,
+                 EekKeyboard *keyboard)
+{
+    g_signal_emit_by_name (keyboard, "key-cancelled", key);
 }
 
 static void
@@ -204,6 +232,45 @@ set_level_from_modifiers (EekKeyboard *self)
 }
 
 static void
+set_modifiers_with_key (EekKeyboard    *self,
+                        EekKey         *key,
+                        EekModifierType modifiers)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    EekModifierType enabled = (priv->modifiers ^ modifiers) & modifiers;
+    EekModifierType disabled = (priv->modifiers ^ modifiers) & priv->modifiers;
+
+    if (enabled != 0) {
+        if (priv->modifier_behavior != EEK_MODIFIER_BEHAVIOR_NONE) {
+            EekModifierKey *modifier_key = g_slice_new (EekModifierKey);
+            modifier_key->modifiers = enabled;
+            modifier_key->key = key;
+            priv->locked_keys =
+                g_list_prepend (priv->locked_keys, modifier_key);
+            g_signal_emit_by_name (modifier_key->key, "locked");
+        }
+    } else {
+        if (priv->modifier_behavior != EEK_MODIFIER_BEHAVIOR_NONE) {
+            GList *head;
+            for (head = priv->locked_keys; head; ) {
+                EekModifierKey *modifier_key = head->data;
+                if (modifier_key->modifiers & disabled) {
+                    GList *next = g_list_next (head);
+                    priv->locked_keys =
+                        g_list_remove_link (priv->locked_keys, head);
+                    g_signal_emit_by_name (modifier_key->key, "unlocked");
+                    g_list_free1 (head);
+                    head = next;
+                } else
+                    head = g_list_next (head);
+            }
+        }
+    }
+
+    priv->modifiers = modifiers;
+}
+
+static void
 eek_keyboard_real_key_pressed (EekKeyboard *self,
                                EekKey      *key)
 {
@@ -211,13 +278,15 @@ eek_keyboard_real_key_pressed (EekKeyboard *self,
     EekSymbol *symbol;
     EekModifierType modifier;
 
+    priv->pressed_keys = g_list_prepend (priv->pressed_keys, key);
+
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
         return;
 
     modifier = eek_symbol_get_modifier_mask (symbol);
     if (priv->modifier_behavior == EEK_MODIFIER_BEHAVIOR_NONE) {
-        priv->modifiers |= modifier;
+        set_modifiers_with_key (self, key, priv->modifiers | modifier);
         set_level_from_modifiers (self);
     }
 }
@@ -230,6 +299,8 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     EekSymbol *symbol;
     EekModifierType modifier;
 
+    EEK_KEYBOARD_GET_CLASS (self)->key_cancelled (self, key);
+
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
     if (!symbol)
         return;
@@ -237,19 +308,40 @@ eek_keyboard_real_key_released (EekKeyboard *self,
     modifier = eek_symbol_get_modifier_mask (symbol);
     switch (priv->modifier_behavior) {
     case EEK_MODIFIER_BEHAVIOR_NONE:
-        priv->modifiers &= ~modifier;
+        set_modifiers_with_key (self, key, priv->modifiers & ~modifier);
         break;
     case EEK_MODIFIER_BEHAVIOR_LOCK:
         priv->modifiers ^= modifier;
         break;
     case EEK_MODIFIER_BEHAVIOR_LATCH:
-        if (modifier == priv->alt_gr_mask || modifier == EEK_SHIFT_MASK)
-            priv->modifiers ^= modifier;
+        if (modifier)
+            set_modifiers_with_key (self, key, priv->modifiers ^ modifier);
         else
-            priv->modifiers = (priv->modifiers ^ modifier) & modifier;
+            set_modifiers_with_key (self, key,
+                                    (priv->modifiers ^ modifier) & modifier);
         break;
     }
     set_level_from_modifiers (self);
+}
+
+static void
+eek_keyboard_real_key_cancelled (EekKeyboard *self,
+                                 EekKey      *key)
+{
+    EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    GList *head;
+
+    for (head = priv->pressed_keys; head; ) {
+        EekKey *pressed_key = head->data;
+        if (pressed_key == key) {
+            GList *next = g_list_next (head);
+            priv->pressed_keys =
+                g_list_remove_link (priv->pressed_keys, head);
+            g_list_free1 (head);
+            head = next;
+        } else
+            head = g_list_next (head);
+    }
 }
 
 static void
@@ -271,6 +363,9 @@ eek_keyboard_finalize (GObject *object)
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(object);
     gint i;
 
+    g_list_free (priv->pressed_keys);
+    g_list_free (priv->locked_keys);
+
     for (i = 0; i < priv->outline_array->len; i++) {
         EekOutline *outline = &g_array_index (priv->outline_array,
                                               EekOutline,
@@ -291,6 +386,12 @@ eek_keyboard_real_child_added (EekContainer *self,
                       G_CALLBACK(on_key_pressed), self);
     g_signal_connect (element, "key-released",
                       G_CALLBACK(on_key_released), self);
+    g_signal_connect (element, "key-locked",
+                      G_CALLBACK(on_key_locked), self);
+    g_signal_connect (element, "key-unlocked",
+                      G_CALLBACK(on_key_unlocked), self);
+    g_signal_connect (element, "key-cancelled",
+                      G_CALLBACK(on_key_cancelled), self);
     g_signal_connect (element, "symbol-index-changed",
                       G_CALLBACK(on_symbol_index_changed), self);
 }
@@ -301,6 +402,9 @@ eek_keyboard_real_child_removed (EekContainer *self,
 {
     g_signal_handlers_disconnect_by_func (element, on_key_pressed, self);
     g_signal_handlers_disconnect_by_func (element, on_key_released, self);
+    g_signal_handlers_disconnect_by_func (element, on_key_locked, self);
+    g_signal_handlers_disconnect_by_func (element, on_key_unlocked, self);
+    g_signal_handlers_disconnect_by_func (element, on_key_cancelled, self);
 }
 
 static void
@@ -319,6 +423,7 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
     /* signals */
     klass->key_pressed = eek_keyboard_real_key_pressed;
     klass->key_released = eek_keyboard_real_key_released;
+    klass->key_cancelled = eek_keyboard_real_key_cancelled;
 
     container_class->child_added = eek_keyboard_real_child_added;
     container_class->child_removed = eek_keyboard_real_child_removed;
@@ -390,6 +495,66 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                       G_TYPE_FROM_CLASS(gobject_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET(EekKeyboardClass, key_released),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+
+    /**
+     * EekKeyboard::key-locked:
+     * @keyboard: an #EekKeyboard
+     * @key: an #EekKey
+     *
+     * The ::key-locked signal is emitted each time a key in @keyboard
+     * is shifted to the locked state.
+     */
+    signals[KEY_LOCKED] =
+        g_signal_new (I_("key-locked"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, key_locked),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+
+    /**
+     * EekKeyboard::key-unlocked:
+     * @keyboard: an #EekKeyboard
+     * @key: an #EekKey
+     *
+     * The ::key-unlocked signal is emitted each time a key in @keyboard
+     * is shifted to the unlocked state.
+     */
+    signals[KEY_UNLOCKED] =
+        g_signal_new (I_("key-unlocked"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, key_unlocked),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__OBJECT,
+                      G_TYPE_NONE,
+                      1,
+                      EEK_TYPE_KEY);
+
+    /**
+     * EekKeyboard::key-cancelled:
+     * @keyboard: an #EekKeyboard
+     * @key: an #EekKey
+     *
+     * The ::key-cancelled signal is emitted each time a key in @keyboard
+     * is shifted to the cancelled state.
+     */
+    signals[KEY_CANCELLED] =
+        g_signal_new (I_("key-cancelled"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekKeyboardClass, key_cancelled),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__OBJECT,
@@ -777,4 +942,42 @@ eek_keyboard_get_alt_gr_mask (EekKeyboard *keyboard)
     priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
 
     return priv->alt_gr_mask;
+}
+
+/**
+ * eek_keyboard_get_pressed_keys:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get pressed keys.
+ * Returns: (transfer container) (element-type EekModifierKey): A list
+ * of pressed keys.
+ */
+GList *
+eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->pressed_keys;
+}
+
+/**
+ * eek_keyboard_get_locked_keys:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get locked keys.
+ * Returns: (transfer container) (element-type EekModifierKey): A list
+ * of locked keys.
+ */
+GList *
+eek_keyboard_get_locked_keys (EekKeyboard *keyboard)
+{
+    EekKeyboardPrivate *priv;
+
+    g_assert (EEK_IS_KEYBOARD(keyboard));
+    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+
+    return priv->locked_keys;
 }
