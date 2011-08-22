@@ -240,6 +240,21 @@ client_dispose (GObject *object)
 }
 
 static void
+client_finalize (GObject *object)
+{
+    Client *client = CLIENT(object);
+
+    if (client->keyboards) {
+        GSList *next = client->keyboards->next;
+        /* client->keyboards is a ring; break it before free */
+        client->keyboards->next = NULL;
+        g_slist_free (next);
+    }
+
+    G_OBJECT_CLASS (client_parent_class)->finalize (object);
+}
+
+static void
 client_class_init (ClientClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
@@ -248,6 +263,7 @@ client_class_init (ClientClass *klass)
     gobject_class->set_property = client_set_property;
     gobject_class->get_property = client_get_property;
     gobject_class->dispose = client_dispose;
+    gobject_class->finalize = client_finalize;
 
     pspec = g_param_spec_object ("connection",
                                  "Connection",

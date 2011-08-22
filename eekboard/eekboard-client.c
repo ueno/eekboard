@@ -18,7 +18,7 @@
 
 /**
  * SECTION:eekboard-client
- * @short_description: D-Bus proxy of eekboard-server
+ * @short_description: client interface of eekboard service
  *
  * The #EekboardClient class provides a client side access to eekboard-server.
  */
@@ -126,7 +126,7 @@ eekboard_name_vanished_callback (GDBusConnection *connection,
  * @connection: a #GDBusConnection
  * @cancellable: a #GCancellable
  *
- * Create a D-Bus proxy of eekboard-eekboard.
+ * Create a client.
  */
 EekboardClient *
 eekboard_client_new (GDBusConnection *connection,

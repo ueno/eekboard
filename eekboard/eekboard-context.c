@@ -18,7 +18,7 @@
 
 /**
  * SECTION:eekboard-context
- * @short_description: input context maintained by #EekboardServer.
+ * @short_description: client interface of eekboard input context service
  *
  * The #EekboardContext class provides a client access to remote input
  * context.
@@ -91,10 +91,13 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
         g_return_if_fail (variant != NULL);
 
         serializable = eek_serializable_deserialize (variant);
+        g_variant_unref (variant);
+
         g_return_if_fail (EEK_IS_SYMBOL(serializable));
         
         g_signal_emit_by_name (context, "key-pressed",
                                keyname, EEK_SYMBOL(serializable), modifiers);
+        g_object_unref (serializable);
 
         return;
     }

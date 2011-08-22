@@ -35,9 +35,14 @@
   <part id="apireference">
     <title>API Manual</title>
     <chapter>
-      <title>D-Bus client interface to eekboard-server</title>
-      <xi:include href="xml/eekboard-eekboard.xml"/>
+      <title>Client interface to eekboard-server</title>
+      <xi:include href="xml/eekboard-client.xml"/>
       <xi:include href="xml/eekboard-context.xml"/>
+    </chapter>
+    <chapter>
+      <title>Server interface to implement custom eekboard-server</title>
+      <xi:include href="xml/eekboard-service.xml"/>
+      <xi:include href="xml/eekboard-context-service.xml"/>
     </chapter>
     <chapter id="object-tree">
       <title>Object Hierarchy</title>

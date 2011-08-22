@@ -15,6 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * SECTION:eekboard-service
+ * @short_description: base server implementation of eekboard service
+ *
+ * The #EekboardService class provides a base server side
+ * implementation of eekboard service.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -221,6 +230,12 @@ eekboard_service_class_init (EekboardServiceClass *klass)
     gobject_class->dispose = eekboard_service_dispose;
     gobject_class->finalize = eekboard_service_finalize;
 
+    /**
+     * EekboardService::destroyed:
+     * @service: an #EekboardService
+     *
+     * The ::destroyed signal is emitted when the service is vanished.
+     */
     signals[DESTROYED] =
         g_signal_new (I_("destroyed"),
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -348,7 +363,9 @@ handle_method_call (GDBusConnection       *connection,
         object_path = g_strdup_printf (EEKBOARD_CONTEXT_SERVICE_PATH, context_id++);
         g_assert (klass->create_context);
         context = klass->create_context (service, client_name, object_path);
-        g_object_set_data (G_OBJECT(context), "owner", g_strdup (sender));
+        g_object_set_data_full (G_OBJECT(context),
+                                "owner", g_strdup (sender),
+                                (GDestroyNotify)g_free);
         g_hash_table_insert (priv->context_hash,
                              object_path,
                              context);

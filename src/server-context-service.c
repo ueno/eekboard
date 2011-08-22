@@ -292,8 +292,8 @@ update_widget (ServerContextService *context)
         stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
         actor = eek_clutter_keyboard_new (context->keyboard);
         clutter_actor_set_name (actor, "keyboard");
-        if (theme)
-            eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
+        eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
+        g_object_unref (theme);
         clutter_container_add_actor (CLUTTER_CONTAINER(stage), actor);
 
         clutter_stage_set_color (CLUTTER_STAGE(stage), &stage_color);
@@ -302,9 +302,8 @@ update_widget (ServerContextService *context)
 #endif
     } else {
         context->widget = eek_gtk_keyboard_new (keyboard);
-        if (theme)
-            eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget),
-                                        theme);
+        eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget), theme);
+        g_object_unref (theme);
     }
 
     if (!context->window) {

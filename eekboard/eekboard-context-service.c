@@ -15,6 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * SECTION:eekboard-context-service
+ * @short_description: base server implementation of eekboard input
+ * context service
+ *
+ * The #EekboardService class provides a base server side
+ * implementation of eekboard input context service.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -171,10 +181,9 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
 
         error = NULL;
         input = g_file_read (file, NULL, &error);
-        if (input == NULL) {
-            g_object_unref (file);
+        g_object_unref (file);
+        if (input == NULL)
             return NULL;
-        }
         layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     }
     keyboard = eek_keyboard_new (layout, CSW, CSH);

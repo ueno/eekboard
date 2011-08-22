@@ -1,2 +1,4 @@
+eekboard_client_get_type
 eekboard_context_get_type
-eekboard_eekboard_get_type
+eekboard_context_service_get_type
+eekboard_service_get_type
