@@ -141,7 +141,8 @@ on_notify_fullscreen (GObject    *object,
                       gpointer    user_data)
 {
     ServerContextService *context = user_data;
-    set_geometry (context);
+    if (context->window)
+        set_geometry (context);
 }
 
 static void
