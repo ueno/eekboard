@@ -81,6 +81,23 @@ on_monitors_changed (GdkScreen *screen,
         set_geometry (context);
 }
 
+#if HAVE_CLUTTER_GTK
+static void
+on_allocation_changed (ClutterActor          *stage,
+                       ClutterActorBox       *box,
+                       ClutterAllocationFlags flags,
+                       gpointer               user_data)
+{
+    ClutterActor *actor =
+        clutter_container_find_child_by_name (CLUTTER_CONTAINER(stage),
+                                              "keyboard");
+
+    clutter_actor_set_size (actor,
+                            box->x2 - box->x1,
+                            box->y2 - box->y1);
+}
+#endif
+
 static void
 on_destroy (GtkWidget *widget, gpointer user_data)
 {
@@ -290,7 +307,7 @@ update_widget (ServerContextService *context)
 #if HAVE_CLUTTER_GTK
         context->widget = gtk_clutter_embed_new ();
         stage = gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED(context->widget));
-        actor = eek_clutter_keyboard_new (context->keyboard);
+        actor = eek_clutter_keyboard_new (keyboard);
         clutter_actor_set_name (actor, "keyboard");
         eek_clutter_keyboard_set_theme (EEK_CLUTTER_KEYBOARD(actor), theme);
         g_object_unref (theme);
