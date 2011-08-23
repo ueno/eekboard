@@ -15,8 +15,9 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from gi.repository import Eekboard
+import dbus
 import gobject
+import serializable
 
 class Context(gobject.GObject):
     __gtype_name__ = "PYEekboardContext"
@@ -32,11 +33,7 @@ class Context(gobject.GObject):
         'key-pressed': (
             gobject.SIGNAL_RUN_LAST,
             gobject.TYPE_NONE,
-            (gobject.TYPE_UINT,)),
-        'key-released': (
-            gobject.SIGNAL_RUN_LAST,
-            gobject.TYPE_NONE,
-            (gobject.TYPE_UINT,)),
+            (gobject.TYPE_STRING, gobject.TYPE_PYOBJECT, gobject.TYPE_UINT)),
         'destroyed': (
             gobject.SIGNAL_RUN_LAST,
             gobject.TYPE_NONE,
@@ -44,19 +41,59 @@ class Context(gobject.GObject):
         }
 
     __gproperties__ = {
-        'keyboard-visible': (bool, None, None, False, gobject.PARAM_READWRITE),
+        'visible': (gobject.TYPE_BOOLEAN, 'Visible', 'Visible',
+                    False, gobject.PARAM_READWRITE),
+        'keyboard': (gobject.TYPE_UINT, 'Keyboard', 'Keyboard',
+                     0, gobject.G_MAXUINT, 0, gobject.PARAM_READWRITE),
+        'group': (gobject.TYPE_UINT, 'Group', 'Group',
+                  0, gobject.G_MAXUINT, 0, gobject.PARAM_READWRITE),
         }
 
-    def __init__(self, giobject):
+    def __init__(self, bus, object_path):
         super(Context, self).__init__()
-        self.__properties = dict()
-        self.__giobject = giobject
-        self.__giobject.connect('enabled', lambda *args: self.emit('enabled'))
-        self.__giobject.connect('disabled', lambda *args: self.emit('disabled'))
-        self.__giobject.connect('key-pressed', lambda *args: self.emit('key-pressed', args[1]))
-        self.__giobject.connect('key-released', lambda *args: self.emit('key-released', args[1]))
-        self.__giobject.connect('destroyed', lambda *args: self.emit('destroyed'))
-        self.__giobject.connect('notify::keyboard-visible', self.__notify_keyboard_visible_cb)
+        self.__bus = bus
+        self.__object_path = object_path
+        self.__properties = {}
+        _context = self.__bus.get_object("org.fedorahosted.Eekboard",
+                                         object_path)
+        self.__context = dbus.Interface(_context, dbus_interface="org.fedorahosted.Eekboard.Context")
+
+        self.__context.connect_to_signal('Enabled', self.__enabled_cb)
+        self.__context.connect_to_signal('Disabled', self.__disabled_cb)
+        self.__context.connect_to_signal('KeyPressed', self.__key_pressed_cb)
+        self.__context.connect_to_signal('Destroyed', self.__destroyed_cb)
+        self.__context.connect_to_signal('VisibilityChanged', self.__visibility_changed_cb)
+        self.__context.connect_to_signal('KeyboardChanged', self.__keyboard_changed_cb)
+        self.__context.connect_to_signal('GroupChanged', self.__group_changed_cb)
+
+    object_path = property(lambda self: self.__object_path)
+
+    def __enabled_cb(self):
+        self.emit('enabled')
+
+    def __disabled_cb(self):
+        self.emit('disabled')
+
+    def __key_pressed_cb(self, *args):
+        keyname = args[0]
+        symbol = serializable.deserialize_object(args[1])
+        modifiers = args[2]
+        self.emit('key-pressed', keyname, symbol, modifiers)
+
+    def __visibility_changed_cb(self, *args):
+        self.set_property('visible', args[0])
+        self.notify('visible')
+
+    def __keyboard_changed_cb(self, *args):
+        self.set_property('keyboard', args[0])
+        self.notify('keyboard')
+
+    def __group_changed_cb(self, *args):
+        self.set_property('group', args[0])
+        self.notify('group')
+
+    def __destroyed_cb(self):
+        self.emit("destroyed")
 
     def do_set_property(self, pspec, value):
         self.__properties[pspec.name] = value
@@ -64,37 +101,26 @@ class Context(gobject.GObject):
     def do_get_property(self, pspec):
         return self.__properties[pspec.name]
 
-    def __notify_keyboard_visible_cb(self, *args):
-        self.set_property('keyboard-visible',
-                          self.__giobject.get_property(args[1].name))
-        self.notify('keyboard-visible')
-
-    def get_giobject(self):
-        return self.__giobject
-
-    def add_keyboard(self, keyboard):
-        return self.__giobject.add_keyboard(keyboard, None)
+    def add_keyboard(self, keyboard_type):
+        return self.__context.AddKeyboard(keyboard_type)
 
     def remove_keyboard(self, keyboard_id):
-        return self.__giobject.remove_keyboard(keyboard_id, None)
+        return self.__context.RemoveKeyboard(keyboard_id)
         
     def set_keyboard(self, keyboard_id):
-        self.__giobject.set_keyboard(keyboard_id, None)
+        self.__context.SetKeyboard(keyboard_id)
 
     def show_keyboard(self):
-        self.__giobject.show_keyboard(None)
+        self.__context.ShowKeyboard()
 
     def hide_keyboard(self):
-        self.__giobject.hide_keyboard(None)
+        self.__context.HideKeyboard()
 
     def set_group(self, group):
-        self.__giobject.set_group(group, None)
+        self.__context.SetGroup(group)
 
-    def press_key(self, keycode):
-        self.__giobject.press_key(keycode, None)
+    def press_keycode(self, keycode):
+        self.__context.PressKeycode(keycode)
 
-    def release_key(self, keycode):
-        self.__giobject.release_key(keycode, None)
-
-    def is_enabled(self):
-        return self.__giobject.is_enabled()
+    def release_keycode(self, keycode):
+        self.__context.ReleaseKeycode(keycode)

@@ -15,53 +15,8 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from gi.repository import Eek, EekXkl, Gio
-
-from eekboard import Eekboard
-from context import Context
-
-Keyboard = Eek.Keyboard
-Section = Eek.Section
-Key = Eek.Key
-Symbol = Eek.Symbol
-Keysym = Eek.Keysym
-SymbolMatrix = Eek.SymbolMatrix
-
-MODIFIER_BEHAVIOR_NONE, \
-MODIFIER_BEHAVIOR_LOCK, \
-MODIFIER_BEHAVIOR_LATCH = \
-(Eek.ModifierBehavior.NONE,
- Eek.ModifierBehavior.LOCK,
- Eek.ModifierBehavior.LATCH)
-
-SymbolCategory = Eek.SymbolCategory
-
-CSW = 640
-CSH = 480
-
-def XmlKeyboard(path, modifier_behavior=MODIFIER_BEHAVIOR_NONE):
-    _file = Gio.file_new_for_path(path)
-    layout = Eek.XmlLayout.new(_file.read())
-    keyboard = Eek.Keyboard.new(layout, CSW, CSH)
-    keyboard.set_modifier_behavior(modifier_behavior)
-    keyboard.set_alt_gr_mask(Eek.ModifierType.MOD5_MASK)
-    return keyboard
-
-def XklKeyboard(modifier_behavior=MODIFIER_BEHAVIOR_NONE):
-    layout = EekXkl.Layout.new()
-    keyboard = Eek.Keyboard.new(layout, CSW, CSH)
-    keyboard.set_modifier_behavior(modifier_behavior)
-    return keyboard
-
-__all__ = ['Eekboard',
-           'Context',
-           'Keyboard',
-           'Section',
-           'Key',
-           'Symbol',
-           'Keysym',
-           'MODIFIER_BEHAVIOR_NONE',
-           'MODIFIER_BEHAVIOR_LOCK',
-           'MODIFIER_BEHAVIOR_LATCH',
-           'XmlKeyboard',
-           'XklKeyboard']
+from symbol import *
+from keysym import *
+from serializable import *
+from client import *
+from context import *

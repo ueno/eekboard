@@ -15,10 +15,21 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-pkgpython_PYTHON =				\
-	__init__.py				\
-	serializable.py				\
-	symbol.py				\
-	keysym.py				\
-	client.py				\
-	context.py
+import symbol
+
+class Keysym(symbol.Symbol):
+    __gtype_name__ = "PYEekKeysym"
+    __NAME__ = "EekKeysym"
+
+    def __init__(self):
+        super(Keysym, self).__init__()
+
+    xkeysym = property(lambda self: self.xkeysym)
+
+    def serialize(self, struct):
+        super(Keysym, self).serialize(struct)
+        struct.append(dbus.UInt32(self.__xkeysym))
+
+    def deserialize(self, struct):
+        super(Keysym, self).deserialize(struct)
+        self.__xkeysym = struct.pop(0)

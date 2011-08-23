@@ -15,12 +15,14 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
-import gi.repository
+import dbus
+import dbus.mainloop.glib
 import gobject
 from context import Context
 
-class Eekboard(gobject.GObject):
+dbus.mainloop.glib.DBusGMainLoop(set_as_default = True)
+
+class Client(gobject.GObject):
     __gtype_name__ = "PYEekboardClient"
     __gsignals__ = {
         'destroyed': (
@@ -30,20 +32,25 @@ class Eekboard(gobject.GObject):
         }
 
     def __init__(self):
-        super(Eekboard, self).__init__()
-        self.__connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-        self.__client = gi.repository.Eekboard.Client.new(self.__connection, None);
-        self.__client.connect('destroyed', lambda *args: self.emit('destroyed'))
+        super(Client, self).__init__()
+        self.__bus = dbus.SessionBus()
+        _service = self.__bus.get_object("org.fedorahosted.Eekboard",
+                                         "/org/fedorahosted/Eekboard")
+        self.__service = dbus.Interface(_service, dbus_interface="org.fedorahosted.Eekboard")
+        self.__service.connect_to_signal("Destroyed", self.__destroyed_cb)
+
+    def __destroyed_cb(self):
+        self.emit("destroyed")
 
     def create_context(self, client_name):
-        context = self.__client.create_context(client_name, None)
-        return Context(context)
+        object_path = self.__service.CreateContext(client_name)
+        return Context(self.__bus, object_path)
 
     def push_context(self, context):
-        self.__client.push_context(context.get_giobject(), None)
+        self.__service.PushContext(context.object_path)
 
     def pop_context(self):
-        self.__client.pop_context(None)
+        self.__service.PopContext()
 
     def destroy_context(self, context):
-        self.__client.destroy_context(context.get_giobject(), None)
+        self.__service.DestroyContext(context.object_path)
