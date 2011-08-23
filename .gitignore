@@ -48,7 +48,6 @@ tests/eek-xkb-test
 tests/eek-xml-test
 src/eekboard
 src/eekboard-server
-src/eekboard-xml
 docs/reference/eek/*.stamp
 docs/reference/eek/*.txt
 docs/reference/eek/eek.types
@@ -80,5 +79,3 @@ py-compile
 data/org.fedorahosted.eekboard.gschema.xml
 data/eekboard-server.service
 data/*.desktop
-examples/eekboard-inscript/eekboard-inscript
-examples/simple-client/simple-client

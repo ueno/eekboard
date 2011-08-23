@@ -1,0 +1,47 @@
+#!/usr/bin/python
+# Copyright (C) 2011 Daiki Ueno <ueno@unixuser.org>
+# Copyright (C) 2011 Red Hat, Inc.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+import eekboard
+import glib
+
+class SimpleClient(object):
+    def __init__(self):
+        client = eekboard.Client()
+        self.__context = client.create_context('simple-client')
+        client.push_context(self.__context)
+        keyboard_id = self.__context.add_keyboard('us')
+        self.__context.set_keyboard(keyboard_id)
+
+    def __key_pressed_cb(self, c, keyname, symbol, modifiers):
+        print (keyname, symbol, modifiers)
+
+    def __notify_visible_cb(self, c, p, mainloop):
+        if not c.props.visible:
+            mainloop.quit()
+
+    def run(self):
+        mainloop = glib.MainLoop()
+        self.__context.connect('key-pressed', self.__key_pressed_cb)
+        self.__context.connect('notify::visible', self.__notify_visible_cb,
+                               mainloop)
+        self.__context.show_keyboard();
+        mainloop.run()
+
+if __name__ == '__main__':
+    client = SimpleClient()
+    client.run()
