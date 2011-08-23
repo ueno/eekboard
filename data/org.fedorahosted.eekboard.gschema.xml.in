@@ -46,5 +46,10 @@
       <summary>Switch to fullscreen mode when startup</summary>
       <description>If true, switch to fullscreen mode when startup.</description>
     </key>
+    <key name="theme" type="s">
+      <default>'default'</default>
+      <summary>Theme</summary>
+      <description>Base name of the theme to apply.</description>
+    </key>
   </schema>
 </schemalist>

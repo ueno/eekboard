@@ -33,8 +33,6 @@
 
 #include "server-context-service.h"
 
-#define DEFAULT_THEME (THEMEDIR "/default.css")
-
 enum {
     PROP_0,
     PROP_UI_TOOLKIT,
@@ -292,7 +290,9 @@ update_widget (ServerContextService *context)
     const EekKeyboard *keyboard;
     const gchar *client_name;
     EekBounds bounds;
+    gchar *theme_name, *theme_path;
     EekTheme *theme;
+    
 #if HAVE_CLUTTER_GTK
     ClutterActor *stage, *actor;
     ClutterColor stage_color = { 0xff, 0xff, 0xff, 0xff };
@@ -301,7 +301,13 @@ update_widget (ServerContextService *context)
     if (context->widget)
         gtk_widget_destroy (context->widget);
 
-    theme = eek_theme_new (DEFAULT_THEME, NULL, NULL);
+    theme_name = g_settings_get_string (context->settings, "theme");
+    theme_path = g_strdup_printf ("%s/%s.css", THEMEDIR, theme_name);
+    g_free (theme_name);
+
+    theme = eek_theme_new (theme_path, NULL, NULL);
+    g_free (theme_path);
+
     keyboard = eekboard_context_service_get_keyboard (EEKBOARD_CONTEXT_SERVICE(context));
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
