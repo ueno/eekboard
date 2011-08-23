@@ -37,7 +37,6 @@
 					<parameter name="keycodes" type="gchar*"/>
 				</parameters>
 			</method>
-<!--
 			<method name="set_names" symbol="eek_xkb_layout_set_names">
 				<return-type type="gboolean"/>
 				<parameters>
@@ -45,7 +44,6 @@
 					<parameter name="names" type="XkbComponentNamesRec*"/>
 				</parameters>
 			</method>
--->
 			<method name="set_names_full" symbol="eek_xkb_layout_set_names_full">
 				<return-type type="gboolean"/>
 				<parameters>

@@ -15,6 +15,10 @@
 				<parameter name="user_data" type="gpointer"/>
 			</parameters>
 		</callback>
+		<struct name="EekModifierKey">
+			<field name="modifiers" type="EekModifierType"/>
+			<field name="key" type="EekKey*"/>
+		</struct>
 		<struct name="EekThemeClass">
 		</struct>
 		<struct name="EekThemeContext">
@@ -500,6 +504,12 @@
 					<parameter name="fallback_level" type="gint"/>
 				</parameters>
 			</method>
+			<method name="is_locked" symbol="eek_key_is_locked">
+				<return-type type="gboolean"/>
+				<parameters>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</method>
 			<method name="is_pressed" symbol="eek_key_is_pressed">
 				<return-type type="gboolean"/>
 				<parameters>
@@ -540,6 +550,18 @@
 			<property name="oref" type="gulong" readable="1" writable="1" construct="0" construct-only="0"/>
 			<property name="row" type="gint" readable="1" writable="1" construct="0" construct-only="0"/>
 			<property name="symbol-matrix" type="EekSymbolMatrix*" readable="1" writable="1" construct="0" construct-only="0"/>
+			<signal name="cancelled" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="locked" when="FIRST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
 			<signal name="pressed" when="FIRST">
 				<return-type type="void"/>
 				<parameters>
@@ -547,6 +569,12 @@
 				</parameters>
 			</signal>
 			<signal name="released" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="unlocked" when="LAST">
 				<return-type type="void"/>
 				<parameters>
 					<parameter name="key" type="EekKey*"/>
@@ -574,6 +602,12 @@
 			</vfunc>
 			<vfunc name="get_symbol_matrix">
 				<return-type type="EekSymbolMatrix*"/>
+				<parameters>
+					<parameter name="self" type="EekKey*"/>
+				</parameters>
+			</vfunc>
+			<vfunc name="is_locked">
+				<return-type type="gboolean"/>
 				<parameters>
 					<parameter name="self" type="EekKey*"/>
 				</parameters>
@@ -662,6 +696,12 @@
 					<parameter name="keyboard" type="EekKeyboard*"/>
 				</parameters>
 			</method>
+			<method name="get_locked_keys" symbol="eek_keyboard_get_locked_keys">
+				<return-type type="GList*"/>
+				<parameters>
+					<parameter name="keyboard" type="EekKeyboard*"/>
+				</parameters>
+			</method>
 			<method name="get_modifier_behavior" symbol="eek_keyboard_get_modifier_behavior">
 				<return-type type="EekModifierBehavior"/>
 				<parameters>
@@ -685,6 +725,12 @@
 				<parameters>
 					<parameter name="keyboard" type="EekKeyboard*"/>
 					<parameter name="oref" type="gulong"/>
+				</parameters>
+			</method>
+			<method name="get_pressed_keys" symbol="eek_keyboard_get_pressed_keys">
+				<return-type type="GList*"/>
+				<parameters>
+					<parameter name="keyboard" type="EekKeyboard*"/>
 				</parameters>
 			</method>
 			<method name="get_size" symbol="eek_keyboard_get_size">
@@ -747,6 +793,13 @@
 					<parameter name="modifier_behavior" type="EekModifierBehavior"/>
 				</parameters>
 			</method>
+			<method name="set_modifiers" symbol="eek_keyboard_set_modifiers">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="keyboard" type="EekKeyboard*"/>
+					<parameter name="modifiers" type="EekModifierType"/>
+				</parameters>
+			</method>
 			<method name="set_num_lock_mask" symbol="eek_keyboard_set_num_lock_mask">
 				<return-type type="void"/>
 				<parameters>
@@ -772,6 +825,20 @@
 			</method>
 			<property name="layout" type="EekLayout*" readable="1" writable="1" construct="0" construct-only="1"/>
 			<property name="modifier-behavior" type="EekModifierBehavior" readable="1" writable="1" construct="0" construct-only="0"/>
+			<signal name="key-cancelled" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekKeyboard*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="key-locked" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekKeyboard*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
 			<signal name="key-pressed" when="LAST">
 				<return-type type="void"/>
 				<parameters>
@@ -780,6 +847,13 @@
 				</parameters>
 			</signal>
 			<signal name="key-released" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekKeyboard*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="key-unlocked" when="LAST">
 				<return-type type="void"/>
 				<parameters>
 					<parameter name="self" type="EekKeyboard*"/>
@@ -896,6 +970,20 @@
 				</parameters>
 			</method>
 			<property name="angle" type="gint" readable="1" writable="1" construct="0" construct-only="0"/>
+			<signal name="key-cancelled" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekSection*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="key-locked" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekSection*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
 			<signal name="key-pressed" when="LAST">
 				<return-type type="void"/>
 				<parameters>
@@ -904,6 +992,13 @@
 				</parameters>
 			</signal>
 			<signal name="key-released" when="LAST">
+				<return-type type="void"/>
+				<parameters>
+					<parameter name="self" type="EekSection*"/>
+					<parameter name="key" type="EekKey*"/>
+				</parameters>
+			</signal>
+			<signal name="key-unlocked" when="LAST">
 				<return-type type="void"/>
 				<parameters>
 					<parameter name="self" type="EekSection*"/>

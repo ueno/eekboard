@@ -50,7 +50,6 @@
 			<constructor name="new" symbol="eek_xkl_layout_new">
 				<return-type type="EekLayout*"/>
 			</constructor>
-<!--
 			<method name="set_config" symbol="eek_xkl_layout_set_config">
 				<return-type type="gboolean"/>
 				<parameters>
@@ -58,7 +57,6 @@
 					<parameter name="config" type="XklConfigRec*"/>
 				</parameters>
 			</method>
--->
 			<method name="set_config_full" symbol="eek_xkl_layout_set_config_full">
 				<return-type type="gboolean"/>
 				<parameters>
