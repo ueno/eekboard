@@ -540,7 +540,7 @@ eek_key_set_symbol_matrix (EekKey          *key,
  * @key: an #EekKey
  *
  * Get the symbol matrix of @key.
- * Returns: #EekSymbolMatrix or %NULL
+ * Returns: (transfer none): #EekSymbolMatrix or %NULL
  */
 EekSymbolMatrix *
 eek_key_get_symbol_matrix (EekKey *key)

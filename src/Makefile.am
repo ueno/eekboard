@@ -18,8 +18,7 @@
 
 bin_PROGRAMS = \
 	eekboard \
-	eekboard-server \
-	eekboard-xml
+	eekboard-server
 
 eekboard_CFLAGS = \
 	-I$(top_srcdir) \
@@ -92,33 +91,10 @@ endif
 eekboard_server_headers = server-service.h server-context-service.h
 eekboard_server_SOURCES = server-service.c server-context-service.c server-main.c
 
-eekboard_xml_CFLAGS = \
-	-I$(top_srcdir) \
-	$(GIO2_CFLAGS) \
-	$(GTK_CFLAGS) \
-	$(LIBXKLAVIER_CFLAGS)
-
-eekboard_xml_LDADD = \
-	$(top_builddir)/eekboard/libeekboard.la \
-	$(top_builddir)/eek/libeek.la \
-	$(top_builddir)/eek/libeek-xkl.la \
-	$(top_builddir)/eek/libeek-gtk.la \
-	$(GIO2_LIBS) \
-	$(GTK_LIBS) \
-	$(LIBXKLAVIER_LIBS)
-
-if ENABLE_CLUTTER
-eekboard_xml_CFLAGS += $(CLUTTER_CFLAGS) $(CLUTTER_GTK_CFLAGS)
-eekboard_xml_LDADD += $(CLUTTER_LIBS) $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
-endif
-
-eekboard_xml_SOURCES = xml-main.c
-
 eekboarddir = $(includedir)/eekboard-$(EEK_API_VERSION)/eekboard
 eekboard_HEADERS =				\
 	$(libeekboard_headers)
 
 noinst_HEADERS = \
 	$(eekboard_headers) \
-	$(eekboard_server_headers) \
-	$(eekboard_xml_headers)
+	$(eekboard_server_headers)

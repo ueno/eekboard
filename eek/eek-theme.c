@@ -489,11 +489,11 @@ eek_theme_get_property (GObject    *object,
 
 /**
  * eek_theme_new:
- * @application_stylesheet: The highest priority stylesheet, representing application-specific
+ * @application_stylesheet: (allow-none): The highest priority stylesheet, representing application-specific
  *   styling; this is associated with the CSS "author" stylesheet, may be %NULL
- * @theme_stylesheet: The second priority stylesheet, representing theme-specific styling ;
+ * @theme_stylesheet: (allow-none): The second priority stylesheet, representing theme-specific styling ;
  *   this is associated with the CSS "user" stylesheet, may be %NULL
- * @default_stylesheet: The lowest priority stylesheet, representing global default styling;
+ * @default_stylesheet: (allow-none): The lowest priority stylesheet, representing global default styling;
  *   this is associated with the CSS "user agent" stylesheet, may be %NULL
  *
  * Return value: the newly created theme object

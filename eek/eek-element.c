@@ -487,7 +487,7 @@ eek_element_set_bounds (EekElement  *element,
 /**
  * eek_element_get_bounds:
  * @element: an #EekElement
- * @bounds: pointer where bounding box of @element will be stored
+ * @bounds: (out): pointer where bounding box of @element will be stored
  *
  * Get the bounding box of @element.  Note that if @element has
  * parent, position of @bounds are relative to the parent.  To obtain

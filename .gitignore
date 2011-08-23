@@ -4,6 +4,7 @@
 *.o
 *.so
 *~
+*.pyc
 Makefile
 Makefile.in
 .deps
