@@ -598,7 +598,7 @@ eekboard_context_press_keycode (EekboardContext *context,
 
 /**
  * eekboard_context_release_keycode:
- * @Context: an #EekboardContext
+ * @context: an #EekboardContext
  * @keycode: keycode number
  * @cancellable: a #GCancellable
  *
@@ -606,8 +606,8 @@ eekboard_context_press_keycode (EekboardContext *context,
  */
 void
 eekboard_context_release_keycode (EekboardContext *context,
-                              guint            keycode,
-                              GCancellable    *cancellable)
+                                  guint            keycode,
+                                  GCancellable    *cancellable)
 {
     EekboardContextPrivate *priv;
 

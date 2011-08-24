@@ -65,6 +65,7 @@ struct _EekKeyboard
  * @key_released: class handler for #EekKeyboard::key-released signal
  * @key_locked: class handler for #EekKeyboard::key-locked signal
  * @key_unlocked: class handler for #EekKeyboard::key-unlocked signal
+ * @key_cancelled: class handler for #EekKeyboard::key-cancelled signal
  */
 struct _EekKeyboardClass
 {

@@ -56,6 +56,7 @@ struct _EekboardContext {
  * @enabled: class handler for #EekboardContext::enabled signal
  * @disabled: class handler for #EekboardContext::disabled signal
  * @key_pressed: class handler for #EekboardContext::key-pressed signal
+ * @destroyed: class handler for #EekboardContext::destroyed signal
  */
 struct _EekboardContextClass {
     /*< private >*/
