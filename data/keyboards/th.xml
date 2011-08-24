@@ -545,8 +545,9 @@
         <key id="keycode37" name="keycode37" column="0" row="4">
             <bounds>3.121951,162.341463,56.195122,37.463415</bounds>
             <oref>outline10</oref>
-            <symbols groups="1" levels="1">
-                <symbol label="⌨">cycle-keyboard</symbol>
+            <symbols groups="1" levels="2">
+                <symbol label="⌨" icon="input-keyboard-symbolic">cycle-keyboard</symbol>
+                <symbol label="☺" icon="preferences-system-symbolic">preferences</symbol>
             </symbols>
         </key>
         <key id="keycode133" name="keycode133" column="1" row="4">

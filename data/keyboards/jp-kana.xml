@@ -41,8 +41,9 @@
         <key id="keycode58" name="LCTL" column="4" row="0">
             <bounds>4.000000,162.341463,57.000000,38.000000</bounds>
             <oref>outline9</oref>
-            <symbols groups="1" levels="1">
-                <symbol label="⌨">cycle-keyboard</symbol>
+            <symbols groups="1" levels="2">
+                <symbol label="⌨" icon="input-keyboard-symbolic">cycle-keyboard</symbol>
+                <symbol label="☺" icon="preferences-system-symbolic">preferences</symbol>
             </symbols>
         </key>
         <key id="keycode60" name="BKSP" column="1" row="1">
