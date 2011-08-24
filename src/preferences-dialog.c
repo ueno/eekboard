@@ -40,14 +40,13 @@ get_rate (GValue   *value,
           GVariant *variant,
           gpointer  user_data)
 {
-  int rate;
-  gdouble fraction;
+    int rate;
+    gdouble fraction;
 
-  rate = g_variant_get_uint32 (variant);
-  fraction = 1.0 / ((gdouble) rate / 1000.0);
-  g_value_set_double (value, fraction);
-  g_debug ("Getting fraction %f for msecs %d", fraction, rate);
-  return TRUE;
+    rate = g_variant_get_uint32 (variant);
+    fraction = 1.0 / ((gdouble) rate / 1000.0);
+    g_value_set_double (value, fraction);
+    return TRUE;
 }
 
 static GVariant *
@@ -55,13 +54,12 @@ set_rate (const GValue       *value,
           const GVariantType *expected_type,
           gpointer            user_data)
 {
-  gdouble rate;
-  int msecs;
+    gdouble rate;
+    int msecs;
 
-  rate = g_value_get_double (value);
-  msecs = (1 / rate) * 1000;
-  g_debug ("Setting repeat rate to %d", msecs);
-  return g_variant_new_uint32 (msecs);
+    rate = g_value_get_double (value);
+    msecs = (1 / rate) * 1000;
+    return g_variant_new_uint32 (msecs);
 }
 
 PreferencesDialog *

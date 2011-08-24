@@ -547,7 +547,9 @@ static gboolean
 on_repeat_timeout (EekboardContextService *context)
 {
     EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-    gint delay = g_settings_get_int (priv->settings, "repeat-interval");
+    guint delay;
+
+    g_settings_get (priv->settings, "repeat-interval", "u", &delay);
 
     emit_key_pressed_dbus_signal (context, priv->repeat_key);
 
@@ -572,7 +574,9 @@ on_repeat_timeout_init (EekboardContextService *context)
     
     /* reschedule repeat timeout only when "repeat" option is set */
     if (g_settings_get_boolean (priv->settings, "repeat")) {
-        gint delay = g_settings_get_int (priv->settings, "repeat-interval");
+        guint delay;
+
+        g_settings_get (priv->settings, "repeat-interval", "u", &delay);
         priv->repeat_timeout_id =
             g_timeout_add (delay,
                            (GSourceFunc)on_repeat_timeout,
@@ -590,7 +594,9 @@ on_key_pressed (EekKeyboard *keyboard,
 {
     EekboardContextService *context = user_data;
     EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-    gint delay = g_settings_get_int (priv->settings, "repeat-delay");
+    guint delay;
+
+    g_settings_get (priv->settings, "repeat-delay", "u", &delay);
 
     if (priv->repeat_timeout_id) {
         g_source_remove (priv->repeat_timeout_id);

@@ -600,8 +600,8 @@ focus_message_filter (GDBusConnection *connection,
             eekboard_context_show_keyboard (client->context, NULL);
         } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
                    g_strcmp0 (member, "FocusOut") == 0) {
-            gint delay = g_settings_get_int (client->settings,
-                                             "auto-hide-delay");
+            guint delay;
+            g_settings_get (client->settings, "auto-hide-delay", "u", &delay);
             client->hide_keyboard_timeout_id =
                 g_timeout_add (delay,
                                (GSourceFunc)on_hide_keyboard_timeout,
