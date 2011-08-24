@@ -173,11 +173,14 @@ noinst_HEADERS =				\
 	$(libeek_xkl_private_headers)
 
 eek-special-keysym-entries.h: special-keysym-entries.txt
-	$(PYTHON) ./gen-keysym-entries.py special_keysym_entries < $< > $@
+	$(AM_V_GEN) $(PYTHON) ./gen-keysym-entries.py special_keysym_entries \
+		< $< > $@
 eek-unicode-keysym-entries.h: unicode-keysym-entries.txt
-	$(PYTHON) ./gen-keysym-entries.py unicode_keysym_entries < $< > $@
+	$(AM_V_GEN) $(PYTHON) ./gen-keysym-entries.py unicode_keysym_entries \
+		< $< > $@
 eek-xkeysym-keysym-entries.h: xkeysym-keysym-entries.txt
-	$(PYTHON) ./gen-keysym-entries.py xkeysym_keysym_entries < $< > $@
+	$(AM_V_GEN) $(PYTHON) ./gen-keysym-entries.py xkeysym_keysym_entries \
+		< $< > $@
 
 eek-enumtypes.h: $(libeek_public_headers) eek-enumtypes.h.template
 	$(AM_V_GEN) $(GLIB_MKENUMS) --template eek-enumtypes.h.template \
