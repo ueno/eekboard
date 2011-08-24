@@ -835,7 +835,7 @@ replace_keycode (Client *client,
     if (replaced_keycode == 0)
         return FALSE;
     replaced_keysym = XKeycodeToKeysym (xdisplay, replaced_keycode, 0);
-    XFlush (xdisplay);
+    XSync (xdisplay, False);
 
     offset = client->xkb->map->key_sym_map[replaced_keycode].offset;
     client->xkb->map->syms[offset] = *keysym;
@@ -845,7 +845,7 @@ replace_keycode (Client *client,
     changes.num_key_syms = 1;
 
     XkbChangeMap (xdisplay, client->xkb, &changes);
-    XFlush (xdisplay);
+    XSync (xdisplay, False);
 
     *keycode = replaced_keycode;
     *keysym = replaced_keysym;
@@ -860,7 +860,7 @@ get_keycode_from_gdk_keymap (Client *client,
                              guint          *modifiers)
 {
     GdkKeymap *keymap = gdk_keymap_get_default ();
-    GdkKeymapKey *keys, *best_match;
+    GdkKeymapKey *keys, *best_match = NULL;
     gint n_keys, i;
 
     if (!gdk_keymap_get_entries_for_keyval (keymap, keysym, &keys, &n_keys))
@@ -870,11 +870,15 @@ get_keycode_from_gdk_keymap (Client *client,
         if (keys[i].group == eekboard_context_get_group (client->context, NULL))
             best_match = &keys[i];
 
+    if (!best_match) {
+        g_free (keys);
+        return FALSE;
+    }
+
     *keycode = best_match->keycode;
     *modifiers = best_match->level == 1 ? EEK_SHIFT_MASK : 0;
 
     g_free (keys);
-
     return TRUE;
 }
 
@@ -931,7 +935,10 @@ send_fake_key_event (Client *client,
     /* Clear level shift modifiers */
     keyboard_modifiers &= ~EEK_SHIFT_MASK;
     keyboard_modifiers &= ~EEK_LOCK_MASK;
-    //keyboard_modifiers &= ~eek_keyboard_get_alt_gr_mask (client->keyboard);
+    /* FIXME: may need to remap ISO_Level3_Shift and NumLock */
+    //keyboard_modifiers &= ~EEK_MOD5_MASK;
+    //keyboard_modifiers &= ~client->alt_gr_mask;
+    //keyboard_modifiers &= ~client->num_lock_mask;
 
     modifiers |= keyboard_modifiers;
 
@@ -972,6 +979,7 @@ on_key_pressed (EekboardContext *context,
     if (g_strcmp0 (eek_symbol_get_name (symbol), "preferences") == 0) {
         PreferencesDialog *dialog = preferences_dialog_new ();
         preferences_dialog_run (dialog);
+        return;
     }
 
 
