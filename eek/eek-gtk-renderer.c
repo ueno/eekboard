@@ -51,64 +51,27 @@ pixbuf_to_cairo_surface (GdkPixbuf *pixbuf)
   return surface;
 }
 
-static void
-eek_gtk_renderer_real_render_key_icon (EekRenderer *self,
-                                       cairo_t     *cr,
-                                       EekKey      *key,
-                                       gdouble      scale,
-                                       gboolean     rotate)
+static cairo_surface_t *
+eek_gtk_renderer_real_get_icon_surface (EekRenderer *self,
+                                        const gchar *icon_name,
+                                        gint size)
 {
-    EekBounds bounds;
-    EekSymbol *symbol;
-    const gchar *icon_name;
     GdkPixbuf *pixbuf;
-    cairo_surface_t *surface;
     GError *error;
-    gint width, height;
-
-    symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    g_return_if_fail (symbol);
-
-    icon_name = eek_symbol_get_icon_name (symbol);
-    g_return_if_fail (icon_name);
-
-    eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    bounds.width *= scale;
-    bounds.height *= scale;
+    cairo_surface_t *surface;
 
     error = NULL;
     pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
                                        icon_name,
-                                       MIN(bounds.width, bounds.height),
+                                       size,
                                        0,
                                        &error);
-    g_return_if_fail (pixbuf);
+    if (pixbuf == NULL)
+        return NULL;
 
-    width = gdk_pixbuf_get_width (pixbuf);
-    height = gdk_pixbuf_get_height (pixbuf);
-
-    if (bounds.height * width / bounds.width <= height)
-        scale = width / bounds.width;
-    else if (bounds.width * height / bounds.height <= width)
-        scale = height / bounds.height;
-    else {
-        if (bounds.width * height < bounds.height * width)
-            scale = bounds.width / width;
-        else
-            scale = bounds.height / height;
-    }
-
-    cairo_save (cr);
-    cairo_translate (cr,
-                     (bounds.width - width * scale) / 2,
-                     (bounds.height - height * scale) / 2);
-
-    eek_renderer_apply_transformation_for_key (self, cr, key, scale, rotate);
     surface = pixbuf_to_cairo_surface (pixbuf);
     g_object_unref (pixbuf);
-    cairo_set_source_surface (cr, surface, 0.0, 0.0);
-    cairo_paint (cr);
-    cairo_restore (cr);
+    return surface;
 }
 
 static void
@@ -116,7 +79,7 @@ eek_gtk_renderer_class_init (EekGtkRendererClass *klass)
 {
     EekRendererClass *renderer_class = EEK_RENDERER_CLASS (klass);
 
-    renderer_class->render_key_icon = eek_gtk_renderer_real_render_key_icon;
+    renderer_class->get_icon_surface = eek_gtk_renderer_real_get_icon_surface;
 }
 
 static void

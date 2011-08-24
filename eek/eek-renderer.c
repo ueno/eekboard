@@ -440,8 +440,15 @@ render_key (EekRenderer *self,
     gulong oref;
     EekSymbol *symbol;
     GHashTable *outline_surface_cache;
+    PangoLayout *layout;
+    PangoRectangle extents = { 0, };
+    EekColor foreground;
 
+    /* render outline */
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
+    bounds.width *= priv->scale;
+    bounds.height *= priv->scale;
+
     oref = eek_key_get_oref (key);
     if (oref == 0)
         return;
@@ -458,8 +465,8 @@ render_key (EekRenderer *self,
 
         outline_surface =
             cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
-                                        bounds.width * priv->scale,
-                                        bounds.height * priv->scale);
+                                        bounds.width,
+                                        bounds.height);
         cr = cairo_create (outline_surface);
 
         /* blank background */
@@ -481,36 +488,66 @@ render_key (EekRenderer *self,
     cairo_set_source_surface (cr, outline_surface, 0.0, 0.0);
     cairo_paint (cr);
 
+    /* render icon (if any) */
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-    if (EEK_RENDERER_GET_CLASS(self)->render_key_icon &&
-        symbol && eek_symbol_get_icon_name (symbol)) {
-        eek_renderer_render_key_icon (self, cr, key, 1.0, 0);
-    } else {
-        PangoLayout *layout;
-        PangoRectangle extents = { 0, };
-        EekColor foreground;
+    if (!symbol)
+        return;
 
-        layout = pango_cairo_create_layout (cr);
-        eek_renderer_render_key_label (self, layout, key);
-        pango_layout_get_extents (layout, NULL, &extents);
+    if (eek_symbol_get_icon_name (symbol)) {
+        cairo_surface_t *icon_surface =
+            eek_renderer_get_icon_surface (self,
+                                           eek_symbol_get_icon_name (symbol),
+                                           MIN(bounds.width, bounds.height));
+        if (icon_surface) {
+            gint width = cairo_image_surface_get_width (icon_surface);
+            gint height = cairo_image_surface_get_height (icon_surface);
+            gdouble scale;
 
-        cairo_save (cr);
-        cairo_move_to
-            (cr,
-             (bounds.width * priv->scale - extents.width / PANGO_SCALE) / 2,
-             (bounds.height * priv->scale - extents.height / PANGO_SCALE) / 2);
+            if (height * bounds.width / width <= bounds.height)
+                scale = bounds.width / width;
+            else if (width * bounds.height / height <= bounds.width)
+                scale = bounds.height / height;
+            else {
+                if (width * bounds.height < height * bounds.width)
+                    scale = width / bounds.width;
+                else
+                    scale = height / bounds.height;
+            }
 
-        eek_renderer_get_foreground_color (self, EEK_ELEMENT(key), &foreground);
-        cairo_set_source_rgba (cr,
-                               foreground.red,
-                               foreground.green,
-                               foreground.blue,
-                               foreground.alpha);
-
-        pango_cairo_show_layout (cr, layout);
-        cairo_restore (cr);
-        g_object_unref (layout);
+            cairo_save (cr);
+            cairo_translate (cr,
+                             (bounds.width - width * scale) / 2,
+                             (bounds.height - height * scale) / 2);
+            cairo_rectangle (cr, 0, 0, width, height);
+            cairo_clip (cr);
+            cairo_set_source_surface (cr, icon_surface, 0.0, 0.0);
+            cairo_paint (cr);
+            cairo_restore (cr);
+            return;
+        }
     }
+
+    /* render label */
+    layout = pango_cairo_create_layout (cr);
+    eek_renderer_render_key_label (self, layout, key);
+    pango_layout_get_extents (layout, NULL, &extents);
+
+    cairo_save (cr);
+    cairo_move_to
+        (cr,
+         (bounds.width - extents.width / PANGO_SCALE) / 2,
+         (bounds.height - extents.height / PANGO_SCALE) / 2);
+
+    eek_renderer_get_foreground_color (self, EEK_ELEMENT(key), &foreground);
+    cairo_set_source_rgba (cr,
+                           foreground.red,
+                           foreground.green,
+                           foreground.blue,
+                           foreground.alpha);
+
+    pango_cairo_show_layout (cr, layout);
+    cairo_restore (cr);
+    g_object_unref (layout);
 }
 
 void
@@ -1040,22 +1077,19 @@ eek_renderer_render_key_outline (EekRenderer *renderer,
                                                           rotate);
 }
 
-void
-eek_renderer_render_key_icon (EekRenderer *renderer,
-                                 cairo_t     *cr,
-                                 EekKey      *key,
-                                 gdouble      scale,
-                                 gboolean     rotate)
+cairo_surface_t *
+eek_renderer_get_icon_surface (EekRenderer *renderer,
+                               const gchar *icon_name,
+                               gint size)
 {
-    g_return_if_fail (EEK_IS_RENDERER(renderer));
-    g_return_if_fail (EEK_IS_KEY(key));
-    g_return_if_fail (scale >= 0.0);
+    EekRendererClass *klass;
 
-    EEK_RENDERER_GET_CLASS(renderer)->render_key_icon (renderer,
-                                                       cr,
-                                                       key,
-                                                       scale,
-                                                       rotate);
+    g_return_val_if_fail (EEK_IS_RENDERER(renderer), NULL);
+
+    klass = EEK_RENDERER_GET_CLASS(renderer);
+    if (klass->get_icon_surface)
+        return klass->get_icon_surface (renderer, icon_name, size);
+    return NULL;
 }
 
 void
