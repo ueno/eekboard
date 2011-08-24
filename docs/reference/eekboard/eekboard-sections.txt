@@ -1,10 +1,6 @@
 <SECTION>
 <FILE>eekboard-client</FILE>
 <TITLE>EekboardClient</TITLE>
-EEKBOARD_TYPE_CLIENT
-EEKBOARD_CLIENT
-EEKBOARD_CLIENT_CLASS
-EEKBOARD_CLIENT_GET_CLASS
 EekboardClient
 EekboardClientClass
 eekboard_client_new
@@ -14,9 +10,13 @@ eekboard_client_pop_context
 eekboard_client_destroy_context
 EekboardClientPrivate
 <SUBSECTION Standard>
-EEKBOARD_IS_EEKBOARD
+EEKBOARD_CLIENT
+EEKBOARD_IS_CLIENT
+EEKBOARD_TYPE_CLIENT
 eekboard_client_get_type
-EEKBOARD_IS_EEKBOARD_CLASS
+EEKBOARD_CLIENT_CLASS
+EEKBOARD_IS_CLIENT_CLASS
+EEKBOARD_CLIENT_GET_CLASS
 </SECTION>
 
 <SECTION>
