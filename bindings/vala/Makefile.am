@@ -71,4 +71,4 @@ eekboard-$(EEK_API_VERSION).vapi:
 # set up the verbosity rules to avoid some build noise
 VAPIGEN_V = $(VAPIGEN_V_$(V))
 VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
-VAPIGEN_V_0 = @echo "  VAPIG " $^;
+VAPIGEN_V_0 = @echo "  VAPIG " $@;
