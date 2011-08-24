@@ -77,5 +77,8 @@ po/.intltool-merge-cache
 bindings/vala/*.vapi
 py-compile
 data/org.fedorahosted.eekboard.gschema.xml
+data/org.fedorahosted.eekboard.gschema.valid
 data/eekboard-server.service
 data/*.desktop
+examples/eekxml/eekxml
+
