@@ -148,6 +148,7 @@ preferences_dialog_new (void)
 void
 preferences_dialog_run (PreferencesDialog *dialog)
 {
+    gtk_window_present (GTK_WINDOW(dialog->dialog));
     gtk_dialog_run (GTK_DIALOG(dialog->dialog));
     gtk_widget_destroy (dialog->dialog);
 }
