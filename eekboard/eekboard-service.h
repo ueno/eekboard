@@ -38,12 +38,23 @@ typedef struct _EekboardService EekboardService;
 typedef struct _EekboardServiceClass EekboardServiceClass;
 typedef struct _EekboardServicePrivate EekboardServicePrivate;
 
+/**
+ * EekboardService:
+ *
+ * The #EekboardService structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _EekboardService {
+    /*< private >*/
     GObject parent;
 
     EekboardServicePrivate *priv;
 };
 
+/**
+ * EekboardServiceClass:
+ * @create_context: virtual function for creating a context
+ */
 struct _EekboardServiceClass {
     /*< private >*/
     GObjectClass parent_class;
@@ -59,8 +70,8 @@ struct _EekboardServiceClass {
 };
 
 GType             eekboard_service_get_type (void) G_GNUC_CONST;
-EekboardService * eekboard_service_new      (const gchar     *object_path,
-                                             GDBusConnection *connection);
+EekboardService * eekboard_service_new      (GDBusConnection *connection,
+                                             const gchar     *object_path);
 
 G_END_DECLS
 #endif  /* EEKBOARD_SERVICE_H */

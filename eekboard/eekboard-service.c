@@ -247,6 +247,11 @@ eekboard_service_class_init (EekboardServiceClass *klass)
                       G_TYPE_NONE,
                       0);
 
+    /**
+     * EekboardService:object-path:
+     *
+     * D-Bus object path.
+     */
     pspec = g_param_spec_string ("object-path",
                                  "Object-path",
                                  "Object-path",
@@ -256,6 +261,11 @@ eekboard_service_class_init (EekboardServiceClass *klass)
                                      PROP_OBJECT_PATH,
                                      pspec);
 
+    /**
+     * EekboardService:connection:
+     *
+     * D-Bus connection.
+     */
     pspec = g_param_spec_object ("connection",
                                  "Connection",
                                  "Connection",
@@ -477,9 +487,16 @@ handle_method_call (GDBusConnection       *connection,
     g_return_if_reached ();
 }
 
+/**
+ * eekboard_service_new:
+ * @connection: a #GDBusConnection
+ * @object_path: object path
+ *
+ * Create an empty server for testing purpose.
+ */
 EekboardService *
-eekboard_service_new (const gchar     *object_path,
-                      GDBusConnection *connection)
+eekboard_service_new (GDBusConnection *connection,
+                      const gchar     *object_path)
 {
     return g_object_new (EEKBOARD_TYPE_SERVICE,
                          "object-path", object_path,

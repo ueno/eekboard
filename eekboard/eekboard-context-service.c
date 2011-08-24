@@ -360,6 +360,12 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
     gobject_class->dispose = eekboard_context_service_dispose;
     gobject_class->finalize = eekboard_context_service_finalize;
 
+    /**
+     * EekboardContextService::enabled:
+     * @context: an #EekboardContextService
+     *
+     * Emitted when @context is enabled.
+     */
     signals[ENABLED] =
         g_signal_new (I_("enabled"),
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -371,6 +377,12 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                       G_TYPE_NONE,
                       0);
 
+    /**
+     * EekboardContextService::disabled:
+     * @context: an #EekboardContextService
+     *
+     * Emitted when @context is enabled.
+     */
     signals[DISABLED] =
         g_signal_new (I_("disabled"),
                       G_TYPE_FROM_CLASS(gobject_class),
@@ -382,6 +394,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                       G_TYPE_NONE,
                       0);
 
+    /**
+     * EekboardContextService:object-path:
+     *
+     * D-Bus object path.
+     */
     pspec = g_param_spec_string ("object-path",
                                  "Object-path",
                                  "Object-path",
@@ -391,6 +408,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                                      PROP_OBJECT_PATH,
                                      pspec);
 
+    /**
+     * EekboardContextService:connection:
+     *
+     * D-Bus connection.
+     */
     pspec = g_param_spec_object ("connection",
                                  "Connection",
                                  "Connection",
@@ -400,6 +422,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                                      PROP_CONNECTION,
                                      pspec);
 
+    /**
+     * EekboardContextService:client-name:
+     *
+     * Name of a client who created this context service.
+     */
     pspec = g_param_spec_string ("client-name",
                                  "Client-name",
                                  "Client-name",
@@ -409,6 +436,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                                      PROP_CLIENT_NAME,
                                      pspec);
 
+    /**
+     * EekboardContextService:keyboard:
+     *
+     * An #EekKeyboard currently active in this context.
+     */
     pspec = g_param_spec_object ("keyboard",
                                  "Keyboard",
                                  "Keyboard",
@@ -418,6 +450,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                                      PROP_KEYBOARD,
                                      pspec);
 
+    /**
+     * EekboardContextService:visible:
+     *
+     * Flag to indicate if keyboard is visible or not.
+     */
     pspec = g_param_spec_boolean ("visible",
                                   "Visible",
                                   "Visible",
@@ -427,6 +464,11 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                                      PROP_VISIBLE,
                                      pspec);
 
+    /**
+     * EekboardContextService:fullscreen:
+     *
+     * Flag to indicate if keyboard is rendered in fullscreen mode.
+     */
     pspec = g_param_spec_boolean ("fullscreen",
                                   "Fullscreen",
                                   "Fullscreen",
@@ -847,6 +889,13 @@ handle_method_call (GDBusConnection       *connection,
     g_return_if_reached ();
 }
 
+/**
+ * eekboard_context_service_enable:
+ * @context: an #EekboardContextService
+ *
+ * Enable @context.  This function is called when @context is pushed
+ * by eekboard_service_push_context().
+ */
 void
 eekboard_context_service_enable (EekboardContextService *context)
 {
@@ -872,6 +921,13 @@ eekboard_context_service_enable (EekboardContextService *context)
     }
 }
 
+/**
+ * eekboard_context_service_disable:
+ * @context: an #EekboardContextService
+ *
+ * Disable @context.  This function is called when @context is pushed
+ * by eekboard_service_pop_context().
+ */
 void
 eekboard_context_service_disable (EekboardContextService *context)
 {
@@ -897,13 +953,27 @@ eekboard_context_service_disable (EekboardContextService *context)
     }
 }
 
-const EekKeyboard *
+/**
+ * eekboard_context_service_get_keyboard:
+ * @context: an #EekboardContextService
+ *
+ * Get keyboard currently active in @context.
+ * Returns: (transfer none): an #EekKeyboard
+ */
+EekKeyboard *
 eekboard_context_service_get_keyboard (EekboardContextService *context)
 {
     EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     return priv->keyboard;
 }
 
+/**
+ * eekboard_context_service_get_fullscreen:
+ * @context: an #EekboardContextService
+ *
+ * Check if keyboard is rendered in fullscreen mode in @context.
+ * Returns: %TRUE or %FALSE
+ */
 gboolean
 eekboard_context_service_get_fullscreen (EekboardContextService *context)
 {
@@ -911,6 +981,13 @@ eekboard_context_service_get_fullscreen (EekboardContextService *context)
     return priv->fullscreen;
 }
 
+/**
+ * eekboard_context_service_get_client_name:
+ * @context: an #EekboardContextService
+ *
+ * Get the name of client which created @context.
+ * Returns: (transfer none): a string
+ */
 const gchar *
 eekboard_context_service_get_client_name (EekboardContextService *context)
 {

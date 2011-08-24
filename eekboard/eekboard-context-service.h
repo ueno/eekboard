@@ -40,16 +40,31 @@ typedef struct _EekboardContextService EekboardContextService;
 typedef struct _EekboardContextServiceClass EekboardContextServiceClass;
 typedef struct _EekboardContextServicePrivate EekboardContextServicePrivate;
 
+/**
+ * EekboardContextService:
+ *
+ * The #EekboardContextService structure contains only private data
+ * and should only be accessed using the provided API.
+ */
 struct _EekboardContextService {
     GObject parent;
 
     EekboardContextServicePrivate *priv;
 };
 
+/**
+ * EekboardContextServiceClass:
+ * @create_keyboard: virtual function for create a keyboard from string
+ * @show_keyboard: virtual function for show a keyboard
+ * @hide_keyboard: virtual function for hide a keyboard
+ * @enabled: class handler for #EekboardContextService::enabled signal
+ * @disabled: class handler for #EekboardContextService::disabled signal
+ */
 struct _EekboardContextServiceClass {
     /*< private >*/
     GObjectClass parent_class;
 
+    /*< public >*/
     EekKeyboard *(*create_keyboard)    (EekboardContextService *self,
                                         const gchar            *keyboard_type);
     void         (*show_keyboard)      (EekboardContextService *self);
@@ -64,18 +79,16 @@ struct _EekboardContextServiceClass {
     gpointer pdummy[24];
 };
 
-GType              eekboard_context_service_get_type
-                   (void) G_GNUC_CONST;
-void               eekboard_context_service_enable
-                   (EekboardContextService *context);
-void               eekboard_context_service_disable
-                   (EekboardContextService *context);
-const EekKeyboard *eekboard_context_service_get_keyboard
-                   (EekboardContextService *context);
-gboolean           eekboard_context_service_get_fullscreen
-                   (EekboardContextService *context);
-const gchar *      eekboard_context_service_get_client_name
-                   (EekboardContextService *context);
+GType         eekboard_context_service_get_type
+                                              (void) G_GNUC_CONST;
+void          eekboard_context_service_enable (EekboardContextService *context);
+void          eekboard_context_service_disable (EekboardContextService *context);
+EekKeyboard  *eekboard_context_service_get_keyboard
+                                              (EekboardContextService *context);
+gboolean      eekboard_context_service_get_fullscreen
+                                              (EekboardContextService *context);
+const gchar * eekboard_context_service_get_client_name
+                                              (EekboardContextService *context);
 
 G_END_DECLS
 #endif  /* EEKBOARD_CONTEXT_SERVICE_H */
