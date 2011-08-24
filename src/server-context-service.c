@@ -159,7 +159,10 @@ on_realize_set_dock (GtkWidget *widget,
 {
 #ifdef HAVE_XDOCK
     GdkWindow *window = gtk_widget_get_window (widget);
-    gint x, y, width, height, depth;
+    gint x, y, width, height;
+#if !GTK_CHECK_VERSION(3,0,0)
+    gint depth;
+#endif  /* GTK_CHECK_VERSION(3,0,0) */
     long vals[12];
 
     /* set window type to dock */
@@ -287,7 +290,7 @@ set_geometry (ServerContextService *context)
 static void
 update_widget (ServerContextService *context)
 {
-    const EekKeyboard *keyboard;
+    EekKeyboard *keyboard;
     const gchar *client_name;
     EekBounds bounds;
     gchar *theme_name, *theme_path;
