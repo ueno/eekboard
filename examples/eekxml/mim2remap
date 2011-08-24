@@ -19,7 +19,7 @@
 # 02110-1301 USA
 
 import json
-import gtk.gdk
+from gi.repository import Gdk
 import sys, os.path, re
 
 class MapFile(object):
@@ -41,8 +41,8 @@ class MapFile(object):
                         if len(keyseq) > 1:
                             continue
                         try:
-                            keyval = gtk.gdk.unicode_to_keyval(ord(keyseq))
-                            keyseq = gtk.gdk.keyval_name(keyval)
+                            keyval = Gdk.unicode_to_keyval(ord(keyseq))
+                            keyseq = Gdk.keyval_name(keyval)
                         except:
                             pass
                     if match.group(3):
@@ -55,8 +55,8 @@ class MapFile(object):
                                     'label': insert }
                     else:
                         try:
-                            keyval = gtk.gdk.unicode_to_keyval(ord(insert))
-                            name = gtk.gdk.keyval_name(keyval)
+                            keyval = Gdk.unicode_to_keyval(ord(insert))
+                            name = Gdk.keyval_name(keyval)
                             replace = { 'name': name,
                                         'label': insert,
                                         'xkeysym': keyval }
