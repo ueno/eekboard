@@ -350,7 +350,7 @@
             <bounds>3.121951,82.731707,68.682927,37.463415</bounds>
             <oref>outline6</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65507">Control_L</keysym>
+                <keysym keyval="65027">ISO_Level3_Shift</keysym>
             </symbols>
         </key>
         <key id="keycode38" name="keycode38" column="1" row="2">
@@ -554,7 +554,7 @@
             <bounds>62.439024,162.341463,48.390244,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="1">
-                <keysym keyval="65027">ISO_Level3_Shift</keysym>
+                <keysym keyval="65507">Control_L</keysym>
             </symbols>
         </key>
         <key id="keycode64" name="keycode64" column="2" row="4">
