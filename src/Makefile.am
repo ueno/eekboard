@@ -26,7 +26,8 @@ eekboard_CFLAGS = \
 	$(GTK_CFLAGS) \
 	$(XKB_CFLAGS) \
 	$(LIBXKLAVIER_CFLAGS) \
-	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\"
+	-DKEYBOARDDIR=\"$(pkgdatadir)/keyboards\" \
+	-DPKGDATADIR=\"$(pkgdatadir)\"
 
 eekboard_LDADD = \
 	$(top_builddir)/eekboard/libeekboard.la \
@@ -58,8 +59,8 @@ eekboard_LDADD += \
 	$(IBUS_LIBS)
 endif
 
-eekboard_headers = client.h
-eekboard_SOURCES = client.c client-main.c
+eekboard_headers = client.h preferences-dialog.h
+eekboard_SOURCES = client.c preferences-dialog.c client-main.c
 
 eekboard_server_CFLAGS = \
 	-I$(top_srcdir) \
@@ -98,3 +99,5 @@ eekboard_HEADERS =				\
 noinst_HEADERS = \
 	$(eekboard_headers) \
 	$(eekboard_server_headers)
+
+dist_pkgdata_DATA = preferences-dialog.ui

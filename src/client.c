@@ -42,6 +42,7 @@
 #include "eekboard/eekboard-client.h"
 #include "eekboard/eekboard-xklutil.h"
 #include "client.h"
+#include "preferences-dialog.h"
 
 #include <string.h>
 
@@ -715,6 +716,9 @@ set_keyboard (Client *client,
     GSList *keyboards = NULL;
     gchar **strv, **p;
 
+    g_return_val_if_fail (keyboard != NULL, FALSE);
+    g_return_val_if_fail (*keyboard != '\0', FALSE);
+
     if (client->keyboards)
         g_slist_free (client->keyboards);
 
@@ -962,7 +966,14 @@ on_key_pressed (EekboardContext *context,
         eekboard_context_set_keyboard (client->context,
                                        GPOINTER_TO_UINT(client->keyboards->data),
                                        NULL);
+        return;
     }
+
+    if (g_strcmp0 (eek_symbol_get_name (symbol), "preferences") == 0) {
+        PreferencesDialog *dialog = preferences_dialog_new ();
+        preferences_dialog_run (dialog);
+    }
+
 
     send_fake_key_event (client, symbol, modifiers, TRUE);
     send_fake_key_event (client, symbol, modifiers, FALSE);
