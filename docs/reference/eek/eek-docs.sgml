@@ -37,6 +37,7 @@
     <title>API Manual</title>
     <chapter>
       <title>Base Classes, Interfaces, and Utilities</title>
+      <xi:include href="xml/eek.xml"/>
       <xi:include href="xml/eek-serializable.xml"/>
       <xi:include href="xml/eek-element.xml"/>
       <xi:include href="xml/eek-container.xml"/>
@@ -49,12 +50,12 @@
       <xi:include href="xml/eek-types.xml"/>
     </chapter>
     <chapter>
-      <title>Clutter Keyboard</title>
-      <xi:include href="xml/eek-clutter-keyboard.xml"/>
+      <title>GTK Adapter</title>
+      <xi:include href="xml/eek-gtk-keyboard.xml"/>
     </chapter>
     <chapter>
-      <title>GTK Keyboard</title>
-      <xi:include href="xml/eek-gtk-keyboard.xml"/>
+      <title>Clutter Adapter</title>
+      <xi:include href="xml/eek-clutter-keyboard.xml"/>
     </chapter>
     <chapter>
       <title>Libxklavier Layout Engine</title>

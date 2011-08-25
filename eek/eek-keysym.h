@@ -47,6 +47,12 @@ G_BEGIN_DECLS
 typedef struct _EekKeysymClass EekKeysymClass;
 typedef struct _EekKeysymPrivate EekKeysymPrivate;
 
+/**
+ * EekKeysym:
+ *
+ * The #EekKeysym structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _EekKeysym {
     /*< private >*/
     EekSymbol parent;
@@ -65,7 +71,7 @@ guint      eek_keysym_get_xkeysym       (EekKeysym      *keysym);
 
 EekKeysym *eek_keysym_new_from_name     (const gchar    *name);
 EekKeysym *eek_keysym_new_with_modifier (guint           xkeysym,
-                                         EekModifierType modifier);
+                                         EekModifierType modifier_mask);
 
 G_END_DECLS
 

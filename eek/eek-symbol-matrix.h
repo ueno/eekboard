@@ -34,6 +34,7 @@ G_BEGIN_DECLS
  */
 struct _EekSymbolMatrix
 {
+    /*< public >*/
     gint num_groups;
     gint num_levels;
     EekSymbol **data;

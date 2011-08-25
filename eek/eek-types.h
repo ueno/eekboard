@@ -159,6 +159,7 @@ typedef struct _EekColor EekColor;
 typedef struct _EekPoint EekPoint;
 struct _EekPoint
 {
+    /*< public >*/
     gdouble x;
     gdouble y;
 };
@@ -180,6 +181,7 @@ void      eek_point_rotate   (EekPoint       *point,
  */
 struct _EekBounds
 {
+    /*< public >*/
     gdouble x;
     gdouble y;
     gdouble width;
@@ -206,6 +208,7 @@ eek_bounds_long_side (EekBounds *bounds)
  */
 struct _EekOutline
 {
+    /*< public >*/
     gdouble corner_radius;
     EekPoint *points;
     gint num_points;
@@ -226,6 +229,7 @@ void        eek_outline_free     (EekOutline       *outline);
  */
 struct _EekColor
 {
+    /*< public >*/
     gdouble red;
     gdouble green;
     gdouble blue;

@@ -41,6 +41,12 @@ G_BEGIN_DECLS
 typedef struct _EekSectionClass EekSectionClass;
 typedef struct _EekSectionPrivate EekSectionPrivate;
 
+/**
+ * EekSection:
+ *
+ * The #EekSection structure contains only private data and should
+ * only be accessed using the provided API.
+ */
 struct _EekSection
 {
     /*< private >*/
@@ -63,6 +69,7 @@ struct _EekSection
  * @key_released: class handler for #EekSection::key-released signal
  * @key_locked: class handler for #EekSection::key-locked signal
  * @key_unlocked: class handler for #EekSection::key-unlocked signal
+ * @key_cancelled: class handler for #EekSection::key-cancelled signal
  */
 struct _EekSectionClass
 {

@@ -20,11 +20,11 @@
 
 /**
  * SECTION:eek-serializable
- * @short_description: Interface implemented by #EekElement to
- * serialize it to #GVariant
+ * @short_description: Interface which provides object serialization
+ * into #GVariant
  *
  * The #EekSerializableIface interface defines serialize/deserialize
- * method of #EekElement.
+ * method.
  */
 
 #ifdef HAVE_CONFIG_H

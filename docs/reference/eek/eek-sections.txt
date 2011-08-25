@@ -3,6 +3,7 @@
 <TITLE>EekKeyboard</TITLE>
 EekKeyboard
 EekKeyboardClass
+EekModifierKey
 eek_keyboard_new
 eek_keyboard_get_layout
 eek_keyboard_get_size
@@ -15,6 +16,7 @@ eek_keyboard_get_group
 eek_keyboard_get_level
 eek_keyboard_set_modifier_behavior
 eek_keyboard_get_modifier_behavior
+eek_keyboard_set_modifiers
 eek_keyboard_get_modifiers
 eek_keyboard_create_section
 eek_keyboard_find_key_by_keycode
@@ -24,6 +26,8 @@ eek_keyboard_set_num_lock_mask
 eek_keyboard_get_num_lock_mask
 eek_keyboard_set_alt_gr_mask
 eek_keyboard_get_alt_gr_mask
+eek_keyboard_get_pressed_keys
+eek_keyboard_get_locked_keys
 EekKeyboardPrivate
 <SUBSECTION Standard>
 EEK_KEYBOARD
@@ -66,37 +70,6 @@ eek_gtk_keyboard_get_type
 EEK_GTK_KEYBOARD_CLASS
 EEK_IS_GTK_KEYBOARD_CLASS
 EEK_GTK_KEYBOARD_GET_CLASS
-</SECTION>
-
-<SECTION>
-<FILE>eek-theme-node</FILE>
-EekSide
-EekCorner
-eek_theme_node_new
-eek_theme_node_get_parent
-eek_theme_node_get_theme
-eek_theme_node_get_element_type
-eek_theme_node_get_element_id
-eek_theme_node_get_element_class
-eek_theme_node_get_pseudo_class
-eek_theme_node_get_color
-eek_theme_node_get_background_color
-eek_theme_node_get_foreground_color
-eek_theme_node_get_background_gradient
-eek_theme_node_get_border_width
-eek_theme_node_get_border_radius
-eek_theme_node_get_border_color
-eek_theme_node_get_font
-EekThemeNodePrivate
-EekThemeNodeClass
-<SUBSECTION Standard>
-EEK_THEME_NODE
-EEK_IS_THEME_NODE
-EEK_TYPE_THEME_NODE
-eek_theme_node_get_type
-EEK_THEME_NODE_CLASS
-EEK_IS_THEME_NODE_CLASS
-EEK_THEME_NODE_GET_CLASS
 </SECTION>
 
 <SECTION>
@@ -285,6 +258,7 @@ eek_key_get_index
 eek_key_set_oref
 eek_key_get_oref
 eek_key_is_pressed
+eek_key_is_locked
 EekKeyPrivate
 <SUBSECTION Standard>
 EEK_KEY
@@ -361,22 +335,6 @@ EEK_XML_LAYOUT_GET_CLASS
 </SECTION>
 
 <SECTION>
-<FILE>eek-theme</FILE>
-eek_theme_new
-eek_theme_load_stylesheet
-eek_theme_unload_stylesheet
-EekThemeClass
-<SUBSECTION Standard>
-EEK_THEME
-EEK_IS_THEME
-EEK_TYPE_THEME
-eek_theme_get_type
-EEK_THEME_CLASS
-EEK_IS_THEME_CLASS
-EEK_THEME_GET_CLASS
-</SECTION>
-
-<SECTION>
 <FILE>eek-keysym</FILE>
 <TITLE>EekKeysym</TITLE>
 EEK_KEYSYM
@@ -434,9 +392,11 @@ eek_color_new
 eek_color_copy
 eek_color_free
 EekGradientType
-EekThemeNode
-EekThemeContext
-EekTheme
+</SECTION>
+
+<SECTION>
+<FILE>eek</FILE>
+eek_init
 </SECTION>
 
 <SECTION>

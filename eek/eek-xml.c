@@ -18,6 +18,7 @@
 
 /**
  * SECTION: eek-xml
+ * @title: XML Conversion Utilities
  * @short_description: #EekKeyboard to XML conversion utilities
  */
 

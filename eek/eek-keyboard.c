@@ -949,8 +949,8 @@ eek_keyboard_get_alt_gr_mask (EekKeyboard *keyboard)
  * @keyboard: an #EekKeyboard
  *
  * Get pressed keys.
- * Returns: (transfer container) (element-type EekModifierKey): A list
- * of pressed keys.
+ * Returns: (transfer container) (element-type EekKey): A list of
+ * pressed keys.
  */
 GList *
 eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)

@@ -106,7 +106,16 @@ struct _EekKeyboardClass
     gpointer pdummy[21];
 };
 
+/**
+ * EekModifierKey:
+ * @modifiers: an #EekModifierType which @key triggers
+ * @key: an #EekKey
+ *
+ * Entry which associates modifier mask to a key.  This is returned by
+ * eek_keyboard_get_locked_keys().
+ */
 struct _EekModifierKey {
+    /*< public >*/
     EekModifierType modifiers;
     EekKey *key;
 };

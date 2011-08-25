@@ -102,9 +102,9 @@ void                  eek_symbol_set_category  (EekSymbol        *symbol,
                                                 EekSymbolCategory category);
 EekSymbolCategory     eek_symbol_get_category  (EekSymbol        *symbol);
 EekModifierType       eek_symbol_get_modifier_mask
-                                               (EekSymbol        *keysym);
+                                               (EekSymbol        *symbol);
 void                  eek_symbol_set_modifier_mask
-                                               (EekSymbol        *keysym,
+                                               (EekSymbol        *symbol,
                                                 EekModifierType   mask);
 gboolean              eek_symbol_is_modifier   (EekSymbol        *symbol);
 void                  eek_symbol_set_icon_name (EekSymbol        *symbol,

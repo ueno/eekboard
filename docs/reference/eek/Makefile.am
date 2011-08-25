@@ -83,6 +83,8 @@ IGNORE_HFILES = \
 	eek-clutter-section.h \
 	eek-clutter-key.h \
 	eek-gtk-renderer.h \
+	eek-theme.h \
+	eek-theme-node.h \
 	eek-enumtypes.h
 if !ENABLE_CLUTTER
 IGNORE_HFILES += eek-clutter-keyboard.h eek-clutter.h

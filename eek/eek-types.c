@@ -20,7 +20,8 @@
 
 /**
  * SECTION:eek-types
- * @short_description: Miscellaneous types
+ * @title: Miscellaneous Types
+ * @short_description: Miscellaneous types used in Libeek
  */
 
 #ifdef HAVE_CONFIG_H

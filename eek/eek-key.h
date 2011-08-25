@@ -40,6 +40,12 @@ G_BEGIN_DECLS
 typedef struct _EekKeyClass EekKeyClass;
 typedef struct _EekKeyPrivate EekKeyPrivate;
 
+/**
+ * EekKey:
+ *
+ * The #EekKey structure contains only private data and should only be
+ * accessed using the provided API.
+ */
 struct _EekKey
 {
     /*< private >*/
@@ -64,6 +70,7 @@ struct _EekKey
  * @released: class handler for #EekKey::released signal
  * @locked: class handler for #EekKey::locked signal
  * @unlocked: class handler for #EekKey::unlocked signal
+ * @cancelled: class handler for #EekKey::cancelled signal
  * @is_pressed: virtual function for getting whether the key is pressed
  * @is_locked: virtual function for getting whether the key is locked
  */
