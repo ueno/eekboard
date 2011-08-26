@@ -99,7 +99,7 @@ class Context(gobject.GObject):
         self.__properties[pspec.name] = value
 
     def do_get_property(self, pspec):
-        return self.__properties[pspec.name]
+        return self.__properties.get(pspec.name, pspec.default_value)
 
     def add_keyboard(self, keyboard_type):
         return self.__context.AddKeyboard(keyboard_type)

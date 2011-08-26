@@ -24,7 +24,7 @@ class Keysym(symbol.Symbol):
     def __init__(self):
         super(Keysym, self).__init__()
 
-    xkeysym = property(lambda self: self.xkeysym)
+    xkeysym = property(lambda self: self.__xkeysym)
 
     def serialize(self, struct):
         super(Keysym, self).serialize(struct)
