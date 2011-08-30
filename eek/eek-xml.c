@@ -78,6 +78,21 @@ output_bounds (GString *output, EekBounds *bounds)
 }
 
 static void
+output_symbol_attributes (GString   *output,
+                          EekSymbol *symbol)
+{
+    if (eek_symbol_get_name (symbol) != NULL)
+        g_string_markup_printf (output, " name=\"%s\"",
+                                eek_symbol_get_name (symbol));
+    if (eek_symbol_get_label (symbol) != NULL)
+        g_string_markup_printf (output, " label=\"%s\"",
+                                eek_symbol_get_label (symbol));
+    if (eek_symbol_get_category (symbol) != EEK_SYMBOL_CATEGORY_UNKNOWN)
+        g_string_markup_printf (output, " category=\"%s\"",
+                                eek_symbol_category_get_name (eek_symbol_get_category (symbol)));
+}
+
+static void
 output_key_callback (EekElement *element, gpointer user_data)
 {
     OutputCallbackData *data = user_data;
@@ -146,26 +161,28 @@ output_key_callback (EekElement *element, gpointer user_data)
             if (EEK_IS_KEYSYM(symbol)) {
                 guint xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
 
+                g_string_markup_printf (data->output, "<keysym");
+                output_symbol_attributes (data->output, symbol);
                 if (xkeysym != EEK_INVALID_KEYSYM)
-                    g_string_markup_printf
-                        (data->output,
-                         "<keysym keyval=\"%u\">%s</keysym>\n",
-                         xkeysym,
-                         eek_symbol_get_name (symbol));
-                else
-                    g_string_markup_printf (data->output,
-                                            "<keysym>%s</keysym>\n",
-                                            eek_symbol_get_name (symbol));
+                    g_string_markup_printf (data->output, " keyval=\"%u\"",
+                                            xkeysym);
+                g_string_markup_printf (data->output, ">%s</keysym>\n",
+                                        eek_symbol_get_name (symbol));
             }
             else if (EEK_IS_TEXT(symbol)) {
+                g_string_markup_printf (data->output, "<text");
+                output_symbol_attributes (data->output, symbol);
                 g_string_markup_printf (data->output,
-                                        "<text>%s</text>\n",
+                                        ">%s</text>\n",
                                         eek_text_get_text (EEK_TEXT(symbol)));
             }
-            else
+            else {
+                g_string_markup_printf (data->output, "<symbol");
+                output_symbol_attributes (data->output, symbol);
                 g_string_markup_printf (data->output,
-                                        "<symbol>%s</symbol>\n",
+                                        ">%s</symbol>\n",
                                         eek_symbol_get_name (symbol));
+            }
         }
         g_string_append_indent (data->output, data->indent + 1);
         g_string_markup_printf (data->output, "</symbols>\n");

@@ -149,9 +149,10 @@
 		      (car from)
 		    (or (mim2remap--char-to-keyname (aref from 0))
 			(error "No keyname for %c" (aref from 0))))
-		  (if (characterp to)
-		      (list (cons :text (char-to-string to)))
-		    (list (cons :text to))))))
+		  (list (cons :text (if (characterp to)
+					(char-to-string to)
+				      to))
+			(cons :category 'letter)))))
 	(cdr sexp))))))
 
 (defun batch-mim2remap ()

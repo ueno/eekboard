@@ -44,7 +44,8 @@ def remap(keyboard, mapping):
                     if mapped.has_key('label'):
                         replace.set_label(mapped['label'])
                     if mapped.has_key('category'):
-                        replace.set_category(mapped['category'])
+                        cat = Eek.symbol_category_from_name(mapped['category'])
+                        replace.set_category(cat)
                     matrix.set_symbol(0, level, replace)
     def __each_section(element, data):
         element.foreach_child(__each_key, data)

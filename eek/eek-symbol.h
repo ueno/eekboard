@@ -111,6 +111,11 @@ void                  eek_symbol_set_icon_name (EekSymbol        *symbol,
                                                 const gchar      *icon_name);
 G_CONST_RETURN gchar *eek_symbol_get_icon_name (EekSymbol        *symbol);
 
+G_CONST_RETURN gchar *eek_symbol_category_get_name
+                                               (EekSymbolCategory category);
+EekSymbolCategory     eek_symbol_category_from_name
+                                               (const gchar      *name);
+
 G_END_DECLS
 
 #endif  /* EEK_SYMBOL_H */

@@ -66,8 +66,10 @@ struct _ParseCallbackData {
     gdouble corner_radius;
     GSList *points;
     GSList *symbols;
+    gchar *name;
     gchar *label;
     gchar *icon;
+    EekSymbolCategory category;
     guint keyval;
     gint groups, levels;
     EekOutline outline;
@@ -166,6 +168,7 @@ start_element_callback (GMarkupParseContext *pcontext,
     gint column = -1, row = -1, groups = -1, levels = -1;
     guint keyval = EEK_INVALID_KEYSYM;
     gchar *name = NULL, *label = NULL, *icon = NULL, *id = NULL, *version = NULL;
+    EekSymbolCategory category;
 
     validate (element_name, data->element_stack, error);
     if (error && *error)
@@ -184,6 +187,8 @@ start_element_callback (GMarkupParseContext *pcontext,
             label = g_strdup (*values);
         else if (g_strcmp0 (*names, "icon") == 0)
             icon = g_strdup (*values);
+        else if (g_strcmp0 (*names, "category") == 0)
+            category = eek_symbol_category_from_name (*values);
         else if (g_strcmp0 (*names, "keyval") == 0)
             keyval = strtoul (*values, NULL, 10);
         else if (g_strcmp0 (*names, "version") == 0)
@@ -230,9 +235,11 @@ start_element_callback (GMarkupParseContext *pcontext,
     }
 
     if (g_strcmp0 (element_name, "symbol") == 0 ||
-        g_strcmp0 (element_name, "keysym") == 0) {
+        g_strcmp0 (element_name, "keysym") == 0 ||
+        g_strcmp0 (element_name, "text") == 0) {
         data->label = g_strdup (label);
         data->icon = g_strdup (icon);
+        data->category = category;
         if (g_strcmp0 (element_name, "keysym") == 0)
             data->keyval = keyval;
     }

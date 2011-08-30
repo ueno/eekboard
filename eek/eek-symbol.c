@@ -444,3 +444,38 @@ eek_symbol_get_icon_name (EekSymbol *symbol)
         return NULL;
     return priv->icon_name;
 }
+
+static const struct {
+    EekSymbolCategory category;
+    gchar *name;
+} category_names[] = {
+    { EEK_SYMBOL_CATEGORY_LETTER, "letter" },
+    { EEK_SYMBOL_CATEGORY_FUNCTION, "function" },
+    { EEK_SYMBOL_CATEGORY_KEYNAME, "keyname" },
+    { EEK_SYMBOL_CATEGORY_USER0, "user0" },
+    { EEK_SYMBOL_CATEGORY_USER1, "user1" },
+    { EEK_SYMBOL_CATEGORY_USER2, "user2" },
+    { EEK_SYMBOL_CATEGORY_USER3, "user3" },
+    { EEK_SYMBOL_CATEGORY_USER4, "user4" },
+    { EEK_SYMBOL_CATEGORY_UNKNOWN, NULL }
+};
+
+G_CONST_RETURN gchar *
+eek_symbol_category_get_name (EekSymbolCategory category)
+{
+    gint i;
+    for (i = 0; i < G_N_ELEMENTS(category_names); i++)
+        if (category_names[i].category == category)
+            return category_names[i].name;
+    return NULL;
+}
+
+EekSymbolCategory
+eek_symbol_category_from_name (const gchar *name)
+{
+    gint i;
+    for (i = 0; i < G_N_ELEMENTS(category_names); i++)
+        if (g_strcmp0 (category_names[i].name, name) == 0)
+            return category_names[i].category;
+    return EEK_SYMBOL_CATEGORY_UNKNOWN;
+}
