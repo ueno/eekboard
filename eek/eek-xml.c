@@ -34,6 +34,7 @@
 #include "eek-key.h"
 #include "eek-xml.h"
 #include "eek-keysym.h"
+#include "eek-text.h"
 
 #define g_string_append_indent(string, indent)  \
     {                                           \
@@ -155,6 +156,11 @@ output_key_callback (EekElement *element, gpointer user_data)
                     g_string_markup_printf (data->output,
                                             "<keysym>%s</keysym>\n",
                                             eek_symbol_get_name (symbol));
+            }
+            else if (EEK_IS_TEXT(symbol)) {
+                g_string_markup_printf (data->output,
+                                        "<text>%s</text>\n",
+                                        eek_text_get_text (EEK_TEXT(symbol)));
             }
             else
                 g_string_markup_printf (data->output,

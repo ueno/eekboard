@@ -1,5 +1,5 @@
 bin_SCRIPTS = eekxml
-EXTRA_DIST = eekxml.in mim2remap
+EXTRA_DIST = eekxml.in mim2remap.el
 DISTCLEANFILES = eekxml
 
 eekxml: eekxml.in

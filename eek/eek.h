@@ -28,6 +28,7 @@
 #include "eek-layout.h"
 #include "eek-symbol.h"
 #include "eek-keysym.h"
+#include "eek-text.h"
 #include "eek-xml.h"
 #include "eek-serializable.h"
 #include "eek-theme.h"

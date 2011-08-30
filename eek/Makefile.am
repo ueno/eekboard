@@ -35,6 +35,7 @@ libeek_public_headers =				\
 	$(srcdir)/eek-key.h			\
 	$(srcdir)/eek-symbol.h			\
 	$(srcdir)/eek-keysym.h			\
+	$(srcdir)/eek-text.h			\
 	$(srcdir)/eek-symbol-matrix.h		\
 	$(srcdir)/eek-types.h			\
 	$(srcdir)/eek-xml.h			\
@@ -64,6 +65,7 @@ libeek_sources =				\
 	$(srcdir)/eek-symbol-matrix.c		\
 	$(srcdir)/eek-symbol.c			\
 	$(srcdir)/eek-keysym.c			\
+	$(srcdir)/eek-text.c			\
 	$(srcdir)/eek-types.c			\
 	$(srcdir)/eek-serializable.c		\
 	$(srcdir)/eek-xml.c			\

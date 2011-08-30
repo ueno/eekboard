@@ -33,6 +33,7 @@
 #include "eek-section.h"
 #include "eek-key.h"
 #include "eek-keysym.h"
+#include "eek-text.h"
 
 enum {
     PROP_0,
@@ -93,6 +94,7 @@ static const gchar *valid_path_list[] = {
     "symbols/key/section/keyboard",
     "groups/symbols/key/section/keyboard",
     "levels/symbols/key/section/keyboard",
+    "text/symbols/key/section/keyboard",
     "keysym/symbols/key/section/keyboard",
     "symbol/symbols/key/section/keyboard",
     "invalid/symbols/key/section/keyboard",
@@ -411,7 +413,8 @@ end_element_callback (GMarkupParseContext *pcontext,
     }
 
     if (g_strcmp0 (element_name, "symbol") == 0 ||
-        g_strcmp0 (element_name, "keysym") == 0) {
+        g_strcmp0 (element_name, "keysym") == 0 ||
+        g_strcmp0 (element_name, "text") == 0) {
         EekSymbol *symbol;
 
         if (g_strcmp0 (element_name, "keysym") == 0) {
@@ -421,6 +424,8 @@ end_element_callback (GMarkupParseContext *pcontext,
             else
                 keysym = eek_keysym_new_from_name (text);
             symbol = EEK_SYMBOL(keysym);
+        } else if (g_strcmp0 (element_name, "text") == 0) {
+            symbol = EEK_SYMBOL(eek_text_new (text));
         } else {
             symbol = eek_symbol_new (text);
             eek_symbol_set_category (symbol, EEK_SYMBOL_CATEGORY_KEYNAME);

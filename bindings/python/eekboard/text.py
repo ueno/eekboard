@@ -15,9 +15,21 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from symbol import *
-from keysym import *
-from text import *
-from serializable import *
-from client import *
-from context import *
+import symbol
+
+class Text(symbol.Symbol):
+    __gtype_name__ = "PYEekText"
+    __NAME__ = "EekText"
+
+    def __init__(self):
+        super(Text, self).__init__()
+
+    text = property(lambda self: self.__text)
+
+    def serialize(self, struct):
+        super(Text, self).serialize(struct)
+        struct.append(dbus.String(self.__text))
+
+    def deserialize(self, struct):
+        super(Text, self).deserialize(struct)
+        self.__text = struct.pop(0)

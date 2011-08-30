@@ -96,6 +96,24 @@ EEK_SECTION_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>eek-text</FILE>
+<TITLE>EekText</TITLE>
+EekText
+EekTextClass
+eek_text_new
+eek_text_get_text
+EekTextPrivate
+<SUBSECTION Standard>
+EEK_TEXT
+EEK_IS_TEXT
+EEK_TYPE_TEXT
+eek_text_get_type
+EEK_TEXT_CLASS
+EEK_IS_TEXT_CLASS
+EEK_TEXT_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>eek-theme-context</FILE>
 eek_theme_context_new
 eek_theme_context_set_theme
@@ -174,6 +192,8 @@ eek_symbol_set_modifier_mask
 eek_symbol_is_modifier
 eek_symbol_set_icon_name
 eek_symbol_get_icon_name
+eek_symbol_category_get_name
+eek_symbol_category_from_name
 EekSymbolPrivate
 <SUBSECTION Standard>
 EEK_SYMBOL

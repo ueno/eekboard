@@ -46,6 +46,7 @@
       <xi:include href="xml/eek-key.xml"/>
       <xi:include href="xml/eek-symbol.xml"/>
       <xi:include href="xml/eek-keysym.xml"/>
+      <xi:include href="xml/eek-text.xml"/>
       <xi:include href="xml/eek-layout.xml"/>
       <xi:include href="xml/eek-types.xml"/>
     </chapter>

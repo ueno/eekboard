@@ -35,9 +35,12 @@ def remap(keyboard, mapping):
                 if mapped:
                     if mapped.has_key('xkeysym'):
                         replace = Eek.Keysym.new(mapped['xkeysym'])
+                    elif mapped.has_key('text'):
+                        replace = Eek.Text.new(mapped['text'])
                     else:
                         replace = Eek.Symbol.new(mapped['name'])
                         replace.set_category(Eek.SymbolCategory.LETTER)
+                    replace.set_name(symbol.get_name())
                     if mapped.has_key('label'):
                         replace.set_label(mapped['label'])
                     if mapped.has_key('category'):

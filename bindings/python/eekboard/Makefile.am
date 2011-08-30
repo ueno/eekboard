@@ -20,5 +20,6 @@ pkgpython_PYTHON =				\
 	serializable.py				\
 	symbol.py				\
 	keysym.py				\
+	text.py					\
 	client.py				\
 	context.py
