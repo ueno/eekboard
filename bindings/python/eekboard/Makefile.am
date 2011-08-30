@@ -15,6 +15,7 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+if ENABLE_PYTHON
 pkgpython_PYTHON =				\
 	__init__.py				\
 	serializable.py				\
@@ -23,3 +24,4 @@ pkgpython_PYTHON =				\
 	text.py					\
 	client.py				\
 	context.py
+endif

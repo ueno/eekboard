@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
+if ENABLE_VALA
 vapidir = $(datadir)/vala/vapi
 dist_vapi_DATA = \
 	eek-$(EEK_API_VERSION).vapi \
@@ -72,3 +73,5 @@ eekboard-$(EEK_API_VERSION).vapi:
 VAPIGEN_V = $(VAPIGEN_V_$(V))
 VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
 VAPIGEN_V_0 = @echo "  VAPIG " $@;
+endif
+
