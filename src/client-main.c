@@ -157,11 +157,20 @@ main (int argc, char **argv)
 
     switch (bus_type) {
     case G_BUS_TYPE_SYSTEM:
+        error = NULL;
+        connection = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
+        if (connection == NULL) {
+            g_printerr ("Can't connect to the system bus: %s\n",
+                        error->message);
+            exit (1);
+        }
+        break;
     case G_BUS_TYPE_SESSION:
         error = NULL;
         connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
         if (connection == NULL) {
-            g_printerr ("Can't connect to the bus: %s\n", error->message);
+            g_printerr ("Can't connect to the session bus: %s\n",
+                        error->message);
             exit (1);
         }
         break;

@@ -26,5 +26,5 @@ Description: A Library to Create Keyboard-like UI
 URL: http://ueno.github.com/eekboard/
 Version: @VERSION@
 Requires: eek-@EEK_API_VERSION@
-Libs: -L${libdir} -leek
+Libs: -L${libdir} -leekboard
 Cflags: -I${includedir}/eekboard-@EEK_API_VERSION@

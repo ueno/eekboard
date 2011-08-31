@@ -65,10 +65,9 @@ eek_text_real_deserialize (EekSerializable *self,
     EekTextPrivate *priv = EEK_TEXT_GET_PRIVATE(self);
 
     index = eek_text_parent_serializable_iface->deserialize (self,
-                                                               variant,
-                                                               index);
-
-    g_variant_get_child (variant, index++, "u", &priv->text);
+                                                             variant,
+                                                             index);
+    g_variant_get_child (variant, index++, "s", &priv->text);
 
     return index;
 }

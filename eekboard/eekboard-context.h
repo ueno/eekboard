@@ -106,7 +106,7 @@ void             eekboard_context_press_keycode  (EekboardContext *context,
 void             eekboard_context_release_keycode (EekboardContext *context,
                                                    guint            keycode,
                                                    GCancellable    *cancellable);
-gboolean         eekboard_context_is_keyboard_visible
+gboolean         eekboard_context_is_visible
                                                  (EekboardContext *context);
 void             eekboard_context_set_enabled    (EekboardContext *context,
                                                   gboolean         enabled);
