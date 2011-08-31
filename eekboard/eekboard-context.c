@@ -81,7 +81,7 @@ eekboard_context_real_g_signal (GDBusProxy  *self,
         return;
     }
 
-    if (g_strcmp0 (signal_name, "KeyPressed") == 0) {
+    if (g_strcmp0 (signal_name, "KeyActivated") == 0) {
         const gchar *keyname;
         GVariant *variant = NULL;
         guint modifiers = 0;

@@ -60,7 +60,7 @@ class Context(gobject.GObject):
 
         self.__context.connect_to_signal('Enabled', self.__enabled_cb)
         self.__context.connect_to_signal('Disabled', self.__disabled_cb)
-        self.__context.connect_to_signal('KeyPressed', self.__key_pressed_cb)
+        self.__context.connect_to_signal('KeyActivated', self.__key_pressed_cb)
         self.__context.connect_to_signal('Destroyed', self.__destroyed_cb)
         self.__context.connect_to_signal('VisibilityChanged', self.__visibility_changed_cb)
         self.__context.connect_to_signal('KeyboardChanged', self.__keyboard_changed_cb)

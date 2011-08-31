@@ -114,7 +114,7 @@ static const gchar introspection_xml[] =
     /* signals */
     "    <signal name='Enabled'/>"
     "    <signal name='Disabled'/>"
-    "    <signal name='KeyPressed'>"
+    "    <signal name='KeyActivated'>"
     "      <arg type='s' name='keyname'/>"
     "      <arg type='v' name='symbol'/>"
     "      <arg type='u' name='modifiers'/>"
@@ -553,8 +553,8 @@ emit_group_changed_signal (EekboardContextService *context,
 }
 
 static void
-emit_key_pressed_dbus_signal (EekboardContextService *context,
-                              EekKey                 *key)
+emit_key_activated_dbus_signal (EekboardContextService *context,
+                                EekKey                 *key)
 {
     EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
@@ -572,7 +572,7 @@ emit_key_pressed_dbus_signal (EekboardContextService *context,
                                        NULL,
                                        priv->object_path,
                                        EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "KeyPressed",
+                                       "KeyActivated",
                                        g_variant_new ("(svu)",
                                                       keyname,
                                                       variant,
@@ -593,7 +593,7 @@ on_repeat_timeout (EekboardContextService *context)
 
     g_settings_get (priv->settings, "repeat-interval", "u", &delay);
 
-    emit_key_pressed_dbus_signal (context, priv->repeat_key);
+    emit_key_activated_dbus_signal (context, priv->repeat_key);
 
     priv->repeat_timeout_id =
         g_timeout_add (delay,
@@ -608,7 +608,7 @@ on_repeat_timeout_init (EekboardContextService *context)
 {
     EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
-    emit_key_pressed_dbus_signal (context, priv->repeat_key);
+    emit_key_activated_dbus_signal (context, priv->repeat_key);
 
     /* FIXME: clear modifiers for further key repeat; better not
        depend on modifier behavior is LATCH */
@@ -664,8 +664,8 @@ on_key_released (EekKeyboard *keyboard,
         g_source_remove (priv->repeat_timeout_id);
         priv->repeat_timeout_id = 0;
 
-        /* KeyPressed signal has not been emitted in repeat handler */
-        emit_key_pressed_dbus_signal (context, priv->repeat_key);
+        /* KeyActivated signal has not been emitted in repeat handler */
+        emit_key_activated_dbus_signal (context, priv->repeat_key);
     }
 }
 
