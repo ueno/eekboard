@@ -219,10 +219,6 @@ client_dispose (GObject *object)
 #endif  /* HAVE_XTEST */
 
     if (client->context) {
-        if (client->eekboard) {
-            eekboard_client_pop_context (client->eekboard, NULL);
-        }
-
         g_object_unref (client->context);
         client->context = NULL;
     }
