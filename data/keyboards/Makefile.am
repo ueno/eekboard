@@ -1,8 +1,19 @@
 keyboarddir = $(pkgdatadir)/keyboards
 dist_keyboard_DATA =				\
-	us.xml					\
-	th.xml					\
+	ar.xml					\
+	be.xml					\
+	fa.xml					\
+	he.xml					\
 	jp-kana.xml				\
+	kk.xml					\
+	ks.xml					\
+	my.xml					\
+	ru.xml					\
+	th.xml					\
+	ua.xml					\
+	ug.xml					\
+	us.xml					\
+	zh-bopomofo.xml				\
 	$(inscript_keyboards)
 inscript_keyboards =				\
 	as-inscript.xml				\
