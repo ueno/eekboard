@@ -151,7 +151,16 @@
 			(error "No keyname for %c" (aref from 0))))
 		  (list (cons :text (if (characterp to)
 					(char-to-string to)
-				      to))
+				      (if (and (symbolp to)
+					       (string-match
+						"\\`0x\\([0-9A-Fa-f]+\\)"
+						(symbol-name to)))
+					  (char-to-string (string-to-number
+							   (match-string
+							    1
+							    (symbol-name to))
+							   16))
+					to)))
 			(cons :category 'letter)))))
 	(cdr sexp))))))
 
