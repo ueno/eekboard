@@ -46,6 +46,16 @@
       <summary>Switch to fullscreen mode when startup</summary>
       <description>If true, switch to fullscreen mode when startup.</description>
     </key>
+    <key name="size-constraint-landscape" type="(dd)">
+      <default>(1.0, 0.3)</default>
+      <summary>Constraint of the maximum window size on landscape screen</summary>
+      <description>Constraint of maximum window size on landscape screen</description>
+    </key>
+    <key name="size-constraint-portrait" type="(dd)">
+      <default>(1.0, 0.5)</default>
+      <summary>Constraint of the maximum window size on portrait screen</summary>
+      <description>Constraint of maximum window size on portrait screen</description>
+    </key>
     <key name="theme" type="s">
       <default>'default'</default>
       <summary>Theme</summary>

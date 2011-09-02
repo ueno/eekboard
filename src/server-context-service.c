@@ -36,6 +36,8 @@
 enum {
     PROP_0,
     PROP_UI_TOOLKIT,
+    PROP_SIZE_CONSTRAINT_LANDSCAPE,
+    PROP_SIZE_CONSTRAINT_PORTRAIT,
     PROP_LAST
 };
 
@@ -59,6 +61,8 @@ struct _ServerContextService {
 
     GSettings *settings;
     UIToolkitType ui_toolkit;
+    gdouble size_constraint_landscape[2];
+    gdouble size_constraint_portrait[2];
 };
 
 struct _ServerContextServiceClass {
@@ -238,7 +242,16 @@ set_geometry (ServerContextService *context)
                                           context);
 
     if (eekboard_context_service_get_fullscreen (EEKBOARD_CONTEXT_SERVICE(context))) {
-        gint width = rect.width, height = rect.height / 2;
+        gint width = rect.width;
+        gint height = rect.height;
+
+        if (width > height) {
+            width *= context->size_constraint_landscape[0];
+            height *= context->size_constraint_landscape[1];
+        } else {
+            width *= context->size_constraint_portrait[0];
+            height *= context->size_constraint_portrait[1];
+        }
 
         if (width * bounds.height > height * bounds.width)
             width = (height / bounds.height) * bounds.width;
@@ -402,6 +415,7 @@ server_context_service_set_property (GObject      *object,
 {
     ServerContextService *context = SERVER_CONTEXT_SERVICE(object);
     const gchar *ui_toolkit;
+    GVariant *variant;
 
     switch (prop_id) {
     case PROP_UI_TOOLKIT:
@@ -415,6 +429,19 @@ server_context_service_set_property (GObject      *object,
         else
             g_warning ("unknown UI toolkit %s", ui_toolkit);
         break;
+    case PROP_SIZE_CONSTRAINT_LANDSCAPE:
+        variant = g_value_get_variant (value);
+        g_variant_get (variant, "(dd)",
+                       &context->size_constraint_landscape[0],
+                       &context->size_constraint_landscape[1]);
+        break;
+    case PROP_SIZE_CONSTRAINT_PORTRAIT:
+        variant = g_value_get_variant (value);
+        g_variant_get (variant, "(dd)",
+                       &context->size_constraint_portrait[0],
+                       &context->size_constraint_portrait[1]);
+        break;
+
     default:
         g_object_set_property (object,
                                g_param_spec_get_name (pspec),
@@ -459,6 +486,26 @@ server_context_service_class_init (ServerContextServiceClass *klass)
     g_object_class_install_property (gobject_class,
                                      PROP_UI_TOOLKIT,
                                      pspec);
+
+    pspec = g_param_spec_variant ("size-constraint-landscape",
+                                  "Size constraint landscape",
+                                  "Size constraint landscape",
+                                  G_VARIANT_TYPE("(dd)"),
+                                  NULL,
+                                  G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_SIZE_CONSTRAINT_LANDSCAPE,
+                                     pspec);
+
+    pspec = g_param_spec_variant ("size-constraint-portrait",
+                                  "Size constraint portrait",
+                                  "Size constraint portrait",
+                                  G_VARIANT_TYPE("(dd)"),
+                                  NULL,
+                                  G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_SIZE_CONSTRAINT_PORTRAIT,
+                                     pspec);
 }
 
 static void
@@ -484,6 +531,20 @@ server_context_service_init (ServerContextService *context)
     g_settings_bind (context->settings, "ui-toolkit",
                      context, "ui-toolkit",
                      G_SETTINGS_BIND_GET);
+    g_settings_bind_with_mapping (context->settings, "size-constraint-landscape",
+                                  context, "size-constraint-landscape",
+                                  G_SETTINGS_BIND_GET,
+                                  (GSettingsBindGetMapping *)g_value_set_variant,
+                                  NULL,
+                                  NULL,
+                                  NULL);
+    g_settings_bind_with_mapping (context->settings, "size-constraint-portrait",
+                                  context, "size-constraint-portrait",
+                                  G_SETTINGS_BIND_GET,
+                                  (GSettingsBindGetMapping *)g_value_set_variant,
+                                  NULL,
+                                  NULL,
+                                  NULL);
 }
 
 ServerContextService *
