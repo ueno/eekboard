@@ -901,18 +901,47 @@ send_fake_modifier_key_event (Client *client,
 }
 
 static void
-send_fake_key_event (Client *client,
-                     EekSymbol      *symbol,
-                     guint           keyboard_modifiers,
-                     gboolean        is_pressed)
+send_fake_key_event (Client    *client,
+                     EekSymbol *symbol,
+                     guint      keyboard_modifiers,
+                     gboolean   is_pressed)
 {
     GdkDisplay *display = gdk_display_get_default ();
     EekModifierType modifiers;
     guint xkeysym;
     guint keycode, replaced_keysym = 0;
 
-    /* Ignore special keys and modifiers */
-    if (!EEK_IS_KEYSYM(symbol) || eek_symbol_is_modifier (symbol))
+    /* Ignore modifier keys */
+    if (eek_symbol_is_modifier (symbol))
+        return;
+
+    /* If symbol is a text, convert chars in it to keysym */
+    if (EEK_IS_TEXT(symbol)) {
+        gchar *utf8 = eek_text_get_text (EEK_TEXT(symbol));
+        glong items_written;
+        gunichar *ucs4 = g_utf8_to_ucs4_fast (utf8, -1, &items_written);
+        gint i;
+
+        for (i = 0; i < items_written; i++) {
+            EekKeysym *keysym;
+            gchar *name;
+
+            name = g_strdup_printf ("U%04X", ucs4[i]);
+            xkeysym = XStringToKeysym (name);
+            g_free (name);
+
+            keysym = eek_keysym_new (xkeysym);
+            send_fake_key_event (client,
+                                 EEK_SYMBOL(keysym),
+                                 keyboard_modifiers,
+                                 is_pressed);
+        }
+        g_free (ucs4);
+        return;
+    }
+
+    /* Ignore special keys */
+    if (!EEK_IS_KEYSYM(symbol))
         return;
 
     xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
