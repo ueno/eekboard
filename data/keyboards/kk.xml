@@ -547,8 +547,8 @@
             <bounds>3.121951,162.341463,56.195122,37.463415</bounds>
             <oref>outline1</oref>
             <symbols groups="1" levels="2">
-                <symbol name="cycle-keyboard" label="⌨" category="keyname">cycle-keyboard</symbol>
-                <symbol name="preferences" label="☺" category="keyname">preferences</symbol>
+                <symbol name="cycle-keyboard" icon="input-keyboard-symbolic" label="⌨" category="keyname">cycle-keyboard</symbol>
+                <symbol name="preferences" icon="preferences-system-symbolic" label="☺" category="keyname">preferences</symbol>
             </symbols>
         </key>
         <key id="keycode133" name="keycode133" column="1" row="4">
