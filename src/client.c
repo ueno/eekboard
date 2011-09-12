@@ -905,39 +905,6 @@ send_fake_key_event (Client    *client,
     guint xkeysym;
     guint keycode, replaced_keysym = 0;
 
-    /* Ignore modifier keys */
-    if (eek_symbol_is_modifier (symbol))
-        return;
-
-    /* If symbol is a text, convert chars in it to keysym */
-    if (EEK_IS_TEXT(symbol)) {
-        gchar *utf8 = eek_text_get_text (EEK_TEXT(symbol));
-        glong items_written;
-        gunichar *ucs4 = g_utf8_to_ucs4_fast (utf8, -1, &items_written);
-        gint i;
-
-        for (i = 0; i < items_written; i++) {
-            EekKeysym *keysym;
-            gchar *name;
-
-            name = g_strdup_printf ("U%04X", ucs4[i]);
-            xkeysym = XStringToKeysym (name);
-            g_free (name);
-
-            keysym = eek_keysym_new (xkeysym);
-            send_fake_key_event (client,
-                                 EEK_SYMBOL(keysym),
-                                 keyboard_modifiers,
-                                 is_pressed);
-        }
-        g_free (ucs4);
-        return;
-    }
-
-    /* Ignore special keys */
-    if (!EEK_IS_KEYSYM(symbol))
-        return;
-
     xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
     g_return_if_fail (xkeysym > 0);
 
@@ -950,7 +917,7 @@ send_fake_key_event (Client    *client,
             return;
         }
     }
-    
+
     /* Clear level shift modifiers */
     keyboard_modifiers &= ~EEK_SHIFT_MASK;
     keyboard_modifiers &= ~EEK_LOCK_MASK;
@@ -964,8 +931,7 @@ send_fake_key_event (Client    *client,
     send_fake_modifier_key_event (client, modifiers, is_pressed);
     XSync (GDK_DISPLAY_XDISPLAY (display), False);
 
-    keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (display),
-                                xkeysym);
+    keycode = XKeysymToKeycode (GDK_DISPLAY_XDISPLAY (display), xkeysym);
     g_return_if_fail (keycode > 0);
 
     XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (display),
@@ -976,6 +942,48 @@ send_fake_key_event (Client    *client,
 
     if (replaced_keysym)
         replace_keycode (client, &keycode, &replaced_keysym);
+}
+
+static void
+send_fake_key_events (Client    *client,
+                      EekSymbol *symbol,
+                      guint      keyboard_modifiers)
+{
+    /* Ignore modifier keys */
+    if (eek_symbol_is_modifier (symbol))
+        return;
+
+    /* If symbol is a text, convert chars in it to keysym */
+    if (EEK_IS_TEXT(symbol)) {
+        gchar *utf8 = eek_text_get_text (EEK_TEXT(symbol));
+        glong items_written;
+        gunichar *ucs4 = g_utf8_to_ucs4_fast (utf8, -1, &items_written);
+        gint i;
+
+        for (i = 0; i < items_written; i++) {
+            guint xkeysym;
+            EekKeysym *keysym;
+            gchar *name;
+
+            name = g_strdup_printf ("U%04X", ucs4[i]);
+            xkeysym = XStringToKeysym (name);
+            g_free (name);
+
+            keysym = eek_keysym_new (xkeysym);
+            send_fake_key_events (client,
+                                  EEK_SYMBOL(keysym),
+                                  keyboard_modifiers);
+        }
+        g_free (ucs4);
+        return;
+    }
+
+    /* Ignore special keys */
+    if (!EEK_IS_KEYSYM(symbol))
+        return;
+
+    send_fake_key_event (client, symbol, keyboard_modifiers, TRUE);
+    send_fake_key_event (client, symbol, keyboard_modifiers, FALSE);
 }
 
 static void
@@ -1001,9 +1009,7 @@ on_key_pressed (EekboardContext *context,
         return;
     }
 
-
-    send_fake_key_event (client, symbol, modifiers, TRUE);
-    send_fake_key_event (client, symbol, modifiers, FALSE);
+    send_fake_key_events (client, symbol, modifiers);
 }
 
 static void
