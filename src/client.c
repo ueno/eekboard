@@ -127,12 +127,13 @@ static void            focus_listener_cb    (const AtspiEvent       *event,
 static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                                               void                   *user_data);
 #endif  /* HAVE_ATSPI */
-static gboolean        set_keyboard         (Client         *client,
-                                             const gchar            *keyboard);
-static gboolean        set_keyboard_from_xkl (Client         *client);
+static gboolean        set_keyboards        (Client                 *client,
+                                             const gchar           **keyboard);
+static gboolean        set_keyboards_from_xkl
+                                            (Client                 *client);
 #ifdef HAVE_XTEST
 static void            update_modifier_keycodes
-(Client         *client);
+                                            (Client                 *client);
 #endif  /* HAVE_XTEST */
 
 static void
@@ -297,11 +298,11 @@ client_init (Client *client)
 }
 
 gboolean
-client_set_keyboard (Client *client,
-                     const gchar    *keyboard)
+client_set_keyboards (Client       *client,
+                      const gchar **keyboards)
 {
     gboolean retval;
-    retval = set_keyboard (client, keyboard);
+    retval = set_keyboards (client, keyboards);
     if (retval && IS_KEYBOARD_VISIBLE (client))
         eekboard_context_show_keyboard (client->context, NULL);
     return retval;
@@ -343,7 +344,7 @@ client_enable_xkl (Client *client)
 
     xkl_engine_start_listen (client->xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
 
-    retval = set_keyboard_from_xkl (client);
+    retval = set_keyboards_from_xkl (client);
     if (IS_KEYBOARD_VISIBLE (client))
         eekboard_context_show_keyboard (client->context, NULL);
 
@@ -697,7 +698,7 @@ on_xkl_config_changed (XklEngine *xklengine,
     Client *client = user_data;
     gboolean retval;
 
-    retval = set_keyboard_from_xkl (client);
+    retval = set_keyboards_from_xkl (client);
     g_return_if_fail (retval);
 
 #ifdef HAVE_XTEST
@@ -706,46 +707,39 @@ on_xkl_config_changed (XklEngine *xklengine,
 }
 
 static gboolean
-set_keyboard (Client *client,
-              const gchar *keyboard)
+set_keyboards (Client       *client,
+               const gchar **keyboards)
 {
-    GSList *keyboards = NULL;
-    gchar **strv, **p;
-
-    g_return_val_if_fail (keyboard != NULL, FALSE);
-    g_return_val_if_fail (*keyboard != '\0', FALSE);
+    guint keyboard_id;
+    gchar **p;
+    GSList *head = NULL;
 
     if (client->keyboards)
         g_slist_free (client->keyboards);
 
-    strv = g_strsplit (keyboard, ",", -1);
-    for (p = strv; *p != NULL; p++) {
-        guint keyboard_id;
-
-        keyboard_id = eekboard_context_add_keyboard (client->context,
-                                                     *p,
-                                                     NULL);
-        if (keyboard_id == 0)
+    for (p = keyboards; *p != NULL; p++) {
+        keyboard_id = eekboard_context_add_keyboard (client->context, *p, NULL);
+        if (keyboard_id == 0) {
+            g_slist_free (head);
             return FALSE;
-        keyboards = g_slist_prepend (keyboards,
-                                     GUINT_TO_POINTER(keyboard_id));
+        }
+        head = g_slist_prepend (head, GUINT_TO_POINTER(keyboard_id));
     }
-    g_strfreev (strv);
 
     /* make a cycle */
-    keyboards = g_slist_reverse (keyboards);
-    g_slist_last (keyboards)->next = keyboards;
-    client->keyboards = keyboards;
+    head = g_slist_reverse (head);
+    g_slist_last (head)->next = head;
+    client->keyboards = head;
 
     /* select the first keyboard */
     eekboard_context_set_keyboard (client->context,
-                                   GPOINTER_TO_UINT(keyboards->data),
+                                   GPOINTER_TO_UINT(head->data),
                                    NULL);
     return TRUE;
 }
 
 static gboolean
-set_keyboard_from_xkl (Client *client)
+set_keyboards_from_xkl (Client *client)
 {
     XklConfigRec *rec;
     gchar *layout, *keyboard;

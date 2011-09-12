@@ -103,17 +103,19 @@ enum FocusListenerType {
 };
 
 static gboolean
-set_keyboard (Client *client,
-              const gchar    *keyboard)
+set_keyboards (Client *client,
+               gchar **keyboards)
 {
-    if (g_strcmp0 (keyboard, "system") == 0) {
+    if (g_strv_length (keyboards) == 0) {
         if (!client_enable_xkl (client)) {
             g_printerr ("Can't register xklavier event listeners\n");
             return FALSE;
         }
     } else {
-        if (!client_set_keyboard (client, keyboard)) {
-            g_printerr ("Can't set keyboard \"%s\"\n", keyboard);
+        if (!client_set_keyboards (client, keyboards)) {
+            gchar *str = g_strjoinv (", ", keyboards);
+            g_printerr ("Can't set keyboards \"%s\"\n", str);
+            g_free (str);
             return FALSE;
         }
     }
@@ -133,7 +135,7 @@ main (int argc, char **argv)
     GMainLoop *loop = NULL;
     gint focus;
     GSettings *settings = NULL;
-    gchar *keyboard;
+    gchar **keyboards;
     gint retval = 0;
 
     if (!gtk_init_check (&argc, &argv)) {
@@ -312,13 +314,13 @@ main (int argc, char **argv)
                       G_CALLBACK(on_destroyed), loop);
     g_object_unref (eekboard);
 
-    keyboard = g_settings_get_string (settings, "keyboard");
-    if (!set_keyboard (client, keyboard)) {
-        g_free (keyboard);
+    keyboards = g_settings_get_strv (settings, "keyboards");
+    if (!set_keyboards (client, keyboards)) {
+        g_strfreev (keyboards);
         retval = 1;
         goto out;
     }
-    g_free (keyboard);
+    g_strfreev (keyboards);
 
     g_main_loop_run (loop);
 

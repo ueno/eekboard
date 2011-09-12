@@ -33,8 +33,8 @@ typedef struct _Client Client;
 
 Client  *client_new                     (GDBusConnection *connection);
 
-gboolean client_set_keyboard            (Client          *client,
-                                         const gchar     *keyboard);
+gboolean client_set_keyboards           (Client          *client,
+                                         const gchar    **keyboard);
 
 gboolean client_enable_xkl              (Client          *client);
 void     client_disable_xkl             (Client          *client);

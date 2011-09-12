@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <schemalist>
   <schema id="org.fedorahosted.eekboard" path="/org/fedorahosted/eekboard/">
-    <key name="keyboard" type="s">
-      <default>'us'</default>
+    <key name="keyboards" type="as">
+      <default>['us']</default>
       <summary>Keyboard types</summary>
-      <description>keyboard types (comma separated).</description>
+      <description>keyboard types.</description>
     </key>
     <key name="ui-toolkit" type="s">
       <default>'gtk'</default>

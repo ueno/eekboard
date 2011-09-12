@@ -62,6 +62,35 @@ set_rate (const GValue       *value,
     return g_variant_new_uint32 (msecs);
 }
 
+static gboolean
+get_strv (GValue   *value,
+          GVariant *variant,
+          gpointer  user_data)
+{
+    gchar *strv = g_variant_get_strv (variant, NULL);
+    gchar *text = g_strjoinv (", ", strv);
+    g_free (strv);
+    g_value_set_string (value, text);
+    return TRUE;
+}
+
+static GVariant *
+set_strv (const GValue       *value,
+          const GVariantType *expected_type,
+          gpointer            user_data)
+{
+    gchar *text = g_value_get_string (value);
+    gchar **strv = g_strsplit (text, ",", -1), **p;
+    GVariant *variant;
+
+    for (p = strv; *p != NULL; p++)
+        g_strstrip (*p);
+
+    variant = g_variant_new_strv (strv, -1);
+    g_strfreev (strv);
+    return variant;
+}
+
 PreferencesDialog *
 preferences_dialog_new (void)
 {
@@ -138,9 +167,10 @@ preferences_dialog_new (void)
         gtk_builder_get_object (builder, "keyboard_entry");
     dialog->keyboard_entry = GTK_WIDGET(object);
 
-    g_settings_bind (dialog->settings, "keyboard",
-                     GTK_ENTRY(dialog->keyboard_entry), "text",
-                     G_SETTINGS_BIND_DEFAULT);
+    g_settings_bind_with_mapping (dialog->settings, "keyboards",
+                                  GTK_ENTRY(dialog->keyboard_entry), "text",
+                                  G_SETTINGS_BIND_DEFAULT,
+                                  get_strv, set_strv, NULL, NULL);
 
     return dialog;
 }
