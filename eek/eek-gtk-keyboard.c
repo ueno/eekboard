@@ -229,12 +229,17 @@ eek_gtk_keyboard_real_button_release_event (GtkWidget      *self,
                                             GdkEventButton *event)
 {
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
-    GList *head;
+    GList *head = eek_keyboard_get_pressed_keys (priv->keyboard);
 
-    head = eek_keyboard_get_pressed_keys (priv->keyboard);
-    for (; head; head = g_list_next (head)) {
+    /* Make a copy of HEAD before sending "released" signal on
+       elements, so that the default handler of
+       EekKeyboard::key-released signal can remove elements from its
+       internal copy */
+    head = g_list_copy (head);
+    for (; head; head = g_list_next (head))
         g_signal_emit_by_name (head->data, "released", priv->keyboard);
-    }
+    g_list_free (head);
+
     return TRUE;
 }
 
@@ -251,12 +256,20 @@ eek_gtk_keyboard_real_motion_notify_event (GtkWidget      *self,
     if (key) {
         GList *head = eek_keyboard_get_pressed_keys (priv->keyboard);
         gboolean found = FALSE;
+
+        /* Make a copy of HEAD before sending "cancelled" signal on
+           elements, so that the default handler of
+           EekKeyboard::key-cancelled signal can remove elements from its
+           internal copy */
+        head = g_list_copy (head);
         for (; head; head = g_list_next (head)) {
             if (head->data == key)
                 found = TRUE;
             else
                 g_signal_emit_by_name (head->data, "cancelled", priv->keyboard);
         }
+        g_list_free (head);
+
         if (!found)
             g_signal_emit_by_name (key, "pressed", priv->keyboard);
     }
@@ -269,12 +282,16 @@ eek_gtk_keyboard_real_unmap (GtkWidget *self)
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
 
     if (priv->keyboard) {
-        GList *head;
+        GList *head = eek_keyboard_get_pressed_keys (priv->keyboard);
 
-        head = eek_keyboard_get_pressed_keys (priv->keyboard);
-        for (; head; head = g_list_next (head)) {
+        /* Make a copy of HEAD before sending "released" signal on
+           elements, so that the default handler of
+           EekKeyboard::key-released signal can remove elements from its
+           internal copy */
+        head = g_list_copy (head);
+        for (; head; head = g_list_next (head))
             g_signal_emit_by_name (head->data, "released", priv->keyboard);
-        }
+        g_list_free (head);
     }
 
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->unmap (self);

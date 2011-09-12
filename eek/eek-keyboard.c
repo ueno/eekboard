@@ -331,16 +331,12 @@ eek_keyboard_real_key_cancelled (EekKeyboard *self,
     EekKeyboardPrivate *priv = EEK_KEYBOARD_GET_PRIVATE(self);
     GList *head;
 
-    for (head = priv->pressed_keys; head; ) {
-        EekKey *pressed_key = head->data;
-        if (pressed_key == key) {
-            GList *next = g_list_next (head);
-            priv->pressed_keys =
-                g_list_remove_link (priv->pressed_keys, head);
+    for (head = priv->pressed_keys; head; head = g_list_next (head)) {
+        if (head->data == key) {
+            priv->pressed_keys = g_list_remove_link (priv->pressed_keys, head);
             g_list_free1 (head);
-            head = next;
-        } else
-            head = g_list_next (head);
+            break;
+        }
     }
 }
 
