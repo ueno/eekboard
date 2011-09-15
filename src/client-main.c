@@ -103,17 +103,17 @@ enum FocusListenerType {
 };
 
 static gboolean
-set_keyboards (Client *client,
-               gchar **keyboards)
+set_keyboards (Client              *client,
+               const gchar * const *keyboards)
 {
-    if (g_strv_length (keyboards) == 0) {
+    if (g_strv_length ((gchar **)keyboards) == 0) {
         if (!client_enable_xkl (client)) {
             g_printerr ("Can't register xklavier event listeners\n");
             return FALSE;
         }
     } else {
         if (!client_set_keyboards (client, keyboards)) {
-            gchar *str = g_strjoinv (", ", keyboards);
+            gchar *str = g_strjoinv (", ", (gchar **)keyboards);
             g_printerr ("Can't set keyboards \"%s\"\n", str);
             g_free (str);
             return FALSE;
@@ -315,7 +315,7 @@ main (int argc, char **argv)
     g_object_unref (eekboard);
 
     keyboards = g_settings_get_strv (settings, "keyboards");
-    if (!set_keyboards (client, keyboards)) {
+    if (!set_keyboards (client, (const gchar * const *)keyboards)) {
         g_strfreev (keyboards);
         retval = 1;
         goto out;

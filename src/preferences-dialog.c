@@ -67,8 +67,8 @@ get_strv (GValue   *value,
           GVariant *variant,
           gpointer  user_data)
 {
-    gchar *strv = g_variant_get_strv (variant, NULL);
-    gchar *text = g_strjoinv (", ", strv);
+    const gchar **strv = g_variant_get_strv (variant, NULL);
+    gchar *text = g_strjoinv (", ", (gchar **)strv);
     g_free (strv);
     g_value_set_string (value, text);
     return TRUE;
@@ -79,14 +79,14 @@ set_strv (const GValue       *value,
           const GVariantType *expected_type,
           gpointer            user_data)
 {
-    gchar *text = g_value_get_string (value);
+    const gchar *text = g_value_get_string (value);
     gchar **strv = g_strsplit (text, ",", -1), **p;
     GVariant *variant;
 
     for (p = strv; *p != NULL; p++)
         g_strstrip (*p);
 
-    variant = g_variant_new_strv (strv, -1);
+    variant = g_variant_new_strv ((const gchar * const *)strv, -1);
     g_strfreev (strv);
     return variant;
 }

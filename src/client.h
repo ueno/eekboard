@@ -31,25 +31,25 @@ G_BEGIN_DECLS
 
 typedef struct _Client Client;
 
-Client  *client_new                     (GDBusConnection *connection);
+Client  *client_new                     (GDBusConnection     *connection);
 
-gboolean client_set_keyboards           (Client          *client,
-                                         const gchar    **keyboard);
+gboolean client_set_keyboards           (Client              *client,
+                                         const gchar * const *keyboard);
 
-gboolean client_enable_xkl              (Client          *client);
-void     client_disable_xkl             (Client          *client);
+gboolean client_enable_xkl              (Client              *client);
+void     client_disable_xkl             (Client              *client);
 
-gboolean client_enable_atspi_focus      (Client          *client);
-void     client_disable_atspi_focus     (Client          *client);
+gboolean client_enable_atspi_focus      (Client              *client);
+void     client_disable_atspi_focus     (Client              *client);
 
-gboolean client_enable_atspi_keystroke  (Client          *client);
-void     client_disable_atspi_keystroke (Client          *client);
+gboolean client_enable_atspi_keystroke  (Client              *client);
+void     client_disable_atspi_keystroke (Client              *client);
 
-gboolean client_enable_xtest            (Client          *client);
-void     client_disable_xtest           (Client          *client);
+gboolean client_enable_xtest            (Client              *client);
+void     client_disable_xtest           (Client              *client);
 
-gboolean client_enable_ibus_focus       (Client          *client);
-void     client_disable_ibus_focus      (Client          *client);
+gboolean client_enable_ibus_focus       (Client              *client);
+void     client_disable_ibus_focus      (Client              *client);
 
 G_END_DECLS
 #endif  /* CLIENT_H */

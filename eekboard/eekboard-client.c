@@ -360,8 +360,9 @@ eekboard_client_destroy_context (EekboardClient  *client,
     g_return_if_fail (EEKBOARD_IS_CLIENT(client));
     g_return_if_fail (EEKBOARD_IS_CONTEXT(context));
 
-    send_destroy_context (client, context, cancellable);
-
     priv = EEKBOARD_CLIENT_GET_PRIVATE(client);
+    object_path = g_dbus_proxy_get_object_path (G_DBUS_PROXY(context));
     g_hash_table_remove (priv->context_hash, object_path);
+
+    send_destroy_context (client, context, cancellable);
 }

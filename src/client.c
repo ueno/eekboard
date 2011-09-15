@@ -128,7 +128,7 @@ static gboolean        keystroke_listener_cb (const AtspiDeviceEvent *stroke,
                                               void                   *user_data);
 #endif  /* HAVE_ATSPI */
 static gboolean        set_keyboards        (Client                 *client,
-                                             const gchar           **keyboard);
+                                             const gchar * const    *keyboard);
 static gboolean        set_keyboards_from_xkl
                                             (Client                 *client);
 #ifdef HAVE_XTEST
@@ -298,8 +298,8 @@ client_init (Client *client)
 }
 
 gboolean
-client_set_keyboards (Client       *client,
-                      const gchar **keyboards)
+client_set_keyboards (Client              *client,
+                      const gchar * const *keyboards)
 {
     gboolean retval;
     retval = set_keyboards (client, keyboards);
@@ -707,11 +707,11 @@ on_xkl_config_changed (XklEngine *xklengine,
 }
 
 static gboolean
-set_keyboards (Client       *client,
-               const gchar **keyboards)
+set_keyboards (Client              *client,
+               const gchar * const *keyboards)
 {
     guint keyboard_id;
-    gchar **p;
+    const gchar * const *p;
     GSList *head = NULL;
 
     if (client->keyboards)
@@ -955,7 +955,7 @@ send_fake_key_events (Client    *client,
 
     /* If symbol is a text, convert chars in it to keysym */
     if (EEK_IS_TEXT(symbol)) {
-        gchar *utf8 = eek_text_get_text (EEK_TEXT(symbol));
+        const gchar *utf8 = eek_text_get_text (EEK_TEXT(symbol));
         glong items_written;
         gunichar *ucs4 = g_utf8_to_ucs4_fast (utf8, -1, &items_written);
         gint i;

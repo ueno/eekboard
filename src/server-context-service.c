@@ -546,14 +546,14 @@ server_context_service_init (ServerContextService *context)
     g_settings_bind_with_mapping (context->settings, "size-constraint-landscape",
                                   context, "size-constraint-landscape",
                                   G_SETTINGS_BIND_GET,
-                                  (GSettingsBindGetMapping *)g_value_set_variant,
+                                  (GSettingsBindGetMapping)g_value_set_variant,
                                   NULL,
                                   NULL,
                                   NULL);
     g_settings_bind_with_mapping (context->settings, "size-constraint-portrait",
                                   context, "size-constraint-portrait",
                                   G_SETTINGS_BIND_GET,
-                                  (GSettingsBindGetMapping *)g_value_set_variant,
+                                  (GSettingsBindGetMapping)g_value_set_variant,
                                   NULL,
                                   NULL,
                                   NULL);
