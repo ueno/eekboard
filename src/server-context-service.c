@@ -73,6 +73,8 @@ G_DEFINE_TYPE (ServerContextService, server_context_service, EEKBOARD_TYPE_CONTE
 
 static void update_widget (ServerContextService *context);
 static void set_geometry  (ServerContextService *context);
+static void set_dock      (GtkWidget            *widget,
+                           GtkAllocation        *allocation);
 
 static void
 on_monitors_changed (GdkScreen *screen,
@@ -158,39 +160,27 @@ on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
 }
 
 static void
-on_realize_set_dock (GtkWidget *widget,
-                     gpointer   user_data)
+set_dock (GtkWidget *widget, GtkAllocation *allocation)
 {
 #ifdef HAVE_XDOCK
     GdkWindow *window = gtk_widget_get_window (widget);
-    gint x, y, width, height;
-#if !GTK_CHECK_VERSION(3,0,0)
-    gint depth;
-#endif  /* GTK_CHECK_VERSION(3,0,0) */
     long vals[12];
 
     /* set window type to dock */
     gdk_window_set_type_hint (window, GDK_WINDOW_TYPE_HINT_DOCK);
   
-    /* set bottom strut */
-#if GTK_CHECK_VERSION(3,0,0)
-    gdk_window_get_geometry (window, &x, &y, &width, &height);
-#else
-    gdk_window_get_geometry (window, &x, &y, &width, &height, &depth);
-#endif  /* GTK_CHECK_VERSION(3,0,0) */
-
     vals[0] = 0;
     vals[1] = 0;
     vals[2] = 0;
-    vals[3] = height;
+    vals[3] = allocation->height;
     vals[4] = 0;
     vals[5] = 0;
     vals[6] = 0;
     vals[7] = 0;
     vals[8] = 0;
     vals[9] = 0;
-    vals[10] = x;
-    vals[11] = x + width;
+    vals[10] = allocation->x;
+    vals[11] = allocation->x + allocation->width;
 
     XChangeProperty (GDK_WINDOW_XDISPLAY (window),
                      GDK_WINDOW_XID (window),
@@ -199,6 +189,25 @@ on_realize_set_dock (GtkWidget *widget,
                      XA_CARDINAL, 32, PropModeReplace,
                      (guchar *)vals, 12);
 #endif  /* HAVE_XDOCK */
+}
+
+static void
+on_realize_set_dock (GtkWidget *widget,
+                     gpointer   user_data)
+{
+    GtkAllocation allocation;
+
+    gtk_widget_get_allocation (widget, &allocation);
+    set_dock (widget, &allocation);
+}
+
+static void
+on_size_allocate_set_dock (GtkWidget *widget,
+                           GdkRectangle *allocation,
+                           gpointer user_data)
+{
+    if (gtk_widget_get_realized (widget))
+        set_dock (widget, allocation);
 }
 
 static void
@@ -270,6 +279,9 @@ set_geometry (ServerContextService *context)
 
         g_signal_connect_after (context->window, "realize",
                                 G_CALLBACK(on_realize_set_dock),
+                                context);
+        g_signal_connect_after (context->window, "size-allocate",
+                                G_CALLBACK(on_size_allocate_set_dock),
                                 context);
     } else {
         if (context->ui_toolkit == UI_TOOLKIT_CLUTTER) {
