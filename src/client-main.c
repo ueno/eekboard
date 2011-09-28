@@ -41,6 +41,8 @@ static gchar *opt_address = NULL;
 static gboolean opt_focus = FALSE;
 static gboolean opt_keystroke = FALSE;
 
+static gchar *opt_keyboards = NULL;
+
 static gboolean opt_fullscreen = FALSE;
 
 static const GOptionEntry options[] = {
@@ -58,6 +60,8 @@ static const GOptionEntry options[] = {
     {"listen-keystroke", 's', 0, G_OPTION_ARG_NONE, &opt_keystroke,
      N_("Listen keystroke events with AT-SPI")},
 #endif  /* HAVE_ATSPI */
+    {"keyboards", 'k', 0, G_OPTION_ARG_STRING, &opt_keyboards,
+     N_("Specify keyboards (comma separated)")},
     {"fullscreen", 'F', 0, G_OPTION_ARG_NONE, &opt_fullscreen,
      N_("Create window in fullscreen mode")},
     {NULL}
@@ -313,8 +317,11 @@ main (int argc, char **argv)
     g_signal_connect (eekboard, "destroyed",
                       G_CALLBACK(on_destroyed), loop);
     g_object_unref (eekboard);
-
-    keyboards = g_settings_get_strv (settings, "keyboards");
+    
+    if (opt_keyboards != NULL)
+        keyboards = g_strsplit (opt_keyboards, ",", -1);
+    else
+        keyboards = g_settings_get_strv (settings, "keyboards");
     if (!set_keyboards (client, (const gchar * const *)keyboards)) {
         g_strfreev (keyboards);
         retval = 1;
