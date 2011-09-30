@@ -608,6 +608,7 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     EekBounds bounds;
     const TextProperty *prop;
     PangoFontDescription *font;
+    PangoLayoutLine *line;
     gdouble scale;
 
     symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
@@ -654,6 +655,9 @@ eek_renderer_real_render_key_label (EekRenderer *self,
     pango_font_description_free (font);
 
     pango_layout_set_text (layout, label, -1);
+    line = pango_layout_get_line (layout, 0);
+    if (line->resolved_dir == PANGO_DIRECTION_RTL)
+        pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
     pango_layout_set_width (layout,
                             PANGO_SCALE * bounds.width * priv->scale * scale);
     if (prop->ellipses)
