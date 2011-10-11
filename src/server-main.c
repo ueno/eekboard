@@ -93,8 +93,6 @@ main (int argc, char **argv)
 
     eek_init ();
 
-    g_log_set_always_fatal (G_LOG_LEVEL_CRITICAL);
-
     if (opt_system)
         bus_type = G_BUS_TYPE_SYSTEM;
     else if (opt_address)
