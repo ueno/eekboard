@@ -39,6 +39,12 @@ G_BEGIN_DECLS
 typedef struct _EekTextClass EekTextClass;
 typedef struct _EekTextPrivate EekTextPrivate;
 
+/**
+ * EekText:
+ *
+ * The #EekText structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _EekText {
     /*< private >*/
     EekSymbol parent;

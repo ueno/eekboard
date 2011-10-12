@@ -1,1 +1,24 @@
 Eek cheader_filename="eek/eek.h"
+
+EekBounds is_value_type="1"
+eek_bounds_copy hidden="1"
+eek_bounds_free hidden="1"
+
+EekPoint is_value_type="1"
+eek_point_copy hidden="1"
+eek_point_free hidden="1"
+
+EekOutline is_value_type="1"
+eek_outline_copy hidden="1"
+eek_outline_free hidden="1"
+
+EekColor is_value_type="1"
+eek_color_copy hidden="1"
+eek_color_free hidden="1"
+eek_color_new hidden="1"
+
+eek_element_get_bounds.bounds is_out="1"
+eek_element_get_absolute_position.x is_out="1"
+eek_element_get_absolute_position.y is_out="1"
+eek_element_get_symbol_index.group is_out="1"
+eek_element_get_symbol_index.level is_out="1"

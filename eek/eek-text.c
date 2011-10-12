@@ -18,6 +18,11 @@
  * 02110-1301 USA
  */
 
+/**
+ * SECTION:eek-text
+ * @short_description: an #EekText represents a text symbol
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
@@ -166,6 +171,12 @@ eek_text_new (const gchar *text)
                          NULL);
 }
 
+/**
+ * eek_text_get_text:
+ * @text: an #EekText
+ *
+ * Get a text value associated with @text
+ */
 const gchar *
 eek_text_get_text (EekText *text)
 {

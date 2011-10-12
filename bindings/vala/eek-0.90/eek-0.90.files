@@ -9,6 +9,7 @@ include/eek-0.90/eek/eek-section.h
 include/eek-0.90/eek/eek-serializable.h
 include/eek-0.90/eek/eek-symbol.h
 include/eek-0.90/eek/eek-symbol-matrix.h
+include/eek-0.90/eek/eek-text.h
 include/eek-0.90/eek/eek-theme.h
 include/eek-0.90/eek/eek-types.h
 include/eek-0.90/eek/eek-xml.h

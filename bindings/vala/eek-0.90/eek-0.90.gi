@@ -900,7 +900,7 @@
 				<return-type type="EekKeysym*"/>
 				<parameters>
 					<parameter name="xkeysym" type="guint"/>
-					<parameter name="modifier" type="EekModifierType"/>
+					<parameter name="modifier_mask" type="EekModifierType"/>
 				</parameters>
 			</constructor>
 		</object>
@@ -1061,6 +1061,18 @@
 			<implements>
 				<interface name="EekSerializable"/>
 			</implements>
+			<method name="category_from_name" symbol="eek_symbol_category_from_name">
+				<return-type type="EekSymbolCategory"/>
+				<parameters>
+					<parameter name="name" type="gchar*"/>
+				</parameters>
+			</method>
+			<method name="category_get_name" symbol="eek_symbol_category_get_name">
+				<return-type type="gchar*"/>
+				<parameters>
+					<parameter name="category" type="EekSymbolCategory"/>
+				</parameters>
+			</method>
 			<method name="get_category" symbol="eek_symbol_get_category">
 				<return-type type="EekSymbolCategory"/>
 				<parameters>
@@ -1082,7 +1094,7 @@
 			<method name="get_modifier_mask" symbol="eek_symbol_get_modifier_mask">
 				<return-type type="EekModifierType"/>
 				<parameters>
-					<parameter name="keysym" type="EekSymbol*"/>
+					<parameter name="symbol" type="EekSymbol*"/>
 				</parameters>
 			</method>
 			<method name="get_name" symbol="eek_symbol_get_name">
@@ -1127,7 +1139,7 @@
 			<method name="set_modifier_mask" symbol="eek_symbol_set_modifier_mask">
 				<return-type type="void"/>
 				<parameters>
-					<parameter name="keysym" type="EekSymbol*"/>
+					<parameter name="symbol" type="EekSymbol*"/>
 					<parameter name="mask" type="EekModifierType"/>
 				</parameters>
 			</method>
@@ -1143,6 +1155,24 @@
 			<property name="label" type="char*" readable="1" writable="1" construct="1" construct-only="0"/>
 			<property name="modifier-mask" type="EekModifierType" readable="1" writable="1" construct="1" construct-only="0"/>
 			<property name="name" type="char*" readable="1" writable="1" construct="1" construct-only="0"/>
+		</object>
+		<object name="EekText" parent="EekSymbol" type-name="EekText" get-type="eek_text_get_type">
+			<implements>
+				<interface name="EekSerializable"/>
+			</implements>
+			<method name="get_text" symbol="eek_text_get_text">
+				<return-type type="gchar*"/>
+				<parameters>
+					<parameter name="text" type="EekText*"/>
+				</parameters>
+			</method>
+			<constructor name="new" symbol="eek_text_new">
+				<return-type type="EekText*"/>
+				<parameters>
+					<parameter name="text" type="gchar*"/>
+				</parameters>
+			</constructor>
+			<property name="text" type="char*" readable="1" writable="1" construct="0" construct-only="1"/>
 		</object>
 		<object name="EekTheme" parent="GObject" type-name="EekTheme" get-type="eek_theme_get_type">
 			<method name="load_stylesheet" symbol="eek_theme_load_stylesheet">
@@ -1235,6 +1265,7 @@
 		<constant name="EEK_SERIALIZABLE_H" type="int" value="1"/>
 		<constant name="EEK_SYMBOL_H" type="int" value="1"/>
 		<constant name="EEK_SYMBOL_MATRIX_H" type="int" value="1"/>
+		<constant name="EEK_TEXT_H" type="int" value="1"/>
 		<constant name="EEK_TYPES_H" type="int" value="1"/>
 		<constant name="EEK_XML_H" type="int" value="1"/>
 		<constant name="EEK_XML_LAYOUT_H" type="int" value="1"/>
