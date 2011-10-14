@@ -141,11 +141,11 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
         style = gtk_widget_get_style (self);
         state = gtk_widget_get_state (self);
 
-        color = color_from_gdk_color (&style->fg[state]);
+        color = color_from_gdk_color (&style->text[state]);
         eek_renderer_set_default_foreground_color (priv->renderer, color);
         eek_color_free (color);
 
-        color = color_from_gdk_color (&style->bg[state]);
+        color = color_from_gdk_color (&style->base[state]);
         eek_renderer_set_default_background_color (priv->renderer, color);
         eek_color_free (color);
     }

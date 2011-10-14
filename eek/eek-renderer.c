@@ -249,8 +249,8 @@ render_key_outline (EekRenderer *renderer,
     /* need to rescale so that the border fit inside the clipping
        region */
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
-    scale = MIN((bounds.width - border_width) / bounds.width,
-                (bounds.height - border_width) / bounds.height);
+    scale = MIN((bounds.width - border_width * 2) / bounds.width,
+                (bounds.height - border_width * 2) / bounds.height);
 
     outline = eek_keyboard_get_outline (priv->keyboard, oref);
     outline = eek_outline_copy (outline);
@@ -260,8 +260,8 @@ render_key_outline (EekRenderer *renderer,
     }
 
     cairo_translate (cr,
-                     border_width / 2 * priv->scale,
-                     border_width / 2 * priv->scale);
+                     border_width * priv->scale * scale,
+                     border_width * priv->scale * scale);
 
     if (gradient_type != EEK_GRADIENT_NONE) {
         cairo_pattern_t *pat;
