@@ -185,38 +185,6 @@ if test -n "$focus_listeners"; then
   AC_DEFINE(ENABLE_FOCUS_LISTENER, [1], [Define if eekboard can follow focus changes])
 fi
 
-dnl Python language binding
-AC_MSG_CHECKING([whether you enable Python language support])
-AC_ARG_ENABLE(python,
-              AS_HELP_STRING([--enable-python=no/yes],
-                             [Enable Python language binding default=yes]),
-              enable_python=$enableval,
-              enable_python=yes)
-
-dnl check python unconditionally to re-generate
-dnl eek/*-keysym-labels.txt when maintainer-mode enabled
-AM_PATH_PYTHON([2.5], , enable_python=no)
-
-if test x"$enable_python" = x"yes"; then
-  if test x$enable_python = xyes; then
-    AC_PATH_PROGS(PYTHON_CONFIG, [python$PYTHON_VERSION-config python-config])
-    if test x"$PYTHON_CONFIG" != x""; then
-      PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
-      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
-    else
-      PYTHON_CFLAGS=`$PYTHON $srcdir/python-config.py --includes`
-      PYTHON_LIBS=`$PYTHON $srcdir/python-config.py --libs`
-    fi
-    PYTHON_INCLUDES="$PYTHON_CFLAGS"
-    AC_SUBST(PYTHON_CFLAGS)
-    AC_SUBST(PYTHON_INCLUDES)
-    AC_SUBST(PYTHON_LIBS)
-  fi
-fi
-
-AC_MSG_RESULT($enable_python)
-AM_CONDITIONAL(ENABLE_PYTHON, [test x$enable_python = xyes])
-
 GOBJECT_INTROSPECTION_CHECK([0.9.0])
 
 dnl Vala langauge binding
@@ -321,8 +289,6 @@ eekboard/Makefile
 src/Makefile
 tests/Makefile
 bindings/Makefile
-bindings/python/Makefile
-bindings/python/eekboard/Makefile
 bindings/vala/Makefile
 docs/Makefile
 docs/reference/Makefile
@@ -359,7 +325,6 @@ Build options:
   GTK version               $with_gtk
   Build Clutter UI          $enable_clutter
   Build Vala binding        $enable_vala
-  Build Python binding      $enable_python
   Sound support             $enable_libcanberra
   Build document            $enable_gtk_doc
   Focus listeners           $focus_listeners
