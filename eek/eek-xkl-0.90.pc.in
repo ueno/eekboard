@@ -25,6 +25,6 @@ Name: libeek-xkl
 Description: A Library to Create Keyboard-like UI (Libxklavier Support)
 URL: http://fedorahosted.org/eekboard/
 Version: @VERSION@
-Requires: eek-xkb-@EEK_API_VERSION@ libxklavier
+Requires: eek-@EEK_API_VERSION@ libxklavier
 Libs: -L${libdir} -leek-xkl
 Cflags: -I${includedir}/eek-@EEK_API_VERSION@

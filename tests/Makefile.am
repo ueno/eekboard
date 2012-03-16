@@ -16,16 +16,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-INCLUDES = -I$(top_srcdir) $(GIO2_CFLAGS) $(GTK_CFLAGS) $(XKB_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(GIO2_CFLAGS) $(GTK_CFLAGS) $(LIBXKLAVIER_CFLAGS)
 
-TESTS = eek-simple-test eek-xkb-test eek-xml-test
+TESTS = eek-simple-test eek-xml-test
 noinst_PROGRAMS = $(TESTS)
 
 eek_simple_test_SOURCES = eek-simple-test.c
 eek_simple_test_LDADD = $(top_builddir)/eek/libeek.la $(GIO2_LIBS)
-
-eek_xkb_test_SOURCES = eek-xkb-test.c
-eek_xkb_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkb.la  $(GIO2_LIBS) $(GTK_LIBS)
 
 eek_xml_test_SOURCES = eek-xml-test.c
 eek_xml_test_LDADD = $(top_builddir)/eek/libeek.la $(top_builddir)/eek/libeek-xkl.la $(GIO2_LIBS) $(GTK_LIBS)

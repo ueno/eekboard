@@ -18,60 +18,66 @@
 
 if ENABLE_VALA
 vapidir = $(datadir)/vala/vapi
-dist_vapi_DATA = \
-	eek-$(EEK_API_VERSION).vapi \
-	eek-clutter-$(EEK_API_VERSION).vapi \
-	eek-gtk-$(EEK_API_VERSION).vapi \
-	eek-xkb-$(EEK_API_VERSION).vapi \
-	eek-xkl-$(EEK_API_VERSION).vapi
-MAINTAINERCLEANFILES = $(dist_vapi_DATA)
+dist_vapi_DATA =				\
+	eek-$(EEK_API_VERSION).vapi		\
+	eek-$(EEK_API_VERSION).deps		\
+	eek-gtk-$(EEK_API_VERSION).vapi		\
+	eek-gtk-$(EEK_API_VERSION).deps		\
+	eek-xkl-$(EEK_API_VERSION).vapi		\
+	eek-xkl-$(EEK_API_VERSION).deps		\
+	$(NULL)
 
-eek-$(EEK_API_VERSION).vapi:
-	$(VAPIGEN_V)$(VAPIGEN) \
-		--library eek-$(EEK_API_VERSION) \
-		--pkg gio-2.0 \
-		eek-$(EEK_API_VERSION)/eek-$(EEK_API_VERSION).gi
+EXTRA_DIST =					\
+	Eek-$(EEK_API_VERSION).metadata		\
+	EekGtk-$(EEK_API_VERSION).metadata	\
+	EekXkl-$(EEK_API_VERSION).metadata	\
+	$(NULL)
 
-eek-clutter-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
-		--library eek-clutter-$(EEK_API_VERSION) \
-		--pkg eek-$(EEK_API_VERSION) \
-		--pkg clutter-1.0 \
-		--pkg gio-2.0 \
-		--pkg atk \
-		eek-clutter-$(EEK_API_VERSION)/eek-clutter-$(EEK_API_VERSION).gi
+maintainer-clean-local:
+	rm -f *.vapi
 
-eek-gtk-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
-		--library eek-gtk-$(EEK_API_VERSION) \
-		--pkg eek-$(EEK_API_VERSION) \
-		--pkg gtk+-2.0 \
-		eek-gtk-$(EEK_API_VERSION)/eek-gtk-$(EEK_API_VERSION).gi
+eek_vapi_deps =						\
+	$(srcdir)/Eek-$(EEK_API_VERSION).metadata	\
+	|						\
+	$(top_srcdir)/eek/Eek-$(EEK_API_VERSION).gir	\
+	$(NULL)
 
-eek-xkb-$(EEK_API_VERSION).vapi: eek-$(EEK_API_VERSION).vapi
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
-		--library eek-xkb-$(EEK_API_VERSION) \
-		--pkg eek-$(EEK_API_VERSION) \
-		--pkg gio-2.0 \
-		eek-xkb-$(EEK_API_VERSION)/eek-xkb-$(EEK_API_VERSION).gi
+eek-$(EEK_API_VERSION).vapi: $(eek_vapi_deps)
+	$(VAPIGEN_V)$(VAPIGEN)					\
+		--library eek-$(EEK_API_VERSION)		\
+		--pkg gio-2.0					\
+		--metadatadir=$(srcdir)				\
+		$(top_srcdir)/eek/Eek-$(EEK_API_VERSION).gir
 
-eek-xkl-$(EEK_API_VERSION).vapi: eek-xkb-$(EEK_API_VERSION).vapi
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
-		--library eek-xkl-$(EEK_API_VERSION) \
-		--pkg eek-$(EEK_API_VERSION) \
-		--pkg eek-xkb-$(EEK_API_VERSION) --pkg gio-2.0 \
-		eek-xkl-$(EEK_API_VERSION)/eek-xkl-$(EEK_API_VERSION).gi
+eek_gtk_vapi_deps =					\
+	$(srcdir)/EekGtk-$(EEK_API_VERSION).metadata	\
+	|						\
+	$(top_srcdir)/eek/EekGtk-$(EEK_API_VERSION).gir	\
+	$(NULL)
 
-eekboard-$(EEK_API_VERSION).vapi:
-	$(VAPIGEN_V)$(VAPIGEN) \
-		--library eekboard-$(EEK_API_VERSION) \
-		--pkg eek-$(EEK_API_VERSION) \
-		--pkg gio-2.0 \
-		eek-$(EEK_API_VERSION)/eek-$(EEK_API_VERSION).gi
+eek-gtk-$(EEK_API_VERSION).vapi: $(eek_gtk_vapi_deps)
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir)		\
+		--library eek-gtk-$(EEK_API_VERSION)		\
+		--pkg eek-$(EEK_API_VERSION)			\
+		--pkg gtk+-3.0					\
+		--metadatadir=$(srcdir)				\
+		$(top_srcdir)/eek/EekGtk-$(EEK_API_VERSION).gir
+
+eek_xkl_vapi_deps =					\
+	$(srcdir)/EekXkl-$(EEK_API_VERSION).metadata	\
+	|						\
+	$(top_srcdir)/eek/EekXkl-$(EEK_API_VERSION).gir	\
+	$(NULL)
+
+eek-xkl-$(EEK_API_VERSION).vapi: $(eek_xkl_vapi_deps)
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir)		\
+		--library eek-xkl-$(EEK_API_VERSION)		\
+		--pkg eek-$(EEK_API_VERSION)			\
+		--metadatadir=$(srcdir)				\
+		$(top_srcdir)/eek/EekXkl-$(EEK_API_VERSION).gir
 
 # set up the verbosity rules to avoid some build noise
 VAPIGEN_V = $(VAPIGEN_V_$(V))
 VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
 VAPIGEN_V_0 = @echo "  VAPIG " $@;
 endif
-

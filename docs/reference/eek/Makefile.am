@@ -79,16 +79,10 @@ EXTRA_HFILES=
 IGNORE_HFILES = \
 	config.h \
 	eek-renderer.h \
-	eek-clutter-renderer.h \
-	eek-clutter-section.h \
-	eek-clutter-key.h \
 	eek-gtk-renderer.h \
 	eek-theme.h \
 	eek-theme-node.h \
 	eek-enumtypes.h
-if !ENABLE_CLUTTER
-IGNORE_HFILES += eek-clutter-keyboard.h eek-clutter.h
-endif
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -111,17 +105,10 @@ expand_content_files=eek-overview.xml
 GTKDOC_CFLAGS = $(GIO2_CFLAGS)
 GTKDOC_LIBS = $(top_builddir)/eek/libeek.la \
 	$(top_builddir)/eek/libeek-gtk.la \
-	$(top_builddir)/eek/libeek-xkb.la \
 	$(top_builddir)/eek/libeek-xkl.la \
 	$(GIO2_LIBS) \
 	$(GTK_LIBS) \
-	$(XKB_LIBS)
-
-if ENABLE_CLUTTER
-GTKDOC_LIBS += \
-	$(top_builddir)/eek/libeek-clutter.la \
-	$(CLUTTER_LIBS)
-endif
+	$(LIBXKLAVIER_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

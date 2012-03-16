@@ -6,11 +6,6 @@
       <summary>Keyboard types</summary>
       <description>keyboard types.</description>
     </key>
-    <key name="ui-toolkit" type="s">
-      <default>'gtk'</default>
-      <summary>GUI toolkit used to render keyboard</summary>
-      <description>The name of GUI toolkit (either 'gtk' or 'clutter') used to render keyboard on screen.</description>
-    </key>
     <key name="focus-listener" type="s">
       <default>'atspi'</default>
       <summary>Use the given focus listener</summary>

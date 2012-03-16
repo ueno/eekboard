@@ -79,11 +79,6 @@ eekboard_server_LDADD = \
 	$(GTK_LIBS) \
 	$(LIBXKLAVIER_LIBS)
 
-if ENABLE_CLUTTER_GTK
-eekboard_server_CFLAGS += $(CLUTTER_GTK_CFLAGS)
-eekboard_server_LDADD += $(top_builddir)/eek/libeek-clutter.la $(CLUTTER_GTK_LIBS)
-endif
-
 if ENABLE_XDOCK
 eekboard_server_CFLAGS += $(XDOCK_CFLAGS)
 eekboard_server_LDADD += $(XDOCK_LIBS)

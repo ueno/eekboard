@@ -97,8 +97,6 @@ PKG_CHECK_MODULES([GTK], [
   gtk+-$GTK_API_VERSION >= $GTK_REQUIRED
   gdk-$GTK_API_VERSION >= $GTK_REQUIRED], ,
   [AC_MSG_ERROR([GTK not found])])
-PKG_CHECK_MODULES([XKB], [x11], ,
-  [AC_MSG_ERROR([XKB support not found])])
 PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier x11], ,
   [AC_MSG_ERROR([Libxklavier not found])])
 PKG_CHECK_MODULES([LIBCROCO], [libcroco-0.6], ,
@@ -219,48 +217,11 @@ fi
 AC_MSG_RESULT($enable_vala)
 AM_CONDITIONAL(ENABLE_VALA, [test x$enable_vala = xyes])
 
-dnl clutter
-AC_MSG_CHECKING([whether you enable clutter])
-AC_ARG_ENABLE(clutter,
-              AS_HELP_STRING([--enable-clutter=no/yes],
-                             [Enable clutter user interface default=no]),
-              enable_clutter=$enableval,
-              enable_clutter=no)
-
-if test x$enable_clutter = xyes; then
-  PKG_CHECK_MODULES([CLUTTER], [clutter-1.0], , enable_clutter=no)
-  if test x$enable_clutter = xyes; then
-    AC_DEFINE([HAVE_CLUTTER], [1], [Define if clutter is found])
-  fi
-fi
-AM_CONDITIONAL(ENABLE_CLUTTER, [test x$enable_clutter = xyes])
-AC_MSG_RESULT($enable_clutter)
-
-dnl clutter-gtk
-if test x$enable_clutter = xyes; then
-  AC_MSG_CHECKING([whether you enable clutter-gtk])
-  AC_ARG_ENABLE(clutter-gtk,
-                AS_HELP_STRING([--enable-clutter-gtk=no/yes],
-                               [Enable clutter user interface default=yes]),
-                enable_clutter_gtk=$enableval,
-                enable_clutter_gtk=yes)
-
-  if test x$enable_clutter_gtk = xyes; then
-    PKG_CHECK_MODULES([CLUTTER_GTK], [clutter-gtk-1.0], ,
-      enable_clutter_gtk=no)
-    if test x$enable_clutter_gtk = xyes; then
-      AC_DEFINE([HAVE_CLUTTER_GTK], [1], [Define if Clutter-Gtk is found])
-    fi
-  fi
-  AC_MSG_RESULT($enable_clutter_gtk)
-fi
-AM_CONDITIONAL(ENABLE_CLUTTER_GTK, [test x$enable_clutter_gtk = xyes])
-
 dnl libcanberra
 AC_MSG_CHECKING([whether you enable libcanberra])
 AC_ARG_ENABLE(libcanberra,
               AS_HELP_STRING([--enable-libcanberra=no/yes],
-                             [Enable clutter user interface default=no]),
+                             [Enable libcanberra user interface default=no]),
               enable_libcanberra=$enableval,
               enable_libcanberra=yes)
 
@@ -309,9 +270,7 @@ examples/Makefile
 examples/eekxml/Makefile
 examples/simple-client/Makefile
 eek/eek-${EEK_API_VERSION}.pc
-eek/eek-clutter-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc
-eek/eek-xkb-${EEK_API_VERSION}.pc
 eek/eek-xkl-${EEK_API_VERSION}.pc
 eekboard/eekboard-${EEK_API_VERSION}.pc])
 AC_OUTPUT
@@ -323,7 +282,6 @@ Build options:
   Build static libs         $enable_static
   CFLAGS                    $CFLAGS
   GTK version               $with_gtk
-  Build Clutter UI          $enable_clutter
   Build Vala binding        $enable_vala
   Sound support             $enable_libcanberra
   Build document            $enable_gtk_doc
