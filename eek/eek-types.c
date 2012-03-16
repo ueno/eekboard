@@ -128,3 +128,9 @@ eek_color_new (gdouble red,
 
     return color;
 }
+
+GQuark
+eek_error_quark (void)
+{
+  return g_quark_from_static_string ("eek-error-quark");
+}

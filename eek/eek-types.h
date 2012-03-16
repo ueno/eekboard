@@ -253,5 +253,13 @@ typedef enum {
   EEK_GRADIENT_RADIAL
 } EekGradientType;
 
+GQuark eek_error_quark (void);
+
+#define EEK_ERROR eek_error_quark ()
+typedef enum {
+  EEK_ERROR_LAYOUT_ERROR,
+  EEK_ERROR_FAILED
+} EekErrorEnum;
+
 G_END_DECLS
 #endif  /* EEK_TYPES_H */

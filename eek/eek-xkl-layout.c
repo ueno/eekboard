@@ -31,14 +31,20 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include <libxklavier/xklavier.h>
-#include <gdk/gdkx.h>
+#include <gio/gio.h>
 #include <string.h>
 
 #include "eek-xkl-layout.h"
 
 #define noKBDRAW_DEBUG
 
-G_DEFINE_TYPE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT);
+static GInitableIface *parent_initable_iface;
+
+static void initable_iface_init (GInitableIface *initable_iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init));
 
 #define EEK_XKL_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKL_LAYOUT, EekXklLayoutPrivate))
@@ -93,6 +99,8 @@ eek_xkl_layout_set_property (GObject      *object,
                              const GValue *value,
                              GParamSpec   *pspec)
 {
+    EekXklLayout *layout = EEK_XKL_LAYOUT(object);
+
     switch (prop_id) 
         {
         case PROP_MODEL:
@@ -112,9 +120,6 @@ eek_xkl_layout_set_property (GObject      *object,
                                         g_value_get_boxed (value));
             break;
         default:
-            g_object_set_property (object,
-                                   g_param_spec_get_name (pspec),
-                                   value);
             break;
         }
 }
@@ -125,6 +130,8 @@ eek_xkl_layout_get_property (GObject    *object,
                              GValue     *value,
                              GParamSpec *pspec)
 {
+    EekXklLayout *layout = EEK_XKL_LAYOUT(object);
+
     switch (prop_id) 
         {
         case PROP_MODEL:
@@ -148,9 +155,6 @@ eek_xkl_layout_get_property (GObject    *object,
                  eek_xkl_layout_get_options (EEK_XKL_LAYOUT(object)));
             break;
         default:
-            g_object_get_property (object,
-                                   g_param_spec_get_name (pspec),
-                                   value);
             break;
         }
 }
@@ -219,18 +223,7 @@ eek_xkl_layout_class_init (EekXklLayoutClass *klass)
 static void
 eek_xkl_layout_init (EekXklLayout *self)
 {
-    EekXklLayoutPrivate *priv;
-    Display *display;
-
-    priv = self->priv = EEK_XKL_LAYOUT_GET_PRIVATE (self);
-    priv->config = xkl_config_rec_new ();
-
-    display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    g_return_if_fail (display);
-
-    priv->engine = xkl_engine_get_instance (display);
-    xkl_config_rec_get_from_server (priv->config, priv->engine);
-    set_xkb_component_names (self, priv->config);
+    self->priv = EEK_XKL_LAYOUT_GET_PRIVATE (self);
 }
 
 /**
@@ -239,9 +232,13 @@ eek_xkl_layout_init (EekXklLayout *self)
  * Create a new #EekXklLayout.
  */
 EekLayout *
-eek_xkl_layout_new (void)
+eek_xkl_layout_new (Display *display, GError **error)
 {
-    return g_object_new (EEK_TYPE_XKL_LAYOUT, NULL);
+    return (EekLayout *) g_initable_new (EEK_TYPE_XKL_LAYOUT,
+                                         NULL,
+                                         error,
+                                         "display", display,
+                                         NULL);
 }
 
 G_INLINE_FUNC void
@@ -627,3 +624,42 @@ eek_xkl_layout_get_option (EekXklLayout *layout,
             return TRUE;
     return FALSE;
 }
+
+static gboolean
+initable_init (GInitable    *initable,
+               GCancellable *cancellable,
+               GError      **error)
+{
+    EekXklLayout *layout = EEK_XKL_LAYOUT (initable);
+    Display *display;
+
+    if (!parent_initable_iface->init (initable, cancellable, error))
+        return FALSE;
+
+    layout->priv->config = xkl_config_rec_new ();
+
+    g_object_get (G_OBJECT (initable),
+                  "display", &display,
+                  NULL);
+
+    layout->priv->engine = xkl_engine_get_instance (display);
+
+    if (!xkl_config_rec_get_from_server (layout->priv->config,
+                                         layout->priv->engine)) {
+        g_set_error (error,
+                     EEK_ERROR,
+                     EEK_ERROR_LAYOUT_ERROR,
+                     "can't load libxklavier configuration");
+        return FALSE;
+    }
+
+    return set_xkb_component_names (layout, layout->priv->config);
+}
+
+static void
+initable_iface_init (GInitableIface *initable_iface)
+{
+    parent_initable_iface = g_type_interface_peek_parent (initable_iface);
+    initable_iface->init = initable_init;
+}
+

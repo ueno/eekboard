@@ -61,7 +61,8 @@ struct _EekXklLayoutClass
 
 GType      eek_xkl_layout_get_type        (void) G_GNUC_CONST;
 
-EekLayout *eek_xkl_layout_new             (void);
+EekLayout *eek_xkl_layout_new             (Display      *display,
+                                           GError      **error);
 
 gboolean   eek_xkl_layout_set_config      (EekXklLayout *layout,
                                            XklConfigRec *config);

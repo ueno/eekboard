@@ -121,8 +121,8 @@ libeek_xkl_sources =				\
 	$(srcdir)/eek-xkl-layout.c
 
 libeek_xkl_la_SOURCES = $(libeek_xkl_sources)
-libeek_xkl_la_CFLAGS = -DEEK_COMPILATION=1 $(LIBXKLAVIER_CFLAGS) $(GTK_CFLAGS)
-libeek_xkl_la_LIBADD = libeek.la $(LIBXKLAVIER_LIBS) $(GTK_LIBS)
+libeek_xkl_la_CFLAGS = -DEEK_COMPILATION=1 $(LIBXKLAVIER_CFLAGS)
+libeek_xkl_la_LIBADD = libeek.la $(LIBXKLAVIER_LIBS)
 
 eekdir = $(includedir)/eek-$(EEK_API_VERSION)/eek
 eek_HEADERS =					\

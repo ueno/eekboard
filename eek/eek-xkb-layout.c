@@ -31,11 +31,12 @@
 #include "config.h"
 #endif  /* HAVE_CONFIG_H */
 
-#include <gdk/gdkx.h>
+#include <X11/keysym.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBgeom.h>
 #include <string.h>
 #include <stdarg.h>
+#include <gio/gio.h>
 
 #include "eek-xkb-layout.h"
 #include "eek-keyboard.h"
@@ -45,13 +46,18 @@
 
 #define noKBDRAW_DEBUG
 
-G_DEFINE_TYPE (EekXkbLayout, eek_xkb_layout, EEK_TYPE_LAYOUT);
+static void initable_iface_init (GInitableIface *initable_iface);
+
+G_DEFINE_TYPE_WITH_CODE (EekXkbLayout, eek_xkb_layout, EEK_TYPE_LAYOUT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init));
 
 #define EEK_XKB_LAYOUT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_XKB_LAYOUT, EekXkbLayoutPrivate))
 
 enum {
     PROP_0,
+    PROP_DISPLAY,
     PROP_KEYCODES,
     PROP_GEOMETRY,
     PROP_SYMBOLS,
@@ -355,33 +361,33 @@ eek_xkb_layout_finalize (GObject *object)
 }
 
 static void 
-eek_xkb_layout_set_property (GObject      *object, 
-                               guint         prop_id,
-                               const GValue *value, 
-                               GParamSpec   *pspec)
+eek_xkb_layout_set_property (GObject      *object,
+                             guint         prop_id,
+                             const GValue *value,
+                             GParamSpec   *pspec)
 {
+    EekXkbLayout *layout = EEK_XKB_LAYOUT (object);
     const gchar *name;
 
-    switch (prop_id) 
-        {
-        case PROP_KEYCODES:
-            name = g_value_get_string (value);
-            eek_xkb_layout_set_keycodes (EEK_XKB_LAYOUT(object), name);
-            break;
-        case PROP_GEOMETRY:
-            name = g_value_get_string (value);
-            eek_xkb_layout_set_geometry (EEK_XKB_LAYOUT(object), name);
-            break;
-        case PROP_SYMBOLS:
-            name = g_value_get_string (value);
-            eek_xkb_layout_set_symbols (EEK_XKB_LAYOUT(object), name);
-            break;
-        default:
-            g_object_set_property (object,
-                                   g_param_spec_get_name (pspec),
-                                   value);
-            break;
-        }
+    switch (prop_id) {
+    case PROP_DISPLAY:
+        layout->priv->display = g_value_get_pointer (value);
+        break;
+    case PROP_KEYCODES:
+        name = g_value_get_string (value);
+        eek_xkb_layout_set_keycodes (EEK_XKB_LAYOUT(object), name);
+        break;
+    case PROP_GEOMETRY:
+        name = g_value_get_string (value);
+        eek_xkb_layout_set_geometry (EEK_XKB_LAYOUT(object), name);
+        break;
+    case PROP_SYMBOLS:
+        name = g_value_get_string (value);
+        eek_xkb_layout_set_symbols (EEK_XKB_LAYOUT(object), name);
+        break;
+    default:
+        break;
+    }
 }
 
 static void 
@@ -390,28 +396,28 @@ eek_xkb_layout_get_property (GObject    *object,
                              GValue     *value,
                              GParamSpec *pspec)
 {
+    EekXkbLayout *layout = EEK_XKB_LAYOUT (object);
     const gchar *name;
 
-    switch (prop_id) 
-        {
-        case PROP_KEYCODES:
-            name = eek_xkb_layout_get_keycodes (EEK_XKB_LAYOUT(object));
-            g_value_set_string (value, name);
-            break;
-        case PROP_GEOMETRY:
-            name = eek_xkb_layout_get_geometry (EEK_XKB_LAYOUT(object));
-            g_value_set_string (value, name);
-            break;
-        case PROP_SYMBOLS:
-            name = eek_xkb_layout_get_symbols (EEK_XKB_LAYOUT(object));
-            g_value_set_string (value, name);
-            break;
-        default:
-            g_object_get_property (object,
-                                   g_param_spec_get_name (pspec),
-                                   value);
-            break;
-        }
+    switch (prop_id) {
+    case PROP_DISPLAY:
+        g_value_set_pointer (value, layout->priv->display);
+        break;
+    case PROP_KEYCODES:
+        name = eek_xkb_layout_get_keycodes (EEK_XKB_LAYOUT(object));
+        g_value_set_string (value, name);
+        break;
+    case PROP_GEOMETRY:
+        name = eek_xkb_layout_get_geometry (EEK_XKB_LAYOUT(object));
+        g_value_set_string (value, name);
+        break;
+    case PROP_SYMBOLS:
+        name = eek_xkb_layout_get_symbols (EEK_XKB_LAYOUT(object));
+        g_value_set_string (value, name);
+        break;
+    default:
+        break;
+    }
 }
 
 static void
@@ -428,6 +434,13 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
     gobject_class->finalize = eek_xkb_layout_finalize;
     gobject_class->set_property = eek_xkb_layout_set_property;
     gobject_class->get_property = eek_xkb_layout_get_property;
+
+    pspec = g_param_spec_pointer ("display",
+                                  "Display",
+                                  "X Display",
+                                  G_PARAM_READWRITE |
+                                  G_PARAM_CONSTRUCT_ONLY);
+    g_object_class_install_property (gobject_class, PROP_DISPLAY, pspec);
 
     pspec = g_param_spec_string ("keycodes",
 				 "Keycodes",
@@ -454,28 +467,7 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
 static void
 eek_xkb_layout_init (EekXkbLayout *self)
 {
-    EekXkbLayoutPrivate *priv;
-
-    priv = self->priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
-
-    priv->display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    g_return_if_fail (priv->display);
-
-    /* XXX: XkbClientMapMask | XkbIndicatorMapMask | XkbNamesMask |
-       XkbGeometryMask */
-    priv->xkb = XkbGetKeyboard (priv->display,
-                                XkbGBN_GeometryMask |
-                                XkbGBN_KeyNamesMask |
-                                XkbGBN_OtherNamesMask |
-                                XkbGBN_SymbolsMask |
-                                XkbGBN_IndicatorMapMask,
-                                XkbUseCoreKbd);
-
-    if (priv->xkb == NULL) {
-        g_critical ("XkbGetKeyboard failed to get keyboard from the server!");
-        return;
-    }
-    get_names (self);
+    self->priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
 }
 
 static void
@@ -535,19 +527,14 @@ get_names (EekXkbLayout *layout)
  * Create a new #EekXkbLayout.
  */
 EekLayout *
-eek_xkb_layout_new (void)
+eek_xkb_layout_new (Display *display,
+                    GError **error)
 {
-    EekXkbLayout *layout;
-
-    layout = g_object_new (EEK_TYPE_XKB_LAYOUT, NULL);
-    g_return_val_if_fail (layout, NULL);
-
-    get_keyboard (layout);
-    if (layout->priv->xkb == NULL) {
-        g_object_unref (layout);
-        return NULL;
-    }
-    return EEK_LAYOUT(layout);
+    return (EekLayout *) g_initable_new (EEK_TYPE_XKB_LAYOUT,
+                                         NULL,
+                                         error,
+                                         "display", display,
+                                         NULL);
 }
 
 /**
@@ -893,4 +880,49 @@ setup_scaling (EekXkbLayout *layout,
         priv->scale_numerator = height;
         priv->scale_denominator = priv->xkb->geom->height_mm;
     }
+}
+
+static gboolean
+initable_init (GInitable    *initable,
+               GCancellable *cancellable,
+               GError      **error)
+{
+    EekXkbLayout *layout = EEK_XKB_LAYOUT (initable);
+
+    /* XXX: XkbClientMapMask | XkbIndicatorMapMask | XkbNamesMask |
+       XkbGeometryMask */
+    layout->priv->xkb = XkbGetKeyboard (layout->priv->display,
+                                        XkbGBN_GeometryMask |
+                                        XkbGBN_KeyNamesMask |
+                                        XkbGBN_OtherNamesMask |
+                                        XkbGBN_SymbolsMask |
+                                        XkbGBN_IndicatorMapMask,
+                                        XkbUseCoreKbd);
+
+    if (layout->priv->xkb == NULL) {
+        g_set_error (error,
+                     EEK_ERROR,
+                     EEK_ERROR_LAYOUT_ERROR,
+                     "can't get initial XKB keyboard configuration");
+        return FALSE;
+    }
+
+    get_names (layout);
+    get_keyboard (layout);
+    
+    if (layout->priv->xkb == NULL) {
+        g_set_error (error,
+                     EEK_ERROR,
+                     EEK_ERROR_LAYOUT_ERROR,
+                     "can't get XKB keyboard configuration");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static void
+initable_iface_init (GInitableIface *initable_iface)
+{
+  initable_iface->init = initable_init;
 }

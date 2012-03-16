@@ -35,10 +35,12 @@ test_output_parse (void)
     GInputStream *input;
     EekLayout *layout;
     EekKeyboard *keyboard;
+    Display *display;
 
     output = g_string_sized_new (8192);
 
-    layout = eek_xkl_layout_new ();
+    display = XOpenDisplay (NULL);
+    layout = eek_xkl_layout_new (display, NULL);
 
     keyboard = eek_keyboard_new (layout, 640, 480);
     g_object_unref (layout);

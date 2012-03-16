@@ -153,6 +153,8 @@ static const GDBusInterfaceVTable interface_vtable =
   NULL
 };
 
+static Display *display = NULL;
+
 static EekKeyboard *
 eekboard_context_service_real_create_keyboard (EekboardContextService *self,
                                                const gchar            *keyboard_type)
@@ -163,8 +165,19 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
     if (g_str_has_prefix (keyboard_type, "xkb:")) {
         XklConfigRec *rec =
             eekboard_xkl_config_rec_from_string (&keyboard_type[4]);
+        GError *error;
 
-        layout = eek_xkl_layout_new ();
+        if (display == NULL)
+            display = XOpenDisplay (NULL);
+
+        error = NULL;
+        layout = eek_xkl_layout_new (display, &error);
+        if (layout == NULL) {
+            g_warning ("can't create keyboard: %s", error->message);
+            g_error_free (error);
+            return NULL;
+        }
+
         if (!eek_xkl_layout_set_config (EEK_XKL_LAYOUT(layout), rec)) {
             g_object_unref (layout);
             return NULL;
