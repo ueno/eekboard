@@ -117,9 +117,7 @@ eekboard_service_set_property (GObject      *object,
         priv->connection = g_object_ref (connection);
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -141,9 +139,7 @@ eekboard_service_get_property (GObject    *object,
         g_value_set_object (value, priv->connection);
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -210,6 +206,12 @@ eekboard_service_constructed (GObject *object)
              object,
              NULL,
              &error);
+
+        if (priv->registration_id == 0) {
+            g_warning ("failed to register context object: %s",
+                       error->message);
+            g_error_free (error);
+        }
     }
 }
 
@@ -287,7 +289,11 @@ eekboard_service_init (EekboardService *service)
     error = NULL;
     priv->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
-    g_assert (priv->introspection_data != NULL);
+    if (priv->introspection_data == NULL) {
+        g_warning ("failed to parse D-Bus XML: %s", error->message);
+        g_error_free (error);
+        g_assert_not_reached ();
+    }
 
     priv->context_hash =
         g_hash_table_new_full (g_str_hash,

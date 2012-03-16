@@ -552,20 +552,30 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
         nread = g_input_stream_read (G_INPUT_STREAM(priv->source),
                                      buffer, sizeof buffer, NULL,
                                      &error);
+        if (nread < 0) {
+            g_warning ("error reading XML layout: %s",
+                       error->message);
+            g_clear_error (&error);
+        }
+
         if (nread <= 0)
             break;
 
         error = NULL;
-        if (!g_markup_parse_context_parse (pcontext, buffer, nread, &error))
+        if (!g_markup_parse_context_parse (pcontext, buffer, nread,
+                                           &error)) {
+            g_warning ("can't parse XML layout: %s", error->message);
+            g_clear_error (&error);
             break;
+        }
     }
-    if (error)
-        g_warning ("%s", error->message);
 
     error = NULL;
-    g_markup_parse_context_end_parse (pcontext, &error);
-    if (error)
-        g_warning ("%s", error->message);
+    if (!g_markup_parse_context_end_parse (pcontext, &error)) {
+        g_warning ("can't finish parsing XML layout: %s",
+                   error->message);
+        g_error_free (error);
+    }
 
     g_markup_parse_context_free (pcontext);
 
@@ -630,9 +640,7 @@ eek_xml_layout_set_property (GObject      *object,
                                    g_value_get_object (value));
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -649,9 +657,7 @@ eek_xml_layout_get_property (GObject    *object,
                             eek_xml_layout_get_source (EEK_XML_LAYOUT(object)));
         break;
     default:
-        g_object_get_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }

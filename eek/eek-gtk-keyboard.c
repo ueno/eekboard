@@ -338,9 +338,7 @@ eek_gtk_keyboard_set_property (GObject      *object,
         eek_gtk_keyboard_set_keyboard (EEK_GTK_KEYBOARD(object), keyboard);
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }

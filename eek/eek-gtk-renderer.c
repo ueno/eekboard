@@ -66,8 +66,13 @@ eek_gtk_renderer_real_get_icon_surface (EekRenderer *self,
                                        size,
                                        0,
                                        &error);
-    if (pixbuf == NULL)
+    if (pixbuf == NULL) {
+        g_warning ("can't get icon pixbuf for %s: %s",
+                   icon_name,
+                   error->message);
+        g_error_free (error);
         return NULL;
+    }
 
     surface = pixbuf_to_cairo_surface (pixbuf);
     g_object_unref (pixbuf);

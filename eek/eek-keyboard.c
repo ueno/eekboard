@@ -187,9 +187,7 @@ eek_keyboard_set_property (GObject      *object,
                                             g_value_get_enum (value));
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -211,9 +209,7 @@ eek_keyboard_get_property (GObject    *object,
                           eek_keyboard_get_modifier_behavior (EEK_KEYBOARD(object)));
         break;
     default:
-        g_object_get_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }

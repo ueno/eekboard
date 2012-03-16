@@ -386,6 +386,7 @@ eek_xkb_layout_set_property (GObject      *object,
         eek_xkb_layout_set_symbols (EEK_XKB_LAYOUT(object), name);
         break;
     default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -416,6 +417,7 @@ eek_xkb_layout_get_property (GObject    *object,
         g_value_set_string (value, name);
         break;
     default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }

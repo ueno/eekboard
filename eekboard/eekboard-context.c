@@ -350,6 +350,10 @@ eekboard_context_new (GDBusConnection *connection,
 
         return context;
     }
+
+    g_warning ("can't create context client: %s", error->message);
+    g_error_free (error);
+
     return NULL;
 }
 
@@ -366,6 +370,10 @@ context_async_ready_callback (GObject      *source_object,
                                        &error);
     if (result)
         g_variant_unref (result);
+    else {
+        g_warning ("error in D-Bus proxy call: %s", error->message);
+        g_error_free (error);
+    }
 }
 
 /**
@@ -403,6 +411,10 @@ eekboard_context_add_keyboard (EekboardContext *context,
 
         return keyboard_id;
     }
+
+    g_warning ("error in AddKeyboard call: %s", error->message);
+    g_error_free (error);
+
     return 0;
 }
 

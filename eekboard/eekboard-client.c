@@ -180,6 +180,9 @@ eekboard_client_new (GDBusConnection *connection,
 
         return client;
     }
+
+    g_warning ("can't create client: %s", error->message);
+    g_error_free (error);
     return NULL;
 }
 
@@ -227,8 +230,11 @@ eekboard_client_create_context (EekboardClient *client,
                                       -1,
                                       cancellable,
                                       &error);
-    if (!variant)
+    if (!variant) {
+        g_warning ("failed to call CreateContext: %s", error->message);
+        g_error_free (error);
         return NULL;
+    }
 
     g_variant_get (variant, "(&s)", &object_path);
     connection = g_dbus_proxy_get_connection (G_DBUS_PROXY(client));
@@ -260,6 +266,10 @@ eekboard_async_ready_callback (GObject      *source_object,
                                        &error);
     if (result)
         g_variant_unref (result);
+    else {
+        g_warning ("error in D-Bus proxy call: %s", error->message);
+        g_error_free (error);
+    }
 }
 
 /**

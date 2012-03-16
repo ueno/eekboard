@@ -381,8 +381,12 @@ client_enable_atspi_focus (Client *client)
          client,
          NULL,
          "object:state-changed:focused",
-         &error))
+         &error)) {
+        g_warning ("can't register object:state-changed:focused handler: %s",
+                   error->message);
+        g_error_free (error);
         return FALSE;
+    }
 
     error = NULL;
     if (!atspi_event_listener_register_from_callback
@@ -390,8 +394,12 @@ client_enable_atspi_focus (Client *client)
          client,
          NULL,
          "focus:",
-         &error))
+         &error)) {
+        g_warning ("can't register focus: handler: %s",
+                   error->message);
+        g_error_free (error);
         return FALSE;
+    }
 
     client->follows_focus = TRUE;
     return TRUE;
@@ -405,18 +413,26 @@ client_disable_atspi_focus (Client *client)
     client->follows_focus = FALSE;
 
     error = NULL;
-    atspi_event_listener_deregister_from_callback
+    if (!atspi_event_listener_deregister_from_callback
         ((AtspiEventListenerCB)focus_listener_cb,
          client,
          "object:state-changed:focused",
-         &error);
+         &error)) {
+        g_warning ("can't deregister object:state-changed:focused handler: %s",
+                   error->message);
+        g_error_free (error);
+    }
 
     error = NULL;
-    atspi_event_listener_deregister_from_callback
+    if (!atspi_event_listener_deregister_from_callback
         ((AtspiEventListenerCB)focus_listener_cb,
          client,
          "focus:",
-         &error);
+         &error)) {
+        g_warning ("can't deregister focus: handler: %s",
+                   error->message);
+        g_error_free (error);
+    }
 }
 
 gboolean
@@ -436,8 +452,12 @@ client_enable_atspi_keystroke (Client *client)
          0,
          ATSPI_KEY_PRESSED,
          ATSPI_KEYLISTENER_NOSYNC,
-         &error))
+         &error)) {
+        g_warning ("can't register keystroke listener for key press: %s",
+                   error->message);
+        g_error_free (error);
         return FALSE;
+    }
 
     error = NULL;
     if (!atspi_register_keystroke_listener
@@ -446,8 +466,12 @@ client_enable_atspi_keystroke (Client *client)
          0,
          ATSPI_KEY_RELEASED,
          ATSPI_KEYLISTENER_NOSYNC,
-         &error))
+         &error)) {
+        g_warning ("can't register keystroke listener for key release: %s",
+                   error->message);
+        g_error_free (error);
         return FALSE;
+    }
     return TRUE;
 }
 
@@ -458,18 +482,27 @@ client_disable_atspi_keystroke (Client *client)
         GError *error;
 
         error = NULL;
-        atspi_deregister_keystroke_listener (client->keystroke_listener,
-                                             NULL,
-                                             0,
-                                             ATSPI_KEY_PRESSED,
-                                             &error);
+        if (!atspi_deregister_keystroke_listener
+            (client->keystroke_listener,
+             NULL,
+             0,
+             ATSPI_KEY_PRESSED,
+             &error)) {
+            g_warning ("can't deregister keystroke listener for key press: %s",
+                       error->message);
+            g_error_free (error);
+        }
 
         error = NULL;
-        atspi_deregister_keystroke_listener (client->keystroke_listener,
-                                             NULL,
-                                             0,
-                                             ATSPI_KEY_RELEASED,
-                                             &error);
+        if (!atspi_deregister_keystroke_listener (client->keystroke_listener,
+                                                  NULL,
+                                                  0,
+                                                  ATSPI_KEY_RELEASED,
+                                                  &error)) {
+            g_warning ("can't deregister keystroke listener for key release: %s",
+                       error->message);
+            g_error_free (error);
+        }
 
         g_object_unref (client->keystroke_listener);
         client->keystroke_listener = NULL;
@@ -488,8 +521,12 @@ focus_listener_cb (const AtspiEvent *event,
 
     error = NULL;
     role = atspi_accessible_get_role (accessible, &error);
-    if (error)
+    if (role == NULL) {
+        g_warning ("can't get accessible role: %s",
+                   error->message);
+        g_error_free (error);
         return;
+    }
 
     if (atspi_state_set_contains (state_set, ATSPI_STATE_EDITABLE) ||
         role == ATSPI_ROLE_TERMINAL) {
@@ -560,11 +597,15 @@ add_match_rule (GDBusConnection *connection,
                                               "AddMatch");
     g_dbus_message_set_body (message, g_variant_new ("(s)", match_rule));
     error = NULL;
-    g_dbus_connection_send_message (connection,
-                                    message,
-                                    G_DBUS_SEND_MESSAGE_FLAGS_NONE,
-                                    NULL,
-                                    &error);
+    if (!g_dbus_connection_send_message (connection,
+                                         message,
+                                         G_DBUS_SEND_MESSAGE_FLAGS_NONE,
+                                         NULL,
+                                         &error)) {
+        g_warning ("can't register match rule %s: %s",
+                   match_rule, error->message);
+        g_error_free (error);
+    }
     g_object_unref (message);
 }
 

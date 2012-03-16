@@ -195,8 +195,12 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
         error = NULL;
         input = g_file_read (file, NULL, &error);
         g_object_unref (file);
-        if (input == NULL)
+        if (input == NULL) {
+            g_warning ("can't read keyboard file %s: %s",
+                       keyboard_type, error->message);
+            g_error_free (error);
             return NULL;
+        }
         layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     }
     keyboard = eek_keyboard_new (layout, CSW, CSH);
@@ -249,9 +253,7 @@ eekboard_context_service_set_property (GObject      *object,
         priv->fullscreen = g_value_get_boolean (value);
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -285,9 +287,7 @@ eekboard_context_service_get_property (GObject    *object,
         g_value_set_boolean (value, priv->fullscreen);
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -351,6 +351,12 @@ eekboard_context_service_constructed (GObject *object)
              context,
              NULL,
              &error);
+
+        if (priv->registration_id == 0) {
+            g_warning ("failed to register context object: %s",
+                       error->message);
+            g_error_free (error);
+        }
     }
 }
 
@@ -501,7 +507,11 @@ eekboard_context_service_init (EekboardContextService *context)
     error = NULL;
     priv->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
-    g_assert (priv->introspection_data != NULL);
+    if (priv->introspection_data == NULL) {
+        g_warning ("failed to parse D-Bus XML: %s", error->message);
+        g_error_free (error);
+        g_assert_not_reached ();
+    }
 
     priv->keyboard_hash =
         g_hash_table_new_full (g_direct_hash,
@@ -535,14 +545,21 @@ emit_visibility_changed_signal (EekboardContextService *context,
 
     if (priv->connection && priv->enabled) {
         GError *error = NULL;
-        g_dbus_connection_emit_signal (priv->connection,
-                                       NULL,
-                                       priv->object_path,
-                                       EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "VisibilityChanged",
-                                       g_variant_new ("(b)", visible),
-                                       &error);
-        g_assert_no_error (error);
+        gboolean retval;
+
+        retval = g_dbus_connection_emit_signal (priv->connection,
+                                                NULL,
+                                                priv->object_path,
+                                                EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                                "VisibilityChanged",
+                                                g_variant_new ("(b)", visible),
+                                                &error);
+        if (!retval) {
+            g_warning ("failed to emit VisibilityChanged signal: %s",
+                       error->message);
+            g_error_free (error);
+            g_assert_not_reached ();
+        }
     }
 }
 
@@ -554,14 +571,21 @@ emit_group_changed_signal (EekboardContextService *context,
 
     if (priv->connection && priv->enabled) {
         GError *error = NULL;
-        g_dbus_connection_emit_signal (priv->connection,
-                                       NULL,
-                                       priv->object_path,
-                                       EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "GroupChanged",
-                                       g_variant_new ("(i)", group),
-                                       &error);
-        g_assert_no_error (error);
+        gboolean retval;
+
+        retval = g_dbus_connection_emit_signal (priv->connection,
+                                                NULL,
+                                                priv->object_path,
+                                                EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                                "GroupChanged",
+                                                g_variant_new ("(i)", group),
+                                                &error);
+        if (!retval) {
+            g_warning ("failed to emit GroupChanged signal: %s",
+                       error->message);
+            g_error_free (error);
+            g_assert_not_reached ();
+        }
     }
 }
 
@@ -577,22 +601,28 @@ emit_key_activated_dbus_signal (EekboardContextService *context,
         guint modifiers = eek_keyboard_get_modifiers (priv->keyboard);
         GVariant *variant;
         GError *error;
+        gboolean retval;
 
         variant = eek_serializable_serialize (EEK_SERIALIZABLE(symbol));
 
         error = NULL;
-        g_dbus_connection_emit_signal (priv->connection,
-                                       NULL,
-                                       priv->object_path,
-                                       EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "KeyActivated",
-                                       g_variant_new ("(svu)",
-                                                      keyname,
-                                                      variant,
-                                                      modifiers),
-                                       &error);
+        retval = g_dbus_connection_emit_signal (priv->connection,
+                                                NULL,
+                                                priv->object_path,
+                                                EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                                "KeyActivated",
+                                                g_variant_new ("(svu)",
+                                                               keyname,
+                                                               variant,
+                                                               modifiers),
+                                                &error);
         g_variant_unref (variant);
-        g_assert_no_error (error);
+        if (!retval) {
+            g_warning ("failed to emit KeyActivated signal: %s",
+                       error->message);
+            g_error_free (error);
+            g_assert_not_reached ();
+        }
     }
 }
 
@@ -919,17 +949,24 @@ eekboard_context_service_enable (EekboardContextService *context)
     g_return_if_fail (priv->connection);
 
     if (!priv->enabled) {
+        gboolean retval;
+
         priv->enabled = TRUE;
 
         error = NULL;
-        g_dbus_connection_emit_signal (priv->connection,
-                                       NULL,
-                                       priv->object_path,
-                                       EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "Enabled",
-                                       NULL,
-                                       &error);
-        g_assert_no_error (error);
+        retval = g_dbus_connection_emit_signal (priv->connection,
+                                                NULL,
+                                                priv->object_path,
+                                                EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                                "Enabled",
+                                                NULL,
+                                                &error);
+        if (!retval) {
+            g_warning ("failed to emit Enabled signal: %s",
+                       error->message);
+            g_error_free (error);
+            g_assert_not_reached ();
+        }
         g_signal_emit_by_name (context, "enabled", NULL);
     }
 }
@@ -951,17 +988,24 @@ eekboard_context_service_disable (EekboardContextService *context)
     g_return_if_fail (priv->connection);
 
     if (priv->enabled) {
+        gboolean retval;
+
         priv->enabled = FALSE;
 
         error = NULL;
-        g_dbus_connection_emit_signal (priv->connection,
-                                       NULL,
-                                       priv->object_path,
-                                       EEKBOARD_CONTEXT_SERVICE_INTERFACE,
-                                       "Disabled",
-                                       NULL,
-                                       &error);
-        g_assert_no_error (error);
+        retval = g_dbus_connection_emit_signal (priv->connection,
+                                                NULL,
+                                                priv->object_path,
+                                                EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                                "Disabled",
+                                                NULL,
+                                                &error);
+        if (!retval) {
+            g_warning ("failed to emit Disabled signal: %s",
+                       error->message);
+            g_error_free (error);
+            g_assert_not_reached ();
+        }
         g_signal_emit_by_name (context, "disabled", NULL);
     }
 }

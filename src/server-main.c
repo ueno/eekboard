@@ -107,6 +107,7 @@ main (int argc, char **argv)
         connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
         if (connection == NULL) {
             g_printerr ("Can't connect to the bus: %s\n", error->message);
+            g_error_free (error);
             exit (1);
         }
         break;
@@ -121,6 +122,7 @@ main (int argc, char **argv)
             g_printerr ("Can't connect to the bus at %s: %s\n",
                         opt_address,
                         error->message);
+            g_error_free (error);
             exit (1);
         }
         break;

@@ -100,9 +100,7 @@ eek_text_set_property (GObject      *object,
         priv->text = g_strdup (g_value_get_string (value));
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -119,9 +117,7 @@ eek_text_get_property (GObject    *object,
         g_value_set_string (value, priv->text);
         break;
     default:
-        g_object_get_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }

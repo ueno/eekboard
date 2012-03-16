@@ -303,9 +303,7 @@ eek_section_set_property (GObject      *object,
                                g_value_get_int (value));
         break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -321,9 +319,7 @@ eek_section_get_property (GObject    *object,
         g_value_set_int (value, eek_section_get_angle (EEK_SECTION(object)));
         break;
     default:
-        g_object_get_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
