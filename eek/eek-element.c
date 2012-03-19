@@ -35,7 +35,6 @@
 #include "eek-element.h"
 #include "eek-container.h"
 #include "eek-marshalers.h"
-#include "eek-serializable.h"
 
 enum {
     PROP_0,
@@ -53,11 +52,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-static void eek_serializable_iface_init (EekSerializableIface *iface);
-
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (EekElement, eek_element, G_TYPE_OBJECT,
-                                  G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
-                                                         eek_serializable_iface_init));
+G_DEFINE_ABSTRACT_TYPE (EekElement, eek_element, G_TYPE_OBJECT);
 
 #define EEK_ELEMENT_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_ELEMENT, EekElementPrivate))
@@ -71,155 +66,6 @@ struct _EekElementPrivate
     gint group;
     gint level;
 };
-
-static GVariant *
-_g_variant_new_bounds (EekBounds *bounds)
-{
-    GVariantBuilder builder;
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("ad"));
-    g_variant_builder_add (&builder, "d", bounds->x);
-    g_variant_builder_add (&builder, "d", bounds->y);
-    g_variant_builder_add (&builder, "d", bounds->width);
-    g_variant_builder_add (&builder, "d", bounds->height);
-
-    return g_variant_builder_end (&builder);
-}
-
-static void
-_g_variant_get_bounds (GVariant *variant, EekBounds *bounds)
-{
-    g_variant_get_child (variant, 0, "d", &bounds->x);
-    g_variant_get_child (variant, 1, "d", &bounds->y);
-    g_variant_get_child (variant, 2, "d", &bounds->width);
-    g_variant_get_child (variant, 3, "d", &bounds->height);
-}
-
-static void
-eek_element_real_serialize (EekSerializable *self,
-                            GVariantBuilder *builder)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    g_variant_builder_add (builder, "s", priv->name == NULL ? "" : priv->name);
-    g_variant_builder_add (builder, "v", _g_variant_new_bounds (&priv->bounds));
-}
-
-static gsize
-eek_element_real_deserialize (EekSerializable *self,
-                              GVariant        *variant,
-                              gsize            index)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-    GVariant *bounds;
-
-    g_variant_get_child (variant, index++, "s", &priv->name);
-    g_variant_get_child (variant, index++, "v", &bounds);
-    _g_variant_get_bounds (bounds, &priv->bounds);
-
-    return index;
-}
-
-static void
-eek_serializable_iface_init (EekSerializableIface *iface)
-{
-    iface->serialize = eek_element_real_serialize;
-    iface->deserialize = eek_element_real_deserialize;
-}
-
-static void
-eek_element_real_set_parent (EekElement *self,
-                             EekElement *parent)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    if (!parent) {
-        g_return_if_fail (priv->parent);
-        /* release self-reference acquired when setting parent */
-        g_object_unref (self);
-        priv->parent = NULL;
-    } else {
-        g_return_if_fail (!priv->parent);
-        g_object_ref (self);
-        priv->parent = parent;
-    }
-}
-
-static EekElement *
-eek_element_real_get_parent (EekElement *self)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    return priv->parent;
-}
-
-static void
-eek_element_real_set_name (EekElement  *self,
-                           const gchar *name)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    g_free (priv->name);
-    priv->name = g_strdup (name);
-
-    g_object_notify (G_OBJECT(self), "name");
-}
-
-static G_CONST_RETURN gchar *
-eek_element_real_get_name (EekElement *self)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    return priv->name;
-}
-
-static void
-eek_element_real_set_bounds (EekElement *self,
-                             EekBounds *bounds)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    priv->bounds = *bounds;
-}
-
-static void
-eek_element_real_get_bounds (EekElement *self,
-                             EekBounds  *bounds)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    g_return_if_fail (bounds);
-    *bounds = priv->bounds;
-
-    g_object_notify (G_OBJECT(self), "bounds");
-}
-
-static void
-eek_element_real_set_symbol_index (EekElement *self,
-                                   gint        group,
-                                   gint        level)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    if (priv->group != group || priv->level != level) {
-        priv->group = group;
-        priv->level = level;
-        g_signal_emit_by_name (self, "symbol-index-changed", group, level);
-    }
-}
-
-static void
-eek_element_real_get_symbol_index (EekElement *self,
-                                   gint       *group,
-                                   gint       *level)
-{
-    EekElementPrivate *priv = EEK_ELEMENT_GET_PRIVATE(self);
-
-    if (group)
-        *group = priv->group;
-    if (level)
-        *level = priv->level;
-}
 
 static void
 eek_element_real_symbol_index_changed (EekElement *self,
@@ -244,22 +90,21 @@ eek_element_set_property (GObject      *object,
                           const GValue *value,
                           GParamSpec   *pspec)
 {
+    EekElement *element = EEK_ELEMENT(object);
+
     switch (prop_id) {
     case PROP_NAME:
-        eek_element_set_name (EEK_ELEMENT(object),
-                              g_value_get_string (value));
+        eek_element_set_name (element,
+                              g_value_dup_string (value));
         break;
     case PROP_BOUNDS:
-        eek_element_set_bounds (EEK_ELEMENT(object),
-                                g_value_get_boxed (value));
+        eek_element_set_bounds (element, g_value_get_boxed (value));
         break;
     case PROP_GROUP:
-        eek_element_set_group (EEK_ELEMENT(object),
-                               g_value_get_int (value));
+        eek_element_set_group (element, g_value_get_int (value));
         break;
     case PROP_LEVEL:
-        eek_element_set_level (EEK_ELEMENT(object),
-                               g_value_get_int (value));
+        eek_element_set_level (element, g_value_get_int (value));
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -272,21 +117,22 @@ eek_element_get_property (GObject    *object,
                           GValue     *value,
                           GParamSpec *pspec)
 {
-    EekBounds  bounds;
+    EekElement *element = EEK_ELEMENT(object);
+    EekBounds bounds;
 
     switch (prop_id) {
     case PROP_NAME:
-        g_value_set_string (value, eek_element_get_name (EEK_ELEMENT(object)));
+        g_value_set_string (value, eek_element_get_name (element));
         break;
     case PROP_BOUNDS:
-        eek_element_get_bounds (EEK_ELEMENT(object), &bounds);
+        eek_element_get_bounds (element, &bounds);
         g_value_set_boxed (value, &bounds);
         break;
     case PROP_GROUP:
-        g_value_set_int (value, eek_element_get_group (EEK_ELEMENT(object)));
+        g_value_set_int (value, eek_element_get_group (element));
         break;
     case PROP_LEVEL:
-        g_value_set_int (value, eek_element_get_level (EEK_ELEMENT(object)));
+        g_value_set_int (value, eek_element_get_level (element));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -302,15 +148,6 @@ eek_element_class_init (EekElementClass *klass)
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekElementPrivate));
-
-    klass->set_parent = eek_element_real_set_parent;
-    klass->get_parent = eek_element_real_get_parent;
-    klass->set_name = eek_element_real_set_name;
-    klass->get_name = eek_element_real_get_name;
-    klass->set_bounds = eek_element_real_set_bounds;
-    klass->get_bounds = eek_element_real_get_bounds;
-    klass->set_symbol_index = eek_element_real_set_symbol_index;
-    klass->get_symbol_index = eek_element_real_get_symbol_index;
 
     /* signals */
     klass->symbol_index_changed = eek_element_real_symbol_index_changed;
@@ -411,7 +248,7 @@ eek_element_init (EekElement *self)
 /**
  * eek_element_set_parent:
  * @element: an #EekElement
- * @parent: an #EekElement
+ * @parent: (allow-none): an #EekElement or %NULL
  *
  * Set the parent of @element to @parent.
  */
@@ -420,8 +257,21 @@ eek_element_set_parent (EekElement *element,
                         EekElement *parent)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    g_return_if_fail (EEK_IS_ELEMENT(parent));
-    EEK_ELEMENT_GET_CLASS(element)->set_parent (element, parent);
+    g_return_if_fail (parent == NULL || EEK_IS_ELEMENT(parent));
+
+    if (element->priv->parent == parent)
+        return;
+
+    if (element->priv->parent != NULL) {
+        /* release self-reference acquired when setting parent */
+        g_object_unref (element);
+    }
+
+    if (parent != NULL) {
+        g_object_ref (element);
+    }
+
+    element->priv->parent = parent;
 }
 
 /**
@@ -435,7 +285,7 @@ EekElement *
 eek_element_get_parent (EekElement *element)
 {
     g_return_val_if_fail (EEK_IS_ELEMENT(element), NULL);
-    return EEK_ELEMENT_GET_CLASS(element)->get_parent (element);
+    return element->priv->parent;
 }
 
 /**
@@ -450,7 +300,8 @@ eek_element_set_name (EekElement  *element,
                       const gchar *name)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    EEK_ELEMENT_GET_CLASS(element)->set_name (element, name);
+    g_free (element->priv->name);
+    element->priv->name = g_strdup (name);
 }
 
 /**
@@ -464,7 +315,7 @@ G_CONST_RETURN gchar *
 eek_element_get_name (EekElement  *element)
 {
     g_return_val_if_fail (EEK_IS_ELEMENT(element), NULL);
-    return EEK_ELEMENT_GET_CLASS(element)->get_name (element);
+    return element->priv->name;
 }
 
 /**
@@ -481,7 +332,7 @@ eek_element_set_bounds (EekElement  *element,
                         EekBounds   *bounds)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    EEK_ELEMENT_GET_CLASS(element)->set_bounds (element, bounds);
+    memcpy (&element->priv->bounds, bounds, sizeof(EekBounds));
 }
 
 /**
@@ -498,7 +349,8 @@ eek_element_get_bounds (EekElement  *element,
                         EekBounds   *bounds)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    EEK_ELEMENT_GET_CLASS(element)->get_bounds (element, bounds);
+    g_return_if_fail (bounds != NULL);
+    memcpy (bounds, &element->priv->bounds, sizeof(EekBounds));
 }
 
 /**
@@ -583,8 +435,18 @@ eek_element_set_symbol_index (EekElement *element,
                               gint        group,
                               gint        level)
 {
+    gboolean emit_signal;
+
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    EEK_ELEMENT_GET_CLASS(element)->set_symbol_index (element, group, level);
+
+    emit_signal = group != eek_element_get_group (element) ||
+        level != eek_element_get_level (element);
+
+    eek_element_set_group (element, group);
+    eek_element_set_level (element, level);
+
+    if (emit_signal)
+        g_signal_emit (element, signals[SYMBOL_INDEX_CHANGED], 0, group, level);
 }
 
 /**
@@ -602,8 +464,11 @@ eek_element_get_symbol_index (EekElement *element,
                               gint       *level)
 {
     g_return_if_fail (EEK_IS_ELEMENT(element));
-    g_return_if_fail (group || level);
-    EEK_ELEMENT_GET_CLASS(element)->get_symbol_index (element, group, level);
+    g_return_if_fail (group != NULL || level != NULL);
+    if (group != NULL)
+        *group = eek_element_get_group (element);
+    if (level != NULL)
+        *level = eek_element_get_level (element);
 }
 
 /**
@@ -620,10 +485,11 @@ void
 eek_element_set_group (EekElement *element,
                        gint        group)
 {
-    gint level;
-
-    level = eek_element_get_level (element);
-    eek_element_set_symbol_index (element, group, level);
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    if (element->priv->group != group) {
+        element->priv->group = group;
+        g_object_notify (element, "group");
+    }
 }
 
 /**
@@ -640,10 +506,11 @@ void
 eek_element_set_level (EekElement *element,
                        gint        level)
 {
-    gint group;
-
-    group = eek_element_get_group (element);
-    eek_element_set_symbol_index (element, group, level);
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    if (element->priv->level != level) {
+        element->priv->level = level;
+        g_object_notify (element, "level");
+    }
 }
 
 /**
@@ -658,10 +525,8 @@ eek_element_set_level (EekElement *element,
 gint
 eek_element_get_group (EekElement *element)
 {
-    gint group;
-
-    eek_element_get_symbol_index (element, &group, NULL);
-    return group;
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    return element->priv->group;
 }
 
 /**
@@ -676,8 +541,6 @@ eek_element_get_group (EekElement *element)
 gint
 eek_element_get_level (EekElement *element)
 {
-    gint level;
-
-    eek_element_get_symbol_index (element, NULL, &level);
-    return level;
+    g_return_if_fail (EEK_IS_ELEMENT(element));
+    return element->priv->level;
 }

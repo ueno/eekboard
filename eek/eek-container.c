@@ -31,7 +31,6 @@
 #endif  /* HAVE_CONFIG_H */
 
 #include "eek-container.h"
-#include "eek-serializable.h"
 
 enum {
     CHILD_ADDED,
@@ -41,11 +40,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-static void eek_serializable_iface_init (EekSerializableIface *iface);
-
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (EekContainer, eek_container, EEK_TYPE_ELEMENT,
-                                  G_IMPLEMENT_INTERFACE (EEK_TYPE_SERIALIZABLE,
-                                                         eek_serializable_iface_init));
+G_DEFINE_ABSTRACT_TYPE (EekContainer, eek_container, EEK_TYPE_ELEMENT);
 
 #define EEK_CONTAINER_GET_PRIVATE(obj)                                  \
     (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EEK_TYPE_CONTAINER, EekContainerPrivate))
@@ -56,60 +51,6 @@ struct _EekContainerPrivate
     GList *head;
     GList *last;
 };
-
-static EekSerializableIface *eek_container_parent_serializable_iface;
-
-static void
-eek_container_real_serialize (EekSerializable *self,
-                              GVariantBuilder *builder)
-{
-    EekContainerPrivate *priv = EEK_CONTAINER_GET_PRIVATE(self);
-    GList *head;
-    GVariantBuilder array;
-
-    eek_container_parent_serializable_iface->serialize (self, builder);
-
-    g_variant_builder_init (&array, G_VARIANT_TYPE("av"));
-    for (head = priv->head; head; head = g_list_next (head)) {
-        GVariant *variant =
-            eek_serializable_serialize (EEK_SERIALIZABLE(head->data));
-        g_variant_builder_add (&array, "v", variant);
-    }
-    g_variant_builder_add (builder, "v", g_variant_builder_end (&array));
-}
-
-static gsize
-eek_container_real_deserialize (EekSerializable *self,
-                                GVariant        *variant,
-                                gsize            index)
-{
-    GVariant *array, *child;
-    GVariantIter iter;
-
-    index = eek_container_parent_serializable_iface->deserialize (self,
-                                                                  variant,
-                                                                  index);
-
-    g_variant_get_child (variant, index++, "v", &array);
-    g_variant_iter_init (&iter, array);
-    while (g_variant_iter_next (&iter, "v", &child)) {
-        EekSerializable *serializable = eek_serializable_deserialize (child);
-        eek_container_add_child (EEK_CONTAINER(self),
-                                 EEK_ELEMENT(serializable));
-    }
-
-    return index;
-}
-
-static void
-eek_serializable_iface_init (EekSerializableIface *iface)
-{
-    eek_container_parent_serializable_iface =
-        g_type_interface_peek_parent (iface);
-
-    iface->serialize = eek_container_real_serialize;
-    iface->deserialize = eek_container_real_deserialize;
-}
 
 static void
 eek_container_real_add_child (EekContainer *self,
@@ -127,7 +68,7 @@ eek_container_real_add_child (EekContainer *self,
         priv->last = priv->last->next;
     }
     eek_element_set_parent (child, EEK_ELEMENT(self));
-    g_signal_emit_by_name (self, "child-added", child);
+    g_signal_emit (self, signals[CHILD_ADDED], 0, child);
 }
 
 static void
@@ -145,7 +86,7 @@ eek_container_real_remove_child (EekContainer *self,
         priv->last = g_list_previous (priv->last);
     priv->head = g_list_remove_link (priv->head, head);
     eek_element_set_parent (child, NULL);
-    g_signal_emit_by_name (self, "child-removed", child);
+    g_signal_emit (self, signals[CHILD_REMOVED], 0, child);
 }
 
 static void

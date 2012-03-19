@@ -137,26 +137,6 @@ void                eek_keyboard_set_size
                                      (EekKeyboard        *keyboard,
                                       gdouble             width,
                                       gdouble             height);
-#ifndef EEK_DISABLE_DEPRECATED
-void                eek_keyboard_set_symbol_index
-                                     (EekKeyboard        *keyboard,
-                                      gint                group,
-                                      gint                level);
-void                eek_keyboard_get_symbol_index
-                                     (EekKeyboard        *keyboard,
-                                      gint               *group,
-                                      gint               *level);
-void                eek_keyboard_set_group
-                                     (EekKeyboard        *keyboard,
-                                      gint                group);
-void                eek_keyboard_set_level
-                                     (EekKeyboard        *keyboard,
-                                      gint                level);
-gint                eek_keyboard_get_group
-                                     (EekKeyboard        *keyboard);
-gint                eek_keyboard_get_level
-                                     (EekKeyboard        *keyboard);
-#endif  /* EEK_DISABLE_DEPRECATED */
 
 void                eek_keyboard_set_modifier_behavior
                                      (EekKeyboard        *keyboard,

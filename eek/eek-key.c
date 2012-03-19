@@ -79,90 +79,6 @@ struct _EekKeyPrivate
 };
 
 static void
-eek_key_real_set_keycode (EekKey *self, guint keycode)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    priv->keycode = keycode;
-}
-
-static guint
-eek_key_real_get_keycode (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->keycode;
-}
-
-static void
-eek_key_real_set_symbol_matrix (EekKey          *self,
-                                EekSymbolMatrix *matrix)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    eek_symbol_matrix_free (priv->symbol_matrix);
-    priv->symbol_matrix = eek_symbol_matrix_copy (matrix);
-}
-
-static EekSymbolMatrix *
-eek_key_real_get_symbol_matrix (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->symbol_matrix;
-}
-
-static void
-eek_key_real_set_index (EekKey *self,
-                        gint    column,
-                        gint    row)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-
-    g_return_if_fail (0 <= column);
-    g_return_if_fail (0 <= row);
-    priv->column = column;
-    priv->row = row;
-}
-
-static void
-eek_key_real_get_index (EekKey *self,
-                        gint   *column,
-                        gint   *row)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-
-    if (column)
-        *column = priv->column;
-    if (row)
-        *row = priv->row;
-}
-
-static void
-eek_key_real_set_oref (EekKey *self, gulong oref)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    priv->oref = oref;
-}
-
-static gulong
-eek_key_real_get_oref (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->oref;
-}
-
-static gboolean
-eek_key_real_is_pressed (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->is_pressed;
-}
-
-static gboolean
-eek_key_real_is_locked (EekKey *self)
-{
-    EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
-    return priv->is_locked;
-}
-
-static void
 eek_key_real_pressed (EekKey *self)
 {
     EekKeyPrivate *priv = EEK_KEY_GET_PRIVATE(self);
@@ -267,7 +183,6 @@ eek_key_get_property (GObject    *object,
 {
     gint column, row;
 
-    g_return_if_fail (EEK_IS_KEY(object));
     switch (prop_id) {
     case PROP_KEYCODE:
         g_value_set_uint (value, eek_key_get_keycode (EEK_KEY(object)));
@@ -301,17 +216,6 @@ eek_key_class_init (EekKeyClass *klass)
 
     g_type_class_add_private (gobject_class,
                               sizeof (EekKeyPrivate));
-
-    klass->get_keycode = eek_key_real_get_keycode;
-    klass->set_keycode = eek_key_real_set_keycode;
-    klass->set_symbol_matrix = eek_key_real_set_symbol_matrix;
-    klass->get_symbol_matrix = eek_key_real_get_symbol_matrix;
-    klass->set_index = eek_key_real_set_index;
-    klass->get_index = eek_key_real_get_index;
-    klass->set_oref = eek_key_real_set_oref;
-    klass->get_oref = eek_key_real_get_oref;
-    klass->is_pressed = eek_key_real_is_pressed;
-    klass->is_locked = eek_key_real_is_locked;
 
     gobject_class->set_property = eek_key_set_property;
     gobject_class->get_property = eek_key_get_property;
@@ -499,7 +403,7 @@ eek_key_set_keycode (EekKey *key,
                      guint   keycode)
 {
     g_return_if_fail (EEK_IS_KEY (key));
-    EEK_KEY_GET_CLASS(key)->set_keycode (key, keycode);
+    key->priv->keycode = keycode;
 }
 
 /**
@@ -513,7 +417,7 @@ guint
 eek_key_get_keycode (EekKey *key)
 {
     g_return_val_if_fail (EEK_IS_KEY (key), EEK_INVALID_KEYCODE);
-    return EEK_KEY_GET_CLASS(key)->get_keycode (key);
+    return key->priv->keycode;
 }
 
 /**
@@ -528,7 +432,9 @@ eek_key_set_symbol_matrix (EekKey          *key,
                            EekSymbolMatrix *matrix)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_symbol_matrix (key, matrix);
+
+    eek_symbol_matrix_free (key->priv->symbol_matrix);
+    key->priv->symbol_matrix = eek_symbol_matrix_copy (matrix);
 }
 
 /**
@@ -542,7 +448,7 @@ EekSymbolMatrix *
 eek_key_get_symbol_matrix (EekKey *key)
 {
     g_return_val_if_fail (EEK_IS_KEY(key), NULL);
-    return EEK_KEY_GET_CLASS(key)->get_symbol_matrix (key);
+    return key->priv->symbol_matrix;
 }
 
 /**
@@ -679,14 +585,24 @@ eek_key_set_index (EekKey *key,
                    gint    row)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_index (key, column, row);
+    g_return_if_fail (0 <= column);
+    g_return_if_fail (0 <= row);
+
+    if (key->priv->column != column) {
+        key->priv->column = column;
+        g_object_notify (key, "column");
+    }
+    if (key->priv->row != row) {
+        key->priv->row = row;
+        g_object_notify (key, "row");
+    }
 }
 
 /**
  * eek_key_get_index:
  * @key: an #EekKey
- * @column: pointer where the column index of @key in #EekSection will be stored
- * @row: pointer where the row index of @key in #EekSection will be stored
+ * @column: (allow-none): pointer where the column index of @key in #EekSection will be stored
+ * @row: (allow-none): pointer where the row index of @key in #EekSection will be stored
  *
  * Get the location of @key in #EekSection.
  */
@@ -696,7 +612,12 @@ eek_key_get_index (EekKey *key,
                    gint   *row)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->get_index (key, column, row);
+    g_return_if_fail (column != NULL || row != NULL);
+
+    if (column != NULL)
+        *column = key->priv->column;
+    if (row != NULL)
+        *row = key->priv->row;
 }
 
 /**
@@ -711,7 +632,10 @@ eek_key_set_oref (EekKey *key,
                   gulong  oref)
 {
     g_return_if_fail (EEK_IS_KEY(key));
-    EEK_KEY_GET_CLASS(key)->set_oref (key, oref);
+    if (key->priv->oref != oref) {
+        key->priv->oref = oref;
+        g_object_notify (key, "oref");
+    }
 }
 
 /**
@@ -725,7 +649,7 @@ gulong
 eek_key_get_oref (EekKey *key)
 {
     g_return_val_if_fail (EEK_IS_KEY (key), 0);
-    return EEK_KEY_GET_CLASS(key)->get_oref (key);
+    return key->priv->oref;
 }
 
 /**
@@ -737,8 +661,8 @@ eek_key_get_oref (EekKey *key)
 gboolean
 eek_key_is_pressed (EekKey *key)
 {
-    g_assert (EEK_IS_KEY(key));
-    return EEK_KEY_GET_CLASS(key)->is_pressed (key);
+    g_return_val_if_fail (EEK_IS_KEY(key), FALSE);
+    return key->priv->is_pressed;
 }
 
 /**
@@ -750,6 +674,6 @@ eek_key_is_pressed (EekKey *key)
 gboolean
 eek_key_is_locked (EekKey *key)
 {
-    g_assert (EEK_IS_KEY(key));
-    return EEK_KEY_GET_CLASS(key)->is_locked (key);
+    g_return_val_if_fail (EEK_IS_KEY(key), FALSE);
+    return key->priv->is_locked;
 }

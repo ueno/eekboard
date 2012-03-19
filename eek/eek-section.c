@@ -75,25 +75,6 @@ struct _EekSectionPrivate
     EekModifierType modifiers;
 };
 
-static void
-eek_section_real_set_angle (EekSection *self,
-                                   gint        angle)
-{
-    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
-
-    priv->angle = angle;
-
-    g_object_notify (G_OBJECT(self), "angle");
-}
-
-static gint
-eek_section_real_get_angle (EekSection *self)
-{
-    EekSectionPrivate *priv = EEK_SECTION_GET_PRIVATE(self);
-
-    return priv->angle;
-}
-
 static gint
 eek_section_real_get_n_rows (EekSection *self)
 {
@@ -355,8 +336,6 @@ eek_section_class_init (EekSectionClass *klass)
 
     g_type_class_add_private (gobject_class, sizeof (EekSectionPrivate));
 
-    klass->set_angle = eek_section_real_set_angle;
-    klass->get_angle = eek_section_real_get_angle;
     klass->get_n_rows = eek_section_real_get_n_rows;
     klass->add_row = eek_section_real_add_row;
     klass->get_row = eek_section_real_get_row;
@@ -507,7 +486,10 @@ eek_section_set_angle (EekSection  *section,
                        gint         angle)
 {
     g_return_if_fail (EEK_IS_SECTION(section));
-    EEK_SECTION_GET_CLASS(section)->set_angle (section, angle);
+    if (section->priv->angle != angle) {
+        section->priv->angle = angle;
+        g_object_notify (section, "angle");
+    }
 }
 
 /**
@@ -520,7 +502,7 @@ gint
 eek_section_get_angle (EekSection *section)
 {
     g_return_val_if_fail (EEK_IS_SECTION(section), -1);
-    return EEK_SECTION_GET_CLASS(section)->get_angle (section);
+    return section->priv->angle;
 }
 
 /**

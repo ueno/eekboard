@@ -56,16 +56,6 @@ struct _EekKey
 
 /**
  * EekKeyClass:
- * @set_keycode: virtual function for setting keycode of the key
- * @get_keycode: virtual function for getting keycode of the key
- * @set_symbol_matrix: virtual function for setting symbol matrix of the key
- * @get_symbol_matrix: virtual function for getting symbol matrix of the key
- * @set_index: virtual function for setting position of the key in the
- * section
- * @get_index: virtual function for getting position of the key in the
- * section
- * @set_oref: virtual function for setting outline id of the key
- * @get_oref: virtual function for getting outline id of the key
  * @pressed: class handler for #EekKey::pressed signal
  * @released: class handler for #EekKey::released signal
  * @locked: class handler for #EekKey::locked signal
@@ -80,38 +70,12 @@ struct _EekKeyClass
     EekElementClass parent_class;
 
     /*< public >*/
-    void             (* set_keycode)       (EekKey          *self,
-                                            guint            keycode);
-    guint            (* get_keycode)       (EekKey          *self);
-    void             (* set_symbol_matrix) (EekKey          *self,
-                                            EekSymbolMatrix *matrix);
-    EekSymbolMatrix *(* get_symbol_matrix) (EekKey          *self);
-
-    void             (* set_index)         (EekKey          *self,
-                                            gint             column,
-                                            gint             row);
-    void             (* get_index)         (EekKey          *self,
-                                            gint            *column,
-                                            gint            *row);
-
-    void             (* set_oref)          (EekKey          *self,
-                                            gulong           oref);
-    gulong           (* get_oref)          (EekKey          *self);
-
-    gboolean         (* is_pressed)        (EekKey          *self);
-
-    void             (* pressed)           (EekKey          *key);
-    void             (* released)          (EekKey          *key);
-
-    gboolean         (* is_locked)         (EekKey          *self);
-
-    void             (* locked)            (EekKey          *key);
-    void             (* unlocked)          (EekKey          *key);
-    void             (* cancelled)         (EekKey          *key);
-
-    /*< private >*/
-    /* padding */
-    gpointer pdummy[20];
+    /* signals */
+    void (* pressed)   (EekKey *key);
+    void (* released)  (EekKey *key);
+    void (* locked)    (EekKey *key);
+    void (* unlocked)  (EekKey *key);
+    void (* cancelled) (EekKey *key);
 };
 
 GType            eek_key_get_type            (void) G_GNUC_CONST;

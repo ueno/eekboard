@@ -57,8 +57,6 @@ struct _EekSection
 
 /**
  * EekSectionClass:
- * @set_angle: virtual function for setting rotation angle of the section
- * @get_angle: virtual function for getting rotation angle of the section
  * @get_n_rows: virtual function for getting the number of rows in the section
  * @add_row: virtual function for adding a new row to the section
  * @get_row: virtual function for accessing a row in the section
@@ -77,10 +75,6 @@ struct _EekSectionClass
     EekContainerClass parent_class;
 
     /*< public >*/
-    void    (* set_angle)           (EekSection     *self,
-                                     gint            angle);
-    gint    (* get_angle)           (EekSection     *self);
-
     gint    (* get_n_rows)          (EekSection     *self);
     void    (* add_row)             (EekSection     *self,
                                      gint            num_columns,
