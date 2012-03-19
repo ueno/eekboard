@@ -1,32 +1,38 @@
-keyboarddir = $(pkgdatadir)/keyboards
-dist_keyboard_DATA =				\
-	ar.xml					\
-	be.xml					\
-	fa.xml					\
-	he.xml					\
-	jp-kana.xml				\
-	kk.xml					\
-	ks.xml					\
-	my.xml					\
-	ru.xml					\
-	th.xml					\
-	ua.xml					\
-	ug.xml					\
-	us.xml					\
-	zh-bopomofo.xml				\
-	$(inscript_keyboards)
-inscript_keyboards =				\
-	as-inscript.xml				\
-	bn-inscript.xml				\
-	gu-inscript.xml				\
-	hi-inscript.xml				\
-	kn-inscript.xml				\
-	ks-inscript.xml				\
-	mai-inscript.xml			\
-	ml-inscript.xml				\
-	mr-inscript.xml				\
-	or-inscript.xml				\
-	pa-inscript.xml				\
-	sd-inscript.xml				\
-	ta-inscript.xml				\
-	te-inscript.xml
+keyboardsdir = $(pkgdatadir)/keyboards
+
+nobase_dist_keyboards_DATA =			\
+	keyboards.xml				\
+	geometry/compact.xml			\
+	symbols/ar.xml				\
+	symbols/be.xml				\
+	symbols/fa.xml				\
+	symbols/he.xml				\
+	symbols/ja-kana.xml			\
+	symbols/kk.xml				\
+	symbols/ks.xml				\
+	symbols/my.xml				\
+	symbols/ru.xml				\
+	symbols/th.xml				\
+	symbols/ua.xml				\
+	symbols/ug.xml				\
+	symbols/us.xml				\
+	symbols/zh-bopomofo.xml			\
+	$(inscript_symbols)			\
+	$(NULL)
+
+inscript_symbols =				\
+	symbols/as-inscript.xml			\
+	symbols/bn-inscript.xml			\
+	symbols/gu-inscript.xml			\
+	symbols/hi-inscript.xml			\
+	symbols/kn-inscript.xml			\
+	symbols/ks-inscript.xml			\
+	symbols/mai-inscript.xml		\
+	symbols/ml-inscript.xml			\
+	symbols/mr-inscript.xml			\
+	symbols/or-inscript.xml			\
+	symbols/pa-inscript.xml			\
+	symbols/sd-inscript.xml			\
+	symbols/ta-inscript.xml			\
+	symbols/te-inscript.xml			\
+	$(NULL)

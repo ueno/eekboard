@@ -94,8 +94,20 @@ libeek_la_SOURCES =				\
 	$(srcdir)/eek-enumtypes.c		\
 	$(srcdir)/eek-marshalers.c
 
-libeek_la_CFLAGS = -DEEK_COMPILATION=1 $(GIO2_CFLAGS) $(PANGOCAIRO_CFLAGS) $(LIBCROCO_CFLAGS)
-libeek_la_LIBADD = $(GIO2_LIBS) $(PANGOCAIRO_LIBS) $(LIBCROCO_LIBS) -lm
+libeek_la_CFLAGS =					\
+	-DEEK_COMPILATION=1				\
+	-DKEYBOARDSDIR=\"$(pkgdatadir)/keyboards\"	\
+	$(GIO2_CFLAGS)					\
+	$(PANGOCAIRO_CFLAGS)				\
+	$(LIBCROCO_CFLAGS)				\
+	$(NULL)
+
+libeek_la_LIBADD =				\
+	$(GIO2_LIBS)				\
+	$(PANGOCAIRO_LIBS)			\
+	$(LIBCROCO_LIBS)			\
+	-lm					\
+	$(NULL)
 
 libeek_gtk_public_headers =			\
 	$(srcdir)/eek-gtk-keyboard.h		\

@@ -65,14 +65,21 @@ struct _EekXmlLayoutClass
     gpointer pdummy[24];
 };
 
-GType          eek_xml_layout_get_type   (void) G_GNUC_CONST;
+struct _EekXmlKeyboardDesc
+{
+    gchar *id;
+    gchar *name;
+    gchar *geometry;
+    gchar *symbols;
+    gchar *language;
+    gchar *longname;
+};
+typedef struct _EekXmlKeyboardDesc EekXmlKeyboardDesc;
 
-EekLayout     *eek_xml_layout_new        (GInputStream *source);
-
-void           eek_xml_layout_set_source (EekXmlLayout *layout,
-                                          GInputStream *source);
-
-GInputStream * eek_xml_layout_get_source (EekXmlLayout *layout);
+GType      eek_xml_layout_get_type       (void) G_GNUC_CONST;
+EekLayout *eek_xml_layout_new            (const gchar *id,
+                                          GError     **error);
+GSList    *eek_xml_layout_list_keyboards (void);
 
 G_END_DECLS
 #endif  /* EEK_XML_LAYOUT_H */

@@ -105,8 +105,8 @@ void             eek_key_get_index           (EekKey          *key,
                                               gint            *row);
 
 void             eek_key_set_oref            (EekKey          *key,
-                                              gulong           oref);
-gulong           eek_key_get_oref            (EekKey          *key);
+                                              guint            oref);
+guint            eek_key_get_oref            (EekKey          *key);
 
 gboolean         eek_key_is_pressed          (EekKey          *key);
 gboolean         eek_key_is_locked           (EekKey          *key);

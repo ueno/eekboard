@@ -134,12 +134,15 @@ create_key (EekXkbLayout *layout,
     gchar name[XkbKeyNameLength + 1];
     KeyCode keycode;
     gint num_groups, num_levels;
-    gulong oref;
+    guint oref;
+    gpointer v;
 
     xkbgeometry = priv->xkb->geom;
     xkbshape = &xkbgeometry->shapes[xkbkey->shape_ndx];
-    oref = (gulong)g_hash_table_lookup (priv->shape_oref_hash, xkbshape);
-    if (oref == 0) {
+    if (g_hash_table_lookup_extended (priv->shape_oref_hash, xkbshape,
+                                      NULL, &v)) {
+        oref = GPOINTER_TO_UINT(v);
+    } else {
         EekOutline *outline;
 
         xkboutline = xkbshape->primary == NULL ? &xkbshape->outlines[0] :
@@ -183,7 +186,8 @@ create_key (EekXkbLayout *layout,
         }
         oref = eek_keyboard_add_outline (keyboard, outline);
         eek_outline_free (outline);
-        g_hash_table_insert (priv->shape_oref_hash, xkbshape, (gpointer)oref);
+        g_hash_table_insert (priv->shape_oref_hash, xkbshape,
+                             GUINT_TO_POINTER(oref));
     }
 
     memset (name, 0, sizeof name);

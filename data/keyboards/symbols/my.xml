@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <include>us</include>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="96">quoteleft</keysym>
+    <keysym keyval="126">asciitilde</keysym>
+  </key>
+  <key keycode="10" name="AE01">
+    <text category="letter">၁</text>
+    <text category="letter">ဍ</text>
+  </key>
+  <key keycode="11" name="AE02">
+    <text category="letter">၂</text>
+    <keysym keyval="64">at</keysym>
+  </key>
+  <key keycode="12" name="AE03">
+    <text category="letter">၃</text>
+    <text category="letter">ဋ</text>
+  </key>
+  <key keycode="13" name="AE04">
+    <text category="letter">၄</text>
+    <keysym keyval="36">dollar</keysym>
+  </key>
+  <key keycode="14" name="AE05">
+    <text category="letter">၅</text>
+    <keysym keyval="37">percent</keysym>
+    <keysym keyval="8364">EuroSign</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <text category="letter">၆</text>
+    <keysym keyval="94">asciicircum</keysym>
+  </key>
+  <key keycode="16" name="AE07">
+    <text category="letter">၇</text>
+    <text category="letter">ရ</text>
+  </key>
+  <key keycode="17" name="AE08">
+    <text category="letter">၈</text>
+    <text category="letter">ဂ</text>
+  </key>
+  <key keycode="18" name="AE09">
+    <text category="letter">၉</text>
+    <keysym keyval="40">parenleft</keysym>
+  </key>
+  <key keycode="19" name="AE10">
+    <text category="letter">၀</text>
+    <text category="letter">ဝ</text>
+  </key>
+  <key keycode="20" name="AE11">
+    <keysym keyval="45">minus</keysym>
+    <keysym keyval="95">underscore</keysym>
+  </key>
+  <key keycode="21" name="AE12">
+    <keysym keyval="61">equal</keysym>
+    <keysym keyval="43">plus</keysym>
+  </key>
+  <key keycode="24" name="AD01">
+    <text category="letter">ဆ</text>
+    <text category="letter">၍</text>
+  </key>
+  <key keycode="25" name="AD02">
+    <text category="letter">တ</text>
+    <keysym keyval="87">W</keysym>
+  </key>
+  <key keycode="26" name="AD03">
+    <text category="letter">န</text>
+    <keysym keyval="69">E</keysym>
+  </key>
+  <key keycode="27" name="AD04">
+    <text category="letter">မ</text>
+    <keysym keyval="82">R</keysym>
+  </key>
+  <key keycode="28" name="AD05">
+    <text category="letter">အ</text>
+    <keysym keyval="84">T</keysym>
+  </key>
+  <key keycode="29" name="AD06">
+    <text category="letter">ပ</text>
+    <keysym keyval="89">Y</keysym>
+  </key>
+  <key keycode="30" name="AD07">
+    <text category="letter">က</text>
+    <keysym keyval="85">U</keysym>
+  </key>
+  <key keycode="31" name="AD08">
+    <text category="letter">င</text>
+    <keysym keyval="73">I</keysym>
+  </key>
+  <key keycode="32" name="AD09">
+    <text category="letter">သ</text>
+    <text category="letter">ဥ</text>
+  </key>
+  <key keycode="33" name="AD10">
+    <text category="letter">စ</text>
+    <text category="letter">ဏ</text>
+  </key>
+  <key keycode="34" name="AD11">
+    <text category="letter">ဟ</text>
+    <text category="letter">ဎ</text>
+  </key>
+  <key keycode="35" name="AD12">
+    <text category="letter">ဉ</text>
+    <text category="letter">ဧ</text>
+  </key>
+  <key keycode="51" name="BKSL">
+    <text category="letter">၏</text>
+    <keysym keyval="124">bar</keysym>
+  </key>
+  <key keycode="38" name="AC01">
+    <text category="letter">ေ</text>
+    <text category="letter">ဗ</text>
+  </key>
+  <key keycode="39" name="AC02">
+    <text category="letter">္</text>
+    <text category="letter">္</text>
+  </key>
+  <key keycode="40" name="AC03">
+    <text category="letter">ိ</text>
+    <text category="letter">ီ</text>
+  </key>
+  <key keycode="41" name="AC04">
+    <text category="letter">္</text>
+    <text category="letter">‍</text>
+  </key>
+  <key keycode="42" name="AC05">
+    <text category="letter">‌</text>
+    <text category="letter">္</text>
+  </key>
+  <key keycode="43" name="AC06">
+    <text category="letter">့</text>
+    <text category="letter">ံ</text>
+  </key>
+  <key keycode="44" name="AC07">
+    <text category="letter">္</text>
+    <text category="letter">ဲ</text>
+  </key>
+  <key keycode="45" name="AC08">
+    <text category="letter">ု</text>
+    <keysym keyval="75">K</keysym>
+  </key>
+  <key keycode="46" name="AC09">
+    <text category="letter">ူ</text>
+    <keysym keyval="76">L</keysym>
+  </key>
+  <key keycode="47" name="AC10">
+    <text category="letter">း</text>
+    <keysym keyval="58">colon</keysym>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="39">quoteright</keysym>
+    <text category="letter">ဓ</text>
+  </key>
+  <key keycode="52" name="AB01">
+    <text category="letter">ဖ</text>
+    <text category="letter">ဇ</text>
+  </key>
+  <key keycode="53" name="AB02">
+    <text category="letter">ထ</text>
+    <text category="letter">ဌ</text>
+  </key>
+  <key keycode="54" name="AB03">
+    <text category="letter">ခ</text>
+    <text category="letter">ဃ</text>
+  </key>
+  <key keycode="55" name="AB04">
+    <text category="letter">လ</text>
+    <text category="letter">ဠ</text>
+  </key>
+  <key keycode="56" name="AB05">
+    <text category="letter">ဘ</text>
+    <keysym keyval="66">B</keysym>
+  </key>
+  <key keycode="57" name="AB06">
+    <text category="letter">ည</text>
+    <keysym keyval="78">N</keysym>
+  </key>
+  <key keycode="58" name="AB07">
+    <text category="letter">ာ</text>
+    <keysym keyval="77">M</keysym>
+  </key>
+  <key keycode="59" name="AB08">
+    <text category="letter">ယ</text>
+    <text category="letter">၍</text>
+  </key>
+  <key keycode="60" name="AB09">
+    <text category="letter">ဈ</text>
+    <text category="letter">ဤ</text>
+  </key>
+  <key keycode="61" name="AB10">
+    <text category="letter">။</text>
+    <keysym keyval="63">question</keysym>
+  </key>
+</symbols>

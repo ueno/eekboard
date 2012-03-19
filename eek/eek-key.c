@@ -629,7 +629,7 @@ eek_key_get_index (EekKey *key,
  */
 void
 eek_key_set_oref (EekKey *key,
-                  gulong  oref)
+                  guint   oref)
 {
     g_return_if_fail (EEK_IS_KEY(key));
     if (key->priv->oref != oref) {
@@ -643,9 +643,9 @@ eek_key_set_oref (EekKey *key,
  * @key: an #EekKey
  *
  * Get the outline id of @key.
- * Returns: a non-zero unsigned integer on success, 0 if the id is not set
+ * Returns: unsigned integer
  */
-gulong
+guint
 eek_key_get_oref (EekKey *key)
 {
     g_return_val_if_fail (EEK_IS_KEY (key), 0);

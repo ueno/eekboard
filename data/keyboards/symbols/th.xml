@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <include>us</include>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="95">underscore</keysym>
+    <keysym keyval="37">percent</keysym>
+  </key>
+  <key keycode="10" name="AE01">
+    <keysym keyval="3557">Thai_lakkhangyao</keysym>
+    <keysym keyval="43">plus</keysym>
+  </key>
+  <key keycode="11" name="AE02">
+    <keysym keyval="47">slash</keysym>
+    <keysym keyval="3569">Thai_leknung</keysym>
+  </key>
+  <key keycode="12" name="AE03">
+    <keysym keyval="45">minus</keysym>
+    <keysym keyval="3570">Thai_leksong</keysym>
+  </key>
+  <key keycode="13" name="AE04">
+    <keysym keyval="3520">Thai_phosamphao</keysym>
+    <keysym keyval="3571">Thai_leksam</keysym>
+  </key>
+  <key keycode="14" name="AE05">
+    <keysym keyval="3510">Thai_thothung</keysym>
+    <keysym keyval="3572">Thai_leksi</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <keysym keyval="3544">Thai_sarau</keysym>
+    <keysym keyval="3545">Thai_sarauu</keysym>
+  </key>
+  <key keycode="16" name="AE07">
+    <keysym keyval="3542">Thai_saraue</keysym>
+    <keysym keyval="3551">Thai_baht</keysym>
+  </key>
+  <key keycode="17" name="AE08">
+    <keysym keyval="3492">Thai_khokhwai</keysym>
+    <keysym keyval="3573">Thai_lekha</keysym>
+  </key>
+  <key keycode="18" name="AE09">
+    <keysym keyval="3509">Thai_totao</keysym>
+    <keysym keyval="3574">Thai_lekhok</keysym>
+  </key>
+  <key keycode="19" name="AE10">
+    <keysym keyval="3496">Thai_chochan</keysym>
+    <keysym keyval="3575">Thai_lekchet</keysym>
+  </key>
+  <key keycode="20" name="AE11">
+    <keysym keyval="3490">Thai_khokhai</keysym>
+    <keysym keyval="3576">Thai_lekpaet</keysym>
+  </key>
+  <key keycode="21" name="AE12">
+    <keysym keyval="3498">Thai_chochang</keysym>
+    <keysym keyval="3577">Thai_lekkao</keysym>
+  </key>
+  <key keycode="24" name="AD01">
+    <keysym keyval="3558">Thai_maiyamok</keysym>
+    <keysym keyval="3568">Thai_leksun</keysym>
+  </key>
+  <key keycode="25" name="AD02">
+    <keysym keyval="3556">Thai_saraaimaimalai</keysym>
+    <keysym keyval="34">quotedbl</keysym>
+  </key>
+  <key keycode="26" name="AD03">
+    <keysym keyval="3539">Thai_saraam</keysym>
+    <keysym keyval="3502">Thai_dochada</keysym>
+  </key>
+  <key keycode="27" name="AD04">
+    <keysym keyval="3518">Thai_phophan</keysym>
+    <keysym keyval="3505">Thai_thonangmontho</keysym>
+  </key>
+  <key keycode="28" name="AD05">
+    <keysym keyval="3536">Thai_saraa</keysym>
+    <keysym keyval="3512">Thai_thothong</keysym>
+  </key>
+  <key keycode="29" name="AD06">
+    <keysym keyval="3537">Thai_maihanakat</keysym>
+    <keysym keyval="3565">Thai_nikhahit</keysym>
+  </key>
+  <key keycode="30" name="AD07">
+    <keysym keyval="3541">Thai_saraii</keysym>
+    <keysym keyval="3562">Thai_maitri</keysym>
+  </key>
+  <key keycode="31" name="AD08">
+    <keysym keyval="3523">Thai_rorua</keysym>
+    <keysym keyval="3507">Thai_nonen</keysym>
+  </key>
+  <key keycode="32" name="AD09">
+    <keysym keyval="3513">Thai_nonu</keysym>
+    <keysym keyval="3535">Thai_paiyannoi</keysym>
+  </key>
+  <key keycode="33" name="AD10">
+    <keysym keyval="3522">Thai_yoyak</keysym>
+    <keysym keyval="3501">Thai_yoying</keysym>
+  </key>
+  <key keycode="34" name="AD11">
+    <keysym keyval="3514">Thai_bobaimai</keysym>
+    <keysym keyval="3504">Thai_thothan</keysym>
+  </key>
+  <key keycode="35" name="AD12">
+    <keysym keyval="3525">Thai_loling</keysym>
+    <keysym keyval="44">comma</keysym>
+  </key>
+  <key keycode="51" name="BKSL">
+    <keysym keyval="3491">Thai_khokhuat</keysym>
+    <keysym keyval="3493">Thai_khokhon</keysym>
+  </key>
+  <key keycode="38" name="AC01">
+    <keysym keyval="3519">Thai_fofan</keysym>
+    <keysym keyval="3524">Thai_ru</keysym>
+  </key>
+  <key keycode="39" name="AC02">
+    <keysym keyval="3531">Thai_hohip</keysym>
+    <keysym keyval="3494">Thai_khorakhang</keysym>
+  </key>
+  <key keycode="40" name="AC03">
+    <keysym keyval="3489">Thai_kokai</keysym>
+    <keysym keyval="3503">Thai_topatak</keysym>
+  </key>
+  <key keycode="41" name="AC04">
+    <keysym keyval="3508">Thai_dodek</keysym>
+    <keysym keyval="3554">Thai_sarao</keysym>
+  </key>
+  <key keycode="42" name="AC05">
+    <keysym keyval="3552">Thai_sarae</keysym>
+    <keysym keyval="3500">Thai_chochoe</keysym>
+  </key>
+  <key keycode="43" name="AC06">
+    <keysym keyval="3561">Thai_maitho</keysym>
+    <keysym keyval="3559">Thai_maitaikhu</keysym>
+  </key>
+  <key keycode="44" name="AC07">
+    <keysym keyval="3560">Thai_maiek</keysym>
+    <keysym keyval="3563">Thai_maichattawa</keysym>
+  </key>
+  <key keycode="45" name="AC08">
+    <keysym keyval="3538">Thai_saraaa</keysym>
+    <keysym keyval="3529">Thai_sorusi</keysym>
+  </key>
+  <key keycode="46" name="AC09">
+    <keysym keyval="3530">Thai_sosua</keysym>
+    <keysym keyval="3528">Thai_sosala</keysym>
+  </key>
+  <key keycode="47" name="AC10">
+    <keysym keyval="3527">Thai_wowaen</keysym>
+    <keysym keyval="3499">Thai_soso</keysym>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="3495">Thai_ngongu</keysym>
+    <keysym keyval="46">period</keysym>
+  </key>
+  <key keycode="52" name="AB01">
+    <keysym keyval="3516">Thai_phophung</keysym>
+    <keysym keyval="40">parenleft</keysym>
+  </key>
+  <key keycode="53" name="AB02">
+    <keysym keyval="3515">Thai_popla</keysym>
+    <keysym keyval="41">parenright</keysym>
+  </key>
+  <key keycode="54" name="AB03">
+    <keysym keyval="3553">Thai_saraae</keysym>
+    <keysym keyval="3497">Thai_choching</keysym>
+  </key>
+  <key keycode="55" name="AB04">
+    <keysym keyval="3533">Thai_oang</keysym>
+    <keysym keyval="3534">Thai_honokhuk</keysym>
+  </key>
+  <key keycode="56" name="AB05">
+    <keysym keyval="3540">Thai_sarai</keysym>
+    <keysym keyval="3546">Thai_phinthu</keysym>
+  </key>
+  <key keycode="57" name="AB06">
+    <keysym keyval="3543">Thai_sarauee</keysym>
+    <keysym keyval="3564">Thai_thanthakhat</keysym>
+  </key>
+  <key keycode="58" name="AB07">
+    <keysym keyval="3511">Thai_thothahan</keysym>
+    <keysym keyval="63">question</keysym>
+  </key>
+  <key keycode="59" name="AB08">
+    <keysym keyval="3521">Thai_moma</keysym>
+    <keysym keyval="3506">Thai_thophuthao</keysym>
+  </key>
+  <key keycode="60" name="AB09">
+    <keysym keyval="3555">Thai_saraaimaimuan</keysym>
+    <keysym keyval="3532">Thai_lochula</keysym>
+  </key>
+  <key keycode="61" name="AB10">
+    <keysym keyval="3517">Thai_fofa</keysym>
+    <keysym keyval="3526">Thai_lu</keysym>
+  </key>
+</symbols>

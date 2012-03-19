@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <include>us</include>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="96">quoteleft</keysym>
+    <keysym keyval="126">asciitilde</keysym>
+  </key>
+  <key keycode="10" name="AE01">
+    <keysym keyval="49">1</keysym>
+    <keysym keyval="33">exclam</keysym>
+  </key>
+  <key keycode="11" name="AE02">
+    <keysym keyval="50">2</keysym>
+    <keysym keyval="64">at</keysym>
+  </key>
+  <key keycode="12" name="AE03">
+    <keysym keyval="51">3</keysym>
+    <keysym keyval="35">numbersign</keysym>
+  </key>
+  <key keycode="13" name="AE04">
+    <keysym keyval="52">4</keysym>
+    <keysym keyval="36">dollar</keysym>
+  </key>
+  <key keycode="14" name="AE05">
+    <keysym keyval="53">5</keysym>
+    <keysym keyval="37">percent</keysym>
+    <keysym keyval="8364">EuroSign</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <keysym keyval="54">6</keysym>
+    <keysym keyval="94">asciicircum</keysym>
+  </key>
+  <key keycode="16" name="AE07">
+    <keysym keyval="55">7</keysym>
+    <keysym keyval="38">ampersand</keysym>
+  </key>
+  <key keycode="17" name="AE08">
+    <keysym keyval="56">8</keysym>
+    <keysym keyval="42">asterisk</keysym>
+  </key>
+  <key keycode="18" name="AE09">
+    <keysym keyval="57">9</keysym>
+    <text category="letter">)</text>
+  </key>
+  <key keycode="19" name="AE10">
+    <keysym keyval="48">0</keysym>
+    <text category="letter">(</text>
+  </key>
+  <key keycode="20" name="AE11">
+    <keysym keyval="45">minus</keysym>
+    <keysym keyval="95">underscore</keysym>
+  </key>
+  <key keycode="21" name="AE12">
+    <keysym keyval="61">equal</keysym>
+    <keysym keyval="43">plus</keysym>
+  </key>
+  <key keycode="24" name="AD01">
+    <text category="letter">/</text>
+    <keysym keyval="81">Q</keysym>
+  </key>
+  <key keycode="25" name="AD02">
+    <text category="letter">&apos;</text>
+    <keysym keyval="87">W</keysym>
+  </key>
+  <key keycode="26" name="AD03">
+    <text category="letter">ק</text>
+    <keysym keyval="69">E</keysym>
+  </key>
+  <key keycode="27" name="AD04">
+    <text category="letter">ר</text>
+    <keysym keyval="82">R</keysym>
+  </key>
+  <key keycode="28" name="AD05">
+    <text category="letter">א</text>
+    <keysym keyval="84">T</keysym>
+  </key>
+  <key keycode="29" name="AD06">
+    <text category="letter">ט</text>
+    <keysym keyval="89">Y</keysym>
+  </key>
+  <key keycode="30" name="AD07">
+    <text category="letter">ו</text>
+    <keysym keyval="85">U</keysym>
+  </key>
+  <key keycode="31" name="AD08">
+    <text category="letter">ן</text>
+    <keysym keyval="73">I</keysym>
+  </key>
+  <key keycode="32" name="AD09">
+    <text category="letter">ם</text>
+    <keysym keyval="79">O</keysym>
+  </key>
+  <key keycode="33" name="AD10">
+    <text category="letter">פ</text>
+    <keysym keyval="80">P</keysym>
+  </key>
+  <key keycode="34" name="AD11">
+    <text category="letter">]</text>
+    <text category="letter">}</text>
+  </key>
+  <key keycode="35" name="AD12">
+    <text category="letter">[</text>
+    <text category="letter">{</text>
+  </key>
+  <key keycode="51" name="BKSL">
+    <keysym keyval="92">backslash</keysym>
+    <keysym keyval="124">bar</keysym>
+  </key>
+  <key keycode="38" name="AC01">
+    <text category="letter">ש</text>
+    <keysym keyval="65">A</keysym>
+  </key>
+  <key keycode="39" name="AC02">
+    <text category="letter">ד</text>
+    <keysym keyval="83">S</keysym>
+  </key>
+  <key keycode="40" name="AC03">
+    <text category="letter">ג</text>
+    <keysym keyval="68">D</keysym>
+  </key>
+  <key keycode="41" name="AC04">
+    <text category="letter">כ</text>
+    <keysym keyval="70">F</keysym>
+  </key>
+  <key keycode="42" name="AC05">
+    <text category="letter">ע</text>
+    <keysym keyval="71">G</keysym>
+  </key>
+  <key keycode="43" name="AC06">
+    <text category="letter">י</text>
+    <keysym keyval="72">H</keysym>
+  </key>
+  <key keycode="44" name="AC07">
+    <text category="letter">ח</text>
+    <keysym keyval="74">J</keysym>
+  </key>
+  <key keycode="45" name="AC08">
+    <text category="letter">ל</text>
+    <keysym keyval="75">K</keysym>
+  </key>
+  <key keycode="46" name="AC09">
+    <text category="letter">ך</text>
+    <keysym keyval="76">L</keysym>
+  </key>
+  <key keycode="47" name="AC10">
+    <text category="letter">ף</text>
+    <keysym keyval="58">colon</keysym>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="39">quoteright</keysym>
+    <keysym keyval="34">quotedbl</keysym>
+  </key>
+  <key keycode="52" name="AB01">
+    <text category="letter">ז</text>
+    <keysym keyval="90">Z</keysym>
+  </key>
+  <key keycode="53" name="AB02">
+    <text category="letter">ס</text>
+    <keysym keyval="88">X</keysym>
+  </key>
+  <key keycode="54" name="AB03">
+    <text category="letter">ב</text>
+    <keysym keyval="67">C</keysym>
+  </key>
+  <key keycode="55" name="AB04">
+    <text category="letter">ה</text>
+    <keysym keyval="86">V</keysym>
+  </key>
+  <key keycode="56" name="AB05">
+    <text category="letter">נ</text>
+    <keysym keyval="66">B</keysym>
+  </key>
+  <key keycode="57" name="AB06">
+    <text category="letter">מ</text>
+    <keysym keyval="78">N</keysym>
+  </key>
+  <key keycode="58" name="AB07">
+    <text category="letter">צ</text>
+    <keysym keyval="77">M</keysym>
+  </key>
+  <key keycode="59" name="AB08">
+    <text category="letter">ת</text>
+    <text category="letter">&gt;</text>
+  </key>
+  <key keycode="60" name="AB09">
+    <text category="letter">ץ</text>
+    <text category="letter">&lt;</text>
+  </key>
+  <key keycode="61" name="AB10">
+    <text category="letter">.</text>
+    <keysym keyval="63">question</keysym>
+  </key>
+</symbols>

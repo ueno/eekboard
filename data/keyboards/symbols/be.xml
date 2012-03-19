@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <include>us</include>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="96">quoteleft</keysym>
+    <text category="letter">Ё</text>
+  </key>
+  <key keycode="10" name="AE01">
+    <keysym keyval="49">1</keysym>
+    <text category="letter">!</text>
+  </key>
+  <key keycode="11" name="AE02">
+    <keysym keyval="50">2</keysym>
+    <text category="letter">&quot;</text>
+  </key>
+  <key keycode="12" name="AE03">
+    <keysym keyval="51">3</keysym>
+    <text category="letter">№</text>
+  </key>
+  <key keycode="13" name="AE04">
+    <keysym keyval="52">4</keysym>
+    <text category="letter">;</text>
+  </key>
+  <key keycode="14" name="AE05">
+    <keysym keyval="53">5</keysym>
+    <text category="letter">%</text>
+    <keysym keyval="8364">EuroSign</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <keysym keyval="54">6</keysym>
+    <text category="letter">:</text>
+  </key>
+  <key keycode="16" name="AE07">
+    <keysym keyval="55">7</keysym>
+    <text category="letter">?</text>
+  </key>
+  <key keycode="17" name="AE08">
+    <keysym keyval="56">8</keysym>
+    <text category="letter">*</text>
+  </key>
+  <key keycode="18" name="AE09">
+    <keysym keyval="57">9</keysym>
+    <text category="letter">(</text>
+  </key>
+  <key keycode="19" name="AE10">
+    <keysym keyval="48">0</keysym>
+    <text category="letter">)</text>
+  </key>
+  <key keycode="20" name="AE11">
+    <keysym keyval="45">minus</keysym>
+    <text category="letter">_</text>
+  </key>
+  <key keycode="21" name="AE12">
+    <keysym keyval="61">equal</keysym>
+    <text category="letter">+</text>
+  </key>
+  <key keycode="24" name="AD01">
+    <text category="letter">й</text>
+    <text category="letter">Й</text>
+  </key>
+  <key keycode="25" name="AD02">
+    <text category="letter">ц</text>
+    <text category="letter">Ц</text>
+  </key>
+  <key keycode="26" name="AD03">
+    <text category="letter">у</text>
+    <text category="letter">У</text>
+  </key>
+  <key keycode="27" name="AD04">
+    <text category="letter">к</text>
+    <text category="letter">К</text>
+  </key>
+  <key keycode="28" name="AD05">
+    <text category="letter">е</text>
+    <text category="letter">Е</text>
+  </key>
+  <key keycode="29" name="AD06">
+    <text category="letter">н</text>
+    <text category="letter">Н</text>
+  </key>
+  <key keycode="30" name="AD07">
+    <text category="letter">г</text>
+    <text category="letter">Г</text>
+  </key>
+  <key keycode="31" name="AD08">
+    <text category="letter">ш</text>
+    <text category="letter">Ш</text>
+  </key>
+  <key keycode="32" name="AD09">
+    <text category="letter">ў</text>
+    <text category="letter">Ў</text>
+  </key>
+  <key keycode="33" name="AD10">
+    <text category="letter">з</text>
+    <text category="letter">З</text>
+  </key>
+  <key keycode="34" name="AD11">
+    <text category="letter">х</text>
+    <text category="letter">Х</text>
+  </key>
+  <key keycode="35" name="AD12">
+    <text category="letter">&apos;</text>
+    <text category="letter">&apos;</text>
+  </key>
+  <key keycode="51" name="BKSL">
+    <text category="letter">\</text>
+    <text category="letter">|</text>
+  </key>
+  <key keycode="38" name="AC01">
+    <text category="letter">ф</text>
+    <text category="letter">Ф</text>
+  </key>
+  <key keycode="39" name="AC02">
+    <text category="letter">ы</text>
+    <text category="letter">Ы</text>
+  </key>
+  <key keycode="40" name="AC03">
+    <text category="letter">в</text>
+    <text category="letter">В</text>
+  </key>
+  <key keycode="41" name="AC04">
+    <text category="letter">а</text>
+    <text category="letter">А</text>
+  </key>
+  <key keycode="42" name="AC05">
+    <text category="letter">п</text>
+    <text category="letter">П</text>
+  </key>
+  <key keycode="43" name="AC06">
+    <text category="letter">р</text>
+    <text category="letter">Р</text>
+  </key>
+  <key keycode="44" name="AC07">
+    <text category="letter">о</text>
+    <text category="letter">О</text>
+  </key>
+  <key keycode="45" name="AC08">
+    <text category="letter">л</text>
+    <text category="letter">Л</text>
+  </key>
+  <key keycode="46" name="AC09">
+    <text category="letter">д</text>
+    <text category="letter">Д</text>
+  </key>
+  <key keycode="47" name="AC10">
+    <text category="letter">ж</text>
+    <text category="letter">Ж</text>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="39">quoteright</keysym>
+    <text category="letter">Э</text>
+  </key>
+  <key keycode="52" name="AB01">
+    <text category="letter">я</text>
+    <text category="letter">Я</text>
+  </key>
+  <key keycode="53" name="AB02">
+    <text category="letter">ч</text>
+    <text category="letter">Ч</text>
+  </key>
+  <key keycode="54" name="AB03">
+    <text category="letter">с</text>
+    <text category="letter">С</text>
+  </key>
+  <key keycode="55" name="AB04">
+    <text category="letter">м</text>
+    <text category="letter">М</text>
+  </key>
+  <key keycode="56" name="AB05">
+    <text category="letter">і</text>
+    <text category="letter">І</text>
+  </key>
+  <key keycode="57" name="AB06">
+    <text category="letter">т</text>
+    <text category="letter">Т</text>
+  </key>
+  <key keycode="58" name="AB07">
+    <text category="letter">ь</text>
+    <text category="letter">Ь</text>
+  </key>
+  <key keycode="59" name="AB08">
+    <text category="letter">б</text>
+    <text category="letter">Б</text>
+  </key>
+  <key keycode="60" name="AB09">
+    <text category="letter">ю</text>
+    <text category="letter">Ю</text>
+  </key>
+  <key keycode="61" name="AB10">
+    <text category="letter">.</text>
+    <text category="letter">,</text>
+  </key>
+</symbols>

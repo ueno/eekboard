@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <key keycode="9" name="ESC">
+    <keysym keyval="65307">Escape</keysym>
+  </key>
+  <key keycode="67" name="FK01">
+    <keysym keyval="65470">F1</keysym>
+  </key>
+  <key keycode="68" name="FK02">
+    <keysym keyval="65471">F2</keysym>
+  </key>
+  <key keycode="69" name="FK03">
+    <keysym keyval="65472">F3</keysym>
+  </key>
+  <key keycode="70" name="FK04">
+    <keysym keyval="65473">F4</keysym>
+  </key>
+  <key keycode="71" name="FK05">
+    <keysym keyval="65474">F5</keysym>
+  </key>
+  <key keycode="72" name="FK06">
+    <keysym keyval="65475">F6</keysym>
+  </key>
+  <key keycode="73" name="FK07">
+    <keysym keyval="65476">F7</keysym>
+  </key>
+  <key keycode="74" name="FK08">
+    <keysym keyval="65477">F8</keysym>
+  </key>
+  <key keycode="75" name="FK09">
+    <keysym keyval="65478">F9</keysym>
+  </key>
+  <key keycode="76" name="FK10">
+    <keysym keyval="65479">F10</keysym>
+  </key>
+  <key keycode="95" name="FK11">
+    <keysym keyval="65480">F11</keysym>
+  </key>
+  <key keycode="96" name="FK12">
+    <keysym keyval="65481">F12</keysym>
+  </key>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="96">quoteleft</keysym>
+    <keysym keyval="126">asciitilde</keysym>
+  </key>
+  <key keycode="10" name="AE01">
+    <keysym keyval="49">1</keysym>
+    <keysym keyval="33">exclam</keysym>
+  </key>
+  <key keycode="11" name="AE02">
+    <keysym keyval="50">2</keysym>
+    <keysym keyval="64">at</keysym>
+  </key>
+  <key keycode="12" name="AE03">
+    <keysym keyval="51">3</keysym>
+    <keysym keyval="35">numbersign</keysym>
+  </key>
+  <key keycode="13" name="AE04">
+    <keysym keyval="52">4</keysym>
+    <keysym keyval="36">dollar</keysym>
+  </key>
+  <key keycode="14" name="AE05">
+    <keysym keyval="53">5</keysym>
+    <keysym keyval="37">percent</keysym>
+    <keysym keyval="8364">EuroSign</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <keysym keyval="54">6</keysym>
+    <keysym keyval="94">asciicircum</keysym>
+  </key>
+  <key keycode="16" name="AE07">
+    <keysym keyval="55">7</keysym>
+    <keysym keyval="38">ampersand</keysym>
+  </key>
+  <key keycode="17" name="AE08">
+    <keysym keyval="56">8</keysym>
+    <keysym keyval="42">asterisk</keysym>
+  </key>
+  <key keycode="18" name="AE09">
+    <keysym keyval="57">9</keysym>
+    <keysym keyval="40">parenleft</keysym>
+  </key>
+  <key keycode="19" name="AE10">
+    <keysym keyval="48">0</keysym>
+    <keysym keyval="41">parenright</keysym>
+  </key>
+  <key keycode="20" name="AE11">
+    <keysym keyval="45">minus</keysym>
+    <keysym keyval="95">underscore</keysym>
+  </key>
+  <key keycode="21" name="AE12">
+    <keysym keyval="61">equal</keysym>
+    <keysym keyval="43">plus</keysym>
+  </key>
+  <key keycode="22" name="BKSP">
+    <keysym keyval="65288">BackSpace</keysym>
+  </key>
+  <key keycode="23" name="TAB">
+    <keysym keyval="65289">Tab</keysym>
+    <keysym keyval="65056">ISO_Left_Tab</keysym>
+  </key>
+  <key keycode="24" name="AD01">
+    <keysym keyval="113">q</keysym>
+    <keysym keyval="81">Q</keysym>
+  </key>
+  <key keycode="25" name="AD02">
+    <keysym keyval="119">w</keysym>
+    <keysym keyval="87">W</keysym>
+  </key>
+  <key keycode="26" name="AD03">
+    <keysym keyval="101">e</keysym>
+    <keysym keyval="69">E</keysym>
+  </key>
+  <key keycode="27" name="AD04">
+    <keysym keyval="114">r</keysym>
+    <keysym keyval="82">R</keysym>
+  </key>
+  <key keycode="28" name="AD05">
+    <keysym keyval="116">t</keysym>
+    <keysym keyval="84">T</keysym>
+  </key>
+  <key keycode="29" name="AD06">
+    <keysym keyval="121">y</keysym>
+    <keysym keyval="89">Y</keysym>
+  </key>
+  <key keycode="30" name="AD07">
+    <keysym keyval="117">u</keysym>
+    <keysym keyval="85">U</keysym>
+  </key>
+  <key keycode="31" name="AD08">
+    <keysym keyval="105">i</keysym>
+    <keysym keyval="73">I</keysym>
+  </key>
+  <key keycode="32" name="AD09">
+    <keysym keyval="111">o</keysym>
+    <keysym keyval="79">O</keysym>
+  </key>
+  <key keycode="33" name="AD10">
+    <keysym keyval="112">p</keysym>
+    <keysym keyval="80">P</keysym>
+  </key>
+  <key keycode="34" name="AD11">
+    <keysym keyval="91">bracketleft</keysym>
+    <keysym keyval="123">braceleft</keysym>
+  </key>
+  <key keycode="35" name="AD12">
+    <keysym keyval="93">bracketright</keysym>
+    <keysym keyval="125">braceright</keysym>
+  </key>
+  <key keycode="51" name="BKSL">
+    <keysym keyval="92">backslash</keysym>
+    <keysym keyval="124">bar</keysym>
+  </key>
+  <key keycode="66" name="CAPS">
+    <keysym keyval="65027">ISO_Level3_Shift</keysym>
+  </key>
+  <key keycode="38" name="AC01">
+    <keysym keyval="97">a</keysym>
+    <keysym keyval="65">A</keysym>
+  </key>
+  <key keycode="39" name="AC02">
+    <keysym keyval="115">s</keysym>
+    <keysym keyval="83">S</keysym>
+  </key>
+  <key keycode="40" name="AC03">
+    <keysym keyval="100">d</keysym>
+    <keysym keyval="68">D</keysym>
+  </key>
+  <key keycode="41" name="AC04">
+    <keysym keyval="102">f</keysym>
+    <keysym keyval="70">F</keysym>
+  </key>
+  <key keycode="42" name="AC05">
+    <keysym keyval="103">g</keysym>
+    <keysym keyval="71">G</keysym>
+  </key>
+  <key keycode="43" name="AC06">
+    <keysym keyval="104">h</keysym>
+    <keysym keyval="72">H</keysym>
+  </key>
+  <key keycode="44" name="AC07">
+    <keysym keyval="106">j</keysym>
+    <keysym keyval="74">J</keysym>
+  </key>
+  <key keycode="45" name="AC08">
+    <keysym keyval="107">k</keysym>
+    <keysym keyval="75">K</keysym>
+  </key>
+  <key keycode="46" name="AC09">
+    <keysym keyval="108">l</keysym>
+    <keysym keyval="76">L</keysym>
+  </key>
+  <key keycode="47" name="AC10">
+    <keysym keyval="59">semicolon</keysym>
+    <keysym keyval="58">colon</keysym>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="39">quoteright</keysym>
+    <keysym keyval="34">quotedbl</keysym>
+  </key>
+  <key keycode="36" name="RTRN">
+    <keysym keyval="65293">Return</keysym>
+  </key>
+  <key keycode="50" name="LFSH">
+    <keysym keyval="65505">Shift_L</keysym>
+  </key>
+  <key keycode="52" name="AB01">
+    <keysym keyval="122">z</keysym>
+    <keysym keyval="90">Z</keysym>
+  </key>
+  <key keycode="53" name="AB02">
+    <keysym keyval="120">x</keysym>
+    <keysym keyval="88">X</keysym>
+  </key>
+  <key keycode="54" name="AB03">
+    <keysym keyval="99">c</keysym>
+    <keysym keyval="67">C</keysym>
+  </key>
+  <key keycode="55" name="AB04">
+    <keysym keyval="118">v</keysym>
+    <keysym keyval="86">V</keysym>
+  </key>
+  <key keycode="56" name="AB05">
+    <keysym keyval="98">b</keysym>
+    <keysym keyval="66">B</keysym>
+  </key>
+  <key keycode="57" name="AB06">
+    <keysym keyval="110">n</keysym>
+    <keysym keyval="78">N</keysym>
+  </key>
+  <key keycode="58" name="AB07">
+    <keysym keyval="109">m</keysym>
+    <keysym keyval="77">M</keysym>
+  </key>
+  <key keycode="59" name="AB08">
+    <keysym keyval="44">comma</keysym>
+    <keysym keyval="60">less</keysym>
+  </key>
+  <key keycode="60" name="AB09">
+    <keysym keyval="46">period</keysym>
+    <keysym keyval="62">greater</keysym>
+  </key>
+  <key keycode="61" name="AB10">
+    <keysym keyval="47">slash</keysym>
+    <keysym keyval="63">question</keysym>
+  </key>
+  <key keycode="62" name="RTSH">
+    <keysym keyval="65506">Shift_R</keysym>
+  </key>
+  <key keycode="149" name="I149">
+    <symbol label="⌨" icon="input-keyboard-symbolic">cycle-keyboard</symbol>
+    <symbol label="☺" icon="preferences-system-symbolic">preferences</symbol>
+  </key>
+  <key keycode="37" name="LCTL">
+    <keysym keyval="65507">Control_L</keysym>
+  </key>
+  <key keycode="64" name="LALT">
+    <keysym keyval="65513">Alt_L</keysym>
+    <keysym keyval="65511">Meta_L</keysym>
+  </key>
+  <key keycode="65" name="SPCE">
+    <keysym keyval="32">space</keysym>
+  </key>
+  <key keycode="113" name="LEFT">
+    <keysym keyval="65361">Left</keysym>
+  </key>
+  <key keycode="111" name="UP">
+    <keysym keyval="65362">Up</keysym>
+  </key>
+  <key keycode="116" name="DOWN">
+    <keysym keyval="65364">Down</keysym>
+  </key>
+  <key keycode="114" name="RGHT">
+    <keysym keyval="65363">Right</keysym>
+  </key>
+</symbols>

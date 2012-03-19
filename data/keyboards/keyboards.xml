@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<keyboards version="0.90">
+  <keyboard id="ar" name="ar"
+	    geometry="compact" symbols="ar"
+	    longname="Arabic" language="ar"/>
+  <keyboard id="be" name="be"
+	    geometry="compact" symbols="be"
+	    longname="Belarusian" language="be"/>
+  <keyboard id="fa" name="fa"
+	    geometry="compact" symbols="fa"
+	    longname="Farsi (ISIRI 2901-1994)" language="fa"/>
+  <keyboard id="he" name="he"
+	    geometry="compact" symbols="he"
+	    longname="Hebrew" language="he"/>
+  <keyboard id="ja" name="ja"
+	    geometry="compact" symbols="ja-kana"
+	    longname="Japanese (Kana)" language="ja"/>
+  <keyboard id="kk" name="kk"
+	    geometry="compact" symbols="kk"
+	    longname="Kazakh" language="kk"/>
+  <keyboard id="ks" name="ks"
+	    geometry="compact" symbols="ks"
+	    longname="Kashmiri" language="ks"/>
+  <keyboard id="my" name="my"
+	    geometry="compact" symbols="my"
+	    longname="Myanmar" language="my"/>
+  <keyboard id="ru" name="ru"
+	    geometry="compact" symbols="us"
+	    longname="Russian" language="ru"/>
+  <keyboard id="th" name="th"
+	    geometry="compact" symbols="th"
+	    longname="Thai" language="th"/>
+  <keyboard id="ua" name="ua"
+	    geometry="compact" symbols="ua"
+	    longname="Ukrainian" language="ua"/>
+  <keyboard id="ug" name="ug"
+	    geometry="compact" symbols="ug"
+	    longname="Uyghur" language="ug"/>
+  <keyboard id="us" name="us"
+	    geometry="compact" symbols="us"
+	    longname="US" language="en"/>
+  <keyboard id="zh-bopomofo" name="zh-bopomofo"
+	    geometry="compact" symbols="zh-bopomofo"
+	    longname="Chinese (Bopomofo)" language="zh"/>
+  <!-- Indic Inscript keyboards converted from m17n-lib -->
+  <keyboard id="as-inscript" name="as-inscript"
+	    geometry="compact" symbols="as-inscript"
+	    longname="Assamese (Inscript)" language="as"/>
+  <keyboard id="bn-inscript" name="bn-inscript"
+	    geometry="compact" symbols="bn-inscript"
+	    longname="Bengali (Inscript)" language="bn"/>
+  <keyboard id="gu-inscript" name="gu-inscript"
+	    geometry="compact" symbols="gu-inscript"
+	    longname="Gujarati (Inscript)" language="gu"/>
+  <keyboard id="hi-inscript" name="hi-inscript"
+	    geometry="compact" symbols="hi-inscript"
+	    longname="Hindi (Inscript)" language="hi"/>
+  <keyboard id="kn-inscript" name="kn-inscript"
+	    geometry="compact" symbols="kn-inscript"
+	    longname="Kannada (Inscript)" language="kn"/>
+  <keyboard id="ks-inscript" name="ks-inscript"
+	    geometry="compact" symbols="ks-inscript"
+	    longname="Kashmiri Devanagari (Inscript)" language="ks"/>
+  <keyboard id="mai-inscript" name="mai-inscript"
+	    geometry="compact" symbols="mai-inscript"
+	    longname="Maithili (Inscript)" language="mai"/>
+  <keyboard id="ml-inscript" name="ml-inscript"
+	    geometry="compact" symbols="ml-inscript"
+	    longname="Malayalam (Inscript)" language="ml-inscript"/>
+  <keyboard id="mr-inscript" name="mr-inscript"
+	    geometry="compact" symbols="mr-inscript"
+	    longname="Marathi (Inscript)" language="mr"/>
+  <keyboard id="or-inscript" name="or-inscript"
+	    geometry="compact" symbols="or-inscript"
+	    longname="Oriya (Inscript)" language="or"/>
+  <keyboard id="pa-inscript" name="pa-inscript"
+	    geometry="compact" symbols="pa-inscript"
+	    longname="Punjabi (Inscript)" language="pa"/>
+  <keyboard id="sd-inscript" name="sd-inscript"
+	    geometry="compact" symbols="sd-inscript"
+	    longname="Sindhi (Inscript)" language="sd"/>
+  <keyboard id="ta-inscript" name="ta-inscript"
+	    geometry="compact" symbols="ta-inscript"
+	    longname="Tamil (Inscript)" language="ta"/>
+  <keyboard id="te-inscript" name="te-inscript"
+	    geometry="compact" symbols="te-inscript"
+	    longname="Telugu (Inscript)" language="te"/>
+</keyboards>

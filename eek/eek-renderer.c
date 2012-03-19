@@ -206,7 +206,7 @@ render_key_outline (EekRenderer *renderer,
     EekBounds bounds;
     gdouble scale;
     gint i;
-    gulong oref;
+    guint oref;
     EekThemeNode *theme_node;
     EekColor foreground, background, gradient_start, gradient_end, border_color;
     EekGradientType gradient_type;
@@ -214,9 +214,10 @@ render_key_outline (EekRenderer *renderer,
     gint border_radius;
 
     oref = eek_key_get_oref (key);
-    if (oref == 0)
+    outline = eek_keyboard_get_outline (priv->keyboard, oref);
+    if (outline == NULL)
         return;
-
+    
     theme_node = g_object_get_data (G_OBJECT(key),
                                     active ?
                                     "theme-node-pressed" :
@@ -252,7 +253,6 @@ render_key_outline (EekRenderer *renderer,
     scale = MIN((bounds.width - border_width * 2) / bounds.width,
                 (bounds.height - border_width * 2) / bounds.height);
 
-    outline = eek_keyboard_get_outline (priv->keyboard, oref);
     outline = eek_outline_copy (outline);
     for (i = 0; i < outline->num_points; i++) {
         outline->points[i].x *= priv->scale * scale;
@@ -437,28 +437,28 @@ render_key (EekRenderer *self,
     EekOutline *outline;
     cairo_surface_t *outline_surface;
     EekBounds bounds;
-    gulong oref;
+    guint oref;
     EekSymbol *symbol;
     GHashTable *outline_surface_cache;
     PangoLayout *layout;
     PangoRectangle extents = { 0, };
     EekColor foreground;
 
+    oref = eek_key_get_oref (key);
+    outline = eek_keyboard_get_outline (priv->keyboard, oref);
+    if (outline == NULL)
+        return;
+
     /* render outline */
     eek_element_get_bounds (EEK_ELEMENT(key), &bounds);
     bounds.width *= priv->scale;
     bounds.height *= priv->scale;
-
-    oref = eek_key_get_oref (key);
-    if (oref == 0)
-        return;
 
     if (active)
         outline_surface_cache = priv->active_outline_surface_cache;
     else
         outline_surface_cache = priv->outline_surface_cache;
 
-    outline = eek_keyboard_get_outline (priv->keyboard, oref);
     outline_surface = g_hash_table_lookup (outline_surface_cache, outline);
     if (!outline_surface) {
         cairo_t *cr;

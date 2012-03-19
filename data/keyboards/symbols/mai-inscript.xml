@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<symbols version="0.90">
+  <include>us</include>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="96">quoteleft</keysym>
+    <text category="letter">ऒ</text>
+  </key>
+  <key keycode="10" name="AE01">
+    <text category="letter">१</text>
+    <text category="letter">ऍ</text>
+  </key>
+  <key keycode="11" name="AE02">
+    <text category="letter">२</text>
+    <text category="letter">ॅ</text>
+  </key>
+  <key keycode="12" name="AE03">
+    <text category="letter">३</text>
+    <text category="letter">#</text>
+  </key>
+  <key keycode="13" name="AE04">
+    <text category="letter">४</text>
+    <text category="letter">$</text>
+  </key>
+  <key keycode="14" name="AE05">
+    <text category="letter">५</text>
+    <text category="letter">ज्ञ</text>
+    <keysym keyval="8364">EuroSign</keysym>
+  </key>
+  <key keycode="15" name="AE06">
+    <text category="letter">६</text>
+    <text category="letter">त्र</text>
+  </key>
+  <key keycode="16" name="AE07">
+    <text category="letter">७</text>
+    <text category="letter">क्ष</text>
+  </key>
+  <key keycode="17" name="AE08">
+    <text category="letter">८</text>
+    <text category="letter">श्र</text>
+  </key>
+  <key keycode="18" name="AE09">
+    <text category="letter">९</text>
+    <text category="letter">(</text>
+  </key>
+  <key keycode="19" name="AE10">
+    <text category="letter">०</text>
+    <text category="letter">)</text>
+  </key>
+  <key keycode="20" name="AE11">
+    <text category="letter">-</text>
+    <text category="letter">ः</text>
+  </key>
+  <key keycode="21" name="AE12">
+    <text category="letter">ृ</text>
+    <text category="letter">ऋ</text>
+  </key>
+  <key keycode="24" name="AD01">
+    <text category="letter">ौ</text>
+    <text category="letter">औ</text>
+  </key>
+  <key keycode="25" name="AD02">
+    <text category="letter">ै</text>
+    <text category="letter">ऐ</text>
+  </key>
+  <key keycode="26" name="AD03">
+    <text category="letter">ा</text>
+    <text category="letter">आ</text>
+  </key>
+  <key keycode="27" name="AD04">
+    <text category="letter">ी</text>
+    <text category="letter">ई</text>
+  </key>
+  <key keycode="28" name="AD05">
+    <text category="letter">ू</text>
+    <text category="letter">ऊ</text>
+  </key>
+  <key keycode="29" name="AD06">
+    <text category="letter">ब</text>
+    <text category="letter">भ</text>
+  </key>
+  <key keycode="30" name="AD07">
+    <text category="letter">ह</text>
+    <text category="letter">ङ</text>
+  </key>
+  <key keycode="31" name="AD08">
+    <text category="letter">ग</text>
+    <text category="letter">घ</text>
+  </key>
+  <key keycode="32" name="AD09">
+    <text category="letter">द</text>
+    <text category="letter">ध</text>
+  </key>
+  <key keycode="33" name="AD10">
+    <text category="letter">ज</text>
+    <text category="letter">झ</text>
+  </key>
+  <key keycode="34" name="AD11">
+    <text category="letter">ड</text>
+    <text category="letter">ढ</text>
+  </key>
+  <key keycode="35" name="AD12">
+    <text category="letter">़</text>
+    <text category="letter">ञ</text>
+  </key>
+  <key keycode="51" name="BKSL">
+    <text category="letter">ॉ</text>
+    <text category="letter">ऑ</text>
+  </key>
+  <key keycode="38" name="AC01">
+    <text category="letter">ो</text>
+    <text category="letter">ओ</text>
+  </key>
+  <key keycode="39" name="AC02">
+    <text category="letter">े</text>
+    <text category="letter">ए</text>
+  </key>
+  <key keycode="40" name="AC03">
+    <text category="letter">्‌</text>
+    <text category="letter">अ</text>
+  </key>
+  <key keycode="41" name="AC04">
+    <text category="letter">ि</text>
+    <text category="letter">इ</text>
+  </key>
+  <key keycode="42" name="AC05">
+    <text category="letter">ु</text>
+    <text category="letter">उ</text>
+  </key>
+  <key keycode="43" name="AC06">
+    <text category="letter">प</text>
+    <text category="letter">फ</text>
+  </key>
+  <key keycode="44" name="AC07">
+    <text category="letter">र</text>
+    <text category="letter">ऱ</text>
+  </key>
+  <key keycode="45" name="AC08">
+    <text category="letter">क</text>
+    <text category="letter">ख</text>
+  </key>
+  <key keycode="46" name="AC09">
+    <text category="letter">त</text>
+    <text category="letter">थ</text>
+  </key>
+  <key keycode="47" name="AC10">
+    <text category="letter">च</text>
+    <text category="letter">छ</text>
+  </key>
+  <key keycode="48" name="AC11">
+    <keysym keyval="39">quoteright</keysym>
+    <text category="letter">ठ</text>
+  </key>
+  <key keycode="52" name="AB01">
+    <text category="letter">ॆ</text>
+    <text category="letter">ऎ</text>
+  </key>
+  <key keycode="53" name="AB02">
+    <text category="letter">ं</text>
+    <text category="letter">ँ</text>
+  </key>
+  <key keycode="54" name="AB03">
+    <text category="letter">म</text>
+    <text category="letter">ण</text>
+  </key>
+  <key keycode="55" name="AB04">
+    <text category="letter">न</text>
+    <text category="letter">ऩ</text>
+  </key>
+  <key keycode="56" name="AB05">
+    <text category="letter">व</text>
+    <text category="letter">ऴ</text>
+  </key>
+  <key keycode="57" name="AB06">
+    <text category="letter">ल</text>
+    <text category="letter">ळ</text>
+  </key>
+  <key keycode="58" name="AB07">
+    <text category="letter">स</text>
+    <text category="letter">श</text>
+  </key>
+  <key keycode="59" name="AB08">
+    <text category="letter">,</text>
+    <text category="letter">ष</text>
+  </key>
+  <key keycode="60" name="AB09">
+    <text category="letter">.</text>
+    <text category="letter">।</text>
+  </key>
+  <key keycode="61" name="AB10">
+    <text category="letter">य</text>
+    <text category="letter">य़</text>
+  </key>
+</symbols>

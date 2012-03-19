@@ -161,11 +161,11 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
 {
     EekKeyboard *keyboard;
     EekLayout *layout;
+    GError *error;
 
     if (g_str_has_prefix (keyboard_type, "xkb:")) {
         XklConfigRec *rec =
             eekboard_xkl_config_rec_from_string (&keyboard_type[4]);
-        GError *error;
 
         if (display == NULL)
             display = XOpenDisplay (NULL);
@@ -173,7 +173,8 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
         error = NULL;
         layout = eek_xkl_layout_new (display, &error);
         if (layout == NULL) {
-            g_warning ("can't create keyboard: %s", error->message);
+            g_warning ("can't create keyboard %s: %s",
+                       keyboard_type, error->message);
             g_error_free (error);
             return NULL;
         }
@@ -183,25 +184,14 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
             return NULL;
         }
     } else {
-        gchar *path;
-        GFile *file;
-        GFileInputStream *input;
-        GError *error;
-
-        path = g_strdup_printf ("%s/%s.xml", KEYBOARDDIR, keyboard_type);
-        file = g_file_new_for_path (path);
-        g_free (path);
-
         error = NULL;
-        input = g_file_read (file, NULL, &error);
-        g_object_unref (file);
-        if (input == NULL) {
-            g_warning ("can't read keyboard file %s: %s",
+        layout = eek_xml_layout_new (keyboard_type, &error);
+        if (layout == NULL) {
+            g_warning ("can't create keyboard: %s",
                        keyboard_type, error->message);
             g_error_free (error);
             return NULL;
         }
-        layout = eek_xml_layout_new (G_INPUT_STREAM(input));
     }
     keyboard = eek_keyboard_new (layout, CSW, CSH);
     g_object_unref (layout);
