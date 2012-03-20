@@ -156,13 +156,15 @@ EekKey             *eek_keyboard_find_key_by_keycode
                                      (EekKeyboard        *keyboard,
                                       guint               keycode);
 
-gulong              eek_keyboard_add_outline
+guint               eek_keyboard_add_outline
                                      (EekKeyboard        *keyboard,
                                       EekOutline         *outline);
 
 EekOutline         *eek_keyboard_get_outline
                                      (EekKeyboard        *keyboard,
-                                      gulong              oref);
+                                      guint               oref);
+gsize               eek_keyboard_get_n_outlines
+                                     (EekKeyboard        *keyboard);
 
 void                eek_keyboard_set_num_lock_mask
                                      (EekKeyboard        *keyboard,

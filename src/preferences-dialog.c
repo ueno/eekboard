@@ -108,7 +108,7 @@ preferences_dialog_new (void)
     ui_path = g_strdup_printf ("%s/%s", PKGDATADIR, "preferences-dialog.ui");
     error = NULL;
     if (gtk_builder_add_from_file (builder, ui_path, &error) == 0) {
-        g_warning ("can't load %s: %s", error->message);
+        g_warning ("can't load %s: %s", ui_path, error->message);
         g_error_free (error);
     }
     g_free (ui_path);

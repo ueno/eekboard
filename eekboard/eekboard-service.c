@@ -101,20 +101,19 @@ eekboard_service_set_property (GObject      *object,
                                GParamSpec   *pspec)
 {
     EekboardService *service = EEKBOARD_SERVICE(object);
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
     GDBusConnection *connection;
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
-        if (priv->object_path)
-            g_free (priv->object_path);
-        priv->object_path = g_strdup (g_value_get_string (value));
+        if (service->priv->object_path)
+            g_free (service->priv->object_path);
+        service->priv->object_path = g_value_dup_string (value);
         break;
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
-        if (priv->connection)
-            g_object_unref (priv->connection);
-        priv->connection = g_object_ref (connection);
+        if (service->priv->connection)
+            g_object_unref (service->priv->connection);
+        service->priv->connection = g_object_ref (connection);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -129,14 +128,13 @@ eekboard_service_get_property (GObject    *object,
                                GParamSpec *pspec)
 {
     EekboardService *service = EEKBOARD_SERVICE(object);
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
-        g_value_set_string (value, priv->object_path);
+        g_value_set_string (value, service->priv->object_path);
         break;
     case PROP_CONNECTION:
-        g_value_set_object (value, priv->connection);
+        g_value_set_object (value, service->priv->connection);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -148,34 +146,33 @@ static void
 eekboard_service_dispose (GObject *object)
 {
     EekboardService *service = EEKBOARD_SERVICE(object);
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
     GSList *head;
 
-    if (priv->context_hash) {
-        g_hash_table_destroy (priv->context_hash);
-        priv->context_hash = NULL;
+    if (service->priv->context_hash) {
+        g_hash_table_destroy (service->priv->context_hash);
+        service->priv->context_hash = NULL;
     }
 
-    for (head = priv->context_stack; head; head = priv->context_stack) {
+    for (head = service->priv->context_stack; head; head = service->priv->context_stack) {
         g_object_unref (head->data);
-        priv->context_stack = g_slist_next (head);
+        service->priv->context_stack = g_slist_next (head);
         g_slist_free1 (head);
     }
 
-    if (priv->connection) {
-        if (priv->registration_id > 0) {
-            g_dbus_connection_unregister_object (priv->connection,
-                                                 priv->registration_id);
-            priv->registration_id = 0;
+    if (service->priv->connection) {
+        if (service->priv->registration_id > 0) {
+            g_dbus_connection_unregister_object (service->priv->connection,
+                                                 service->priv->registration_id);
+            service->priv->registration_id = 0;
         }
 
-        g_object_unref (priv->connection);
-        priv->connection = NULL;
+        g_object_unref (service->priv->connection);
+        service->priv->connection = NULL;
     }
 
-    if (priv->introspection_data) {
-        g_dbus_node_info_unref (priv->introspection_data);
-        priv->introspection_data = NULL;
+    if (service->priv->introspection_data) {
+        g_dbus_node_info_unref (service->priv->introspection_data);
+        service->priv->introspection_data = NULL;
     }
 
     G_OBJECT_CLASS (eekboard_service_parent_class)->dispose (object);
@@ -184,9 +181,9 @@ eekboard_service_dispose (GObject *object)
 static void
 eekboard_service_finalize (GObject *object)
 {
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(object);
+    EekboardService *service = EEKBOARD_SERVICE(object);
 
-    g_free (priv->object_path);
+    g_free (service->priv->object_path);
 
     G_OBJECT_CLASS (eekboard_service_parent_class)->finalize (object);
 }
@@ -194,20 +191,20 @@ eekboard_service_finalize (GObject *object)
 static void
 eekboard_service_constructed (GObject *object)
 {
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(object);
-    if (priv->connection && priv->object_path) {
+    EekboardService *service = EEKBOARD_SERVICE(object);
+    if (service->priv->connection && service->priv->object_path) {
         GError *error = NULL;
 
-        priv->registration_id = g_dbus_connection_register_object
-            (priv->connection,
-             priv->object_path,
-             priv->introspection_data->interfaces[0],
+        service->priv->registration_id = g_dbus_connection_register_object
+            (service->priv->connection,
+             service->priv->object_path,
+             service->priv->introspection_data->interfaces[0],
              &interface_vtable,
              object,
              NULL,
              &error);
 
-        if (priv->registration_id == 0) {
+        if (service->priv->registration_id == 0) {
             g_warning ("failed to register context object: %s",
                        error->message);
             g_error_free (error);
@@ -279,23 +276,22 @@ eekboard_service_class_init (EekboardServiceClass *klass)
 }
 
 static void
-eekboard_service_init (EekboardService *service)
+eekboard_service_init (EekboardService *self)
 {
-    EekboardServicePrivate *priv;
     GError *error;
 
-    priv = service->priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
+    self->priv = EEKBOARD_SERVICE_GET_PRIVATE(self);
 
     error = NULL;
-    priv->introspection_data =
+    self->priv->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
-    if (priv->introspection_data == NULL) {
+    if (self->priv->introspection_data == NULL) {
         g_warning ("failed to parse D-Bus XML: %s", error->message);
         g_error_free (error);
         g_assert_not_reached ();
     }
 
-    priv->context_hash =
+    self->priv->context_hash =
         g_hash_table_new_full (g_str_hash,
                                g_str_equal,
                                (GDestroyNotify)g_free,
@@ -306,17 +302,16 @@ static void
 remove_context_from_stack (EekboardService        *service,
                            EekboardContextService *context)
 {
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
     GSList *head;
 
-    head = g_slist_find (priv->context_stack, context);
+    head = g_slist_find (service->priv->context_stack, context);
     if (head) {
-        priv->context_stack = g_slist_remove_link (priv->context_stack, head);
+        service->priv->context_stack = g_slist_remove_link (service->priv->context_stack, head);
         g_object_unref (head->data);
         g_slist_free1 (head);
     }
-    if (priv->context_stack)
-        eekboard_context_service_enable (priv->context_stack->data);
+    if (service->priv->context_stack)
+        eekboard_context_service_enable (service->priv->context_stack->data);
 }
 
 static void
@@ -325,25 +320,24 @@ service_name_vanished_callback (GDBusConnection *connection,
                                 gpointer         user_data)
 {
     EekboardService *service = user_data;
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
     GSList *head;
     GHashTableIter iter;
     gpointer k, v;
 
-    g_hash_table_iter_init (&iter, priv->context_hash);
+    g_hash_table_iter_init (&iter, service->priv->context_hash);
     while (g_hash_table_iter_next (&iter, &k, &v)) {
         const gchar *owner = g_object_get_data (G_OBJECT(v), "owner");
         if (g_strcmp0 (owner, name) == 0)
             g_hash_table_iter_remove (&iter);
     }
 
-    for (head = priv->context_stack; head; ) {
+    for (head = service->priv->context_stack; head; ) {
         const gchar *owner = g_object_get_data (G_OBJECT(head->data), "owner");
         GSList *next = g_slist_next (head);
 
         if (g_strcmp0 (owner, name) == 0) {
-            priv->context_stack =
-                g_slist_remove_link (priv->context_stack, head);
+            service->priv->context_stack =
+                g_slist_remove_link (service->priv->context_stack, head);
             g_object_unref (head->data);
             g_slist_free1 (head);
         }
@@ -351,8 +345,8 @@ service_name_vanished_callback (GDBusConnection *connection,
         head = next;
     }
 
-    if (priv->context_stack)
-        eekboard_context_service_enable (priv->context_stack->data);
+    if (service->priv->context_stack)
+        eekboard_context_service_enable (service->priv->context_stack->data);
 }
 
 static void
@@ -366,7 +360,6 @@ handle_method_call (GDBusConnection       *connection,
                     gpointer               user_data)
 {
     EekboardService *service = user_data;
-    EekboardServicePrivate *priv = EEKBOARD_SERVICE_GET_PRIVATE(service);
     EekboardServiceClass *klass = EEKBOARD_SERVICE_GET_CLASS(service);
 
     if (g_strcmp0 (method_name, "CreateContext") == 0) {
@@ -382,12 +375,12 @@ handle_method_call (GDBusConnection       *connection,
         g_object_set_data_full (G_OBJECT(context),
                                 "owner", g_strdup (sender),
                                 (GDestroyNotify)g_free);
-        g_hash_table_insert (priv->context_hash,
+        g_hash_table_insert (service->priv->context_hash,
                              object_path,
                              context);
 
         /* the vanished callback is called when clients are disconnected */
-        g_bus_watch_name_on_connection (priv->connection,
+        g_bus_watch_name_on_connection (service->priv->connection,
                                         sender,
                                         G_BUS_NAME_WATCHER_FLAGS_NONE,
                                         NULL,
@@ -405,7 +398,7 @@ handle_method_call (GDBusConnection       *connection,
         EekboardContextService *context;
 
         g_variant_get (parameters, "(&s)", &object_path);
-        context = g_hash_table_lookup (priv->context_hash, object_path);
+        context = g_hash_table_lookup (service->priv->context_hash, object_path);
         if (!context) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
@@ -413,9 +406,9 @@ handle_method_call (GDBusConnection       *connection,
                                                    "context not found");
             return;
         }
-        if (priv->context_stack)
-            eekboard_context_service_disable (priv->context_stack->data);
-        priv->context_stack = g_slist_prepend (priv->context_stack,
+        if (service->priv->context_stack)
+            eekboard_context_service_disable (service->priv->context_stack->data);
+        service->priv->context_stack = g_slist_prepend (service->priv->context_stack,
                                                g_object_ref (context));
         eekboard_context_service_enable (context);
 
@@ -424,8 +417,8 @@ handle_method_call (GDBusConnection       *connection,
     }
 
     if (g_strcmp0 (method_name, "PopContext") == 0) {
-        if (priv->context_stack) {
-            EekboardContextService *context = priv->context_stack->data;
+        if (service->priv->context_stack) {
+            EekboardContextService *context = service->priv->context_stack->data;
             gchar *object_path;
             const gchar *owner;
 
@@ -443,9 +436,9 @@ handle_method_call (GDBusConnection       *connection,
             g_free (object_path);
                 
             eekboard_context_service_disable (context);
-            priv->context_stack = g_slist_next (priv->context_stack);
-            if (priv->context_stack)
-                eekboard_context_service_enable (priv->context_stack->data);
+            service->priv->context_stack = g_slist_next (service->priv->context_stack);
+            if (service->priv->context_stack)
+                eekboard_context_service_enable (service->priv->context_stack->data);
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
@@ -458,7 +451,7 @@ handle_method_call (GDBusConnection       *connection,
         const gchar *owner;
 
         g_variant_get (parameters, "(&s)", &object_path);
-        context = g_hash_table_lookup (priv->context_hash, object_path);
+        context = g_hash_table_lookup (service->priv->context_hash, object_path);
         if (!context) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
@@ -479,13 +472,13 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         remove_context_from_stack (service, context);
-        g_hash_table_remove (priv->context_hash, object_path);
+        g_hash_table_remove (service->priv->context_hash, object_path);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }
 
     if (g_strcmp0 (method_name, "Destroy") == 0) {
-        g_signal_emit_by_name (service, "destroyed", NULL);
+        g_signal_emit (service, signals[DESTROYED], 0);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }

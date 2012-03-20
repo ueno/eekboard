@@ -103,20 +103,16 @@ eek_xkl_layout_set_property (GObject      *object,
 
     switch (prop_id) {
     case PROP_MODEL:
-        eek_xkl_layout_set_model (EEK_XKL_LAYOUT(object),
-                                  g_value_get_string (value));
+        eek_xkl_layout_set_model (layout, g_value_get_string (value));
         break;
     case PROP_LAYOUTS:
-        eek_xkl_layout_set_layouts (EEK_XKL_LAYOUT(object),
-                                    g_value_get_boxed (value));
+        eek_xkl_layout_set_layouts (layout, g_value_get_boxed (value));
         break;
     case PROP_VARIANTS:
-        eek_xkl_layout_set_variants (EEK_XKL_LAYOUT(object),
-                                     g_value_get_boxed (value));
+        eek_xkl_layout_set_variants (layout, g_value_get_boxed (value));
         break;
     case PROP_OPTIONS:
-        eek_xkl_layout_set_options (EEK_XKL_LAYOUT(object),
-                                    g_value_get_boxed (value));
+        eek_xkl_layout_set_options (layout, g_value_get_boxed (value));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -135,19 +131,19 @@ eek_xkl_layout_get_property (GObject    *object,
     switch (prop_id) {
     case PROP_MODEL:
         g_value_set_string (value,
-                            eek_xkl_layout_get_model (EEK_XKL_LAYOUT(object)));
+                            eek_xkl_layout_get_model (layout));
         break;
     case PROP_LAYOUTS:
         g_value_set_boxed (value,
-                           eek_xkl_layout_get_layouts (EEK_XKL_LAYOUT(object)));
+                           eek_xkl_layout_get_layouts (layout));
         break;
     case PROP_VARIANTS:
         g_value_set_boxed (value,
-                           eek_xkl_layout_get_variants (EEK_XKL_LAYOUT(object)));
+                           eek_xkl_layout_get_variants (layout));
         break;
     case PROP_OPTIONS:
         g_value_set_boxed (value,
-                           eek_xkl_layout_get_options (EEK_XKL_LAYOUT(object)));
+                           eek_xkl_layout_get_options (layout));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);

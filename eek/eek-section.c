@@ -118,35 +118,35 @@ static void
 on_pressed (EekKey     *key,
             EekSection *section)
 {
-    g_signal_emit_by_name (section, "key-pressed", key);
+    g_signal_emit (section, signals[KEY_PRESSED], 0, key);
 }
 
 static void
 on_released (EekKey     *key,
              EekSection *section)
 {
-    g_signal_emit_by_name (section, "key-released", key);
+    g_signal_emit (section, signals[KEY_RELEASED], 0, key);
 }
 
 static void
 on_locked (EekKey     *key,
-            EekSection *section)
+           EekSection *section)
 {
-    g_signal_emit_by_name (section, "key-locked", key);
+    g_signal_emit (section, signals[KEY_LOCKED], 0, key);
 }
 
 static void
 on_unlocked (EekKey     *key,
              EekSection *section)
 {
-    g_signal_emit_by_name (section, "key-unlocked", key);
+    g_signal_emit (section, signals[KEY_UNLOCKED], 0, key);
 }
 
 static void
 on_cancelled (EekKey     *key,
              EekSection *section)
 {
-    g_signal_emit_by_name (section, "key-cancelled", key);
+    g_signal_emit (section, signals[KEY_CANCELLED], 0, key);
 }
 
 static EekKey *
@@ -488,7 +488,7 @@ eek_section_set_angle (EekSection  *section,
     g_return_if_fail (EEK_IS_SECTION(section));
     if (section->priv->angle != angle) {
         section->priv->angle = angle;
-        g_object_notify (section, "angle");
+        g_object_notify (G_OBJECT(section), "angle");
     }
 }
 

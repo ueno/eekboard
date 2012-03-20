@@ -187,7 +187,7 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
         error = NULL;
         layout = eek_xml_layout_new (keyboard_type, &error);
         if (layout == NULL) {
-            g_warning ("can't create keyboard: %s",
+            g_warning ("can't create keyboard %s: %s",
                        keyboard_type, error->message);
             g_error_free (error);
             return NULL;
@@ -206,41 +206,40 @@ eekboard_context_service_set_property (GObject      *object,
                                        GParamSpec   *pspec)
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE(object);
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     GDBusConnection *connection;
     gboolean was_visible;
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
-        if (priv->object_path)
-            g_free (priv->object_path);
-        priv->object_path = g_strdup (g_value_get_string (value));
+        if (context->priv->object_path)
+            g_free (context->priv->object_path);
+        context->priv->object_path = g_value_dup_string (value);
         break;
     case PROP_CONNECTION:
         connection = g_value_get_object (value);
-        if (priv->connection)
-            g_object_unref (priv->connection);
-        priv->connection = g_object_ref (connection);
+        if (context->priv->connection)
+            g_object_unref (context->priv->connection);
+        context->priv->connection = g_object_ref (connection);
         break;
     case PROP_CLIENT_NAME:
-        if (priv->client_name)
-            g_free (priv->client_name);
-        priv->client_name = g_strdup (g_value_get_string (value));
+        if (context->priv->client_name)
+            g_free (context->priv->client_name);
+        context->priv->client_name = g_value_dup_string (value);
         break;
     case PROP_KEYBOARD:
-        if (priv->keyboard)
-            g_object_unref (priv->keyboard);
-        priv->keyboard = g_value_get_object (value);
+        if (context->priv->keyboard)
+            g_object_unref (context->priv->keyboard);
+        context->priv->keyboard = g_value_get_object (value);
         break;
     case PROP_VISIBLE:
-        was_visible = priv->visible;
-        priv->visible = g_value_get_boolean (value);
-        if (was_visible != priv->visible)
-            emit_visibility_changed_signal (EEKBOARD_CONTEXT_SERVICE(object),
-                                            priv->visible);
+        was_visible = context->priv->visible;
+        context->priv->visible = g_value_get_boolean (value);
+        if (was_visible != context->priv->visible)
+            emit_visibility_changed_signal (context,
+                                            context->priv->visible);
         break;
     case PROP_FULLSCREEN:
-        priv->fullscreen = g_value_get_boolean (value);
+        context->priv->fullscreen = g_value_get_boolean (value);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -255,26 +254,25 @@ eekboard_context_service_get_property (GObject    *object,
                                        GParamSpec *pspec)
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE(object);
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
-        g_value_set_string (value, priv->object_path);
+        g_value_set_string (value, context->priv->object_path);
         break;
     case PROP_CONNECTION:
-        g_value_set_object (value, priv->connection);
+        g_value_set_object (value, context->priv->connection);
         break;
     case PROP_CLIENT_NAME:
-        g_value_set_string (value, priv->client_name);
+        g_value_set_string (value, context->priv->client_name);
         break;
     case PROP_KEYBOARD:
-        g_value_set_object (value, priv->keyboard);
+        g_value_set_object (value, context->priv->keyboard);
         break;
     case PROP_VISIBLE:
-        g_value_set_boolean (value, priv->visible);
+        g_value_set_boolean (value, context->priv->visible);
         break;
     case PROP_FULLSCREEN:
-        g_value_set_boolean (value, priv->fullscreen);
+        g_value_set_boolean (value, context->priv->fullscreen);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -286,63 +284,61 @@ static void
 eekboard_context_service_dispose (GObject *object)
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE(object);
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
-    if (priv->keyboard_hash) {
-        g_hash_table_destroy (priv->keyboard_hash);
-        priv->keyboard_hash = NULL;
+    if (context->priv->keyboard_hash) {
+        g_hash_table_destroy (context->priv->keyboard_hash);
+        context->priv->keyboard_hash = NULL;
     }
 
-    if (priv->connection) {
-        if (priv->registration_id > 0) {
-            g_dbus_connection_unregister_object (priv->connection,
-                                                 priv->registration_id);
-            priv->registration_id = 0;
+    if (context->priv->connection) {
+        if (context->priv->registration_id > 0) {
+            g_dbus_connection_unregister_object (context->priv->connection,
+                                                 context->priv->registration_id);
+            context->priv->registration_id = 0;
         }
 
-        g_object_unref (priv->connection);
-        priv->connection = NULL;
+        g_object_unref (context->priv->connection);
+        context->priv->connection = NULL;
     }
 
-    if (priv->introspection_data) {
-        g_dbus_node_info_unref (priv->introspection_data);
-        priv->introspection_data = NULL;
+    if (context->priv->introspection_data) {
+        g_dbus_node_info_unref (context->priv->introspection_data);
+        context->priv->introspection_data = NULL;
     }
 
-    G_OBJECT_CLASS (eekboard_context_service_parent_class)->dispose (object);
+    G_OBJECT_CLASS (eekboard_context_service_parent_class)->
+        dispose (object);
 }
 
 static void
 eekboard_context_service_finalize (GObject *object)
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE(object);
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
-    g_free (priv->object_path);
-    g_free (priv->client_name);
+    g_free (context->priv->object_path);
+    g_free (context->priv->client_name);
 
-    G_OBJECT_CLASS (eekboard_context_service_parent_class)->finalize (object);
+    G_OBJECT_CLASS (eekboard_context_service_parent_class)->
+        finalize (object);
 }
 
 static void
 eekboard_context_service_constructed (GObject *object)
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE (object);
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
-    if (priv->connection && priv->object_path) {
+    if (context->priv->connection && context->priv->object_path) {
         GError *error = NULL;
-
-        priv->registration_id = g_dbus_connection_register_object
-            (priv->connection,
-             priv->object_path,
-             priv->introspection_data->interfaces[0],
+        context->priv->registration_id = g_dbus_connection_register_object
+            (context->priv->connection,
+             context->priv->object_path,
+             context->priv->introspection_data->interfaces[0],
              &interface_vtable,
              context,
              NULL,
              &error);
 
-        if (priv->registration_id == 0) {
+        if (context->priv->registration_id == 0) {
             g_warning ("failed to register context object: %s",
                        error->message);
             g_error_free (error);
@@ -489,57 +485,53 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
 }
 
 static void
-eekboard_context_service_init (EekboardContextService *context)
+eekboard_context_service_init (EekboardContextService *self)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     GError *error;
 
+    self->priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(self);
     error = NULL;
-    priv->introspection_data =
+    self->priv->introspection_data =
         g_dbus_node_info_new_for_xml (introspection_xml, &error);
-    if (priv->introspection_data == NULL) {
+    if (self->priv->introspection_data == NULL) {
         g_warning ("failed to parse D-Bus XML: %s", error->message);
         g_error_free (error);
         g_assert_not_reached ();
     }
 
-    priv->keyboard_hash =
+    self->priv->keyboard_hash =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
                                (GDestroyNotify)g_object_unref);
 
-    priv->settings = g_settings_new ("org.fedorahosted.eekboard");
+    self->priv->settings = g_settings_new ("org.fedorahosted.eekboard");
 }
 
 static void
 disconnect_keyboard_signals (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    if (g_signal_handler_is_connected (priv->keyboard,
-                                       priv->key_pressed_handler))
-        g_signal_handler_disconnect (priv->keyboard,
-                                     priv->key_pressed_handler);
-    if (g_signal_handler_is_connected (priv->keyboard,
-                                       priv->key_released_handler))
-        g_signal_handler_disconnect (priv->keyboard,
-                                     priv->key_released_handler);
+    if (g_signal_handler_is_connected (context->priv->keyboard,
+                                       context->priv->key_pressed_handler))
+        g_signal_handler_disconnect (context->priv->keyboard,
+                                     context->priv->key_pressed_handler);
+    if (g_signal_handler_is_connected (context->priv->keyboard,
+                                       context->priv->key_released_handler))
+        g_signal_handler_disconnect (context->priv->keyboard,
+                                     context->priv->key_released_handler);
 }
 
 static void
 emit_visibility_changed_signal (EekboardContextService *context,
                                 gboolean                visible)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    if (priv->connection && priv->enabled) {
+    if (context->priv->connection && context->priv->enabled) {
         GError *error = NULL;
         gboolean retval;
 
-        retval = g_dbus_connection_emit_signal (priv->connection,
+        retval = g_dbus_connection_emit_signal (context->priv->connection,
                                                 NULL,
-                                                priv->object_path,
+                                                context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "VisibilityChanged",
                                                 g_variant_new ("(b)", visible),
@@ -557,15 +549,13 @@ static void
 emit_group_changed_signal (EekboardContextService *context,
                            gint                    group)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    if (priv->connection && priv->enabled) {
+    if (context->priv->connection && context->priv->enabled) {
         GError *error = NULL;
         gboolean retval;
 
-        retval = g_dbus_connection_emit_signal (priv->connection,
+        retval = g_dbus_connection_emit_signal (context->priv->connection,
                                                 NULL,
-                                                priv->object_path,
+                                                context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "GroupChanged",
                                                 g_variant_new ("(i)", group),
@@ -583,12 +573,10 @@ static void
 emit_key_activated_dbus_signal (EekboardContextService *context,
                                 EekKey                 *key)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    if (priv->connection && priv->enabled) {
+    if (context->priv->connection && context->priv->enabled) {
         const gchar *keyname = eek_element_get_name (EEK_ELEMENT(key));
         EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
-        guint modifiers = eek_keyboard_get_modifiers (priv->keyboard);
+        guint modifiers = eek_keyboard_get_modifiers (context->priv->keyboard);
         GVariant *variant;
         GError *error;
         gboolean retval;
@@ -596,9 +584,9 @@ emit_key_activated_dbus_signal (EekboardContextService *context,
         variant = eek_serializable_serialize (EEK_SERIALIZABLE(symbol));
 
         error = NULL;
-        retval = g_dbus_connection_emit_signal (priv->connection,
+        retval = g_dbus_connection_emit_signal (context->priv->connection,
                                                 NULL,
-                                                priv->object_path,
+                                                context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "KeyActivated",
                                                 g_variant_new ("(svu)",
@@ -606,7 +594,6 @@ emit_key_activated_dbus_signal (EekboardContextService *context,
                                                                variant,
                                                                modifiers),
                                                 &error);
-        g_variant_unref (variant);
         if (!retval) {
             g_warning ("failed to emit KeyActivated signal: %s",
                        error->message);
@@ -621,14 +608,13 @@ static gboolean on_repeat_timeout (EekboardContextService *context);
 static gboolean
 on_repeat_timeout (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     guint delay;
 
-    g_settings_get (priv->settings, "repeat-interval", "u", &delay);
+    g_settings_get (context->priv->settings, "repeat-interval", "u", &delay);
 
-    emit_key_activated_dbus_signal (context, priv->repeat_key);
+    emit_key_activated_dbus_signal (context, context->priv->repeat_key);
 
-    priv->repeat_timeout_id =
+    context->priv->repeat_timeout_id =
         g_timeout_add (delay,
                        (GSourceFunc)on_repeat_timeout,
                        context);
@@ -639,25 +625,23 @@ on_repeat_timeout (EekboardContextService *context)
 static gboolean
 on_repeat_timeout_init (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    emit_key_activated_dbus_signal (context, priv->repeat_key);
+    emit_key_activated_dbus_signal (context, context->priv->repeat_key);
 
     /* FIXME: clear modifiers for further key repeat; better not
        depend on modifier behavior is LATCH */
-    eek_keyboard_set_modifiers (priv->keyboard, 0);
+    eek_keyboard_set_modifiers (context->priv->keyboard, 0);
     
     /* reschedule repeat timeout only when "repeat" option is set */
-    if (g_settings_get_boolean (priv->settings, "repeat")) {
+    if (g_settings_get_boolean (context->priv->settings, "repeat")) {
         guint delay;
 
-        g_settings_get (priv->settings, "repeat-interval", "u", &delay);
-        priv->repeat_timeout_id =
+        g_settings_get (context->priv->settings, "repeat-interval", "u", &delay);
+        context->priv->repeat_timeout_id =
             g_timeout_add (delay,
                            (GSourceFunc)on_repeat_timeout,
                            context);
     } else
-        priv->repeat_timeout_id = 0;
+        context->priv->repeat_timeout_id = 0;
 
     return FALSE;
 }
@@ -668,18 +652,17 @@ on_key_pressed (EekKeyboard *keyboard,
                 gpointer     user_data)
 {
     EekboardContextService *context = user_data;
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     guint delay;
 
-    g_settings_get (priv->settings, "repeat-delay", "u", &delay);
+    g_settings_get (context->priv->settings, "repeat-delay", "u", &delay);
 
-    if (priv->repeat_timeout_id) {
-        g_source_remove (priv->repeat_timeout_id);
-        priv->repeat_timeout_id = 0;
+    if (context->priv->repeat_timeout_id) {
+        g_source_remove (context->priv->repeat_timeout_id);
+        context->priv->repeat_timeout_id = 0;
     }
 
-    priv->repeat_key = key;
-    priv->repeat_timeout_id =
+    context->priv->repeat_key = key;
+    context->priv->repeat_timeout_id =
         g_timeout_add (delay,
                        (GSourceFunc)on_repeat_timeout_init,
                        context);
@@ -691,28 +674,26 @@ on_key_released (EekKeyboard *keyboard,
                  gpointer     user_data)
 {
     EekboardContextService *context = user_data;
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
 
-    if (priv->repeat_timeout_id > 0) {
-        g_source_remove (priv->repeat_timeout_id);
-        priv->repeat_timeout_id = 0;
+    if (context->priv->repeat_timeout_id > 0) {
+        g_source_remove (context->priv->repeat_timeout_id);
+        context->priv->repeat_timeout_id = 0;
 
         /* KeyActivated signal has not been emitted in repeat handler */
-        emit_key_activated_dbus_signal (context, priv->repeat_key);
+        emit_key_activated_dbus_signal (context,
+                                        context->priv->repeat_key);
     }
 }
 
 static void
 connect_keyboard_signals (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-
-    priv->key_pressed_handler =
-        g_signal_connect (priv->keyboard, "key-pressed",
+    context->priv->key_pressed_handler =
+        g_signal_connect (context->priv->keyboard, "key-pressed",
                           G_CALLBACK(on_key_pressed),
                           context);
-    priv->key_released_handler =
-        g_signal_connect (priv->keyboard, "key-released",
+    context->priv->key_released_handler =
+        g_signal_connect (context->priv->keyboard, "key-released",
                           G_CALLBACK(on_key_released),
                           context);
 }
@@ -728,7 +709,6 @@ handle_method_call (GDBusConnection       *connection,
                     gpointer               user_data)
 {
     EekboardContextService *context = user_data;
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     EekboardContextServiceClass *klass = EEKBOARD_CONTEXT_SERVICE_GET_CLASS(context);
     
     if (g_strcmp0 (method_name, "AddKeyboard") == 0) {
@@ -751,7 +731,7 @@ handle_method_call (GDBusConnection       *connection,
                                             EEK_MODIFIER_BEHAVIOR_LATCH);
 
         keyboard_id++;
-        g_hash_table_insert (priv->keyboard_hash,
+        g_hash_table_insert (context->priv->keyboard_hash,
                              GUINT_TO_POINTER(keyboard_id),
                              keyboard);
         g_object_set_data (G_OBJECT(keyboard),
@@ -769,15 +749,15 @@ handle_method_call (GDBusConnection       *connection,
         g_variant_get (parameters, "(u)", &keyboard_id);
 
         current_keyboard_id =
-            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT(priv->keyboard),
+            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT(context->priv->keyboard),
                                                  "keyboard-id"));
         if (keyboard_id == current_keyboard_id) {
             disconnect_keyboard_signals (context);
-            priv->keyboard = NULL;
+            context->priv->keyboard = NULL;
             g_object_notify (G_OBJECT(context), "keyboard");
         }
 
-        g_hash_table_remove (priv->keyboard_hash,
+        g_hash_table_remove (context->priv->keyboard_hash,
                              GUINT_TO_POINTER(keyboard_id));
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
@@ -790,7 +770,7 @@ handle_method_call (GDBusConnection       *connection,
 
         g_variant_get (parameters, "(u)", &keyboard_id);
 
-        keyboard = g_hash_table_lookup (priv->keyboard_hash,
+        keyboard = g_hash_table_lookup (context->priv->keyboard_hash,
                                         GUINT_TO_POINTER(keyboard_id));
         if (!keyboard) {
             g_dbus_method_invocation_return_error (invocation,
@@ -800,20 +780,20 @@ handle_method_call (GDBusConnection       *connection,
             return;
         }
 
-        if (keyboard == priv->keyboard) {
+        if (keyboard == context->priv->keyboard) {
             g_dbus_method_invocation_return_value (invocation, NULL);
             return;
         }
 
-        if (priv->keyboard)
+        if (context->priv->keyboard)
             disconnect_keyboard_signals (context);
 
-        priv->keyboard = keyboard;
+        context->priv->keyboard = keyboard;
         connect_keyboard_signals (context);
 
         g_dbus_method_invocation_return_value (invocation, NULL);
 
-        group = eek_element_get_group (EEK_ELEMENT(priv->keyboard));
+        group = eek_element_get_group (EEK_ELEMENT(context->priv->keyboard));
         emit_group_changed_signal (context, group);
 
         g_object_notify (G_OBJECT(context), "keyboard");
@@ -825,11 +805,11 @@ handle_method_call (GDBusConnection       *connection,
 
         g_variant_get (parameters, "(b)", &fullscreen);
 
-        if (priv->fullscreen == fullscreen) {
+        if (context->priv->fullscreen == fullscreen) {
             g_dbus_method_invocation_return_value (invocation, NULL);
             return;
         }
-        priv->fullscreen = fullscreen;
+        context->priv->fullscreen = fullscreen;
         g_dbus_method_invocation_return_value (invocation, NULL);
 
         g_object_notify (G_OBJECT(context), "fullscreen");
@@ -839,7 +819,7 @@ handle_method_call (GDBusConnection       *connection,
     if (g_strcmp0 (method_name, "SetGroup") == 0) {
         gint group;
 
-        if (!priv->keyboard) {
+        if (!context->priv->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
@@ -848,14 +828,14 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_variant_get (parameters, "(i)", &group);
-        eek_element_set_group (EEK_ELEMENT(priv->keyboard), group);
+        eek_element_set_group (EEK_ELEMENT(context->priv->keyboard), group);
         g_dbus_method_invocation_return_value (invocation, NULL);
         emit_group_changed_signal (context, group);
         return;
     }
 
     if (g_strcmp0 (method_name, "ShowKeyboard") == 0) {
-        if (!priv->keyboard) {
+        if (!context->priv->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
@@ -881,7 +861,7 @@ handle_method_call (GDBusConnection       *connection,
         EekKey *key;
         guint keycode;
 
-        if (!priv->keyboard) {
+        if (!context->priv->keyboard) {
             g_dbus_method_invocation_return_error (invocation,
                                                    G_IO_ERROR,
                                                    G_IO_ERROR_FAILED_HANDLED,
@@ -890,7 +870,7 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_variant_get (parameters, "(u)", &keycode);
-        key = eek_keyboard_find_key_by_keycode (priv->keyboard, keycode);
+        key = eek_keyboard_find_key_by_keycode (context->priv->keyboard, keycode);
 
         if (!key) {
             g_dbus_method_invocation_return_error (invocation,
@@ -902,17 +882,17 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         if (g_strcmp0 (method_name, "PressKeycode") == 0) {
-            g_signal_handler_block (priv->keyboard,
-                                    priv->key_pressed_handler);
+            g_signal_handler_block (context->priv->keyboard,
+                                    context->priv->key_pressed_handler);
             g_signal_emit_by_name (key, "pressed");
-            g_signal_handler_unblock (priv->keyboard,
-                                      priv->key_pressed_handler);
+            g_signal_handler_unblock (context->priv->keyboard,
+                                      context->priv->key_pressed_handler);
         } else {
-            g_signal_handler_block (priv->keyboard,
-                                    priv->key_released_handler);
+            g_signal_handler_block (context->priv->keyboard,
+                                    context->priv->key_released_handler);
             g_signal_emit_by_name (key, "released");
-            g_signal_handler_unblock (priv->keyboard,
-                                      priv->key_released_handler);
+            g_signal_handler_unblock (context->priv->keyboard,
+                                      context->priv->key_released_handler);
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
@@ -932,21 +912,20 @@ handle_method_call (GDBusConnection       *connection,
 void
 eekboard_context_service_enable (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     GError *error;
 
     g_return_if_fail (EEKBOARD_IS_CONTEXT_SERVICE(context));
-    g_return_if_fail (priv->connection);
+    g_return_if_fail (context->priv->connection);
 
-    if (!priv->enabled) {
+    if (!context->priv->enabled) {
         gboolean retval;
 
-        priv->enabled = TRUE;
+        context->priv->enabled = TRUE;
 
         error = NULL;
-        retval = g_dbus_connection_emit_signal (priv->connection,
+        retval = g_dbus_connection_emit_signal (context->priv->connection,
                                                 NULL,
-                                                priv->object_path,
+                                                context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "Enabled",
                                                 NULL,
@@ -957,7 +936,7 @@ eekboard_context_service_enable (EekboardContextService *context)
             g_error_free (error);
             g_assert_not_reached ();
         }
-        g_signal_emit_by_name (context, "enabled", NULL);
+        g_signal_emit (context, signals[ENABLED], 0);
     }
 }
 
@@ -971,21 +950,20 @@ eekboard_context_service_enable (EekboardContextService *context)
 void
 eekboard_context_service_disable (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
     GError *error;
 
     g_return_if_fail (EEKBOARD_IS_CONTEXT_SERVICE(context));
-    g_return_if_fail (priv->connection);
+    g_return_if_fail (context->priv->connection);
 
-    if (priv->enabled) {
+    if (context->priv->enabled) {
         gboolean retval;
 
-        priv->enabled = FALSE;
+        context->priv->enabled = FALSE;
 
         error = NULL;
-        retval = g_dbus_connection_emit_signal (priv->connection,
+        retval = g_dbus_connection_emit_signal (context->priv->connection,
                                                 NULL,
-                                                priv->object_path,
+                                                context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "Disabled",
                                                 NULL,
@@ -996,7 +974,7 @@ eekboard_context_service_disable (EekboardContextService *context)
             g_error_free (error);
             g_assert_not_reached ();
         }
-        g_signal_emit_by_name (context, "disabled", NULL);
+        g_signal_emit (context, signals[DISABLED], 0);
     }
 }
 
@@ -1010,8 +988,7 @@ eekboard_context_service_disable (EekboardContextService *context)
 EekKeyboard *
 eekboard_context_service_get_keyboard (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-    return priv->keyboard;
+    return context->priv->keyboard;
 }
 
 /**
@@ -1024,8 +1001,7 @@ eekboard_context_service_get_keyboard (EekboardContextService *context)
 gboolean
 eekboard_context_service_get_fullscreen (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-    return priv->fullscreen;
+    return context->priv->fullscreen;
 }
 
 /**
@@ -1038,6 +1014,5 @@ eekboard_context_service_get_fullscreen (EekboardContextService *context)
 const gchar *
 eekboard_context_service_get_client_name (EekboardContextService *context)
 {
-    EekboardContextServicePrivate *priv = EEKBOARD_CONTEXT_SERVICE_GET_PRIVATE(context);
-    return priv->client_name;
+    return context->priv->client_name;
 }

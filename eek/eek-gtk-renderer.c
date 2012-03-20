@@ -97,12 +97,8 @@ eek_gtk_renderer_new (EekKeyboard  *keyboard,
                       PangoContext *pcontext,
                       GtkWidget    *widget)
 {
-    EekRenderer *renderer;
-
-    renderer = g_object_new (EEK_TYPE_GTK_RENDERER,
-                             "keyboard", keyboard,
-                             "pango-context", pcontext,
-                             NULL);
-
-    return renderer;
+    return g_object_new (EEK_TYPE_GTK_RENDERER,
+                         "keyboard", keyboard,
+                         "pango-context", pcontext,
+                         NULL);
 }

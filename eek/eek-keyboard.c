@@ -79,7 +79,7 @@ on_key_pressed (EekSection  *section,
                 EekKey      *key,
                 EekKeyboard *keyboard)
 {
-    g_signal_emit_by_name (keyboard, "key-pressed", key);
+    g_signal_emit (keyboard, signals[KEY_PRESSED], 0, key);
 }
 
 static void
@@ -87,7 +87,7 @@ on_key_released (EekSection  *section,
                  EekKey      *key,
                  EekKeyboard *keyboard)
 {
-    g_signal_emit_by_name (keyboard, "key-released", key);
+    g_signal_emit (keyboard, signals[KEY_RELEASED], 0, key);
 }
 
 static void
@@ -95,7 +95,7 @@ on_key_locked (EekSection  *section,
                 EekKey      *key,
                 EekKeyboard *keyboard)
 {
-    g_signal_emit_by_name (keyboard, "key-locked", key);
+    g_signal_emit (keyboard, signals[KEY_LOCKED], 0, key);
 }
 
 static void
@@ -103,7 +103,7 @@ on_key_unlocked (EekSection  *section,
                  EekKey      *key,
                  EekKeyboard *keyboard)
 {
-    g_signal_emit_by_name (keyboard, "key-unlocked", key);
+    g_signal_emit (keyboard, signals[KEY_UNLOCKED], 0, key);
 }
 
 static void
@@ -111,7 +111,7 @@ on_key_cancelled (EekSection  *section,
                  EekKey      *key,
                  EekKeyboard *keyboard)
 {
-    g_signal_emit_by_name (keyboard, "key-cancelled", key);
+    g_signal_emit (keyboard, signals[KEY_CANCELLED], 0, key);
 }
 
 static void
@@ -558,120 +558,10 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
 static void
 eek_keyboard_init (EekKeyboard *self)
 {
-    EekKeyboardPrivate *priv;
-
-    priv = self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
-    priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
-    priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
+    self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
+    self->priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
+    self->priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
     eek_element_set_symbol_index (EEK_ELEMENT(self), 0, 0);
-}
-
-/**
- * eek_keyboard_set_symbol_index:
- * @keyboard: an #EekKeyboard
- * @group: row index of the symbol matrix of keys on @keyboard
- * @level: column index of the symbol matrix of keys on @keyboard
- *
- * Set the default index of the symbol matrices of keys in @keyboard.
- * To unset, pass -1 as group/level.
- *
- * Deprecated: 1.0: Use eek_element_set_symbol_index()
- */
-void
-eek_keyboard_set_symbol_index (EekKeyboard *keyboard,
-                               gint         group,
-                               gint         level)
-{
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    eek_element_set_symbol_index (EEK_ELEMENT(keyboard), group, level);
-}
-
-/**
- * eek_keyboard_get_symbol_index:
- * @keyboard: an #EekKeyboard
- * @group: a pointer where the group value of the symbol index will be stored
- * @level: a pointer where the level value of the symbol index will be stored
- *
- * Get the default index of the symbol matrices of keys in @keyboard.
- * If the index is not set, -1 will be returned.
- *
- * Deprecated: 1.0: Use eek_element_get_symbol_index()
- */
-void
-eek_keyboard_get_symbol_index (EekKeyboard *keyboard,
-                               gint        *group,
-                               gint        *level)
-{
-    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    eek_element_get_symbol_index(EEK_ELEMENT(keyboard), group, level);
-}
-
-/**
- * eek_keyboard_set_group:
- * @keyboard: an #EekKeyboard
- * @group: group index of @keyboard
- *
- * Set the group value of the default symbol index of @keyboard.  To
- * unset, pass -1 as @group.
- *
- * See also: eek_keyboard_set_symbol_index()
- * Deprecated: 1.0: Use eek_element_set_group()
- */
-void
-eek_keyboard_set_group (EekKeyboard *keyboard,
-                        gint         group)
-{
-    eek_element_set_group (EEK_ELEMENT(keyboard), group);
-}
-
-/**
- * eek_keyboard_set_level:
- * @keyboard: an #EekKeyboard
- * @level: level index of @keyboard
- *
- * Set the level value of the default symbol index of @keyboard.  To
- * unset, pass -1 as @level.
- *
- * See also: eek_keyboard_set_symbol_index()
- * Deprecated: 1.0: Use eek_element_set_level()
- */
-void
-eek_keyboard_set_level (EekKeyboard *keyboard,
-                        gint         level)
-{
-    eek_element_set_level (EEK_ELEMENT(keyboard), level);
-}
-
-/**
- * eek_keyboard_get_group:
- * @keyboard: an #EekKeyboard
- *
- * Return the group value of the default symbol index of @keyboard.
- * If the value is not set, -1 will be returned.
- *
- * See also: eek_keyboard_get_symbol_index()
- * Deprecated: 1.0: Use eek_element_get_group()
- */
-gint
-eek_keyboard_get_group (EekKeyboard *keyboard)
-{
-    return eek_element_get_group (EEK_ELEMENT(keyboard));
-}
-
-/**
- * eek_keyboard_get_level:
- * @keyboard: an #EekKeyboard
- *
- * Return the level value of the default symbol index of @keyboard.
- * If the value is not set, -1 will be returned.
- *
- * See also: eek_keyboard_get_symbol_index()
- * Deprecated: 1.0: Use eek_element_get_level()
- */
-gint
-eek_keyboard_get_level (EekKeyboard *keyboard)
-{
-    return eek_element_get_level (EEK_ELEMENT(keyboard));
 }
 
 /**
@@ -685,10 +575,8 @@ eek_keyboard_get_level (EekKeyboard *keyboard)
 EekSection *
 eek_keyboard_create_section (EekKeyboard *keyboard)
 {
-    EekSection *section;
     g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
-    section = EEK_KEYBOARD_GET_CLASS(keyboard)->create_section (keyboard);
-    return section;
+    return EEK_KEYBOARD_GET_CLASS(keyboard)->create_section (keyboard);
 }
 
 /**
@@ -703,7 +591,7 @@ EekKey *
 eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                   guint        keycode)
 {
-    g_assert (EEK_IS_KEYBOARD(keyboard));
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
     return EEK_KEYBOARD_GET_CLASS(keyboard)->
         find_key_by_keycode (keyboard, keycode);
 }
@@ -718,11 +606,8 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
 EekLayout *
 eek_keyboard_get_layout (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-    return priv->layout;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
+    return keyboard->priv->layout;
 }
 
 /**
@@ -740,7 +625,6 @@ eek_keyboard_get_size (EekKeyboard *keyboard,
 {
     EekBounds bounds;
 
-    g_assert (EEK_IS_KEYBOARD(keyboard));
     eek_element_get_bounds (EEK_ELEMENT(keyboard), &bounds);
     *width = bounds.width;
     *height = bounds.height;
@@ -757,12 +641,8 @@ void
 eek_keyboard_set_modifier_behavior (EekKeyboard        *keyboard,
                                     EekModifierBehavior modifier_behavior)
 {
-    EekKeyboardPrivate *priv;
-
     g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    priv->modifier_behavior = modifier_behavior;
+    keyboard->priv->modifier_behavior = modifier_behavior;
 }
 
 /**
@@ -775,24 +655,16 @@ eek_keyboard_set_modifier_behavior (EekKeyboard        *keyboard,
 EekModifierBehavior
 eek_keyboard_get_modifier_behavior (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->modifier_behavior;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+    return keyboard->priv->modifier_behavior;
 }
 
 void
 eek_keyboard_set_modifiers (EekKeyboard    *keyboard,
                             EekModifierType modifiers)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    priv->modifiers = modifiers;
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    keyboard->priv->modifiers = modifiers;
     set_level_from_modifiers (keyboard);
 }
 
@@ -806,12 +678,8 @@ eek_keyboard_set_modifiers (EekKeyboard    *keyboard,
 EekModifierType
 eek_keyboard_get_modifiers (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->modifiers;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+    return keyboard->priv->modifiers;
 }
 
 /**
@@ -820,46 +688,56 @@ eek_keyboard_get_modifiers (EekKeyboard *keyboard)
  * @outline: an #EekOutline
  *
  * Register an outline of @keyboard.
- * Returns: an unsigned long id of the registered outline, for later reference
+ * Returns: an unsigned integer ID of the registered outline, for
+ * later reference
  */
-gulong
+guint
 eek_keyboard_add_outline (EekKeyboard *keyboard,
                           EekOutline  *outline)
 {
-    EekKeyboardPrivate *priv;
     EekOutline *_outline;
 
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
 
     _outline = eek_outline_copy (outline);
-    g_array_append_val (priv->outline_array, *_outline);
+    g_array_append_val (keyboard->priv->outline_array, *_outline);
     /* don't use eek_outline_free here, so as to keep _outline->points */
     g_slice_free (EekOutline, _outline);
-    return priv->outline_array->len;
+    return keyboard->priv->outline_array->len - 1;
 }
 
 /**
  * eek_keyboard_get_outline:
  * @keyboard: an #EekKeyboard
- * @oref: an unsigned long id
+ * @oref: ID of the outline
  *
  * Get an outline associated with @oref in @keyboard.
  * Returns: an #EekOutline, which should not be released
  */
 EekOutline *
 eek_keyboard_get_outline (EekKeyboard *keyboard,
-                          gulong oref)
+                          guint        oref)
 {
-    EekKeyboardPrivate *priv;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
 
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    if (oref > priv->outline_array->len)
+    if (oref > keyboard->priv->outline_array->len)
         return NULL;
 
-    return &g_array_index (priv->outline_array, EekOutline, oref - 1);
+    return &g_array_index (keyboard->priv->outline_array, EekOutline, oref);
+}
+
+/**
+ * eek_keyboard_get_n_outlines:
+ * @keyboard: an #EekKeyboard
+ *
+ * Get the number of outlines defined in @keyboard.
+ * Returns: integer
+ */
+gsize
+eek_keyboard_get_n_outlines (EekKeyboard *keyboard)
+{
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+    return keyboard->priv->outline_array->len;
 }
 
 /**
@@ -873,12 +751,8 @@ void
 eek_keyboard_set_num_lock_mask (EekKeyboard    *keyboard,
                                 EekModifierType num_lock_mask)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    priv->num_lock_mask = num_lock_mask;
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    keyboard->priv->num_lock_mask = num_lock_mask;
 }
 
 /**
@@ -891,12 +765,8 @@ eek_keyboard_set_num_lock_mask (EekKeyboard    *keyboard,
 EekModifierType
 eek_keyboard_get_num_lock_mask (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->num_lock_mask;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+    return keyboard->priv->num_lock_mask;
 }
 
 /**
@@ -910,12 +780,8 @@ void
 eek_keyboard_set_alt_gr_mask (EekKeyboard    *keyboard,
                               EekModifierType alt_gr_mask)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    priv->alt_gr_mask = alt_gr_mask;
+    g_return_if_fail (EEK_IS_KEYBOARD(keyboard));
+    keyboard->priv->alt_gr_mask = alt_gr_mask;
 }
 
 /**
@@ -928,12 +794,8 @@ eek_keyboard_set_alt_gr_mask (EekKeyboard    *keyboard,
 EekModifierType
 eek_keyboard_get_alt_gr_mask (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->alt_gr_mask;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), 0);
+    return keyboard->priv->alt_gr_mask;
 }
 
 /**
@@ -947,12 +809,8 @@ eek_keyboard_get_alt_gr_mask (EekKeyboard *keyboard)
 GList *
 eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->pressed_keys;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
+    return keyboard->priv->pressed_keys;
 }
 
 /**
@@ -966,10 +824,6 @@ eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)
 GList *
 eek_keyboard_get_locked_keys (EekKeyboard *keyboard)
 {
-    EekKeyboardPrivate *priv;
-
-    g_assert (EEK_IS_KEYBOARD(keyboard));
-    priv = EEK_KEYBOARD_GET_PRIVATE(keyboard);
-
-    return priv->locked_keys;
+    g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
+    return keyboard->priv->locked_keys;
 }

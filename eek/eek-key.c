@@ -590,11 +590,11 @@ eek_key_set_index (EekKey *key,
 
     if (key->priv->column != column) {
         key->priv->column = column;
-        g_object_notify (key, "column");
+        g_object_notify (G_OBJECT(key), "column");
     }
     if (key->priv->row != row) {
         key->priv->row = row;
-        g_object_notify (key, "row");
+        g_object_notify (G_OBJECT(key), "row");
     }
 }
 
@@ -634,7 +634,7 @@ eek_key_set_oref (EekKey *key,
     g_return_if_fail (EEK_IS_KEY(key));
     if (key->priv->oref != oref) {
         key->priv->oref = oref;
-        g_object_notify (key, "oref");
+        g_object_notify (G_OBJECT(key), "oref");
     }
 }
 

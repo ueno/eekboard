@@ -442,8 +442,8 @@ client_enable_atspi_keystroke (Client *client)
 
     client->keystroke_listener =
         atspi_device_listener_new ((AtspiDeviceListenerCB)keystroke_listener_cb,
-                                   NULL,
-                                   client);
+                                   client,
+                                   NULL);
 
     error = NULL;
     if (!atspi_register_keystroke_listener
@@ -521,7 +521,7 @@ focus_listener_cb (const AtspiEvent *event,
 
     error = NULL;
     role = atspi_accessible_get_role (accessible, &error);
-    if (role == NULL) {
+    if (role == ATSPI_ROLE_INVALID) {
         g_warning ("can't get accessible role: %s",
                    error->message);
         g_error_free (error);

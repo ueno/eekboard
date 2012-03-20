@@ -488,7 +488,9 @@ eek_element_set_group (EekElement *element,
     g_return_if_fail (EEK_IS_ELEMENT(element));
     if (element->priv->group != group) {
         element->priv->group = group;
-        g_object_notify (element, "group");
+        g_object_notify (G_OBJECT(element), "group");
+        g_signal_emit (element, signals[SYMBOL_INDEX_CHANGED], 0,
+                       group, element->priv->level);
     }
 }
 
@@ -509,7 +511,9 @@ eek_element_set_level (EekElement *element,
     g_return_if_fail (EEK_IS_ELEMENT(element));
     if (element->priv->level != level) {
         element->priv->level = level;
-        g_object_notify (element, "level");
+        g_object_notify (G_OBJECT(element), "level");
+        g_signal_emit (element, signals[SYMBOL_INDEX_CHANGED], 0,
+                       element->priv->group, level);
     }
 }
 
@@ -525,7 +529,7 @@ eek_element_set_level (EekElement *element,
 gint
 eek_element_get_group (EekElement *element)
 {
-    g_return_if_fail (EEK_IS_ELEMENT(element));
+    g_return_val_if_fail (EEK_IS_ELEMENT(element), -1);
     return element->priv->group;
 }
 
@@ -541,6 +545,6 @@ eek_element_get_group (EekElement *element)
 gint
 eek_element_get_level (EekElement *element)
 {
-    g_return_if_fail (EEK_IS_ELEMENT(element));
+    g_return_val_if_fail (EEK_IS_ELEMENT(element), -1);
     return element->priv->level;
 }
