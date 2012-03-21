@@ -267,7 +267,6 @@ data/icons/scalable/Makefile
 data/themes/Makefile
 data/keyboards/Makefile
 examples/Makefile
-examples/eekxml/Makefile
 examples/simple-client/Makefile
 eek/eek-${EEK_API_VERSION}.pc
 eek/eek-gtk-${EEK_API_VERSION}.pc

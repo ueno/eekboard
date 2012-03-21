@@ -1,1 +1,1 @@
-SUBDIRS = eekxml simple-client
+SUBDIRS = simple-client
