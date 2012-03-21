@@ -178,22 +178,6 @@ eek_gtk_keyboard_real_draw (GtkWidget *self,
     return FALSE;
 }
 
-#if !GTK_CHECK_VERSION (2, 91, 2)
-static gboolean
-eek_gtk_keyboard_real_expose_event (GtkWidget      *self,
-                                    GdkEventExpose *event)
-{
-    gboolean retval;
-    cairo_t *cr;
-
-    cr = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (self)));
-    retval = eek_gtk_keyboard_real_draw (self, cr);
-    cairo_destroy (cr);
-
-    return retval;
-}
-#endif  /* !GTK_CHECK_VERSION (2, 91, 2) */
-
 static void
 eek_gtk_keyboard_real_size_allocate (GtkWidget     *self,
                                      GtkAllocation *allocation)
@@ -410,11 +394,7 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
 
     widget_class->realize = eek_gtk_keyboard_real_realize;
     widget_class->unmap = eek_gtk_keyboard_real_unmap;
-#if GTK_CHECK_VERSION (2, 91, 2)
     widget_class->draw = eek_gtk_keyboard_real_draw;
-#else  /* GTK_CHECK_VERSION (2, 91, 2) */
-    widget_class->expose_event = eek_gtk_keyboard_real_expose_event;
-#endif  /* !GTK_CHECK_VERSION (2, 91, 2) */
     widget_class->size_allocate = eek_gtk_keyboard_real_size_allocate;
     widget_class->button_press_event =
         eek_gtk_keyboard_real_button_press_event;

@@ -44,34 +44,13 @@ AC_HEADER_STDC
 LT_INIT
 IT_PROG_INTLTOOL([0.35.0])
 
-AC_MSG_CHECKING([which gtk+ version to compile against])
-AC_ARG_WITH([gtk],
-  [AS_HELP_STRING([--with-gtk=2.0|3.0],[which gtk+ version to compile against (default: 3.0)])],
-  [case "$with_gtk" in
-     2.0|3.0) ;;
-     *) AC_MSG_ERROR([invalid gtk version specified]) ;;
-   esac],
-  [with_gtk=3.0])
-AC_MSG_RESULT([$with_gtk])
-
-case "$with_gtk" in
-  2.0) GTK_API_VERSION=2.0
-       GTK_REQUIRED=2.14.0
-       EEK_API_VERSION=0.90
-       EEK_API_MAJOR_VERSION=0
-       EEK_API_MINOR_VERSION=90
-       EEK_API_PC_VERSION=0.90
-       EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
-       ;;
-  3.0) GTK_API_VERSION=3.0
-       GTK_REQUIRED=2.91.0
-       EEK_API_VERSION=0.90
-       EEK_API_MAJOR_VERSION=0
-       EEK_API_MINOR_VERSION=90
-       EEK_API_PC_VERSION=0.90
-       EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
-       ;;
-esac
+GTK_API_VERSION=3.0
+GTK_REQUIRED=2.91.0
+EEK_API_VERSION=0.90
+EEK_API_MAJOR_VERSION=0
+EEK_API_MINOR_VERSION=90
+EEK_API_PC_VERSION=0.90
+EEK_LIBRARY_SUFFIX="-$EEK_API_VERSION"
 
 AC_SUBST([GTK_API_VERSION])
 AC_SUBST([EEK_API_VERSION])
@@ -80,9 +59,6 @@ AC_SUBST([EEK_API_MINOR_VERSION])
 AC_SUBST([EEK_API_PC_VERSION])
 AC_SUBST([EEK_LIBRARY_SUFFIX])
 AC_SUBST([EEK_LIBRARY_SUFFIX_U],[AS_TR_SH([$EEK_LIBRARY_SUFFIX])])
-
-AM_CONDITIONAL([HAVE_GTK_2],[test "$with_gtk" = "2.0"])
-AM_CONDITIONAL([HAVE_GTK_3],[test "$with_gtk" = "3.0"])
 
 AM_PATH_GLIB_2_0
 PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.26.0], ,
