@@ -68,6 +68,7 @@ struct _EekKeyboardPrivate
     GList *pressed_keys;
     GList *locked_keys;
     GArray *outline_array;
+    GHashTable *keycodes;
 
     /* modifiers dynamically assigned at run time */
     EekModifierType num_lock_mask;
@@ -139,6 +140,27 @@ on_symbol_index_changed (EekSection *section,
     g_signal_emit_by_name (keyboard, "symbol-index-changed", group, level);
 }
 
+static void
+section_child_added_cb (EekContainer *container,
+                        EekElement   *element,
+                        EekKeyboard  *keyboard)
+{
+    guint keycode = eek_key_get_keycode (EEK_KEY(element));
+    g_hash_table_insert (keyboard->priv->keycodes,
+                         GUINT_TO_POINTER(keycode),
+                         element);
+}
+
+static void
+section_child_removed_cb (EekContainer *container,
+                          EekElement   *element,
+                          EekKeyboard  *keyboard)
+{
+    guint keycode = eek_key_get_keycode (EEK_KEY(element));
+    g_hash_table_remove (keyboard->priv->keycodes,
+                         GUINT_TO_POINTER(keycode));
+}
+
 static EekSection *
 eek_keyboard_real_create_section (EekKeyboard *self)
 {
@@ -147,41 +169,15 @@ eek_keyboard_real_create_section (EekKeyboard *self)
     section = g_object_new (EEK_TYPE_SECTION, NULL);
     g_return_val_if_fail (section, NULL);
 
+    g_signal_connect (G_OBJECT(section), "child-added",
+                      G_CALLBACK(section_child_added_cb), self);
+
+    g_signal_connect (G_OBJECT(section), "child-removed",
+                      G_CALLBACK(section_child_removed_cb), self);
+
     EEK_CONTAINER_GET_CLASS(self)->add_child (EEK_CONTAINER(self),
                                               EEK_ELEMENT(section));
     return section;
-}
-
-struct _FindKeyByKeycodeCallbackData {
-    EekKey *key;
-    guint keycode;
-};
-typedef struct _FindKeyByKeycodeCallbackData FindKeyByKeycodeCallbackData;
-
-static gint
-find_key_by_keycode_section_callback (EekElement *element, gpointer user_data)
-{
-    FindKeyByKeycodeCallbackData *data = user_data;
-
-    data->key = eek_section_find_key_by_keycode (EEK_SECTION(element),
-                                                 data->keycode);
-    if (data->key)
-        return 0;
-    return -1;
-}
-
-static EekKey *
-eek_keyboard_real_find_key_by_keycode (EekKeyboard *self,
-                                       guint        keycode)
-{
-    FindKeyByKeycodeCallbackData data;
-
-    data.keycode = keycode;
-    if (eek_container_find (EEK_CONTAINER(self),
-                            find_key_by_keycode_section_callback,
-                            &data))
-        return data.key;
-    return NULL;
 }
 
 static void
@@ -375,6 +371,8 @@ eek_keyboard_finalize (GObject *object)
     g_list_free_full (priv->locked_keys,
                       (GDestroyNotify) eek_modifier_key_free);
 
+    g_hash_table_destroy (priv->keycodes);
+
     for (i = 0; i < priv->outline_array->len; i++) {
         EekOutline *outline = &g_array_index (priv->outline_array,
                                               EekOutline,
@@ -427,7 +425,6 @@ eek_keyboard_class_init (EekKeyboardClass *klass)
                               sizeof (EekKeyboardPrivate));
 
     klass->create_section = eek_keyboard_real_create_section;
-    klass->find_key_by_keycode = eek_keyboard_real_find_key_by_keycode;
 
     /* signals */
     klass->key_pressed = eek_keyboard_real_key_pressed;
@@ -578,6 +575,7 @@ eek_keyboard_init (EekKeyboard *self)
     self->priv = EEK_KEYBOARD_GET_PRIVATE(self);
     self->priv->modifier_behavior = EEK_MODIFIER_BEHAVIOR_NONE;
     self->priv->outline_array = g_array_new (FALSE, TRUE, sizeof (EekOutline));
+    self->priv->keycodes = g_hash_table_new (g_direct_hash, g_direct_equal);
     eek_element_set_symbol_index (EEK_ELEMENT(self), 0, 0);
 }
 
@@ -609,8 +607,8 @@ eek_keyboard_find_key_by_keycode (EekKeyboard *keyboard,
                                   guint        keycode)
 {
     g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
-    return EEK_KEYBOARD_GET_CLASS(keyboard)->
-        find_key_by_keycode (keyboard, keycode);
+    return g_hash_table_lookup (keyboard->priv->keycodes,
+                                GUINT_TO_POINTER(keycode));
 }
 
 /**

@@ -150,9 +150,10 @@ on_cancelled (EekKey     *key,
 }
 
 static EekKey *
-eek_section_real_create_key (EekSection  *self,
-                             gint column,
-                             gint row)
+eek_section_real_create_key (EekSection *self,
+                             guint       keycode,
+                             gint        column,
+                             gint        row)
 {
     EekKey *key;
     gint num_columns, num_rows;
@@ -164,6 +165,7 @@ eek_section_real_create_key (EekSection  *self,
     g_return_val_if_fail (column < num_columns, NULL);
 
     key = g_object_new (EEK_TYPE_KEY,
+                        "keycode", keycode,
                         "column", column,
                         "row", row,
                         NULL);
@@ -173,23 +175,6 @@ eek_section_real_create_key (EekSection  *self,
                                               EEK_ELEMENT(key));
 
     return key;
-}
-
-static gint
-compare_key_by_keycode (EekElement *element, gpointer user_data)
-{
-    if (eek_key_get_keycode (EEK_KEY(element)) == (guint)(long)user_data)
-        return 0;
-    return -1;
-}
-
-static EekKey *
-eek_section_real_find_key_by_keycode (EekSection *self,
-                                      guint       keycode)
-{
-    return (EekKey *)eek_container_find (EEK_CONTAINER(self),
-                                         compare_key_by_keycode,
-                                         (gpointer)(long)keycode);
 }
 
 static void
@@ -340,7 +325,6 @@ eek_section_class_init (EekSectionClass *klass)
     klass->add_row = eek_section_real_add_row;
     klass->get_row = eek_section_real_get_row;
     klass->create_key = eek_section_real_create_key;
-    klass->find_key_by_keycode = eek_section_real_find_key_by_keycode;
 
     /* signals */
     klass->key_pressed = eek_section_real_key_pressed;
@@ -563,6 +547,7 @@ eek_section_get_row (EekSection     *section,
 /**
  * eek_section_create_key:
  * @section: an #EekSection
+ * @keycode: a keycode
  * @column: the column index of the key
  * @row: the row index of the key
  *
@@ -571,27 +556,14 @@ eek_section_get_row (EekSection     *section,
  * implementation.
  */
 EekKey *
-eek_section_create_key (EekSection  *section,
-                        gint         column,
-                        gint         row)
+eek_section_create_key (EekSection *section,
+                        guint       keycode,
+                        gint        column,
+                        gint        row)
 {
     g_return_val_if_fail (EEK_IS_SECTION(section), NULL);
-    return EEK_SECTION_GET_CLASS(section)->create_key (section, column, row);
-}
-
-/**
- * eek_section_find_key_by_keycode:
- * @section: an #EekSection
- * @keycode: a keycode
- *
- * Find an #EekKey whose keycode is @keycode.
- * Returns: an #EekKey or NULL (if not found)
- */
-EekKey *
-eek_section_find_key_by_keycode (EekSection *section,
-                                 guint       keycode)
-{
-    g_return_val_if_fail (EEK_IS_SECTION(section), NULL);
-    return EEK_SECTION_GET_CLASS(section)->find_key_by_keycode (section,
-                                                                keycode);
+    return EEK_SECTION_GET_CLASS(section)->create_key (section,
+                                                       keycode,
+                                                       column,
+                                                       row);
 }

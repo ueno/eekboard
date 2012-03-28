@@ -61,8 +61,6 @@ struct _EekSection
  * @add_row: virtual function for adding a new row to the section
  * @get_row: virtual function for accessing a row in the section
  * @create_key: virtual function for creating key in the section
- * @find_key_by_keycode: virtual function for accessing a key in the
- * section by keycode
  * @key_pressed: class handler for #EekSection::key-pressed signal
  * @key_released: class handler for #EekSection::key-released signal
  * @key_locked: class handler for #EekSection::key-locked signal
@@ -85,11 +83,9 @@ struct _EekSectionClass
                                      EekOrientation *orientation);
 
     EekKey *(* create_key)          (EekSection     *self,
+                                     guint           keycode,
                                      gint            row,
                                      gint            column);
-
-    EekKey *(* find_key_by_keycode) (EekSection     *self,
-                                     guint           keycode);
 
     /* signals */
     void    (* key_pressed)         (EekSection     *self,
@@ -124,6 +120,7 @@ void    eek_section_get_row              (EekSection     *section,
                                           EekOrientation *orientation);
 
 EekKey *eek_section_create_key           (EekSection     *section,
+                                          guint           keycode,
                                           gint            column,
                                           gint            row);
 

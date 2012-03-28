@@ -401,31 +401,8 @@ geometry_start_element_callback (GMarkupParseContext *pcontext,
     }
 
     if (g_strcmp0 (element_name, "key") == 0) {
-        guint column, row;
-
-        attribute = get_attribute (attribute_names, attribute_values,
-                                   "column");
-        if (attribute == NULL) {
-            g_set_error (error,
-                         G_MARKUP_ERROR,
-                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-                         "no \"column\" attribute for \"key\"");
-            return;
-        }
-        column = strtoul (attribute, NULL, 10);
-        
-        attribute = get_attribute (attribute_names, attribute_values,
-                                   "row");
-        if (attribute == NULL) {
-            g_set_error (error,
-                         G_MARKUP_ERROR,
-                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-                         "no \"row\" attribute for \"row\"");
-            return;
-        }
-        row = strtoul (attribute, NULL, 10);
-
-        data->key = eek_section_create_key (data->section, column, row);
+        guint keycode;
+        gint column, row;
 
         attribute = get_attribute (attribute_names, attribute_values,
                                    "keycode");
@@ -436,7 +413,31 @@ geometry_start_element_callback (GMarkupParseContext *pcontext,
                          "no \"keycode\" attribute for \"key\"");
             return;
         }
-        eek_key_set_keycode (data->key, strtoul (attribute, NULL, 10));
+        keycode = strtoul (attribute, NULL, 10);
+
+        attribute = get_attribute (attribute_names, attribute_values,
+                                   "column");
+        if (attribute == NULL) {
+            g_set_error (error,
+                         G_MARKUP_ERROR,
+                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
+                         "no \"column\" attribute for \"key\"");
+            return;
+        }
+        column = strtol (attribute, NULL, 10);
+        
+        attribute = get_attribute (attribute_names, attribute_values,
+                                   "row");
+        if (attribute == NULL) {
+            g_set_error (error,
+                         G_MARKUP_ERROR,
+                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
+                         "no \"row\" attribute for \"row\"");
+            return;
+        }
+        row = strtol (attribute, NULL, 10);
+
+        data->key = eek_section_create_key (data->section, keycode, column, row);
 
         attribute = get_attribute (attribute_names, attribute_values,
                                    "name");

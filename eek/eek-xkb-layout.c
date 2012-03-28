@@ -222,10 +222,9 @@ create_key (EekXkbLayout *layout,
             }
     }
 
-    key = eek_section_create_key (section, column, row);
+    key = eek_section_create_key (section, keycode, column, row);
     eek_element_set_name (EEK_ELEMENT(key), name);
     eek_element_set_bounds (EEK_ELEMENT(key), &bounds);
-    eek_key_set_keycode (key, keycode);
     eek_key_set_symbol_matrix (key, matrix);
     eek_symbol_matrix_free (matrix);
     eek_key_set_oref (key, oref);
