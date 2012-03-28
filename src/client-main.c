@@ -68,21 +68,6 @@ static const GOptionEntry options[] = {
 };
 
 static void
-on_notify_visible (GObject    *object,
-                   GParamSpec *spec,
-                   gpointer    user_data)
-{
-    GMainLoop *loop = user_data;
-    gboolean visible;
-
-    g_object_get (object, "visible", &visible, NULL);
-
-    /* user explicitly closed the window */
-    if (!visible && eekboard_context_is_enabled (EEKBOARD_CONTEXT(object)))
-        g_main_loop_quit (loop);
-}
-
-static void
 on_context_destroyed (EekboardContext *context,
                       gpointer         user_data)
 {
@@ -139,7 +124,7 @@ main (int argc, char **argv)
     GMainLoop *loop = NULL;
     gint focus;
     GSettings *settings = NULL;
-    gchar **keyboards;
+    gchar **keyboards = NULL;
     gint retval = 0;
 
     if (!gtk_init_check (&argc, &argv)) {
@@ -302,8 +287,6 @@ main (int argc, char **argv)
 
     if (!opt_focus) {
         g_object_get (client, "context", &context, NULL);
-        g_signal_connect (context, "notify::visible",
-                          G_CALLBACK(on_notify_visible), loop);
         g_signal_connect (context, "destroyed",
                           G_CALLBACK(on_context_destroyed), loop);
         g_object_unref (context);
@@ -321,16 +304,16 @@ main (int argc, char **argv)
                       G_CALLBACK(on_destroyed), loop);
     g_object_unref (eekboard);
     
-    if (opt_keyboards != NULL)
+    if (opt_keyboards != NULL) {
         keyboards = g_strsplit (opt_keyboards, ",", -1);
-    else
-        keyboards = g_settings_get_strv (settings, "keyboards");
-    if (!set_keyboards (client, (const gchar * const *)keyboards)) {
+
+        if (!set_keyboards (client, (const gchar * const *)keyboards)) {
+            g_strfreev (keyboards);
+            retval = 1;
+            goto out;
+        }
         g_strfreev (keyboards);
-        retval = 1;
-        goto out;
     }
-    g_strfreev (keyboards);
 
     g_main_loop_run (loop);
 

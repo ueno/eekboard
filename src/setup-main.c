@@ -1,6 +1,6 @@
 /* 
- * Copyright (C) 2011 Daiki Ueno <ueno@unixuser.org>
- * Copyright (C) 2011 Red Hat, Inc.
+ * Copyright (C) 2012 Daiki Ueno <ueno@unixuser.org>
+ * Copyright (C) 2012 Red Hat, Inc.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef PREFERENCES_DIALOG_H
-#define PREFERENCES_DIALOG_H 1
 
-#include <glib-object.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "preferences-dialog.h"
+#include <gtk/gtk.h>
+#include <stdlib.h>
 
-G_BEGIN_DECLS
+int
+main (int argc, char **argv)
+{
+    PreferencesDialog *dialog;
 
-typedef struct _PreferencesDialog PreferencesDialog;
+    if (!gtk_init_check (&argc, &argv)) {
+        g_printerr ("Can't init GTK\n");
+        return EXIT_FAILURE;
+    }
 
-PreferencesDialog *preferences_dialog_new  (void);
-void               preferences_dialog_run  (PreferencesDialog *dialog);
-void               preferences_dialog_free (PreferencesDialog *dialog);
+    dialog = preferences_dialog_new ();
+    preferences_dialog_run (dialog);
+    preferences_dialog_free (dialog);
 
-G_END_DECLS
-#endif  /* PREFERENCES_DIALOG_H */
+    return EXIT_SUCCESS;
+}

@@ -183,5 +183,10 @@ GList              *eek_keyboard_get_pressed_keys
 GList              *eek_keyboard_get_locked_keys
                                      (EekKeyboard        *keyboard);
 
+EekModifierKey     *eek_modifier_key_copy
+                                     (EekModifierKey     *modkey);
+void                eek_modifier_key_free
+                                     (EekModifierKey      *modkey);
+
 G_END_DECLS
 #endif  /* EEK_KEYBOARD_H */

@@ -56,11 +56,13 @@ struct _EekXmlLayoutPrivate
     EekXmlKeyboardDesc *desc;
 };
 
+G_DEFINE_BOXED_TYPE(EekXmlKeyboardDesc, eek_xml_keyboard_desc, eek_xml_keyboard_desc_copy, eek_xml_keyboard_desc_free);
+
 #define BUFSIZE	8192
 
-static GSList       *parse_keyboards (const gchar         *path,
+static GList        *parse_keyboards (const gchar         *path,
                                       GError             **error);
-static GSList       *parse_prerequisites
+static GList        *parse_prerequisites
                                      (const gchar         *path,
                                       GError             **error);
 static gboolean      parse_geometry  (const gchar         *path,
@@ -69,7 +71,7 @@ static gboolean      parse_geometry  (const gchar         *path,
 static gboolean      parse_symbols_with_prerequisites
                                      (const gchar         *name,
                                       EekKeyboard         *keyboard,
-                                      GSList             **loaded,
+                                      GList             **loaded,
                                       GError             **error);
 static gboolean      parse_symbols   (const gchar         *path,
                                       EekKeyboard         *keyboard,
@@ -107,7 +109,7 @@ keyboard_desc_free (EekXmlKeyboardDesc *desc)
 struct _KeyboardsParseData {
     GSList *element_stack;
 
-    GSList *keyboards;
+    GList *keyboards;
 };
 typedef struct _KeyboardsParseData KeyboardsParseData;
 
@@ -120,7 +122,7 @@ keyboards_parse_data_new (void)
 static void
 keyboards_parse_data_free (KeyboardsParseData *data)
 {
-    g_slist_free_full (data->keyboards, (GDestroyNotify) keyboard_desc_free);
+    g_list_free_full (data->keyboards, (GDestroyNotify) keyboard_desc_free);
     g_slice_free (KeyboardsParseData, data);
 }
 
@@ -150,7 +152,7 @@ keyboards_start_element_callback (GMarkupParseContext *pcontext,
         EekXmlKeyboardDesc *desc = g_slice_new0 (EekXmlKeyboardDesc);
         const gchar *attribute;
 
-        data->keyboards = g_slist_prepend (data->keyboards, desc);
+        data->keyboards = g_list_prepend (data->keyboards, desc);
 
         attribute = get_attribute (attribute_names, attribute_values,
                                    "id");
@@ -821,7 +823,7 @@ struct _PrerequisitesParseData {
     GSList *element_stack;
     GString *text;
 
-    GSList *prerequisites;
+    GList *prerequisites;
 };
 typedef struct _PrerequisitesParseData PrerequisitesParseData;
 
@@ -836,7 +838,7 @@ prerequisites_parse_data_new (void)
 static void
 prerequisites_parse_data_free (PrerequisitesParseData *data)
 {
-    g_slist_free_full (data->prerequisites, g_free);
+    g_list_free_full (data->prerequisites, g_free);
     g_string_free (data->text, TRUE);
     g_slice_free (PrerequisitesParseData, data);
 }
@@ -877,7 +879,7 @@ prerequisites_end_element_callback (GMarkupParseContext *pcontext,
     g_slist_free1 (head);
 
     if (g_strcmp0 (element_name, "include") == 0) {
-        data->prerequisites = g_slist_append (data->prerequisites,
+        data->prerequisites = g_list_append (data->prerequisites,
                                               g_strndup (data->text->str,
                                                          data->text->len));
     }
@@ -910,7 +912,7 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
     EekXmlLayout *layout = EEK_XML_LAYOUT (self);
     EekKeyboard *keyboard;
     gchar *filename, *path;
-    GSList *loaded;
+    GList *loaded;
     GError *error;
     gboolean retval;
 
@@ -935,15 +937,13 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
         return NULL;
     }
 
-    EekKey *key = eek_keyboard_find_key_by_keycode (keyboard,
-                                                    149);
     /* Read symbols information. */
     loaded = NULL;
     retval = parse_symbols_with_prerequisites (layout->priv->desc->symbols,
                                                keyboard,
                                                &loaded,
                                                &error);
-    g_slist_free_full (loaded, g_free);
+    g_list_free_full (loaded, g_free);
     if (!retval) {
         g_object_unref (keyboard);
         g_warning ("can't parse symbols file %s: %s",
@@ -1057,7 +1057,7 @@ initable_init (GInitable    *initable,
                GError      **error)
 {
     EekXmlLayout *layout = EEK_XML_LAYOUT (initable);
-    GSList *keyboards, *p;
+    GList *keyboards, *p;
     gchar *path;
     EekXmlKeyboardDesc *desc;
 
@@ -1081,10 +1081,10 @@ initable_init (GInitable    *initable,
         return FALSE;
     }
 
-    keyboards = g_slist_remove_link (keyboards, p);
+    keyboards = g_list_remove_link (keyboards, p);
     layout->priv->desc = p->data;
-    g_slist_free_1 (p);
-    g_slist_free_full (keyboards, (GDestroyNotify) keyboard_desc_free);
+    g_list_free_1 (p);
+    g_list_free_full (keyboards, (GDestroyNotify) keyboard_desc_free);
 
     return TRUE;
 }
@@ -1095,14 +1095,34 @@ initable_iface_init (GInitableIface *initable_iface)
     initable_iface->init = initable_init;
 }
 
-GSList *
-eek_xml_layout_list_keyboards (void)
+GList *
+eek_xml_list_keyboards (void)
 {
     gchar *path;
-    GSList *keyboards;
+    GList *keyboards;
 
     path = g_build_filename (KEYBOARDSDIR, "keyboards.xml", NULL);
-    return parse_keyboards (path, NULL);
+    keyboards = parse_keyboards (path, NULL);
+    g_free (path);
+    return keyboards;
+}
+
+EekXmlKeyboardDesc *
+eek_xml_keyboard_desc_copy (EekXmlKeyboardDesc *desc)
+{
+    return g_slice_dup (EekXmlKeyboardDesc, desc);
+}
+
+void
+eek_xml_keyboard_desc_free (EekXmlKeyboardDesc *desc)
+{
+    g_free (desc->id);
+    g_free (desc->name);
+    g_free (desc->geometry);
+    g_free (desc->symbols);
+    g_free (desc->language);
+    g_free (desc->longname);
+    g_slice_free (EekXmlKeyboardDesc, desc);
 }
 
 static gboolean
@@ -1164,11 +1184,11 @@ parse_geometry (const gchar *path, EekKeyboard *keyboard, GError **error)
 static gboolean
 parse_symbols_with_prerequisites (const gchar *name,
                                   EekKeyboard *keyboard,
-                                  GSList     **loaded,
+                                  GList     **loaded,
                                   GError     **error)
 {
     gchar *filename, *path;
-    GSList *prerequisites, *p;
+    GList *prerequisites, *p;
     GError *prerequisites_error;
     gboolean retval;
 
@@ -1182,7 +1202,7 @@ parse_symbols_with_prerequisites (const gchar *name,
             return FALSE;
         }
     }
-    *loaded = g_slist_prepend (*loaded, g_strdup (name));
+    *loaded = g_list_prepend (*loaded, g_strdup (name));
 
     filename = g_strdup_printf ("%s.xml", name);
     path = g_build_filename (KEYBOARDSDIR, "symbols", filename, NULL);
@@ -1203,7 +1223,7 @@ parse_symbols_with_prerequisites (const gchar *name,
         if (!retval)
             return FALSE;
     }
-    g_slist_free_full (prerequisites, (GDestroyNotify)g_free);
+    g_list_free_full (prerequisites, (GDestroyNotify)g_free);
 
     retval = parse_symbols (path, keyboard, error);
     g_free (path);
@@ -1243,14 +1263,14 @@ parse_symbols (const gchar *path, EekKeyboard *keyboard, GError **error)
     return TRUE;
 }
 
-static GSList *
+static GList *
 parse_prerequisites (const gchar *path, GError **error)
 {
     PrerequisitesParseData *data;
     GMarkupParseContext *pcontext;
     GFile *file;
     GFileInputStream *input;
-    GSList *prerequisites;
+    GList *prerequisites;
     gboolean retval;
 
     file = g_file_new_for_path (path);
@@ -1278,14 +1298,14 @@ parse_prerequisites (const gchar *path, GError **error)
     return prerequisites;
 }
 
-static GSList *
+static GList *
 parse_keyboards (const gchar *path, GError **error)
 {
     KeyboardsParseData *data;
     GMarkupParseContext *pcontext;
     GFile *file;
     GFileInputStream *input;
-    GSList *keyboards;
+    GList *keyboards;
     gboolean retval;
 
     file = g_file_new_for_path (path);

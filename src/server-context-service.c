@@ -79,8 +79,11 @@ on_destroy (GtkWidget *widget, gpointer user_data)
     ServerContextService *context = user_data;
 
     g_assert (widget == context->window);
+
     context->window = NULL;
     context->widget = NULL;
+
+    eekboard_context_service_destroy (EEKBOARD_CONTEXT_SERVICE (context));
 }
 
 static void
@@ -96,6 +99,7 @@ on_notify_keyboard (GObject    *object,
         if (keyboard == NULL) {
             gtk_widget_hide (context->window);
             gtk_widget_destroy (context->widget);
+            context->widget = NULL;
         } else {
             gboolean was_visible = gtk_widget_get_visible (context->window);
             /* avoid to send KeyboardVisibilityChanged */
@@ -273,15 +277,20 @@ update_widget (ServerContextService *context)
     EekKeyboard *keyboard;
     const gchar *client_name;
     EekBounds bounds;
-    gchar *theme_name, *theme_path;
+    gchar *theme_name, *theme_filename, *theme_path;
     EekTheme *theme;
     
-    if (context->widget)
+    if (context->widget) {
         gtk_widget_destroy (context->widget);
+        context->widget = NULL;
+    }
 
     theme_name = g_settings_get_string (context->settings, "theme");
-    theme_path = g_strdup_printf ("%s/%s.css", THEMEDIR, theme_name);
+    theme_filename = g_strdup_printf ("%s.css", theme_name);
     g_free (theme_name);
+
+    theme_path = g_build_filename (THEMESDIR, theme_filename, NULL);
+    g_free (theme_filename);
 
     theme = eek_theme_new (theme_path, NULL, NULL);
     g_free (theme_path);
@@ -354,6 +363,11 @@ server_context_service_real_disabled (EekboardContextService *_context)
 }
 
 static void
+server_context_service_real_destroyed (EekboardContextService *_context)
+{
+}
+
+static void
 server_context_service_set_property (GObject      *object,
                                      guint         prop_id,
                                      const GValue *value,
@@ -377,9 +391,7 @@ server_context_service_set_property (GObject      *object,
         break;
 
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -408,6 +420,7 @@ server_context_service_class_init (ServerContextServiceClass *klass)
     context_class->hide_keyboard = server_context_service_real_hide_keyboard;
     context_class->enabled = server_context_service_real_enabled;
     context_class->disabled = server_context_service_real_disabled;
+    context_class->destroyed = server_context_service_real_destroyed;
 
     gobject_class->set_property = server_context_service_set_property;
     gobject_class->dispose = server_context_service_dispose;

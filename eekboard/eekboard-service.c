@@ -70,9 +70,6 @@ static const gchar introspection_xml[] =
     "      <arg direction='in' type='s' name='object_path'/>"
     "    </method>"
     "    <method name='PopContext'/>"
-    "    <method name='DestroyContext'>"
-    "      <arg direction='in' type='s' name='object_path'/>"
-    "    </method>"
     "    <method name='Destroy'/>"
     /* signals */
     "  </interface>"
@@ -350,6 +347,18 @@ service_name_vanished_callback (GDBusConnection *connection,
 }
 
 static void
+context_destroyed_cb (EekboardContextService *context, EekboardService *service)
+{
+    gchar *object_path = NULL;
+
+    remove_context_from_stack (service, context);
+
+    g_object_get (G_OBJECT(context), "object-path", &object_path, NULL);
+    g_hash_table_remove (service->priv->context_hash, object_path);
+    g_free (object_path);
+}
+
+static void
 handle_method_call (GDBusConnection       *connection,
                     const gchar           *sender,
                     const gchar           *object_path,
@@ -387,6 +396,10 @@ handle_method_call (GDBusConnection       *connection,
                                         service_name_vanished_callback,
                                         service,
                                         NULL);
+
+        g_signal_connect (G_OBJECT(context), "destroyed",
+                          G_CALLBACK(context_destroyed_cb), service);
+
         g_dbus_method_invocation_return_value (invocation,
                                                g_variant_new ("(s)",
                                                               object_path));
@@ -441,38 +454,6 @@ handle_method_call (GDBusConnection       *connection,
                 eekboard_context_service_enable (service->priv->context_stack->data);
         }
 
-        g_dbus_method_invocation_return_value (invocation, NULL);
-        return;
-    }
-
-    if (g_strcmp0 (method_name, "DestroyContext") == 0) {
-        EekboardContextService *context;
-        const gchar *object_path;
-        const gchar *owner;
-
-        g_variant_get (parameters, "(&s)", &object_path);
-        context = g_hash_table_lookup (service->priv->context_hash, object_path);
-        if (!context) {
-            g_dbus_method_invocation_return_error (invocation,
-                                                   G_IO_ERROR,
-                                                   G_IO_ERROR_FAILED_HANDLED,
-                                                   "context not found");
-            return;
-        }
-
-        owner = g_object_get_data (G_OBJECT(context), "owner");
-        if (g_strcmp0 (owner, sender) != 0) {
-            g_dbus_method_invocation_return_error
-                (invocation,
-                 G_IO_ERROR,
-                 G_IO_ERROR_FAILED_HANDLED,
-                 "the context at %s not owned by %s",
-                 object_path, sender);
-            return;
-        }
-
-        remove_context_from_stack (service, context);
-        g_hash_table_remove (service->priv->context_hash, object_path);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }

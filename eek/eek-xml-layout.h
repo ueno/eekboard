@@ -76,10 +76,13 @@ struct _EekXmlKeyboardDesc
 };
 typedef struct _EekXmlKeyboardDesc EekXmlKeyboardDesc;
 
-GType      eek_xml_layout_get_type       (void) G_GNUC_CONST;
-EekLayout *eek_xml_layout_new            (const gchar *id,
-                                          GError     **error);
-GSList    *eek_xml_layout_list_keyboards (void);
+GType               eek_xml_layout_get_type    (void) G_GNUC_CONST;
+EekLayout          *eek_xml_layout_new         (const gchar        *id,
+                                                GError            **error);
+GList              *eek_xml_list_keyboards     (void);
+
+EekXmlKeyboardDesc *eek_xml_keyboard_desc_copy (EekXmlKeyboardDesc *desc);
+void                eek_xml_keyboard_desc_free (EekXmlKeyboardDesc *desc);
 
 G_END_DECLS
 #endif  /* EEK_XML_LAYOUT_H */

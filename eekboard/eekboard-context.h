@@ -66,11 +66,12 @@ struct _EekboardContextClass {
     /* signals */
     void (*enabled)      (EekboardContext *self);
     void (*disabled)     (EekboardContext *self);
-    void (*key_pressed)  (EekboardContext *self,
-                          const gchar     *keyname,
-                          EekSymbol       *symbol,
-                          guint            modifiers);
     void (*destroyed)    (EekboardContext *self);
+
+    void (*key_activated)  (EekboardContext *self,
+                            const gchar     *keyname,
+                            EekSymbol       *symbol,
+                            guint            modifiers);
 
     /*< private >*/
     /* padding */

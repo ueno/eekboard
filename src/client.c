@@ -42,7 +42,6 @@
 #include "eekboard/eekboard-client.h"
 #include "eekboard/eekboard-xklutil.h"
 #include "client.h"
-#include "preferences-dialog.h"
 
 #include <string.h>
 
@@ -54,6 +53,7 @@ enum {
     PROP_CONNECTION,
     PROP_EEKBOARD,
     PROP_CONTEXT,
+    PROP_KEYBOARDS,
     PROP_LAST
 };
 
@@ -66,14 +66,15 @@ struct _Client {
     EekboardContext *context;
 
     GSList *keyboards;
+    GSList *keyboards_head;
+
     XklEngine *xkl_engine;
     XklConfigRegistry *xkl_config_registry;
 
     gulong xkl_config_changed_handler;
     gulong xkl_state_changed_handler;
 
-    gulong key_pressed_handler;
-    gulong key_released_handler;
+    gulong key_activated_handler;
 
     gboolean follows_focus;
     guint hide_keyboard_timeout_id;
@@ -158,16 +159,21 @@ client_set_property (GObject      *object,
             if (client->context == NULL) {
                 g_object_unref (client->eekboard);
                 client->eekboard = NULL;
-            } else
+            } else {
                 eekboard_client_push_context (client->eekboard,
                                               client->context,
                                               NULL);
+                g_settings_bind (client->settings, "keyboards",
+                                 client, "keyboards",
+                                 G_SETTINGS_BIND_GET);
+            }
         }
         break;
+    case PROP_KEYBOARDS:
+        client_set_keyboards (client, g_value_get_boxed (value));
+        break;
     default:
-        g_object_set_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -188,9 +194,7 @@ client_get_property (GObject    *object,
         g_value_set_object (value, client->context);
         break;
     default:
-        g_object_get_property (object,
-                               g_param_spec_get_name (pspec),
-                               value);
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
     }
 }
@@ -288,6 +292,15 @@ client_class_init (ClientClass *klass)
                                  G_PARAM_READABLE);
     g_object_class_install_property (gobject_class,
                                      PROP_CONTEXT,
+                                     pspec);
+
+    pspec = g_param_spec_boxed ("keyboards",
+                                "Keyboards",
+                                "Keyboards",
+                                G_TYPE_STRV,
+                                G_PARAM_WRITABLE);
+    g_object_class_install_property (gobject_class,
+                                     PROP_KEYBOARDS,
                                      pspec);
 }
 
@@ -753,10 +766,20 @@ set_keyboards (Client              *client,
 {
     guint keyboard_id;
     const gchar * const *p;
-    GSList *head = NULL;
+    GSList *head;
 
-    if (client->keyboards)
+    g_return_val_if_fail (keyboards != NULL, FALSE);
+    g_return_val_if_fail (client->context, FALSE);
+
+    if (client->keyboards) {
+        for (head = client->keyboards; head; head = head->next) {
+            eekboard_context_remove_keyboard (client->context,
+                                              GPOINTER_TO_UINT(head->data),
+                                              NULL);
+        }
         g_slist_free (client->keyboards);
+        client->keyboards = NULL;
+    }
 
     for (p = keyboards; *p != NULL; p++) {
         keyboard_id = eekboard_context_add_keyboard (client->context, *p, NULL);
@@ -764,17 +787,16 @@ set_keyboards (Client              *client,
             g_slist_free (head);
             return FALSE;
         }
-        head = g_slist_prepend (head, GUINT_TO_POINTER(keyboard_id));
+        client->keyboards = g_slist_prepend (client->keyboards,
+                                             GUINT_TO_POINTER(keyboard_id));
     }
 
-    /* make a cycle */
-    head = g_slist_reverse (head);
-    g_slist_last (head)->next = head;
-    client->keyboards = head;
+    client->keyboards = g_slist_reverse (client->keyboards);
+    client->keyboards_head = client->keyboards;
 
     /* select the first keyboard */
     eekboard_context_set_keyboard (client->context,
-                                   GPOINTER_TO_UINT(head->data),
+                                   GPOINTER_TO_UINT(client->keyboards_head->data),
                                    NULL);
     return TRUE;
 }
@@ -1028,25 +1050,37 @@ send_fake_key_events (Client    *client,
 }
 
 static void
-on_key_pressed (EekboardContext *context,
-                const gchar     *keyname,
-                EekSymbol       *symbol,
-                guint            modifiers,
-                gpointer         user_data)
+on_key_activated (EekboardContext *context,
+                  guint            keycode,
+                  EekSymbol       *symbol,
+                  guint            modifiers,
+                  gpointer         user_data)
 {
     Client *client = user_data;
 
     if (g_strcmp0 (eek_symbol_get_name (symbol), "cycle-keyboard") == 0) {
-        client->keyboards = g_slist_next (client->keyboards);
+        client->keyboards_head = g_slist_next (client->keyboards_head);
+        if (client->keyboards_head == NULL)
+            client->keyboards_head = client->keyboards;
         eekboard_context_set_keyboard (client->context,
-                                       GPOINTER_TO_UINT(client->keyboards->data),
+                                       GPOINTER_TO_UINT(client->keyboards_head->data),
                                        NULL);
         return;
     }
 
     if (g_strcmp0 (eek_symbol_get_name (symbol), "preferences") == 0) {
-        PreferencesDialog *dialog = preferences_dialog_new ();
-        preferences_dialog_run (dialog);
+        gchar *argv[2];
+        GError *error;
+
+        argv[0] = g_build_filename (LIBEXECDIR, "eekboard-setup", NULL);
+        argv[1] = NULL;
+
+        error = NULL;
+        if (!g_spawn_async (NULL, argv, NULL, 0, NULL, NULL, NULL, &error)) {
+            g_warning ("can't spawn %s: %s", argv[0], error->message);
+            g_error_free (error);
+        }
+        g_free (argv[0]);
         return;
     }
 
@@ -1104,9 +1138,9 @@ client_enable_xtest (Client *client)
 
     update_modifier_keycodes (client);
 
-    client->key_pressed_handler =
-        g_signal_connect (client->context, "key-pressed",
-                          G_CALLBACK(on_key_pressed), client);
+    client->key_activated_handler =
+        g_signal_connect (client->context, "key-activated",
+                          G_CALLBACK(on_key_activated), client);
 
     return TRUE;
 }

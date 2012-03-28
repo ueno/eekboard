@@ -50,6 +50,7 @@ enum {
 enum {
     ENABLED,
     DISABLED,
+    DESTROYED,
     LAST_SIGNAL
 };
 
@@ -114,8 +115,9 @@ static const gchar introspection_xml[] =
     /* signals */
     "    <signal name='Enabled'/>"
     "    <signal name='Disabled'/>"
+    "    <signal name='Destroyed'/>"
     "    <signal name='KeyActivated'>"
-    "      <arg type='s' name='keyname'/>"
+    "      <arg type='u' name='keycode'/>"
     "      <arg type='v' name='symbol'/>"
     "      <arg type='u' name='modifiers'/>"
     "    </signal>"
@@ -400,6 +402,23 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                       0);
 
     /**
+     * EekboardContextService::destroyed:
+     * @context: an #EekboardContextService
+     *
+     * Emitted when @context is destroyed.
+     */
+    signals[DESTROYED] =
+        g_signal_new (I_("destroyed"),
+                      G_TYPE_FROM_CLASS(gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET(EekboardContextServiceClass, destroyed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0);
+
+    /**
      * EekboardContextService:object-path:
      *
      * D-Bus object path.
@@ -574,7 +593,7 @@ emit_key_activated_dbus_signal (EekboardContextService *context,
                                 EekKey                 *key)
 {
     if (context->priv->connection && context->priv->enabled) {
-        const gchar *keyname = eek_element_get_name (EEK_ELEMENT(key));
+        guint keycode = eek_key_get_keycode (key);
         EekSymbol *symbol = eek_key_get_symbol_with_fallback (key, 0, 0);
         guint modifiers = eek_keyboard_get_modifiers (context->priv->keyboard);
         GVariant *variant;
@@ -589,8 +608,8 @@ emit_key_activated_dbus_signal (EekboardContextService *context,
                                                 context->priv->object_path,
                                                 EEKBOARD_CONTEXT_SERVICE_INTERFACE,
                                                 "KeyActivated",
-                                                g_variant_new ("(svu)",
-                                                               keyname,
+                                                g_variant_new ("(uvu)",
+                                                               keycode,
                                                                variant,
                                                                modifiers),
                                                 &error);
@@ -748,13 +767,15 @@ handle_method_call (GDBusConnection       *connection,
 
         g_variant_get (parameters, "(u)", &keyboard_id);
 
-        current_keyboard_id =
-            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT(context->priv->keyboard),
-                                                 "keyboard-id"));
-        if (keyboard_id == current_keyboard_id) {
-            disconnect_keyboard_signals (context);
-            context->priv->keyboard = NULL;
-            g_object_notify (G_OBJECT(context), "keyboard");
+        if (context->priv->keyboard != NULL) {
+            current_keyboard_id =
+                GPOINTER_TO_UINT (g_object_get_data (G_OBJECT(context->priv->keyboard),
+                                                     "keyboard-id"));
+            if (keyboard_id == current_keyboard_id) {
+                disconnect_keyboard_signals (context);
+                context->priv->keyboard = NULL;
+                g_object_notify (G_OBJECT(context), "keyboard");
+            }
         }
 
         g_hash_table_remove (context->priv->keyboard_hash,
@@ -976,6 +997,42 @@ eekboard_context_service_disable (EekboardContextService *context)
         }
         g_signal_emit (context, signals[DISABLED], 0);
     }
+}
+
+/**
+ * eekboard_context_service_destroy:
+ * @context: an #EekboardContextService
+ *
+ * Destroy @context.
+ */
+void
+eekboard_context_service_destroy (EekboardContextService *context)
+{
+    gboolean retval;
+    GError *error;
+
+    g_return_if_fail (EEKBOARD_IS_CONTEXT_SERVICE(context));
+    g_return_if_fail (context->priv->connection);
+
+    if (context->priv->enabled) {
+        eekboard_context_service_disable (context);
+    }
+
+    error = NULL;
+    retval = g_dbus_connection_emit_signal (context->priv->connection,
+                                            NULL,
+                                            context->priv->object_path,
+                                            EEKBOARD_CONTEXT_SERVICE_INTERFACE,
+                                            "Destroyed",
+                                            NULL,
+                                            &error);
+    if (!retval) {
+        g_warning ("failed to emit Destroyed signal: %s",
+                   error->message);
+        g_error_free (error);
+        g_assert_not_reached ();
+    }
+    g_signal_emit (context, signals[DESTROYED], 0);
 }
 
 /**

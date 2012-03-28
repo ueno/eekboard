@@ -73,6 +73,7 @@ struct _EekboardContextServiceClass {
     /* signals */
     void         (*enabled)            (EekboardContextService *self);
     void         (*disabled)           (EekboardContextService *self);
+    void         (*destroyed)          (EekboardContextService *self);
 
     /*< private >*/
     /* padding */
@@ -83,6 +84,7 @@ GType         eekboard_context_service_get_type
                                               (void) G_GNUC_CONST;
 void          eekboard_context_service_enable (EekboardContextService *context);
 void          eekboard_context_service_disable (EekboardContextService *context);
+void          eekboard_context_service_destroy (EekboardContextService *context);
 EekKeyboard  *eekboard_context_service_get_keyboard
                                               (EekboardContextService *context);
 gboolean      eekboard_context_service_get_fullscreen

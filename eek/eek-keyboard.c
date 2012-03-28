@@ -74,6 +74,22 @@ struct _EekKeyboardPrivate
     EekModifierType alt_gr_mask;
 };
 
+G_DEFINE_BOXED_TYPE(EekModifierKey, eek_modifier_key,
+                    eek_modifier_key_copy, eek_modifier_key_free);
+
+EekModifierKey *
+eek_modifier_key_copy (EekModifierKey *modkey)
+{
+    return g_slice_dup (EekModifierKey, modkey);
+}
+
+void
+eek_modifier_key_free (EekModifierKey *modkey)
+{
+    g_object_unref (modkey->key);
+    g_slice_free (EekModifierKey, modkey);
+}
+
 static void
 on_key_pressed (EekSection  *section,
                 EekKey      *key,
@@ -240,7 +256,7 @@ set_modifiers_with_key (EekKeyboard    *self,
         if (priv->modifier_behavior != EEK_MODIFIER_BEHAVIOR_NONE) {
             EekModifierKey *modifier_key = g_slice_new (EekModifierKey);
             modifier_key->modifiers = enabled;
-            modifier_key->key = key;
+            modifier_key->key = g_object_ref (key);
             priv->locked_keys =
                 g_list_prepend (priv->locked_keys, modifier_key);
             g_signal_emit_by_name (modifier_key->key, "locked");
@@ -356,7 +372,8 @@ eek_keyboard_finalize (GObject *object)
     gint i;
 
     g_list_free (priv->pressed_keys);
-    g_list_free (priv->locked_keys);
+    g_list_free_full (priv->locked_keys,
+                      (GDestroyNotify) eek_modifier_key_free);
 
     for (i = 0; i < priv->outline_array->len; i++) {
         EekOutline *outline = &g_array_index (priv->outline_array,
@@ -810,7 +827,7 @@ GList *
 eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)
 {
     g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
-    return keyboard->priv->pressed_keys;
+    return g_list_copy (keyboard->priv->pressed_keys);
 }
 
 /**
@@ -825,5 +842,5 @@ GList *
 eek_keyboard_get_locked_keys (EekKeyboard *keyboard)
 {
     g_return_val_if_fail (EEK_IS_KEYBOARD(keyboard), NULL);
-    return keyboard->priv->locked_keys;
+    return g_list_copy (keyboard->priv->locked_keys);
 }
