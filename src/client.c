@@ -92,8 +92,6 @@ struct _Client {
 #ifdef HAVE_XTEST
     guint modifier_keycodes[8]; 
     XkbDescRec *xkb;
-    GSList *replaced_keycodes;
-    gulong reset_replaced_keycodes_timeout_handler;
 #endif  /* HAVE_XTEST */
 
     GSettings *settings;
@@ -837,19 +835,6 @@ on_xkl_state_changed (XklEngine           *xklengine,
 }
 
 #ifdef HAVE_XTEST
-struct _KeycodeReplacement {
-    guint keycode;
-    guint new_keysym;
-    guint old_keysym;
-};
-typedef struct _KeycodeReplacement KeycodeReplacement;
-
-static void
-keycode_replacement_free (KeycodeReplacement *replacement)
-{
-    g_slice_free (KeycodeReplacement, replacement);
-}
-
 /* The following functions for keyboard mapping change are direct
    translation of the code in Caribou (in libcaribou/xadapter.vala):
 
@@ -868,14 +853,7 @@ get_replaced_keycode (Client *client)
         guint offset = client->xkb->map->key_sym_map[keycode].offset;
         if (client->xkb->map->key_sym_map[keycode].kt_index[0] == XkbOneLevelIndex &&
             client->xkb->map->syms[offset] != NoSymbol) {
-            GSList *head;
-            for (head = client->replaced_keycodes; head; head = head->next) {
-                KeycodeReplacement *replacement = head->data;
-                if (replacement->keycode == keycode)
-                    break;
-            }
-            if (head == NULL)
-                return keycode;
+            return keycode;
         }
     }
 
@@ -896,26 +874,21 @@ replace_keycode (Client *client,
 {
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
-    guint offset;
-    XkbMapChangesRec changes;
     guint old_keysym;
+    int keysyms_per_keycode;
+    KeySym *syms;
 
     g_return_val_if_fail (client->xkb->min_key_code <= keycode &&
-                          client->xkb->max_key_code,
+                          keycode <= client->xkb->max_key_code,
                           FALSE);
     g_return_val_if_fail (keysym != NULL, FALSE);
 
-    offset = client->xkb->map->key_sym_map[keycode].offset;
-    old_keysym = client->xkb->map->syms[offset];
-    client->xkb->map->syms[offset] = *keysym;
-
-    changes.changed = XkbKeySymsMask;
-    changes.first_key_sym = keycode;
-    changes.num_key_syms = 1;
-
-    XkbChangeMap (xdisplay, client->xkb, &changes);
+    syms = XGetKeyboardMapping (xdisplay, keycode, 1, &keysyms_per_keycode);
+    old_keysym = syms[0];
+    syms[0] = *keysym;
+    XChangeKeyboardMapping (xdisplay, keycode, 1, syms, 1);
     XSync (xdisplay, False);
-
+    XFree (syms);
     *keysym = old_keysym;
 
     return TRUE;
@@ -956,6 +929,7 @@ send_fake_modifier_key_event (Client         *client,
                               gboolean        is_pressed)
 {
     GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
     gint i;
 
     for (i = 0; i < G_N_ELEMENTS(client->modifier_keycodes); i++) {
@@ -964,79 +938,39 @@ send_fake_modifier_key_event (Client         *client,
 
             g_return_if_fail (keycode > 0);
 
-            XTestFakeKeyEvent (GDK_DISPLAY_XDISPLAY (display),
+            XTestFakeKeyEvent (xdisplay,
                                keycode,
                                is_pressed,
                                CurrentTime);
+            XSync (xdisplay, False);
         }
     }
-}
-
-static gboolean
-reset_replaced_keycodes (gpointer data)
-{
-    Client *client = data;
-    GSList *head;
-
-    for (head = client->replaced_keycodes; head; head = head->next) {
-        KeycodeReplacement *replacement = head->data;
-        guint keysym = replacement->old_keysym;
-        replace_keycode (client, replacement->keycode, &keysym);
-    }
-    g_slist_free_full (client->replaced_keycodes,
-                       (GDestroyNotify) keycode_replacement_free);
-    client->replaced_keycodes = NULL;
-    client->reset_replaced_keycodes_timeout_handler = 0;
-    return FALSE;
 }
 
 static void
 send_fake_key_event (Client  *client,
                      guint    xkeysym,
-                     guint    keyboard_modifiers,
-                     gboolean is_pressed)
+                     guint    keyboard_modifiers)
 {
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = GDK_DISPLAY_XDISPLAY (display);
     EekModifierType modifiers;
     guint keycode;
-    guint old_keysym = 0;
-    GSList *head;
+    guint old_keysym = xkeysym;
 
     g_return_if_fail (xkeysym > 0);
 
-    keycode = 0;
-    for (head = client->replaced_keycodes; head; head = head->next) {
-        KeycodeReplacement *replacement = head->data;
-        if (replacement->new_keysym == xkeysym) {
-            keycode = replacement->keycode;
-            break;
-        }
-    }
-
     modifiers = 0;
-    if (keycode == 0) {
-        if (!get_keycode_from_gdk_keymap (client, xkeysym, &keycode, &modifiers)) {
-            KeycodeReplacement *replacement;
+    if (!get_keycode_from_gdk_keymap (client, xkeysym, &keycode, &modifiers)) {
+        keycode = get_replaced_keycode (client);
+        if (keycode == 0) {
+            g_warning ("no available keycode to replace");
+            return;
+        }
 
-            keycode = get_replaced_keycode (client);
-            if (keycode == 0) {
-                g_warning ("no available keycode to replace");
-                return;
-            }
-
-            old_keysym = xkeysym;
-            if (!replace_keycode (client, keycode, &old_keysym)) {
-                g_warning ("failed to lookup X keysym %X", xkeysym);
-                return;
-            }
-
-            replacement = g_slice_new0 (KeycodeReplacement);
-            replacement->keycode = keycode;
-            replacement->new_keysym = xkeysym;
-            replacement->old_keysym = old_keysym;
-            client->replaced_keycodes =
-                g_slist_prepend (client->replaced_keycodes, replacement);
+        if (!replace_keycode (client, keycode, &old_keysym)) {
+            g_warning ("failed to lookup X keysym %X", xkeysym);
+            return;
         }
     }
 
@@ -1052,18 +986,15 @@ send_fake_key_event (Client  *client,
 
     modifiers |= keyboard_modifiers;
 
-    send_fake_modifier_key_event (client, modifiers, is_pressed);
-    XTestFakeKeyEvent (xdisplay, keycode, is_pressed, CurrentTime);
+    send_fake_modifier_key_event (client, modifiers, TRUE);
+    XTestFakeKeyEvent (xdisplay, keycode, TRUE, 20);
+    XSync (xdisplay, False);
+    XTestFakeKeyEvent (xdisplay, keycode, FALSE, 20);
+    XSync (xdisplay, False);
+    send_fake_modifier_key_event (client, modifiers, FALSE);
 
-    if (client->reset_replaced_keycodes_timeout_handler == 0 &&
-        old_keysym != 0) {
-        /* Queue a timer to restore the old keycode.  Ugly, but
-         * required due to races / asynchronous X delivery.  Long-term
-         * fix is to extend the X keymap here instead of replace
-         * entries. */
-        client->reset_replaced_keycodes_timeout_handler =
-            g_timeout_add (500, reset_replaced_keycodes, client);
-    }
+    if (old_keysym != xkeysym)
+        replace_keycode (client, keycode, &old_keysym);
 }
 
 static void
@@ -1102,8 +1033,7 @@ send_fake_key_events (Client    *client,
 
     if (EEK_IS_KEYSYM(symbol)) {
         guint xkeysym = eek_keysym_get_xkeysym (EEK_KEYSYM(symbol));
-        send_fake_key_event (client, xkeysym, keyboard_modifiers, TRUE);
-        send_fake_key_event (client, xkeysym, keyboard_modifiers, FALSE);
+        send_fake_key_event (client, xkeysym, keyboard_modifiers);
     }
 }
 
@@ -1209,11 +1139,6 @@ client_disable_xtest (Client *client)
     if (client->xkb) {
         XkbFreeKeyboard (client->xkb, 0, TRUE);	/* free_all = TRUE */
         client->xkb = NULL;
-    }
-    if (client->replaced_keycodes) {
-        g_slist_free_full (client->replaced_keycodes,
-                           (GDestroyNotify) keycode_replacement_free);
-        client->replaced_keycodes = NULL;
     }
 }
 #endif  /* HAVE_XTEST */

@@ -71,18 +71,14 @@ static void
 on_context_destroyed (EekboardContext *context,
                       gpointer         user_data)
 {
-    GMainLoop *loop = user_data;
-
-    g_main_loop_quit (loop);
+    gtk_main_quit ();
 }
 
 static void
 on_destroyed (EekboardClient *eekboard,
               gpointer          user_data)
 {
-    GMainLoop *loop = user_data;
-
-    g_main_loop_quit (loop);
+    gtk_main_quit ();
 }
 
 enum FocusListenerType {
@@ -121,7 +117,6 @@ main (int argc, char **argv)
     GDBusConnection *connection;
     GError *error;
     GOptionContext *option_context;
-    GMainLoop *loop = NULL;
     gint focus;
     GSettings *settings = NULL;
     gchar **keyboards = NULL;
@@ -283,12 +278,10 @@ main (int argc, char **argv)
     }
 #endif  /* HAVE_XTEST */
 
-    loop = g_main_loop_new (NULL, FALSE);
-
     if (!opt_focus) {
         g_object_get (client, "context", &context, NULL);
         g_signal_connect (context, "destroyed",
-                          G_CALLBACK(on_context_destroyed), loop);
+                          G_CALLBACK(on_context_destroyed), NULL);
         g_object_unref (context);
     }
 
@@ -301,7 +294,7 @@ main (int argc, char **argv)
 
     g_object_get (client, "eekboard", &eekboard, NULL);
     g_signal_connect (eekboard, "destroyed",
-                      G_CALLBACK(on_destroyed), loop);
+                      G_CALLBACK(on_destroyed), NULL);
     g_object_unref (eekboard);
     
     if (opt_keyboards != NULL) {
@@ -315,11 +308,9 @@ main (int argc, char **argv)
         g_strfreev (keyboards);
     }
 
-    g_main_loop_run (loop);
+    gtk_main ();
 
  out:
-    if (loop)
-        g_main_loop_unref (loop);
     if (client)
         g_object_unref (client);
     if (settings)
