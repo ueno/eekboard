@@ -249,6 +249,8 @@
   </key>
   <key keycode="149" name="I149">
     <symbol label="⌨" icon="input-keyboard-symbolic">cycle-keyboard</symbol>
+  </key>
+  <key keycode="150" name="I150">
     <symbol label="☺" icon="preferences-system-symbolic">preferences</symbol>
   </key>
   <key keycode="37" name="LCTL">

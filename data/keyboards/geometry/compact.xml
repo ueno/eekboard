@@ -50,7 +50,7 @@
     <row columns="14" orientation="1"/>
     <row columns="13" orientation="1"/>
     <row columns="12" orientation="1"/>
-    <row columns="8" orientation="1"/>
+    <row columns="9" orientation="1"/>
     <key keycode="49" name="TLDE" column="0" row="0" oref="outline2">
       <bounds x="3.121951" y="1.560976" width="37.46341" height="37.46341"/>
     </key>
@@ -211,7 +211,7 @@
       <bounds x="499.5121" y="121.7560" width="109.2682" height="37.46341"/>
     </key>
     <key keycode="149" name="I149" column="0" row="4" oref="outline10">
-      <bounds x="3.121951" y="162.3414" width="56.19512" height="37.46341"/>
+      <bounds x="3.121951" y="162.3414" width="37.46341" height="37.46341"/>
     </key>
     <key keycode="37" name="LCTL" column="1" row="4" oref="outline1">
       <bounds x="62.43902" y="162.3414" width="48.39024" height="37.46341"/>
@@ -220,19 +220,22 @@
       <bounds x="113.9512" y="162.3414" width="48.39024" height="37.46341"/>
     </key>
     <key keycode="65" name="SPCE" column="3" row="4" oref="outline3">
-      <bounds x="165.4634" y="162.3414" width="238.8292" height="37.46341"/>
+      <bounds x="165.4634" y="162.3414" width="217.5853" height="37.46341"/>
     </key>
     <key keycode="113" name="LEFT" column="4" row="4" oref="outline1">
-      <bounds x="407.4146" y="162.3414" width="48.39024" height="37.46341"/>
+      <bounds x="368.0487" y="162.3414" width="48.39024" height="37.46341"/>
     </key>
     <key keycode="111" name="UP" column="5" row="4" oref="outline1">
-      <bounds x="458.9268" y="162.3414" width="48.39024" height="37.46341"/>
+      <bounds x="419.43894" y="162.3414" width="48.39024" height="37.46341"/>
     </key>
     <key keycode="116" name="DOWN" column="6" row="4" oref="outline1">
-      <bounds x="508.8780" y="162.3414" width="48.39024" height="37.46341"/>
+      <bounds x="470.82918" y="162.3414" width="48.39024" height="37.46341"/>
     </key>
     <key keycode="114" name="RGHT" column="7" row="4" oref="outline1">
-      <bounds x="560.3902" y="162.3414" width="48.39024" height="37.46341"/>
+      <bounds x="522.21942" y="162.3414" width="48.39024" height="37.46341"/>
+    </key>
+    <key keycode="150" name="I150" column="8" row="4" oref="outline10">
+      <bounds x="573.60966" y="162.3414" width="37.46341" height="37.46341"/>
     </key>
   </section>
   <outline id="outline2" corner-radius="1.000000">
@@ -285,8 +288,8 @@
   </outline>
   <outline id="outline10" corner-radius="1.000000">
     <point x="0.000000" y="0.000000"/>
-    <point x="56.19512" y="0.000000"/>
-    <point x="56.19512" y="37.46341"/>
+    <point x="37.46341" y="0.000000"/>
+    <point x="37.46341" y="37.46341"/>
     <point x="0.000000" y="37.46341"/>
   </outline>
   <outline id="outline13" corner-radius="1.000000">
@@ -297,8 +300,8 @@
   </outline>
   <outline id="outline3" corner-radius="1.000000">
     <point x="0.000000" y="0.000000"/>
-    <point x="238.8292" y="0.000000"/>
-    <point x="238.8292" y="37.46341"/>
+    <point x="217.5853" y="0.000000"/>
+    <point x="217.5853" y="37.46341"/>
     <point x="0.000000" y="37.46341"/>
   </outline>
 </geometry>
