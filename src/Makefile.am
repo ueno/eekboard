@@ -54,11 +54,6 @@ eekboard_CFLAGS += $(ATSPI2_CFLAGS)
 eekboard_LDADD += $(ATSPI2_LIBS)
 endif
 
-if ENABLE_IBUS
-eekboard_CFLAGS += $(IBUS_CFLAGS)
-eekboard_LDADD += $(IBUS_LIBS)
-endif
-
 eekboard_headers =				\
 	client.h				\
 	$(NULL)

@@ -112,10 +112,7 @@ fi
 AM_CONDITIONAL(ENABLE_XDOCK, [test x$enable_x_dock = xyes])
 AC_MSG_RESULT($enable_x_dock)
 
-focus_listeners=""
-keystroke_listeners=""
-
-focus_listeners=""
+focus_listeners="ibus"
 keystroke_listeners=""
 
 dnl use AT-SPI 2 to capture focus/keystroke events
@@ -136,24 +133,6 @@ if test x$enable_atspi = xyes; then
 fi
 AC_MSG_RESULT($enable_atspi)
 AM_CONDITIONAL(ENABLE_ATSPI, [test x$enable_atspi = xyes])
-
-dnl use IBus to capture focus events
-AC_MSG_CHECKING([whether you enable IBus focus tracking])
-AC_ARG_ENABLE(ibus,
-              AS_HELP_STRING([--enable-ibus=no/yes],
-                             [Enable IBus focus tracking default=yes]),
-              enable_ibus=$enableval,
-              enable_ibus=yes)
-
-if test x$enable_ibus = xyes; then
-  PKG_CHECK_MODULES([IBUS], [ibus-1.0 >= 1.3.99], , enable_ibus=no)
-  if test x$enable_ibus = xyes; then
-    AC_DEFINE([HAVE_IBUS], [1], [Define if IBus is found])
-    focus_listeners="ibus $focus_listeners"
-  fi
-fi
-AC_MSG_RESULT($enable_ibus)
-AM_CONDITIONAL(ENABLE_IBUS, [test x$enable_ibus = xyes])
 
 if test -n "$focus_listeners"; then
   AC_DEFINE(ENABLE_FOCUS_LISTENER, [1], [Define if eekboard can follow focus changes])

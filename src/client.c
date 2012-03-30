@@ -33,10 +33,6 @@
 #include <X11/XKBlib.h>
 #endif  /* HAVE_XTEST */
 
-#ifdef HAVE_IBUS
-#include <ibus.h>
-#endif  /* HAVE_IBUS */
-
 #include "eek/eek.h"
 #include "eek/eek-xkl.h"
 #include "eekboard/eekboard-client.h"
@@ -47,6 +43,8 @@
 
 #define CSW 640
 #define CSH 480
+
+#define IBUS_INTERFACE_PANEL    "org.freedesktop.IBus.Panel"
 
 enum {
     PROP_0,
@@ -79,15 +77,13 @@ struct _Client {
     gboolean follows_focus;
     guint hide_keyboard_timeout_id;
 
+    GDBusConnection *ibus_connection;
+    guint ibus_focus_message_filter;
+
 #ifdef HAVE_ATSPI
     AtspiAccessible *acc;
     AtspiDeviceListener *keystroke_listener;
 #endif  /* HAVE_ATSPI */
-
-#ifdef HAVE_IBUS
-    IBusBus *ibus_bus;
-    guint ibus_focus_message_filter;
-#endif  /* HAVE_IBUS */
 
 #ifdef HAVE_XTEST
     guint modifier_keycodes[8]; 
@@ -211,13 +207,11 @@ client_dispose (GObject *object)
     client_disable_atspi_keystroke (client);
 #endif  /* HAVE_ATSPI */
 
-#ifdef HAVE_IBUS
     client_disable_ibus_focus (client);
-    if (client->ibus_bus) {
-        g_object_unref (client->ibus_bus);
-        client->ibus_bus = NULL;
+    if (client->ibus_connection) {
+        g_object_unref (client->ibus_connection);
+        client->ibus_connection = NULL;
     }
-#endif  /* HAVE_IBUS */
 
 #ifdef HAVE_XTEST
     client_disable_xtest (client);
@@ -590,7 +584,6 @@ keystroke_listener_cb (const AtspiDeviceEvent *stroke,
 }
 #endif  /* HAVE_ATSPI */
 
-#ifdef HAVE_IBUS
 static void
 add_match_rule (GDBusConnection *connection,
                 const gchar     *match_rule)
@@ -658,12 +651,10 @@ focus_message_filter (GDBusConnection *connection,
 }
 
 static void
-_ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
+_ibus_connect_focus_handlers (GDBusConnection *connection, gpointer user_data)
 {
     Client *client = user_data;
-    GDBusConnection *connection;
 
-    connection = ibus_bus_get_connection (bus);
     add_match_rule (connection,
                     "type='method_call',"
                     "interface='" IBUS_INTERFACE_PANEL "',"
@@ -682,16 +673,30 @@ _ibus_connect_focus_handlers (IBusBus *bus, gpointer user_data)
 gboolean
 client_enable_ibus_focus (Client *client)
 {
-    if (!client->ibus_bus) {
-        client->ibus_bus = ibus_bus_new ();
-        g_object_ref (client->ibus_bus);
-        g_signal_connect (client->ibus_bus, "connected",
-                          G_CALLBACK(_ibus_connect_focus_handlers),
-                          client);
-    }
+    if (client->ibus_connection == NULL) {
+        const gchar *ibus_address;
+        GError *error;
 
-    if (ibus_bus_is_connected (client->ibus_bus))
-        _ibus_connect_focus_handlers (client->ibus_bus, client);
+        ibus_address = g_getenv ("IBUS_ADDRESS");
+        if (ibus_address == NULL) {
+            g_warning ("Can't get IBus address; set IBUS_ADDRESS");
+            return FALSE;
+        }
+
+        error = NULL;
+        client->ibus_connection =
+            g_dbus_connection_new_for_address_sync (ibus_address,
+                                                    G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION,
+                                                    NULL,
+                                                    NULL,
+                                                    &error);
+        if (client->ibus_connection == NULL) {
+            g_warning ("Can't open connection to IBus: %s", error->message);
+            g_error_free (error);
+            return FALSE;
+        }
+    }
+    _ibus_connect_focus_handlers (client->ibus_connection, client);
 
     client->follows_focus = TRUE;
     return TRUE;
@@ -700,21 +705,17 @@ client_enable_ibus_focus (Client *client)
 void
 client_disable_ibus_focus (Client *client)
 {
-    GDBusConnection *connection;
-
     client->follows_focus = FALSE;
 
-    if (client->ibus_bus) {
+    if (client->ibus_connection) {
         if (client->ibus_focus_message_filter != 0) {
-            connection = ibus_bus_get_connection (client->ibus_bus);
-            g_dbus_connection_remove_filter (connection,
+            g_dbus_connection_remove_filter (client->ibus_connection,
                                              client->ibus_focus_message_filter);
         }
-        g_object_unref (client->ibus_bus);
-        client->ibus_bus = NULL;
+        g_object_unref (client->ibus_connection);
+        client->ibus_connection = NULL;
     }
 }
-#endif  /* HAVE_ATSPI */
 
 Client *
 client_new (GDBusConnection *connection)
