@@ -18,6 +18,8 @@
 
 INCLUDES = -I$(top_srcdir) $(GIO2_CFLAGS) $(GTK_CFLAGS) $(LIBXKLAVIER_CFLAGS)
 
+TESTS_ENVIRONMENT = EEKBOARD_KEYBOARDSDIR=$(top_srcdir)/data/keyboards
+
 TESTS = eek-simple-test eek-xml-test
 noinst_PROGRAMS = $(TESTS)
 

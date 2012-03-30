@@ -53,6 +53,7 @@ G_DEFINE_TYPE_WITH_CODE (EekXmlLayout, eek_xml_layout, EEK_TYPE_LAYOUT,
 struct _EekXmlLayoutPrivate
 {
     gchar *id;
+    gchar *keyboards_dir;
     EekXmlKeyboardDesc *desc;
 };
 
@@ -69,7 +70,8 @@ static gboolean      parse_geometry  (const gchar         *path,
                                       EekKeyboard         *keyboard,
                                       GError             **error);
 static gboolean      parse_symbols_with_prerequisites
-                                     (const gchar         *name,
+                                     (const gchar         *keyboards_dir,
+                                      const gchar         *name,
                                       EekKeyboard         *keyboard,
                                       GList             **loaded,
                                       GError             **error);
@@ -923,7 +925,7 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
 
     /* Read geometry information. */
     filename = g_strdup_printf ("%s.xml", layout->priv->desc->geometry);
-    path = g_build_filename (KEYBOARDSDIR, "geometry", filename, NULL);
+    path = g_build_filename (layout->priv->keyboards_dir, "geometry", filename, NULL);
     g_free (filename);
 
     error = NULL;
@@ -940,7 +942,8 @@ eek_xml_layout_real_create_keyboard (EekLayout *self,
 
     /* Read symbols information. */
     loaded = NULL;
-    retval = parse_symbols_with_prerequisites (layout->priv->desc->symbols,
+    retval = parse_symbols_with_prerequisites (layout->priv->keyboards_dir,
+                                               layout->priv->desc->symbols,
                                                keyboard,
                                                &loaded,
                                                &error);
@@ -1009,6 +1012,8 @@ eek_xml_layout_finalize (GObject *object)
     if (priv->desc)
         keyboard_desc_free (priv->desc);
 
+    g_free (priv->keyboards_dir);
+
     G_OBJECT_CLASS (eek_xml_layout_parent_class)->finalize (object);
 }
 
@@ -1062,7 +1067,12 @@ initable_init (GInitable    *initable,
     gchar *path;
     EekXmlKeyboardDesc *desc;
 
-    path = g_build_filename (KEYBOARDSDIR, "keyboards.xml", NULL);
+    layout->priv->keyboards_dir = (gchar *) g_getenv ("EEKBOARD_KEYBOARDSDIR");
+    if (layout->priv->keyboards_dir == NULL)
+        layout->priv->keyboards_dir = KEYBOARDSDIR;
+    layout->priv->keyboards_dir = g_strdup (layout->priv->keyboards_dir);
+
+    path = g_build_filename (layout->priv->keyboards_dir, "keyboards.xml", NULL);
     keyboards = parse_keyboards (path, error);
     g_free (path);
     if (error && *error)
@@ -1099,10 +1109,14 @@ initable_iface_init (GInitableIface *initable_iface)
 GList *
 eek_xml_list_keyboards (void)
 {
+    const gchar *keyboards_dir;
     gchar *path;
     GList *keyboards;
 
-    path = g_build_filename (KEYBOARDSDIR, "keyboards.xml", NULL);
+    keyboards_dir = g_getenv ("EEKBOARD_KEYBOARDSDIR");
+    if (keyboards_dir == NULL)
+        keyboards_dir = KEYBOARDSDIR;
+    path = g_build_filename (keyboards_dir, "keyboards.xml", NULL);
     keyboards = parse_keyboards (path, NULL);
     g_free (path);
     return keyboards;
@@ -1183,7 +1197,8 @@ parse_geometry (const gchar *path, EekKeyboard *keyboard, GError **error)
 }
 
 static gboolean
-parse_symbols_with_prerequisites (const gchar *name,
+parse_symbols_with_prerequisites (const gchar *keyboards_dir,
+                                  const gchar *name,
                                   EekKeyboard *keyboard,
                                   GList     **loaded,
                                   GError     **error)
@@ -1206,7 +1221,7 @@ parse_symbols_with_prerequisites (const gchar *name,
     *loaded = g_list_prepend (*loaded, g_strdup (name));
 
     filename = g_strdup_printf ("%s.xml", name);
-    path = g_build_filename (KEYBOARDSDIR, "symbols", filename, NULL);
+    path = g_build_filename (keyboards_dir, "symbols", filename, NULL);
     g_free (filename);
 
     prerequisites_error = NULL;
@@ -1217,7 +1232,8 @@ parse_symbols_with_prerequisites (const gchar *name,
     }
 
     for (p = prerequisites; p; p = p->next) {
-        retval = parse_symbols_with_prerequisites (p->data,
+        retval = parse_symbols_with_prerequisites (keyboards_dir,
+                                                   p->data,
                                                    keyboard,
                                                    loaded,
                                                    error);
