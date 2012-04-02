@@ -645,7 +645,8 @@ initable_init (GInitable    *initable,
         return FALSE;
     }
 
-    return set_xkb_component_names (layout, layout->priv->config);
+    set_xkb_component_names (layout, layout->priv->config);
+    return TRUE;
 }
 
 static void
