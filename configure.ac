@@ -124,7 +124,7 @@ AC_ARG_ENABLE(atspi,
               enable_atspi=yes)
 
 if test x$enable_atspi = xyes; then
-  PKG_CHECK_MODULES([ATSPI2], [atspi-2 dbus-glib-1], , enable_atspi=no)
+  PKG_CHECK_MODULES([ATSPI2], [atspi-2], , enable_atspi=no)
   if test x$enable_atspi = xyes; then
     AC_DEFINE([HAVE_ATSPI], [1], [Define if AT-SPI 2 is found])
     focus_listeners="atspi $focus_listeners"
