@@ -152,22 +152,24 @@ on_cancelled (EekKey     *key,
 static EekKey *
 eek_section_real_create_key (EekSection *self,
                              guint       keycode,
-                             gint        column,
-                             gint        row)
+                             gint        column_index,
+                             gint        row_index)
 {
     EekKey *key;
-    gint num_columns, num_rows;
-    EekOrientation orientation;
+    gint num_rows;
+    EekRow *row;
 
     num_rows = eek_section_get_n_rows (self);
-    g_return_val_if_fail (0 <= row && row < num_rows, NULL);
-    eek_section_get_row (self, row, &num_columns, &orientation);
-    g_return_val_if_fail (column < num_columns, NULL);
+    g_return_val_if_fail (0 <= row_index && row_index < num_rows, NULL);
+
+    row = g_slist_nth_data (self->priv->rows, row_index);
+    if (row->num_columns < column_index + 1)
+        row->num_columns = column_index + 1;
 
     key = g_object_new (EEK_TYPE_KEY,
                         "keycode", keycode,
-                        "column", column,
-                        "row", row,
+                        "column", column_index,
+                        "row", row_index,
                         NULL);
     g_return_val_if_fail (key, NULL);
 

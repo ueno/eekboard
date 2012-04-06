@@ -240,6 +240,7 @@ struct _GeometryParseData {
     EekSection *section;
     EekKey *key;
     gint num_columns;
+    gint num_rows;
     EekOrientation orientation;
     gdouble corner_radius;
     GSList *points;
@@ -287,8 +288,8 @@ static const gchar *geometry_valid_path_list[] = {
     "outline/geometry",
     "bounds/section/geometry",
     "row/section/geometry",
-    "key/section/geometry",
-    "bounds/key/section/geometry",
+    "key/row/section/geometry",
+    "bounds/key/row/section/geometry",
     "point/outline/geometry",
 };
 
@@ -385,26 +386,20 @@ geometry_start_element_callback (GMarkupParseContext *pcontext,
 
     if (g_strcmp0 (element_name, "row") == 0) {
         attribute = get_attribute (attribute_names, attribute_values,
-                                   "columns");
-        if (attribute == NULL) {
-            g_set_error (error,
-                         G_MARKUP_ERROR,
-                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-                         "no \"columns\" attribute for \"row\"");
-            return;
-        }
-        data->num_columns = strtol (attribute, NULL, 10);
-
-        attribute = get_attribute (attribute_names, attribute_values,
                                    "orientation");
         if (attribute != NULL)
             data->orientation = strtol (attribute, NULL, 10);
+
+        eek_section_add_row (data->section,
+                             data->num_columns,
+                             data->orientation);
+
+        data->num_rows++;
         goto out;
     }
 
     if (g_strcmp0 (element_name, "key") == 0) {
         guint keycode;
-        gint column, row;
 
         attribute = get_attribute (attribute_names, attribute_values,
                                    "keycode");
@@ -417,29 +412,10 @@ geometry_start_element_callback (GMarkupParseContext *pcontext,
         }
         keycode = strtoul (attribute, NULL, 10);
 
-        attribute = get_attribute (attribute_names, attribute_values,
-                                   "column");
-        if (attribute == NULL) {
-            g_set_error (error,
-                         G_MARKUP_ERROR,
-                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-                         "no \"column\" attribute for \"key\"");
-            return;
-        }
-        column = strtol (attribute, NULL, 10);
-        
-        attribute = get_attribute (attribute_names, attribute_values,
-                                   "row");
-        if (attribute == NULL) {
-            g_set_error (error,
-                         G_MARKUP_ERROR,
-                         G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-                         "no \"row\" attribute for \"row\"");
-            return;
-        }
-        row = strtol (attribute, NULL, 10);
-
-        data->key = eek_section_create_key (data->section, keycode, column, row);
+        data->key = eek_section_create_key (data->section,
+                                            keycode,
+                                            data->num_columns,
+                                            data->num_rows - 1);
 
         attribute = get_attribute (attribute_names, attribute_values,
                                    "name");
@@ -458,6 +434,9 @@ geometry_start_element_callback (GMarkupParseContext *pcontext,
         g_hash_table_insert (data->key_oref_hash,
                              data->key,
                              g_strdup (attribute));
+
+        data->num_columns++;
+
         goto out;
     }
 
@@ -533,11 +512,18 @@ geometry_end_element_callback (GMarkupParseContext *pcontext,
 
     if (g_strcmp0 (element_name, "section") == 0) {
         data->section = NULL;
+        data->num_rows = 0;
         return;
     }
 
     if (g_strcmp0 (element_name, "key") == 0) {
         data->key = NULL;
+        return;
+    }
+
+    if (g_strcmp0 (element_name, "row") == 0) {
+        data->num_columns = 0;
+        data->orientation = EEK_ORIENTATION_HORIZONTAL;
         return;
     }
 
@@ -564,15 +550,6 @@ geometry_end_element_callback (GMarkupParseContext *pcontext,
                              outline);
 
         g_free (data->oref);
-        return;
-    }
-
-    if (g_strcmp0 (element_name, "row") == 0) {
-        eek_section_add_row (data->section,
-                             data->num_columns,
-                             data->orientation);
-        data->num_columns = 0;
-        data->orientation = EEK_ORIENTATION_HORIZONTAL;
         return;
     }
 }
