@@ -1,250 +1,154 @@
 <?xml version="1.0"?>
 <symbols version="0.90">
   <include>us</include>
-  <key keycode="1" name="AE03" groups="2">
-    <keysym keyval="51" label="あ">3</keysym>
-    <keysym keyval="35" label="ぁ">numbersign</keysym>
-    <keysym keyval="51" label="ア">3</keysym>
-    <keysym keyval="35" label="ァ">numbersign</keysym>
+  <key keycode="49" name="TLDE">
+    <keysym keyval="1246">゛</keysym>
+    <keysym keyval="1247">゜</keysym>
   </key>
-  <key keycode="2" name="AD03" groups="2">
-    <keysym keyval="101" label="い">e</keysym>
-    <keysym keyval="69" label="ぃ">E</keysym>
-    <keysym keyval="101" label="イ">e</keysym>
-    <keysym keyval="69" label="ィ">E</keysym>
+  <key keycode="10" name="AE01">
+    <keysym keyval="1223">ぬ</keysym>
   </key>
-  <key keycode="3" name="AE04" groups="2">
-    <keysym keyval="52" label="う">4</keysym>
-    <keysym keyval="36" label="ぅ">dollar</keysym>
-    <keysym keyval="52" label="ウ">4</keysym>
-    <keysym keyval="36" label="ゥ">dollar</keysym>
+  <key keycode="11" name="AE02">
+    <keysym keyval="1228">ふ</keysym>
   </key>
-  <key keycode="4" name="AE05" groups="2">
-    <keysym keyval="53" label="え">5</keysym>
-    <keysym keyval="37" label="ぇ">percent</keysym>
-    <keysym keyval="53" label="エ">5</keysym>
-    <keysym keyval="37" label="ェ">percent</keysym>
+  <key keycode="12" name="AE03">
+    <keysym keyval="1201">あ</keysym>
+    <keysym keyval="1191">ぁ</keysym>
   </key>
-  <key keycode="5" name="AE06" groups="2">
-    <keysym keyval="54" label="お">6</keysym>
-    <keysym keyval="38" label="ぉ">ampersand</keysym>
-    <keysym keyval="54" label="オ">6</keysym>
-    <keysym keyval="38" label="ォ">ampersand</keysym>
+  <key keycode="13" name="AE04">
+    <keysym keyval="1203">う</keysym>
+    <keysym keyval="1193">ぅ</keysym>
   </key>
-
-  <key keycode="6" name="AE03" groups="2">
-    <keysym keyval="116" label="か">t</keysym>
-    <keysym keyval="116" label="カ">t</keysym>
+  <key keycode="14" name="AE05">
+    <keysym keyval="1204">え</keysym>
+    <keysym keyval="1194">ぇ</keysym>
   </key>
-  <key keycode="7" name="AD03" groups="2">
-    <keysym keyval="103" label="き">g</keysym>
-    <keysym keyval="103" label="キ">g</keysym>
+  <key keycode="15" name="AE06">
+    <keysym keyval="1205">お</keysym>
+    <keysym keyval="1195">ぉ</keysym>
   </key>
-  <key keycode="8" name="AE04" groups="2">
-    <keysym keyval="104" label="く">h</keysym>
-    <keysym keyval="104" label="ク">h</keysym>
+  <key keycode="16" name="AE07">
+    <keysym keyval="1236">や</keysym>
+    <keysym keyval="1196">ゃ</keysym>
   </key>
-  <key keycode="9" name="AE05" groups="2">
-    <keysym keyval="58" label="け">colon</keysym>
-    <keysym keyval="58" label="ケ">colon</keysym>
+  <key keycode="17" name="AE08">
+    <keysym keyval="1237">ゆ</keysym>
+    <keysym keyval="1197">ゅ</keysym>
   </key>
-  <key keycode="10" name="AE06" groups="2">
-    <keysym keyval="98" label="こ">b</keysym>
-    <keysym keyval="98" label="コ">b</keysym>
+  <key keycode="18" name="AE09">
+    <keysym keyval="1238">よ</keysym>
+    <keysym keyval="1198">ょ</keysym>
   </key>
-
-  <key keycode="11" name="AE03" groups="2">
-    <keysym keyval="120" label="さ">x</keysym>
-    <keysym keyval="120" label="サ">x</keysym>
+  <key keycode="19" name="AE10">
+    <keysym keyval="1244">わ</keysym>
+    <keysym keyval="1190">を</keysym>
   </key>
-  <key keycode="12" name="AD03" groups="2">
-    <keysym keyval="100" label="し">d</keysym>
-    <keysym keyval="100" label="シ">d</keysym>
+  <key keycode="20" name="AE11">
+    <keysym keyval="1230">ほ</keysym>
   </key>
-  <key keycode="13" name="AE04" groups="2">
-    <keysym keyval="114" label="す">r</keysym>
-    <keysym keyval="114" label="ス">r</keysym>
+  <key keycode="21" name="AE12">
+    <keysym keyval="1229">へ</keysym>
   </key>
-  <key keycode="14" name="AE05" groups="2">
-    <keysym keyval="112" label="せ">p</keysym>
-    <keysym keyval="112" label="セ">p</keysym>
+  <key keycode="24" name="AD01">
+    <keysym keyval="1216">た</keysym>
   </key>
-  <key keycode="15" name="AE06" groups="2">
-    <keysym keyval="99" label="そ">c</keysym>
-    <keysym keyval="99" label="ソ">c</keysym>
+  <key keycode="25" name="AD02">
+    <keysym keyval="1219">て</keysym>
   </key>
-
-  <key keycode="16" name="AE03" groups="2">
-    <keysym keyval="113" label="た">q</keysym>
-    <keysym keyval="113" label="タ">q</keysym>
+  <key keycode="26" name="AD03">
+    <keysym keyval="1202">い</keysym>
+    <keysym keyval="1192">ぃ</keysym>
   </key>
-  <key keycode="17" name="AD03" groups="2">
-    <keysym keyval="97" label="ち">a</keysym>
-    <keysym keyval="97" label="チ">a</keysym>
+  <key keycode="27" name="AD04">
+    <keysym keyval="1213">す</keysym>
   </key>
-  <key keycode="18" name="AE04" groups="2">
-    <keysym keyval="122" label="つ">z</keysym>
-    <keysym keyval="90" label="っ">Z</keysym>
-    <keysym keyval="122" label="ツ">z</keysym>
-    <keysym keyval="90" label="ッ">Z</keysym>
+  <key keycode="28" name="AD05">
+    <keysym keyval="1206">か</keysym>
   </key>
-  <key keycode="19" name="AE05" groups="2">
-    <keysym keyval="119" label="て">w</keysym>
-    <keysym keyval="119" label="テ">w</keysym>
+  <key keycode="29" name="AD06">
+    <keysym keyval="1245">ん</keysym>
   </key>
-  <key keycode="20" name="AE06" groups="2">
-    <keysym keyval="115" label="と">s</keysym>
-    <keysym keyval="115" label="ト">s</keysym>
+  <key keycode="30" name="AD07">
+    <keysym keyval="1221">な</keysym>
   </key>
-
-  <key keycode="21" name="AE03" groups="2">
-    <keysym keyval="117" label="な">u</keysym>
-    <keysym keyval="117" label="ナ">u</keysym>
+  <key keycode="31" name="AD08">
+    <keysym keyval="1222">に</keysym>
   </key>
-  <key keycode="22" name="AD03" groups="2">
-    <keysym keyval="105" label="に">i</keysym>
-    <keysym keyval="105" label="ニ">i</keysym>
+  <key keycode="32" name="AD09">
+    <keysym keyval="1239">ら</keysym>
   </key>
-  <key keycode="23" name="AE04" groups="2">
-    <keysym keyval="33" label="ぬ">exclam</keysym>
-    <keysym keyval="33" label="ヌ">exclam</keysym>
+  <key keycode="33" name="AD10">
+    <keysym keyval="1214">せ</keysym>
   </key>
-  <key keycode="24" name="AE05" groups="2">
-    <keysym keyval="44" label="ね">comma</keysym>
-    <keysym keyval="44" label="ネ">comma</keysym>
+  <key keycode="34" name="AD11">
+    <keysym keyval="1233">む</keysym>
   </key>
-  <key keycode="25" name="AE06" groups="2">
-    <keysym keyval="107" label="の">k</keysym>
-    <keysym keyval="107" label="ノ">k</keysym>
+  <key keycode="35" name="AD12">
+    <keysym keyval="1243">ろ</keysym>
   </key>
-
-  <key keycode="26" name="AE03" groups="2">
-    <keysym keyval="102" label="は">f</keysym>
-    <keysym keyval="102" label="ハ">f</keysym>
+  <key keycode="38" name="AC01">
+    <keysym keyval="1217">ち</keysym>
   </key>
-  <key keycode="27" name="AD03" groups="2">
-    <keysym keyval="118" label="ひ">v</keysym>
-    <keysym keyval="118" label="ヒ">v</keysym>
+  <key keycode="39" name="AC02">
+    <keysym keyval="1220">と</keysym>
   </key>
-  <key keycode="28" name="AE04" groups="2">
-    <keysym keyval="34" label="ふ">quotedbl</keysym>
-    <keysym keyval="34" label="フ">quotedbl</keysym>
+  <key keycode="40" name="AC03">
+    <keysym keyval="1212">し</keysym>
   </key>
-  <key keycode="29" name="AE05" groups="2">
-    <keysym keyval="94" label="へ">asciicircum</keysym>
-    <keysym keyval="94" label="ヘ">asciicircum</keysym>
+  <key keycode="41" name="AC04">
+    <keysym keyval="1226">は</keysym>
   </key>
-  <key keycode="30" name="AE06" groups="2">
-    <keysym keyval="61" label="ほ">equal</keysym>
-    <keysym keyval="61" label="ホ">equal</keysym>
+  <key keycode="42" name="AC05">
+    <keysym keyval="1207">き</keysym>
   </key>
-
-  <key keycode="31" name="AE03" groups="2">
-    <keysym keyval="106" label="ま">j</keysym>
-    <keysym keyval="106" label="マ">j</keysym>
+  <key keycode="43" name="AC06">
+    <keysym keyval="1208">く</keysym>
   </key>
-  <key keycode="32" name="AD03" groups="2">
-    <keysym keyval="110" label="み">n</keysym>
-    <keysym keyval="110" label="ミ">n</keysym>
+  <key keycode="44" name="AC07">
+    <keysym keyval="1231">ま</keysym>
   </key>
-  <key keycode="33" name="AE04" groups="2">
-    <keysym keyval="93" label="む">bracketright</keysym>
-    <keysym keyval="93" label="ム">bracketright</keysym>
+  <key keycode="45" name="AC08">
+    <keysym keyval="1225">の</keysym>
   </key>
-  <key keycode="34" name="AE05" groups="2">
-    <keysym keyval="47" label="め">slash</keysym>
-    <keysym keyval="47" label="メ">slash</keysym>
+  <key keycode="46" name="AC09">
+    <keysym keyval="1240">り</keysym>
   </key>
-  <key keycode="35" name="AE06" groups="2">
-    <keysym keyval="109" label="も">m</keysym>
-    <keysym keyval="109" label="モ">m</keysym>
+  <key keycode="47" name="AC10">
+    <keysym keyval="1242">れ</keysym>
   </key>
-
-  <key keycode="36" name="AE03" groups="2">
-    <keysym keyval="55" label="や">7</keysym>
-    <keysym keyval="39" label="ゃ">quoteright</keysym>
-    <keysym keyval="55" label="ヤ">7</keysym>
-    <keysym keyval="39" label="ャ">quoteright</keysym>
+  <key keycode="48" name="AC11">
+    <keysym keyval="1209">け</keysym>
   </key>
-  <key keycode="37" name="AD03" groups="2">
-    <keysym keyval="56" label="ゆ">8</keysym>
-    <keysym keyval="40" label="ゅ">parenleft</keysym>
-    <keysym keyval="56" label="ユ">8</keysym>
-    <keysym keyval="40" label="ュ">parenleft</keysym>
+  <key keycode="52" name="AB01">
+    <keysym keyval="1218">つ</keysym>
+    <keysym keyval="1199">っ</keysym>
   </key>
-  <key keycode="38" name="AE04" groups="2">
-    <keysym keyval="57" label="よ">9</keysym>
-    <keysym keyval="41" label="ょ">parenright</keysym>
-    <keysym keyval="57" label="ヨ">9</keysym>
-    <keysym keyval="41" label="ョ">parenright</keysym>
+  <key keycode="53" name="AB02">
+    <keysym keyval="1211">さ</keysym>
   </key>
-  <key keycode="41" name="AE03" groups="2">
-    <keysym keyval="111" label="ら">o</keysym>
-    <keysym keyval="111" label="ラ">o</keysym>
+  <key keycode="54" name="AB03">
+    <keysym keyval="1215">そ</keysym>
   </key>
-  <key keycode="42" name="AD03" groups="2">
-    <keysym keyval="108" label="り">l</keysym>
-    <keysym keyval="108" label="リ">l</keysym>
+  <key keycode="55" name="AB04">
+    <keysym keyval="1227">ひ</keysym>
   </key>
-  <key keycode="43" name="AE04" groups="2">
-    <keysym keyval="46" label="る">period</keysym>
-    <keysym keyval="46" label="ル">period</keysym>
+  <key keycode="56" name="AB05">
+    <keysym keyval="1210">こ</keysym>
   </key>
-  <key keycode="44" name="AE05" groups="2">
-    <keysym keyval="59" label="れ">semicolon</keysym>
-    <keysym keyval="59" label="レ">semicolon</keysym>
+  <key keycode="57" name="AB06">
+    <keysym keyval="1232">み</keysym>
   </key>
-  <key keycode="45" name="AE06" groups="2">
-    <keysym keyval="92" label="ろ">backslash</keysym>
-    <keysym keyval="92" label="ロ">backslash</keysym>
+  <key keycode="58" name="AB07">
+    <keysym keyval="1235">も</keysym>
   </key>
-
-  <key keycode="46" name="AE03" groups="2">
-    <keysym keyval="48" label="わ">0</keysym>
-    <keysym keyval="48" label="ワ">0</keysym>
+  <key keycode="59" name="AB08">
+    <keysym keyval="1224">ね</keysym>
   </key>
-  <key keycode="47" name="AD03" groups="2">
-    <keysym keyval="126" label="を">asciitilde</keysym>
-    <keysym keyval="126" label="ヲ">asciitilde</keysym>
+  <key keycode="60" name="AB09">
+    <keysym keyval="1241">る</keysym>
   </key>
-  <key keycode="48" name="AE04" groups="2">
-    <keysym keyval="121" label="ん">y</keysym>
-    <keysym keyval="121" label="ン">y</keysym>
-  </key>
-  <key keycode="49" name="AE05" groups="2">
-    <keysym keyval="123" label="「">braceleft</keysym>
-    <keysym keyval="48" label="ゐ">0</keysym>
-    <keysym keyval="123" label="「">braceleft</keysym>
-    <keysym keyval="48" label="ヰ">0</keysym>
-  </key>
-  <key keycode="50" name="AE06" groups="2">
-    <keysym keyval="125" label="」">braceright</keysym>
-    <keysym keyval="48" label="ゑ">0</keysym>
-    <keysym keyval="125" label="」">braceright</keysym>
-    <keysym keyval="48" label="ヱ">0</keysym>
-  </key>
-
-  <key keycode="51" name="AE03" groups="2">
-    <keysym keyval="64" label="゛">at</keysym>
-    <keysym keyval="64" label="゛">at</keysym>
-  </key>
-  <key keycode="52" name="AD03" groups="2">
-    <keysym keyval="91" label="゜">bracketleft</keysym>
-    <keysym keyval="91" label="゜">bracketleft</keysym>
-  </key>
-  <key keycode="53" name="AE04" groups="2">
-    <keysym keyval="124" label="ー">bar</keysym>
-    <keysym keyval="124" label="ー">bar</keysym>
-  </key>
-  <key keycode="54" name="AE05" groups="2">
-    <keysym keyval="60" label="、">less</keysym>
-    <keysym keyval="60" label="、">less</keysym>
-  </key>
-  <key keycode="55" name="AE06" groups="2">
-    <keysym keyval="62" label="。">greater</keysym>
-    <keysym keyval="63" label="・">question</keysym>
-    <keysym keyval="62" label="。">greater</keysym>
-    <keysym keyval="63" label="・">question</keysym>
+  <key keycode="61" name="AB10">
+    <keysym keyval="1234">め</keysym>
   </key>
 </symbols>
 
