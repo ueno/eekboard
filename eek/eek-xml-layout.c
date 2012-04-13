@@ -1083,6 +1083,12 @@ initable_iface_init (GInitableIface *initable_iface)
     initable_iface->init = initable_init;
 }
 
+/**
+ * eek_xml_list_keyboards:
+ *
+ * List available keyboards.
+ * Returns: (transfer container) (element-type utf8): the list of keyboards
+ */
 GList *
 eek_xml_list_keyboards (void)
 {

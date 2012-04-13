@@ -833,7 +833,7 @@ eek_keyboard_get_pressed_keys (EekKeyboard *keyboard)
  * @keyboard: an #EekKeyboard
  *
  * Get locked keys.
- * Returns: (transfer container) (element-type EekModifierKey): A list
+ * Returns: (transfer container) (element-type Eek.ModifierKey): A list
  * of locked keys.
  */
 GList *
