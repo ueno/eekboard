@@ -779,8 +779,8 @@ set_keyboards (Client              *client,
     for (p = keyboards; *p != NULL; p++) {
         keyboard_id = eekboard_context_add_keyboard (client->context, *p, NULL);
         if (keyboard_id == 0) {
-            g_slist_free (head);
-            return FALSE;
+            g_warning ("can't add keyboard %s", *p);
+            continue;
         }
         client->keyboards = g_slist_prepend (client->keyboards,
                                              GUINT_TO_POINTER(keyboard_id));
