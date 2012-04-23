@@ -571,6 +571,7 @@ struct _SymbolsParseData {
     GSList *symbols;
     gchar *label;
     gchar *icon;
+    gchar *tooltip;
     EekSymbolCategory category;
     guint keyval;
     gint groups;
@@ -684,6 +685,11 @@ symbols_start_element_callback (GMarkupParseContext *pcontext,
             data->icon = g_strdup (attribute);
 
         attribute = get_attribute (attribute_names, attribute_values,
+                                   "tooltip");
+        if (attribute != NULL)
+            data->tooltip = g_strdup (attribute);
+
+        attribute = get_attribute (attribute_names, attribute_values,
                                    "category");
         if (attribute != NULL)
             data->category = strtoul (attribute, NULL, 10);
@@ -765,6 +771,11 @@ symbols_end_element_callback (GMarkupParseContext *pcontext,
             eek_symbol_set_icon_name (symbol, data->icon);
             g_free (data->icon);
             data->icon = NULL;
+        }
+        if (data->tooltip) {
+            eek_symbol_set_tooltip (symbol, data->tooltip);
+            g_free (data->tooltip);
+            data->tooltip = NULL;
         }
 
         data->symbols = g_slist_prepend (data->symbols, symbol);

@@ -301,6 +301,8 @@ update_widget (ServerContextService *context)
     eek_gtk_keyboard_set_theme (EEK_GTK_KEYBOARD(context->widget), theme);
     g_object_unref (theme);
 
+    gtk_widget_set_has_tooltip (context->widget, TRUE);
+
     if (!context->window) {
         context->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
         g_signal_connect (context->window, "destroy",

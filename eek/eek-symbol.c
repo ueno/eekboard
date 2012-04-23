@@ -40,6 +40,7 @@ enum {
     PROP_CATEGORY,
     PROP_MODIFIER_MASK,
     PROP_ICON_NAME,
+    PROP_TOOLTIP,
     PROP_LAST
 };
 
@@ -49,6 +50,7 @@ struct _EekSymbolPrivate {
     EekSymbolCategory category;
     EekModifierType modifier_mask;
     gchar *icon_name;
+    gchar *tooltip;
 };
 
 static void eek_serializable_iface_init (EekSerializableIface *iface);
@@ -71,6 +73,7 @@ eek_symbol_real_serialize (EekSerializable *self,
     g_variant_builder_add (builder, "u", priv->category);
     g_variant_builder_add (builder, "u", priv->modifier_mask);
     g_variant_builder_add (builder, "s", NOTNULL(priv->icon_name));
+    g_variant_builder_add (builder, "s", NOTNULL(priv->tooltip));
 #undef NOTNULL
 }
 
@@ -86,6 +89,7 @@ eek_symbol_real_deserialize (EekSerializable *self,
     g_variant_get_child (variant, index++, "u", &priv->category);
     g_variant_get_child (variant, index++, "u", &priv->modifier_mask);
     g_variant_get_child (variant, index++, "s", &priv->icon_name);
+    g_variant_get_child (variant, index++, "s", &priv->tooltip);
 
     return index;
 }
@@ -121,6 +125,10 @@ eek_symbol_set_property (GObject      *object,
         eek_symbol_set_icon_name (EEK_SYMBOL(object),
                                   g_value_get_string (value));
         break;
+    case PROP_TOOLTIP:
+        eek_symbol_set_tooltip (EEK_SYMBOL(object),
+                                g_value_get_string (value));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -151,6 +159,10 @@ eek_symbol_get_property (GObject    *object,
         g_value_set_string (value,
                             eek_symbol_get_icon_name (EEK_SYMBOL(object)));
         break;
+    case PROP_TOOLTIP:
+        g_value_set_string (value,
+                            eek_symbol_get_tooltip (EEK_SYMBOL(object)));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -165,6 +177,7 @@ eek_symbol_finalize (GObject *object)
     g_free (priv->name);
     g_free (priv->label);
     g_free (priv->icon_name);
+    g_free (priv->tooltip);
     G_OBJECT_CLASS (eek_symbol_parent_class)->finalize (object);
 }
 
@@ -216,6 +229,13 @@ eek_symbol_class_init (EekSymbolClass *klass)
                                  NULL,
                                  G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
     g_object_class_install_property (gobject_class, PROP_ICON_NAME, pspec);
+
+    pspec = g_param_spec_string ("tooltip",
+                                 "Tooltip",
+                                 "Tooltip text",
+                                 NULL,
+                                 G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_object_class_install_property (gobject_class, PROP_TOOLTIP, pspec);
 }
 
 static void
@@ -439,6 +459,45 @@ eek_symbol_get_icon_name (EekSymbol *symbol)
     if (priv->icon_name == NULL || *priv->icon_name == '\0')
         return NULL;
     return priv->icon_name;
+}
+
+/**
+ * eek_symbol_set_tooltip:
+ * @symbol: an #EekSymbol
+ * @tooltip: icon name of @symbol
+ *
+ * Set the tooltip text of @symbol to @tooltip.
+ */
+void
+eek_symbol_set_tooltip (EekSymbol   *symbol,
+                        const gchar *tooltip)
+{
+    EekSymbolPrivate *priv;
+
+    g_return_if_fail (EEK_IS_SYMBOL(symbol));
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    g_free (priv->tooltip);
+    priv->tooltip = g_strdup (tooltip);
+}
+
+/**
+ * eek_symbol_get_tooltip:
+ * @symbol: an #EekSymbol
+ *
+ * Get the tooltip text of @symbol.
+ */
+G_CONST_RETURN gchar *
+eek_symbol_get_tooltip (EekSymbol *symbol)
+{
+    EekSymbolPrivate *priv;
+
+    g_return_val_if_fail (EEK_IS_SYMBOL(symbol), NULL);
+
+    priv = EEK_SYMBOL_GET_PRIVATE(symbol);
+    if (priv->tooltip == NULL || *priv->tooltip == '\0')
+        return NULL;
+    return priv->tooltip;
 }
 
 static const struct {

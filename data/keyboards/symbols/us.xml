@@ -248,10 +248,10 @@
     <keysym keyval="65506">Shift_R</keysym>
   </key>
   <key keycode="149" name="I149">
-    <symbol label="⌨" icon="input-keyboard-symbolic">cycle-keyboard</symbol>
+    <symbol label="⌨" icon="input-keyboard-symbolic" tooltip="Change keyboard">cycle-keyboard</symbol>
   </key>
   <key keycode="150" name="I150">
-    <symbol label="☺" icon="preferences-system-symbolic">preferences</symbol>
+    <symbol label="☺" icon="preferences-system-symbolic" tooltip="Setup">preferences</symbol>
   </key>
   <key keycode="37" name="LCTL">
     <keysym keyval="65507">Control_L</keysym>

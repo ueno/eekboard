@@ -232,6 +232,9 @@ eek_gtk_keyboard_real_motion_notify_event (GtkWidget      *self,
     EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(self);
     EekKey *key;
 
+    if (event->state == 0)
+        return FALSE;
+
     key = eek_renderer_find_key_by_position (priv->renderer,
                                              (gdouble)event->x,
                                              (gdouble)event->y);
@@ -273,6 +276,30 @@ eek_gtk_keyboard_real_unmap (GtkWidget *self)
     }
 
     GTK_WIDGET_CLASS (eek_gtk_keyboard_parent_class)->unmap (self);
+}
+
+static gboolean
+eek_gtk_keyboard_real_query_tooltip (GtkWidget  *widget,
+                                     gint        x,
+                                     gint        y,
+                                     gboolean    keyboard_tooltip,
+                                     GtkTooltip *tooltip)
+{
+    EekGtkKeyboardPrivate *priv = EEK_GTK_KEYBOARD_GET_PRIVATE(widget);
+    EekKey *key;
+
+    key = eek_renderer_find_key_by_position (priv->renderer,
+                                             (gdouble)x,
+                                             (gdouble)y);
+    if (key) {
+        EekSymbol *symbol = eek_key_get_symbol (key);
+        const gchar *text = eek_symbol_get_tooltip (symbol);
+        if (text) {
+            gtk_tooltip_set_text (tooltip, text);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 static void
@@ -397,6 +424,8 @@ eek_gtk_keyboard_class_init (EekGtkKeyboardClass *klass)
         eek_gtk_keyboard_real_button_release_event;
     widget_class->motion_notify_event =
         eek_gtk_keyboard_real_motion_notify_event;
+    widget_class->query_tooltip =
+        eek_gtk_keyboard_real_query_tooltip;
 
     gobject_class->set_property = eek_gtk_keyboard_set_property;
     gobject_class->dispose = eek_gtk_keyboard_dispose;
