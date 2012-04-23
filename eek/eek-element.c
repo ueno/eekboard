@@ -311,7 +311,7 @@ eek_element_set_name (EekElement  *element,
  * Get the name of @element.
  * Returns: the name of @element or NULL when the name is not set
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_element_get_name (EekElement  *element)
 {
     g_return_val_if_fail (EEK_IS_ELEMENT(element), NULL);

@@ -58,45 +58,45 @@ struct _EekElementClass
                                                     gint         level);
 };
 
-GType                 eek_element_get_type              (void) G_GNUC_CONST;
+GType        eek_element_get_type              (void) G_GNUC_CONST;
 
-void                  eek_element_set_parent            (EekElement  *element,
-                                                         EekElement  *parent);
-EekElement           *eek_element_get_parent            (EekElement  *element);
-void                  eek_element_set_name              (EekElement  *element,
-                                                         const gchar *name);
+void         eek_element_set_parent            (EekElement  *element,
+                                                EekElement  *parent);
+EekElement  *eek_element_get_parent            (EekElement  *element);
+void         eek_element_set_name              (EekElement  *element,
+                                                const gchar *name);
 
-G_CONST_RETURN gchar *eek_element_get_name              (EekElement  *element);
+const gchar *eek_element_get_name              (EekElement  *element);
 
-void                  eek_element_set_bounds            (EekElement  *element,
-                                                         EekBounds   *bounds);
+void         eek_element_set_bounds            (EekElement  *element,
+                                                EekBounds   *bounds);
 
-void                  eek_element_get_bounds            (EekElement  *element,
-                                                         EekBounds   *bounds);
+void         eek_element_get_bounds            (EekElement  *element,
+                                                EekBounds   *bounds);
 
-void                  eek_element_set_position          (EekElement  *element,
-                                                         gdouble      x,
-                                                         gdouble      y);
-void                  eek_element_set_size              (EekElement  *element,
-                                                         gdouble      width,
-                                                         gdouble      height);
+void         eek_element_set_position          (EekElement  *element,
+                                                gdouble      x,
+                                                gdouble      y);
+void         eek_element_set_size              (EekElement  *element,
+                                                gdouble      width,
+                                                gdouble      height);
 
-void                  eek_element_get_absolute_position (EekElement  *element,
-                                                         gdouble     *x,
-                                                         gdouble     *y);
+void         eek_element_get_absolute_position (EekElement  *element,
+                                                gdouble     *x,
+                                                gdouble     *y);
 
-void                  eek_element_set_symbol_index      (EekElement  *element,
-                                                         gint         group,
-                                                         gint         level);
-void                  eek_element_get_symbol_index      (EekElement  *element,
-                                                         gint        *group,
-                                                         gint        *level);
-void                  eek_element_set_group             (EekElement  *element,
-                                                         gint         group);
-void                  eek_element_set_level             (EekElement  *element,
-                                                         gint         level);
-gint                  eek_element_get_group             (EekElement  *element);
-gint                  eek_element_get_level             (EekElement  *element);
+void         eek_element_set_symbol_index      (EekElement  *element,
+                                                gint         group,
+                                                gint         level);
+void         eek_element_get_symbol_index      (EekElement  *element,
+                                                gint        *group,
+                                                gint        *level);
+void         eek_element_set_group             (EekElement  *element,
+                                                gint         group);
+void         eek_element_set_level             (EekElement  *element,
+                                                gint         level);
+gint         eek_element_get_group             (EekElement  *element);
+gint         eek_element_get_level             (EekElement  *element);
 
 G_END_DECLS
 #endif  /* EEK_ELEMENT_H */

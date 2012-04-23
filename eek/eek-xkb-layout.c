@@ -715,7 +715,7 @@ eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
  *
  * Get the keycodes component name (in the XKB terminology).
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_xkb_layout_get_keycodes (EekXkbLayout *layout)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
@@ -730,7 +730,7 @@ eek_xkb_layout_get_keycodes (EekXkbLayout *layout)
  *
  * Get the geometry component name (in the XKB terminology).
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_xkb_layout_get_geometry (EekXkbLayout *layout)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
@@ -745,7 +745,7 @@ eek_xkb_layout_get_geometry (EekXkbLayout *layout)
  *
  * Get the symbols component name (in the XKB terminology).
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_xkb_layout_get_symbols (EekXkbLayout *layout)
 {
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);

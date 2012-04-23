@@ -285,7 +285,7 @@ eek_symbol_set_name (EekSymbol   *symbol,
  *
  * Get the name of @symbol.
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_symbol_get_name (EekSymbol *symbol)
 {
     EekSymbolPrivate *priv;
@@ -324,7 +324,7 @@ eek_symbol_set_label (EekSymbol   *symbol,
  *
  * Get the label text of @symbol.
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_symbol_get_label (EekSymbol *symbol)
 {
     EekSymbolPrivate *priv;
@@ -448,7 +448,7 @@ eek_symbol_set_icon_name (EekSymbol   *symbol,
  *
  * Get the icon name of @symbol.
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_symbol_get_icon_name (EekSymbol *symbol)
 {
     EekSymbolPrivate *priv;
@@ -487,7 +487,7 @@ eek_symbol_set_tooltip (EekSymbol   *symbol,
  *
  * Get the tooltip text of @symbol.
  */
-G_CONST_RETURN gchar *
+const gchar *
 eek_symbol_get_tooltip (EekSymbol *symbol)
 {
     EekSymbolPrivate *priv;
@@ -515,7 +515,7 @@ static const struct {
     { EEK_SYMBOL_CATEGORY_UNKNOWN, NULL }
 };
 
-G_CONST_RETURN gchar *
+const gchar *
 eek_symbol_category_get_name (EekSymbolCategory category)
 {
     gint i;
