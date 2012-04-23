@@ -26,7 +26,7 @@
 #define EEK_XKL_LAYOUT_H 1
 
 #include <libxklavier/xklavier.h>
-#include "eek-xkb-layout.h"
+#include "eek-layout.h"
 
 G_BEGIN_DECLS
 
@@ -44,7 +44,7 @@ typedef struct _EekXklLayoutPrivate EekXklLayoutPrivate;
 struct _EekXklLayout
 {
     /*< private >*/
-    EekXkbLayout parent;
+    EekLayout parent;
 
     EekXklLayoutPrivate *priv;
 };
@@ -52,7 +52,7 @@ struct _EekXklLayout
 struct _EekXklLayoutClass
 {
     /*< private >*/
-    EekXkbLayoutClass parent_class;
+    EekLayoutClass parent_class;
 
     /*< private >*/
     /* padding */

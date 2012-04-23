@@ -124,12 +124,9 @@ libeek_gtk_la_LIBADD = libeek.la $(GTK_LIBS) $(LIBCANBERRA_LIBS)
 
 libeek_xkl_public_headers =			\
 	$(srcdir)/eek-xkl-layout.h		\
-	$(srcdir)/eek-xkl.h			\
-	$(srcdir)/eek-xkb-layout.h		\
-	$(srcdir)/eek-xkb.h
+	$(srcdir)/eek-xkl.h
 
 libeek_xkl_sources =				\
-	$(srcdir)/eek-xkb-layout.c		\
 	$(srcdir)/eek-xkl-layout.c
 
 libeek_xkl_la_SOURCES = $(libeek_xkl_sources)
