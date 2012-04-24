@@ -55,6 +55,7 @@ struct _EekboardServicePrivate {
 
     GHashTable *context_hash;
     GSList *context_stack;
+    gboolean visible;
 };
 
 G_DEFINE_TYPE (EekboardService, eekboard_service, G_TYPE_OBJECT);
@@ -70,6 +71,8 @@ static const gchar introspection_xml[] =
     "      <arg direction='in' type='s' name='object_path'/>"
     "    </method>"
     "    <method name='PopContext'/>"
+    "    <method name='ShowKeyboard'/>"
+    "    <method name='HideKeyboard'/>"
     "    <method name='Destroy'/>"
     /* signals */
     "  </interface>"
@@ -359,6 +362,14 @@ context_destroyed_cb (EekboardContextService *context, EekboardService *service)
 }
 
 static void
+on_notify_visible (GObject *object, GParamSpec *spec, gpointer user_data)
+{
+    EekboardService *service = user_data;
+
+    g_object_get (object, "visible", &service->priv->visible, NULL);
+}
+
+static void
 handle_method_call (GDBusConnection       *connection,
                     const gchar           *sender,
                     const gchar           *object_path,
@@ -424,6 +435,10 @@ handle_method_call (GDBusConnection       *connection,
         service->priv->context_stack = g_slist_prepend (service->priv->context_stack,
                                                g_object_ref (context));
         eekboard_context_service_enable (context);
+        g_signal_connect (context, "notify::visible",
+                          G_CALLBACK(on_notify_visible), service);
+        if (service->priv->visible)
+            eekboard_context_service_show_keyboard (context);
 
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
@@ -448,6 +463,9 @@ handle_method_call (GDBusConnection       *connection,
             }
             g_free (object_path);
                 
+            g_signal_handlers_disconnect_by_func (context,
+                                                  G_CALLBACK(on_notify_visible),
+                                                  service);
             eekboard_context_service_disable (context);
             service->priv->context_stack = g_slist_next (service->priv->context_stack);
             if (service->priv->context_stack)
@@ -455,6 +473,24 @@ handle_method_call (GDBusConnection       *connection,
         }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "ShowKeyboard") == 0) {
+        if (service->priv->context_stack) {
+            eekboard_context_service_show_keyboard (service->priv->context_stack->data);
+        } else {
+            service->priv->visible = TRUE;
+        }
+        return;
+    }
+
+    if (g_strcmp0 (method_name, "HideKeyboard") == 0) {
+        if (service->priv->context_stack) {
+            eekboard_context_service_hide_keyboard (service->priv->context_stack->data);
+        } else {
+            service->priv->visible = FALSE;
+        }
         return;
     }
 

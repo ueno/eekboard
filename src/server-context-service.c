@@ -332,6 +332,9 @@ server_context_service_real_show_keyboard (EekboardContextService *_context)
         update_widget (context);
     g_assert (context->window);
     gtk_widget_show_all (context->window);
+
+    EEKBOARD_CONTEXT_SERVICE_CLASS (server_context_service_parent_class)->
+        show_keyboard (_context);
 }
 
 static void
@@ -341,6 +344,9 @@ server_context_service_real_hide_keyboard (EekboardContextService *_context)
 
     if (context->window)
         gtk_widget_hide (context->window);
+
+    EEKBOARD_CONTEXT_SERVICE_CLASS (server_context_service_parent_class)->
+        hide_keyboard (_context);
 }
 
 static void

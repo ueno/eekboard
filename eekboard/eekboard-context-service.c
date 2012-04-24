@@ -202,6 +202,26 @@ eekboard_context_service_real_create_keyboard (EekboardContextService *self,
 }
 
 static void
+eekboard_context_service_real_show_keyboard (EekboardContextService *self)
+{
+    gboolean visible = self->priv->visible;
+    self->priv->visible = TRUE;
+    if (visible != self->priv->visible)
+        emit_visibility_changed_signal (self,
+                                        self->priv->visible);
+}
+
+static void
+eekboard_context_service_real_hide_keyboard (EekboardContextService *self)
+{
+    gboolean visible = self->priv->visible;
+    self->priv->visible = FALSE;
+    if (visible != self->priv->visible)
+        emit_visibility_changed_signal (self,
+                                        self->priv->visible);
+}
+
+static void
 eekboard_context_service_set_property (GObject      *object,
                                        guint         prop_id,
                                        const GValue *value,
@@ -209,7 +229,6 @@ eekboard_context_service_set_property (GObject      *object,
 {
     EekboardContextService *context = EEKBOARD_CONTEXT_SERVICE(object);
     GDBusConnection *connection;
-    gboolean was_visible;
 
     switch (prop_id) {
     case PROP_OBJECT_PATH:
@@ -234,11 +253,12 @@ eekboard_context_service_set_property (GObject      *object,
         context->priv->keyboard = g_value_get_object (value);
         break;
     case PROP_VISIBLE:
-        was_visible = context->priv->visible;
-        context->priv->visible = g_value_get_boolean (value);
-        if (was_visible != context->priv->visible)
-            emit_visibility_changed_signal (context,
-                                            context->priv->visible);
+        if (context->priv->keyboard) {
+            if (g_value_get_boolean (value))
+                eekboard_context_service_show_keyboard (context);
+            else
+                eekboard_context_service_hide_keyboard (context);
+        }
         break;
     case PROP_FULLSCREEN:
         context->priv->fullscreen = g_value_get_boolean (value);
@@ -358,8 +378,8 @@ eekboard_context_service_class_init (EekboardContextServiceClass *klass)
                               sizeof (EekboardContextServicePrivate));
 
     klass->create_keyboard = eekboard_context_service_real_create_keyboard;
-    klass->show_keyboard = NULL;
-    klass->hide_keyboard = NULL;
+    klass->show_keyboard = eekboard_context_service_real_show_keyboard;
+    klass->hide_keyboard = eekboard_context_service_real_hide_keyboard;
 
     gobject_class->constructed = eekboard_context_service_constructed;
     gobject_class->set_property = eekboard_context_service_set_property;
@@ -864,15 +884,13 @@ handle_method_call (GDBusConnection       *connection,
             return;
         }
 
-        if (klass->show_keyboard)
-            klass->show_keyboard (context);
+        eekboard_context_service_show_keyboard (context);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }
 
     if (g_strcmp0 (method_name, "HideKeyboard") == 0) {
-        if (klass->hide_keyboard)
-            klass->hide_keyboard (context);
+        eekboard_context_service_hide_keyboard (context);
         g_dbus_method_invocation_return_value (invocation, NULL);
         return;
     }
@@ -997,6 +1015,24 @@ eekboard_context_service_disable (EekboardContextService *context)
         }
         g_signal_emit (context, signals[DISABLED], 0);
     }
+}
+
+void
+eekboard_context_service_show_keyboard (EekboardContextService *context)
+{
+    g_return_if_fail (EEKBOARD_IS_CONTEXT_SERVICE(context));
+    g_return_if_fail (context->priv->connection);
+
+    EEKBOARD_CONTEXT_SERVICE_GET_CLASS(context)->show_keyboard (context);
+}
+
+void
+eekboard_context_service_hide_keyboard (EekboardContextService *context)
+{
+    g_return_if_fail (EEKBOARD_IS_CONTEXT_SERVICE(context));
+    g_return_if_fail (context->priv->connection);
+
+    EEKBOARD_CONTEXT_SERVICE_GET_CLASS(context)->hide_keyboard (context);
 }
 
 /**

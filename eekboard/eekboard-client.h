@@ -67,6 +67,10 @@ void             eekboard_client_push_context    (EekboardClient  *eekboard,
                                                   GCancellable    *cancellable);
 void             eekboard_client_pop_context     (EekboardClient  *eekboard,
                                                   GCancellable    *cancellable);
+void             eekboard_client_show_keyboard   (EekboardClient  *eekboard,
+                                                  GCancellable    *cancellable);
+void             eekboard_client_hide_keyboard   (EekboardClient  *eekboard,
+                                                  GCancellable    *cancellable);
 void             eekboard_client_destroy_context (EekboardClient  *eekboard,
                                                   EekboardContext *context,
                                                   GCancellable    *cancellable);

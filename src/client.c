@@ -305,7 +305,7 @@ client_set_keyboards (Client              *client,
     gboolean retval;
     retval = set_keyboards (client, keyboards);
     if (retval && IS_KEYBOARD_VISIBLE (client))
-        eekboard_context_show_keyboard (client->context, NULL);
+        eekboard_client_show_keyboard (client->eekboard, NULL);
     return retval;
 }
 
@@ -347,7 +347,7 @@ client_enable_xkl (Client *client)
 
     retval = set_keyboards_from_xkl (client);
     if (IS_KEYBOARD_VISIBLE (client))
-        eekboard_context_show_keyboard (client->context, NULL);
+        eekboard_client_show_keyboard (client->eekboard, NULL);
 
     return retval;
 }
@@ -538,21 +538,21 @@ focus_listener_cb (const AtspiEvent *event,
         case ATSPI_ROLE_TERMINAL:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
-                eekboard_context_show_keyboard (client->context, NULL);
+                eekboard_client_show_keyboard (client->eekboard, NULL);
             } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
                        event->detail1 == 0 && accessible == client->acc) {
                 client->acc = NULL;
-                eekboard_context_hide_keyboard (client->context, NULL);
+                eekboard_client_hide_keyboard (client->eekboard, NULL);
             }
             break;
         case ATSPI_ROLE_ENTRY:
             if (strncmp (event->type, "focus", 5) == 0 || event->detail1 == 1) {
                 client->acc = accessible;
-                eekboard_context_show_keyboard (client->context, NULL);
+                eekboard_client_show_keyboard (client->eekboard, NULL);
             } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
                        event->detail1 == 0) {
                 client->acc = NULL;
-                eekboard_context_hide_keyboard (client->context, NULL);
+                eekboard_client_hide_keyboard (client->eekboard, NULL);
             }
             break;
             
@@ -560,7 +560,7 @@ focus_listener_cb (const AtspiEvent *event,
             ;
         }
     } else {
-        eekboard_context_hide_keyboard (client->context, NULL);
+        eekboard_client_hide_keyboard (client->eekboard, NULL);
     }
 }
 
@@ -612,7 +612,7 @@ add_match_rule (GDBusConnection *connection,
 static gboolean
 on_hide_keyboard_timeout (Client *client)
 {
-    eekboard_context_hide_keyboard (client->context, NULL);
+    eekboard_client_hide_keyboard (client->eekboard, NULL);
     client->hide_keyboard_timeout_id = 0;
     return FALSE;
 }
@@ -635,7 +635,7 @@ focus_message_filter (GDBusConnection *connection,
                 g_source_remove (client->hide_keyboard_timeout_id);
                 client->hide_keyboard_timeout_id = 0;
             }
-            eekboard_context_show_keyboard (client->context, NULL);
+            eekboard_client_show_keyboard (client->eekboard, NULL);
         } else if (g_settings_get_boolean (client->settings, "auto-hide") &&
                    g_strcmp0 (member, "FocusOut") == 0) {
             guint delay;

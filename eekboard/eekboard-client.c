@@ -325,6 +325,38 @@ eekboard_client_pop_context (EekboardClient *client,
                        NULL);
 }
 
+void
+eekboard_client_show_keyboard (EekboardClient  *client,
+                               GCancellable    *cancellable)
+{
+    g_return_if_fail (EEKBOARD_IS_CLIENT(client));
+
+    g_dbus_proxy_call (G_DBUS_PROXY(client),
+                       "ShowKeyboard",
+                       NULL,
+                       G_DBUS_CALL_FLAGS_NONE,
+                       -1,
+                       cancellable,
+                       eekboard_async_ready_callback,
+                       NULL);
+}
+
+void
+eekboard_client_hide_keyboard (EekboardClient *client,
+                               GCancellable   *cancellable)
+{
+    g_return_if_fail (EEKBOARD_IS_CLIENT(client));
+
+    g_dbus_proxy_call (G_DBUS_PROXY(client),
+                       "HideKeyboard",
+                       NULL,
+                       G_DBUS_CALL_FLAGS_NONE,
+                       -1,
+                       cancellable,
+                       eekboard_async_ready_callback,
+                       NULL);
+}
+
 static void
 send_destroy_context (EekboardClient  *client,
                       EekboardContext *context,
