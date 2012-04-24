@@ -19,3 +19,21 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = eek eekboard src tests bindings docs po data examples
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --enable-introspection
+
+GITIGNOREFILES =				\
+	INSTALL					\
+	aclocal.m4				\
+	compile					\
+	config.guess				\
+	config.h.in				\
+	config.sub				\
+	depcomp					\
+	gtk-doc.make				\
+	install-sh				\
+	ltmain.sh				\
+	m4					\
+	missing					\
+	mkinstalldirs				\
+	$(NULL)
+
+-include $(top_srcdir)/git.mk

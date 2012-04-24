@@ -17,3 +17,5 @@
 # 02110-1301 USA
 
 SUBDIRS = vala
+
+-include $(top_srcdir)/git.mk

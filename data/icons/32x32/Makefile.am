@@ -14,3 +14,4 @@ install-data-hook:
 		echo "***   $(gtk_update_icon_cache)";	\
 	fi
 
+-include $(top_srcdir)/git.mk

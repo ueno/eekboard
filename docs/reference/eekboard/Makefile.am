@@ -118,3 +118,5 @@ if ENABLE_GTK_DOC
 endif
 
 -include $(top_srcdir)/gtk-doc.mk
+
+-include $(top_srcdir)/git.mk

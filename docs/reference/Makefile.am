@@ -17,3 +17,5 @@
 # 02110-1301 USA
 
 SUBDIRS = eek eekboard
+
+-include $(top_srcdir)/git.mk

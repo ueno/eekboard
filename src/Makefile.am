@@ -128,3 +128,5 @@ noinst_HEADERS =				\
 	$(eekboard_server_headers)		\
 	$(eekboard_setup_headers)		\
 	$(NULL)
+
+-include $(top_srcdir)/git.mk

@@ -36,3 +36,5 @@ inscript_symbols =				\
 	symbols/ta-inscript.xml			\
 	symbols/te-inscript.xml			\
 	$(NULL)
+
+-include $(top_srcdir)/git.mk

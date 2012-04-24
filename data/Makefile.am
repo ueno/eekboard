@@ -32,3 +32,4 @@ CLEANFILES += $(autostart_DATA)
 EXTRA_DIST += $(autostart_in_files)
 endif
 
+-include $(top_srcdir)/git.mk

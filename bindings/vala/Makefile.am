@@ -33,6 +33,12 @@ EXTRA_DIST =					\
 	EekXkl-$(EEK_API_VERSION).metadata	\
 	$(NULL)
 
+GITIGNOREFILES = \
+	eek-$(EEK_API_VERSION).vapi		\
+	eek-gtk-$(EEK_API_VERSION).vapi		\
+	eek-xkl-$(EEK_API_VERSION).vapi		\
+	$(NULL)
+
 maintainer-clean-local:
 	rm -f *.vapi
 
@@ -81,3 +87,5 @@ VAPIGEN_V = $(VAPIGEN_V_$(V))
 VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
 VAPIGEN_V_0 = @echo "  VAPIG " $@;
 endif
+
+-include $(top_srcdir)/git.mk
