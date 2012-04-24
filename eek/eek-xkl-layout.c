@@ -42,7 +42,7 @@ static GInitableIface *parent_initable_iface;
 
 static void initable_iface_init (GInitableIface *initable_iface);
 
-G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_LAYOUT,
+G_DEFINE_TYPE_WITH_CODE (EekXklLayout, eek_xkl_layout, EEK_TYPE_XKB_LAYOUT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 initable_iface_init));
 
@@ -63,6 +63,22 @@ struct _EekXklLayoutPrivate
     XklEngine *engine;
     XklConfigRec *config;
 };
+
+/* from gnome-keyboard-properties-xkbpv.c:
+ *  BAD STYLE: Taken from xklavier_private_xkb.h
+ *  Any ideas on architectural improvements are WELCOME
+ */
+extern gboolean xkl_xkb_config_native_prepare (XklEngine * engine,
+					       const XklConfigRec * data,
+					       XkbComponentNamesPtr
+					       component_names);
+
+extern void xkl_xkb_config_native_cleanup (XklEngine * engine,
+					   XkbComponentNamesPtr
+					   component_names);
+
+static gboolean set_xkb_component_names (EekXklLayout *layout,
+                                         XklConfigRec *config);
 
 static void
 eek_xkl_layout_dispose (GObject *object)
@@ -258,7 +274,7 @@ eek_xkl_layout_set_config (EekXklLayout *layout,
     c = xkl_config_rec_new ();
     merge_xkl_config_rec (c, priv->config);
     merge_xkl_config_rec (c, config);
-    retval = xkl_config_rec_activate (c, priv->engine);
+    retval = set_xkb_component_names (layout, c);
     g_object_unref (c);
     merge_xkl_config_rec (priv->config, config);
     return retval;
@@ -535,6 +551,50 @@ eek_xkl_layout_get_options (EekXklLayout *layout)
     return g_strdupv (priv->config->options);
 }
 
+static gboolean
+set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
+{
+    EekXklLayoutPrivate *priv = layout->priv;
+    XkbComponentNamesRec names;
+    gboolean retval = FALSE;
+
+#if DEBUG
+    if (config->layouts) {
+        gint i;
+
+        fprintf (stderr, "layout = ");
+        for (i = 0; config->layouts[i] != NULL; i++)
+            fprintf (stderr, "\"%s\" ", config->layouts[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "layouts = NULL\n");
+    if (config->variants) {
+        gint i;
+
+        fprintf (stderr, "variant = ");
+        for (i = 0; config->variants[i]; i++)
+            fprintf (stderr, "\"%s\" ", config->variants[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "variants = NULL\n");
+    if (config->options) {
+        gint i;
+
+        fprintf (stderr, "option = ");
+        for (i = 0; config->options[i]; i++)
+            fprintf (stderr, "\"%s\" ", config->options[i]);
+        fputc ('\n', stderr);
+    } else
+        fprintf (stderr, "options = NULL\n");
+#endif
+
+    if (xkl_xkb_config_native_prepare (priv->engine, config, &names)) {
+        retval = eek_xkb_layout_set_names (EEK_XKB_LAYOUT(layout), &names);
+        xkl_xkb_config_native_cleanup (priv->engine, &names);
+    }
+    return retval;
+}
+
 /**
  * eek_xkl_layout_get_option:
  * @layout: an #EekXklLayout
@@ -585,7 +645,7 @@ initable_init (GInitable    *initable,
         return FALSE;
     }
 
-    xkl_config_rec_activate (layout->priv->config, layout->priv->engine);
+    set_xkb_component_names (layout, layout->priv->config);
     return TRUE;
 }
 
