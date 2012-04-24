@@ -67,22 +67,5 @@ EekLayout   *eek_xkb_layout_new            (Display              *display,
 gboolean     eek_xkb_layout_set_names      (EekXkbLayout         *layout,
                                             XkbComponentNamesRec *names);
 
-gboolean     eek_xkb_layout_set_names_full (EekXkbLayout         *layout,
-                                            ...);
-gboolean     eek_xkb_layout_set_names_full_valist
-                                           (EekXkbLayout         *layout,
-                                            va_list               var_args);
-                                        
-gboolean     eek_xkb_layout_set_keycodes   (EekXkbLayout         *layout,
-                                            const gchar          *keycodes);
-gboolean     eek_xkb_layout_set_geometry   (EekXkbLayout         *layout,
-                                            const gchar          *geometry);
-gboolean     eek_xkb_layout_set_symbols    (EekXkbLayout         *layout,
-                                            const gchar          *symbols);
-
-const gchar *eek_xkb_layout_get_keycodes   (EekXkbLayout         *layout);
-const gchar *eek_xkb_layout_get_geometry   (EekXkbLayout         *layout);
-const gchar *eek_xkb_layout_get_symbols    (EekXkbLayout         *layout);
-
 G_END_DECLS
 #endif				/* #ifndef EEK_XKB_LAYOUT_H */

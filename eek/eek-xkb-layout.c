@@ -58,9 +58,6 @@ G_DEFINE_TYPE_WITH_CODE (EekXkbLayout, eek_xkb_layout, EEK_TYPE_LAYOUT,
 enum {
     PROP_0,
     PROP_DISPLAY,
-    PROP_KEYCODES,
-    PROP_GEOMETRY,
-    PROP_SYMBOLS,
     PROP_LAST
 };
 
@@ -370,23 +367,10 @@ eek_xkb_layout_set_property (GObject      *object,
                              GParamSpec   *pspec)
 {
     EekXkbLayout *layout = EEK_XKB_LAYOUT (object);
-    const gchar *name;
 
     switch (prop_id) {
     case PROP_DISPLAY:
         layout->priv->display = g_value_get_pointer (value);
-        break;
-    case PROP_KEYCODES:
-        name = g_value_get_string (value);
-        eek_xkb_layout_set_keycodes (EEK_XKB_LAYOUT(object), name);
-        break;
-    case PROP_GEOMETRY:
-        name = g_value_get_string (value);
-        eek_xkb_layout_set_geometry (EEK_XKB_LAYOUT(object), name);
-        break;
-    case PROP_SYMBOLS:
-        name = g_value_get_string (value);
-        eek_xkb_layout_set_symbols (EEK_XKB_LAYOUT(object), name);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -401,23 +385,10 @@ eek_xkb_layout_get_property (GObject    *object,
                              GParamSpec *pspec)
 {
     EekXkbLayout *layout = EEK_XKB_LAYOUT (object);
-    const gchar *name;
 
     switch (prop_id) {
     case PROP_DISPLAY:
         g_value_set_pointer (value, layout->priv->display);
-        break;
-    case PROP_KEYCODES:
-        name = eek_xkb_layout_get_keycodes (EEK_XKB_LAYOUT(object));
-        g_value_set_string (value, name);
-        break;
-    case PROP_GEOMETRY:
-        name = eek_xkb_layout_get_geometry (EEK_XKB_LAYOUT(object));
-        g_value_set_string (value, name);
-        break;
-    case PROP_SYMBOLS:
-        name = eek_xkb_layout_get_symbols (EEK_XKB_LAYOUT(object));
-        g_value_set_string (value, name);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -446,27 +417,6 @@ eek_xkb_layout_class_init (EekXkbLayoutClass *klass)
                                   G_PARAM_READWRITE |
                                   G_PARAM_CONSTRUCT_ONLY);
     g_object_class_install_property (gobject_class, PROP_DISPLAY, pspec);
-
-    pspec = g_param_spec_string ("keycodes",
-				 "Keycodes",
-				 "XKB keycodes component name",
-				 NULL,
-				 G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_KEYCODES, pspec);
-
-    pspec = g_param_spec_string ("geometry",
-                                 "Geometry",
-                                 "XKB geometry component name",
-                                 NULL,
-                                 G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_GEOMETRY, pspec);
-
-    pspec = g_param_spec_string ("symbols",
-                                 "Symbols",
-                                 "XKB symbols component name",
-                                 NULL,
-                                 G_PARAM_READWRITE);
-    g_object_class_install_property (gobject_class, PROP_SYMBOLS, pspec);
 }
 
 static void
@@ -556,8 +506,6 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
     EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
     gboolean retval;
 
-    g_return_val_if_fail (priv, FALSE);
-
     if (g_strcmp0 (names->keycodes, priv->names.keycodes)) {
         g_free (priv->names.keycodes);
         priv->names.keycodes = g_strdup (names->keycodes);
@@ -580,178 +528,6 @@ eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
     g_assert (priv->xkb);
 
     return retval;
-}
-
-/**
- * eek_xkb_layout_set_names_full:
- * @layout: an #EekXkbLayout
- * @Varargs: pairs of component name and value, terminated by NULL.
- *
- * Set the XKB component names to @layout.  This function is merely a
- * wrapper around eek_xkb_layout_set_names() to avoid passing a
- * pointer of XkbComponentNamesRec, which is not currently available
- * in the gobject-introspection repository.
- *
- * Available component names are: keymap, keycodes, types, compat,
- * symbols, geometry.
- *
- * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
- * Since: 0.0.2
- */
-gboolean
-eek_xkb_layout_set_names_full (EekXkbLayout *layout,
-                               ...)
-{
-    va_list var_args;
-    gboolean retval;
-
-    va_start (var_args, layout);
-    retval = eek_xkb_layout_set_names_full_valist (layout, var_args);
-    va_end (var_args);
-
-    return retval;
-}
-
-/**
- * eek_xkb_layout_set_names_full_valist:
- * @layout: an #EekXkbLayout
- * @var_args: <type>va_list</type> of pairs of component name and value.
- *
- * See eek_xkb_layout_set_names_full(), this version takes a
- * <type>va_list</type> for language bindings to use.
- *
- * Since: 0.0.5
- */
-gboolean
-eek_xkb_layout_set_names_full_valist (EekXkbLayout *layout,
-                                      va_list       var_args)
-{
-    XkbComponentNamesRec names;
-    gchar *name, *value;
-
-    memset (&names, 0, sizeof names);
-    name = va_arg (var_args, gchar *);
-    while (name) {
-        value = va_arg (var_args, gchar *);
-        if (g_strcmp0 (name, "keymap") == 0)
-            names.keymap = (char *)value;
-        else if (g_strcmp0 (name, "keycodes") == 0)
-            names.keycodes = (char *)value;
-        else if (g_strcmp0 (name, "types") == 0)
-            names.types = (char *)value;
-        else if (g_strcmp0 (name, "compat") == 0)
-            names.compat = (char *)value;
-        else if (g_strcmp0 (name, "symbols") == 0)
-            names.symbols = (char *)value;
-        else if (g_strcmp0 (name, "geometry") == 0)
-            names.geometry = (char *)value;
-        name = va_arg (var_args, gchar *);
-    }
-    return eek_xkb_layout_set_names (layout, &names);
-}
-
-/**
- * eek_xkb_layout_set_keycodes:
- * @layout: an #EekXkbLayout
- * @keycodes: component name for keycodes
- *
- * Set the keycodes component (in the XKB terminology).
- * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
- */
-gboolean
-eek_xkb_layout_set_keycodes (EekXkbLayout *layout, const gchar *keycodes)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    XkbComponentNamesRec names;
-
-    g_return_val_if_fail (priv, FALSE);
-    memcpy (&names, &priv->names, sizeof names);
-    names.keycodes = (gchar *)keycodes;
-    return eek_xkb_layout_set_names (layout, &names);
-}
-
-/**
- * eek_xkb_layout_set_geometry:
- * @layout: an #EekXkbLayout
- * @geometry: component name for geometry
- *
- * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
- */
-gboolean
-eek_xkb_layout_set_geometry (EekXkbLayout *layout, const gchar *geometry)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    XkbComponentNamesRec names;
-
-    g_return_val_if_fail (priv, FALSE);
-    memcpy (&names, &priv->names, sizeof names);
-    names.geometry = (gchar *)geometry;
-    return eek_xkb_layout_set_names (layout, &names);
-}
-
-/**
- * eek_xkb_layout_set_symbols:
- * @layout: an #EekXkbLayout
- * @symbols: component name for symbols
- *
- * Set the symbols component (in the XKB terminology).
- * Returns: %TRUE if the component name is successfully set, %FALSE otherwise
- */
-gboolean
-eek_xkb_layout_set_symbols (EekXkbLayout *layout, const gchar *symbols)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    XkbComponentNamesRec names;
-
-    g_return_val_if_fail (priv, FALSE);
-    memcpy (&names, &priv->names, sizeof names);
-    names.symbols = (gchar *)symbols;
-    return eek_xkb_layout_set_names (layout, &names);
-}
-
-/**
- * eek_xkb_layout_get_keycodes:
- * @layout: an #EekXkbLayout
- *
- * Get the keycodes component name (in the XKB terminology).
- */
-const gchar *
-eek_xkb_layout_get_keycodes (EekXkbLayout *layout)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-
-    g_return_val_if_fail (priv, NULL);
-    return priv->names.keycodes;
-}
-
-/**
- * eek_xkb_layout_get_geometry:
- * @layout: an #EekXkbLayout
- *
- * Get the geometry component name (in the XKB terminology).
- */
-const gchar *
-eek_xkb_layout_get_geometry (EekXkbLayout *layout)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-
-    g_return_val_if_fail (priv, NULL);
-    return priv->names.geometry;
-}
-
-/**
- * eek_xkb_layout_get_symbols:
- * @layout: an #EekXkbLayout
- *
- * Get the symbols component name (in the XKB terminology).
- */
-const gchar *
-eek_xkb_layout_get_symbols (EekXkbLayout *layout)
-{
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-
-    g_return_val_if_fail (priv, NULL);
-    return priv->names.symbols;
 }
 
 static void
