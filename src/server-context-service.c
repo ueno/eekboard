@@ -242,7 +242,7 @@ set_geometry (ServerContextService *context)
         else
             height = (width / bounds.width) * bounds.height;
 
-        gtk_widget_set_size_request (context->widget, width, height);
+        gtk_window_resize (GTK_WINDOW(context->widget), width, height);
 
         gtk_window_move (GTK_WINDOW(context->window),
                          (rect.width - width) / 2,
@@ -259,9 +259,9 @@ set_geometry (ServerContextService *context)
                                 G_CALLBACK(on_size_allocate_set_dock),
                                 context);
     } else {
-        gtk_widget_set_size_request (context->widget,
-                                     bounds.width,
-                                     bounds.height);
+        gtk_window_resize (GTK_WINDOW(context->window),
+                           bounds.width,
+                           bounds.height);
         gtk_window_move (GTK_WINDOW(context->window),
                          MAX(rect.width - 20 - bounds.width, 0),
                          MAX(rect.height - 40 - bounds.height, 0));
