@@ -589,7 +589,12 @@ set_xkb_component_names (EekXklLayout *layout, XklConfigRec *config)
 #endif
 
     if (xkl_xkb_config_native_prepare (priv->engine, config, &names)) {
-        retval = eek_xkb_layout_set_names (EEK_XKB_LAYOUT(layout), &names);
+        GError *error = NULL;
+        retval = eek_xkb_layout_set_names (EEK_XKB_LAYOUT(layout),
+                                           &names,
+                                           &error);
+        if (!retval)
+            g_warning ("can't set XKB layout");
         xkl_xkb_config_native_cleanup (priv->engine, &names);
     }
     return retval;

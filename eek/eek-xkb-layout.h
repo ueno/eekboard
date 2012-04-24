@@ -60,12 +60,13 @@ struct _EekXkbLayoutClass
     gpointer pdummy[24];
 };
 
-GType        eek_xkb_layout_get_type       (void) G_GNUC_CONST;
-EekLayout   *eek_xkb_layout_new            (Display              *display,
-                                            GError              **error);
+GType      eek_xkb_layout_get_type  (void) G_GNUC_CONST;
+EekLayout *eek_xkb_layout_new       (Display              *display,
+                                     GError              **error);
 
-gboolean     eek_xkb_layout_set_names      (EekXkbLayout         *layout,
-                                            XkbComponentNamesRec *names);
+gboolean   eek_xkb_layout_set_names (EekXkbLayout         *layout,
+                                     XkbComponentNamesRec *names,
+                                     GError              **error);
 
 G_END_DECLS
 #endif				/* #ifndef EEK_XKB_LAYOUT_H */

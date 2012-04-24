@@ -44,7 +44,11 @@
 #include "eek-key.h"
 #include "eek-keysym.h"
 
-#define noKBDRAW_DEBUG
+#define XKB_COMPONENT_MASK (XkbGBN_GeometryMask |       \
+                            XkbGBN_KeyNamesMask |       \
+                            XkbGBN_OtherNamesMask |     \
+                            XkbGBN_SymbolsMask |        \
+                            XkbGBN_IndicatorMapMask)
 
 static void initable_iface_init (GInitableIface *initable_iface);
 
@@ -80,19 +84,18 @@ struct _EekXkbLayoutPrivate
     gint scale_denominator;
 };
 
-static guint
-find_keycode (EekXkbLayout *layout, gchar *key_name);
+static guint    find_keycode             (EekXkbLayout *layout,
+                                          gchar        *key_name);
 
-static void
-get_keyboard (EekXkbLayout *layout);
+static gboolean get_keyboard_from_server (EekXkbLayout *layout,
+                                          GError      **error);
 
-static void
-get_names (EekXkbLayout *layout);
+static gboolean get_names_from_server    (EekXkbLayout *layout,
+                                          GError      **error);
 
-static void
-setup_scaling (EekXkbLayout *layout,
-               gdouble       width,
-               gdouble       height);
+static void     setup_scaling            (EekXkbLayout *layout,
+                                          gdouble       width,
+                                          gdouble       height);
 
 G_INLINE_FUNC gint
 xkb_to_pixmap_coord (EekXkbLayout *layout,
@@ -146,7 +149,8 @@ create_key (EekXkbLayout *layout,
             xkbshape->primary;
 
         outline = g_slice_new (EekOutline);
-        outline->corner_radius = xkb_to_pixmap_coord(layout, xkboutline->corner_radius);
+        outline->corner_radius = xkb_to_pixmap_coord(layout,
+                                                     xkboutline->corner_radius);
 
         if (xkboutline->num_points <= 2) { /* rectangular */
             gdouble x1, y1, x2, y2;
@@ -425,8 +429,9 @@ eek_xkb_layout_init (EekXkbLayout *self)
     self->priv = EEK_XKB_LAYOUT_GET_PRIVATE (self);
 }
 
-static void
-get_names (EekXkbLayout *layout)
+static gboolean
+get_names_from_server (EekXkbLayout *layout,
+                       GError      **error)
 {
     EekXkbLayoutPrivate *priv = layout->priv;
     gchar *name;
@@ -474,6 +479,8 @@ get_names (EekXkbLayout *layout)
             XFree (name);
         }
     }
+
+    return TRUE;
 }
 
 /**
@@ -496,78 +503,76 @@ eek_xkb_layout_new (Display *display,
  * eek_xkb_layout_set_names: (skip)
  * @layout: an #EekXkbLayout
  * @names: XKB component names
+ * @error: a #GError
  *
  * Set the XKB component names to @layout.
- * Returns: %TRUE if any of the component names changed, %FALSE otherwise
+ * Returns: %TRUE if the component names are successfully set, %FALSE otherwise
  */
 gboolean
-eek_xkb_layout_set_names (EekXkbLayout *layout, XkbComponentNamesRec *names)
+eek_xkb_layout_set_names (EekXkbLayout         *layout,
+                          XkbComponentNamesRec *names,
+                          GError              **error)
 {
-    EekXkbLayoutPrivate *priv = EEK_XKB_LAYOUT_GET_PRIVATE (layout);
-    gboolean retval;
-
-    if (g_strcmp0 (names->keycodes, priv->names.keycodes)) {
-        g_free (priv->names.keycodes);
-        priv->names.keycodes = g_strdup (names->keycodes);
-        retval = TRUE;
+    if (g_strcmp0 (names->keycodes, layout->priv->names.keycodes)) {
+        g_free (layout->priv->names.keycodes);
+        layout->priv->names.keycodes = g_strdup (names->keycodes);
     }
 
-    if (g_strcmp0 (names->geometry, priv->names.geometry)) {
-        g_free (priv->names.geometry);
-        priv->names.geometry = g_strdup (names->geometry);
-        retval = TRUE;
+    if (g_strcmp0 (names->geometry, layout->priv->names.geometry)) {
+        g_free (layout->priv->names.geometry);
+        layout->priv->names.geometry = g_strdup (names->geometry);
     }
 
-    if (g_strcmp0 (names->symbols, priv->names.symbols)) {
-        g_free (priv->names.symbols);
-        priv->names.symbols = g_strdup (names->symbols);
-        retval = TRUE;
+    if (g_strcmp0 (names->symbols, layout->priv->names.symbols)) {
+        g_free (layout->priv->names.symbols);
+        layout->priv->names.symbols = g_strdup (names->symbols);
     }
 
-    get_keyboard (layout);
-    g_assert (priv->xkb);
-
-    return retval;
+    return get_keyboard_from_server (layout, error);
 }
 
-static void
-get_keyboard (EekXkbLayout *layout)
+static gboolean
+get_keyboard_from_server (EekXkbLayout *layout,
+                          GError      **error)
 {
     EekXkbLayoutPrivate *priv = layout->priv;
 
-    if (priv->xkb)
-        XkbFreeKeyboard (priv->xkb, 0, TRUE);	/* free_all = TRUE */
-    priv->xkb = NULL;
+    if (priv->xkb) {
+        XkbFreeKeyboard (priv->xkb, 0, True);
+        priv->xkb = NULL;
+    }
 
-    if (priv->names.keycodes &&
-        priv->names.geometry &&
-        priv->names.symbols) {
-        priv->xkb = XkbGetKeyboardByName (priv->display, XkbUseCoreKbd,
-                                          &priv->names, 0,
-                                          XkbGBN_GeometryMask |
-                                          XkbGBN_KeyNamesMask |
-                                          XkbGBN_OtherNamesMask |
-                                          XkbGBN_ClientSymbolsMask |
-                                          XkbGBN_IndicatorMapMask, FALSE);
+    if (priv->names.keycodes && priv->names.geometry && priv->names.symbols) {
+        priv->xkb = XkbGetKeyboardByName (priv->display,
+                                          XkbUseCoreKbd,
+                                          &priv->names,
+                                          0,
+                                          XKB_COMPONENT_MASK,
+                                          False);
     } else {
         priv->xkb = XkbGetKeyboard (priv->display,
-                                    XkbGBN_GeometryMask |
-                                    XkbGBN_KeyNamesMask |
-                                    XkbGBN_OtherNamesMask |
-                                    XkbGBN_SymbolsMask |
-                                    XkbGBN_IndicatorMapMask,
+                                    XKB_COMPONENT_MASK,
                                     XkbUseCoreKbd);
-        get_names (layout);
+        if (!get_names_from_server (layout, error)) {
+            XkbFreeKeyboard (priv->xkb, 0, True);
+            priv->xkb = NULL;
+        }
     }
 
     if (priv->xkb == NULL) {
+        g_set_error (error,
+                     EEK_ERROR,
+                     EEK_ERROR_LAYOUT_ERROR,
+                     "can't get keyboard from server");
         g_free (priv->names.keycodes);
         priv->names.keycodes = NULL;
         g_free (priv->names.geometry);
         priv->names.geometry = NULL;
         g_free (priv->names.symbols);
         priv->names.symbols = NULL;
+        return FALSE;
     }
+    return TRUE;
 }
 
 
@@ -586,11 +591,6 @@ find_keycode (EekXkbLayout *layout, gchar *key_name)
     if (!priv->xkb)
         return EEK_INVALID_KEYCODE;
 
-#ifdef KBDRAW_DEBUG
-    printf ("    looking for keycode for (%c%c%c%c)\n",
-            key_name[0], key_name[1], key_name[2], key_name[3]);
-#endif
-
     pkey = priv->xkb->names->keys + priv->xkb->min_key_code;
     for (keycode = priv->xkb->min_key_code;
          keycode <= priv->xkb->max_key_code; keycode++) {
@@ -605,12 +605,8 @@ find_keycode (EekXkbLayout *layout, gchar *key_name)
                 break;
             }
         }
-        if (is_name_matched) {
-#ifdef KBDRAW_DEBUG
-            printf ("      found keycode %u\n", keycode);
-#endif
+        if (is_name_matched)
             return keycode;
-        }
         pkey++;
     }
 
@@ -630,9 +626,6 @@ find_keycode (EekXkbLayout *layout, gchar *key_name)
 
         if (is_name_matched) {
             keycode = find_keycode (layout, palias->real);
-#ifdef KBDRAW_DEBUG
-            printf ("found alias keycode %u\n", keycode);
-#endif
             return keycode;
         }
         palias++;
@@ -670,34 +663,11 @@ initable_init (GInitable    *initable,
 {
     EekXkbLayout *layout = EEK_XKB_LAYOUT (initable);
 
-    /* XXX: XkbClientMapMask | XkbIndicatorMapMask | XkbNamesMask |
-       XkbGeometryMask */
-    layout->priv->xkb = XkbGetKeyboard (layout->priv->display,
-                                        XkbGBN_GeometryMask |
-                                        XkbGBN_KeyNamesMask |
-                                        XkbGBN_OtherNamesMask |
-                                        XkbGBN_SymbolsMask |
-                                        XkbGBN_IndicatorMapMask,
-                                        XkbUseCoreKbd);
-
-    if (layout->priv->xkb == NULL) {
-        g_set_error (error,
-                     EEK_ERROR,
-                     EEK_ERROR_LAYOUT_ERROR,
-                     "can't get initial XKB keyboard configuration");
+    if (!get_keyboard_from_server (layout, error))
         return FALSE;
-    }
 
-    get_names (layout);
-    get_keyboard (layout);
-    
-    if (layout->priv->xkb == NULL) {
-        g_set_error (error,
-                     EEK_ERROR,
-                     EEK_ERROR_LAYOUT_ERROR,
-                     "can't get XKB keyboard configuration");
+    if (!get_names_from_server (layout, error))
         return FALSE;
-    }
 
     return TRUE;
 }
