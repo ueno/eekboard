@@ -32,8 +32,6 @@
 #include "eekboard/eekboard-client.h"
 #include "client.h"
 
-#define DEFAULT_KEYBOARD "us"
-
 static gboolean opt_system = FALSE;
 static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;

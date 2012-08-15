@@ -44,6 +44,12 @@
 #define CSW 640
 #define CSH 480
 
+#define DEFAULT_KEYBOARD "us"
+static gchar *default_keyboards[2] = {
+    DEFAULT_KEYBOARD,
+    NULL
+};
+
 #define IBUS_INTERFACE_PANEL    "org.freedesktop.IBus.Panel"
 
 enum {
@@ -141,6 +147,7 @@ client_set_property (GObject      *object,
 {
     Client *client = CLIENT(object);
     GDBusConnection *connection;
+    gchar **keyboards;
 
     switch (prop_id) {
     case PROP_CONNECTION:
@@ -166,7 +173,10 @@ client_set_property (GObject      *object,
         }
         break;
     case PROP_KEYBOARDS:
-        client_set_keyboards (client, g_value_get_boxed (value));
+        keyboards = g_value_get_boxed (value);
+        if (g_strv_length (keyboards) == 0)
+            keyboards = default_keyboards;
+        client_set_keyboards (client, (const gchar * const *)keyboards);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
