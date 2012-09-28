@@ -37,7 +37,9 @@ static gboolean opt_session = FALSE;
 static gchar *opt_address = NULL;
 
 static gboolean opt_focus = FALSE;
+#ifdef HAVE_ATSPI
 static gboolean opt_keystroke = FALSE;
+#endif  /* HAVE_ATSPI */
 
 static gchar *opt_keyboards = NULL;
 

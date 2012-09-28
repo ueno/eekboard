@@ -151,7 +151,7 @@ eekboard_context_real_destroyed (EekboardContext *self)
 
 static void
 eekboard_context_real_key_activated (EekboardContext *self,
-                                     const gchar     *keyname,
+                                     guint            keycode,
                                      EekSymbol       *symbol,
                                      guint            modifiers)
 {
