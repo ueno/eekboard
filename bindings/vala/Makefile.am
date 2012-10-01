@@ -16,6 +16,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
+NULL =
+
 if ENABLE_VALA
 vapidir = $(datadir)/vala/vapi
 dist_vapi_DATA =				\
@@ -45,42 +47,45 @@ maintainer-clean-local:
 eek_vapi_deps =						\
 	$(srcdir)/Eek-$(EEK_API_VERSION).metadata	\
 	|						\
-	$(top_srcdir)/eek/Eek-$(EEK_API_VERSION).gir	\
+	$(top_builddir)/eek/Eek-$(EEK_API_VERSION).gir	\
 	$(NULL)
 
 eek-$(EEK_API_VERSION).vapi: $(eek_vapi_deps)
-	$(VAPIGEN_V)$(VAPIGEN)					\
-		--library eek-$(EEK_API_VERSION)		\
-		--pkg gio-2.0					\
-		--metadatadir=$(srcdir)				\
-		$(top_srcdir)/eek/Eek-$(EEK_API_VERSION).gir
+	$(VAPIGEN_V)$(VAPIGEN) \
+		--library eek-$(EEK_API_VERSION) \
+		--pkg gio-2.0 \
+		--metadatadir=$(srcdir) \
+		$(top_builddir)/eek/Eek-$(EEK_API_VERSION).gir
 
 eek_gtk_vapi_deps =					\
 	$(srcdir)/EekGtk-$(EEK_API_VERSION).metadata	\
 	|						\
-	$(top_srcdir)/eek/EekGtk-$(EEK_API_VERSION).gir	\
+	$(top_builddir)/eek/EekGtk-$(EEK_API_VERSION).gir	\
 	$(NULL)
 
 eek-gtk-$(EEK_API_VERSION).vapi: $(eek_gtk_vapi_deps)
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir)		\
-		--library eek-gtk-$(EEK_API_VERSION)		\
-		--pkg eek-$(EEK_API_VERSION)			\
-		--pkg gtk+-3.0					\
-		--metadatadir=$(srcdir)				\
-		$(top_srcdir)/eek/EekGtk-$(EEK_API_VERSION).gir
+	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir) \
+		--library eek-gtk-$(EEK_API_VERSION) \
+		--pkg eek-$(EEK_API_VERSION) \
+		--pkg gio-2.0 \
+		--pkg gtk+-3.0 \
+		--metadatadir=$(srcdir)	\
+		$(top_builddir)/eek/EekGtk-$(EEK_API_VERSION).gir
 
-eek_xkl_vapi_deps =					\
-	$(srcdir)/EekXkl-$(EEK_API_VERSION).metadata	\
-	|						\
-	$(top_srcdir)/eek/EekXkl-$(EEK_API_VERSION).gir	\
+eek_xkl_vapi_deps =						\
+	$(srcdir)/EekXkl-$(EEK_API_VERSION).metadata		\
+	|							\
+	$(top_builddir)/eek/EekXkl-$(EEK_API_VERSION).gir	\
 	$(NULL)
 
 eek-xkl-$(EEK_API_VERSION).vapi: $(eek_xkl_vapi_deps)
-	$(VAPIGEN_V)$(VAPIGEN) --vapidir=$(builddir)		\
-		--library eek-xkl-$(EEK_API_VERSION)		\
-		--pkg eek-$(EEK_API_VERSION)			\
-		--metadatadir=$(srcdir)				\
-		$(top_srcdir)/eek/EekXkl-$(EEK_API_VERSION).gir
+	$(VAPIGEN_V)$(VAPIGEN) \
+		--vapidir=$(builddir) \
+		--library eek-xkl-$(EEK_API_VERSION) \
+		--pkg eek-$(EEK_API_VERSION) \
+		--pkg gio-2.0 \
+		--metadatadir=$(srcdir) \
+		$(top_builddir)/eek/EekXkl-$(EEK_API_VERSION).gir
 
 # set up the verbosity rules to avoid some build noise
 VAPIGEN_V = $(VAPIGEN_V_$(V))
