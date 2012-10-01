@@ -750,6 +750,11 @@ handle_method_call (GDBusConnection       *connection,
     EekboardContextService *context = user_data;
     EekboardContextServiceClass *klass = EEKBOARD_CONTEXT_SERVICE_GET_CLASS(context);
     
+    if (context->priv->repeat_timeout_id) {
+        g_source_remove (context->priv->repeat_timeout_id);
+        context->priv->repeat_timeout_id = 0;
+    }
+
     if (g_strcmp0 (method_name, "AddKeyboard") == 0) {
         const gchar *keyboard_type;
         static guint keyboard_id = 0;
